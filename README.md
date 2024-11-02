@@ -1,3 +1,9 @@
+<p align="center">
+
+<img src="VirtualAccessories.png">
+
+</p>
+
 # homebridge-virtual-accessories
 
 #### homebridge-virtual-accessories is a plugin for Homebridge. It provides the ability to create victual HomeKit accessories.
