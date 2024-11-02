@@ -3,10 +3,12 @@
 </p>
 
 <span align="center">
+
 # Virtual Accessories For Homebridge
+
 </span>
 
-#### homebridge-virtual-accessories is a plugin for Homebridge. It provides the ability to create victual HomeKit accessories.
+#### homebridge-virtual-accessories is a plugin for Homebridge that provides the ability to create victual HomeKit accessories.
 
 This plugin is inspired by the following plugins:
 - [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), the most excellent plugin by Nick Farina
@@ -18,10 +20,10 @@ The purpose of this plugin is to be able to create different types of virtual Ho
 
 This is work in progress, so new accessories will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
 
--   Switch. Nobody can have too many switches! Allows you to create standalone switches, switches with timers, and switches that trigger notifications.
+-   Switch. Nobody can have too many switches! Allows you to create switches, normally on/off, stateful, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod paired in the Home app.
--   Garage Door. Will display a widget in CarPlay when you approach your home. Issues a notification when the accessory's state changes.
--   Lock. This was just low hanging fruit. Issues a notification when the accessory's state changes.
+-   Garage Door. Will display a widget in CarPlay when you approach your home. Triggers a HomeKit notification when the accessory's state changes.
+-   Lock. This was just low hanging fruit. Triggers a HomeKit notification when the accessory's state changes.
 
 ## Installation
 
