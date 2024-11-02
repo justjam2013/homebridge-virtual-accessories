@@ -1,22 +1,37 @@
 {
-  "name": "homebridge-plugin-name",
-  "displayName": "Plugin Name",
+  "name": "homebridge-virtual-accessories",
+  "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "private": true,
-  "description": "A short description about what your plugin does.",
-  "author": "Your Name",
+  "description": "Virtual accessories for Homebridge.",
+  "author": "justjam2013",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/USERNAME/GITHUB_PROJECT_NAME#readme",
+  "homepage": "https://github.com/justjam2013/homebridge-virtual-accessories#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "https://github.com/justjam2013/homebridge-virtual-accessories.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/justjam2013/homebridge-virtual-accessories/issues"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge",
+    "plugin",
+    "homebridge-plugin",
+    "virtual",
+    "virtual accessory",
+    "virtual accessories",
+    "switch",
+    "virtual switch",
+    "delay switch",
+    "lock",
+    "virtual lock",
+    "doorbell",
+    "virtual doorbell",
+    "garage door",
+    "virtual garage door",
+    "dummy"
   ],
   "main": "dist/index.js",
   "engines": {
@@ -30,15 +45,15 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
+    "@eslint/js": "^9.13.0",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^22.2.0",
-    "eslint": "^9.9.0",
+    "@types/node": "^22.7.9",
+    "eslint": "^9.13.0",
     "homebridge": "^2.0.0-beta.0",
-    "nodemon": "^3.1.4",
+    "nodemon": "^3.1.7",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.1"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.11.0"
   }
 }

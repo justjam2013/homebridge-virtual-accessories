@@ -1,216 +1,193 @@
-<p align="center">
+# homebridge-virtual-accessories
 
-<img src="https://github.com/homebridge/branding/raw/latest/logos/homebridge-wordmark-logo-vertical.png" width="150">
+#### homebridge-virtual-accessories is a plugin for Homebridge. It provides the ability to create victual HomeKit accessories.
 
-</p>
+This plugin is inspired by the following plugins:
+- [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), the most excellent plugin by Nick Farina
+- [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches)
+- [homebridge-fake-doorbell](https://www.npmjs.com/package/homebridge-fake-doorbell)
+- [homebridge-dummy-lock-homekey](https://github.com/benov84/homebridge-dummy-lock-homekey)
 
-<span align="center">
+The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins.
 
-# Homebridge Platform Plugin Template
+This is work in progress, so new accessories will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
 
-</span>
+-   Switch. Nobody can have too many switches! Allows you to create standalone switches, switches with timers, and switches that trigger notifications.
+-   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod paired in the Home app.
+-   Garage Door. Will display a widget in CarPlay when you approach your home. Issues a notification when the accessory's state changes.
+-   Lock. This was just low hanging fruit. Issues a notification when the accessory's state changes.
 
-> [!IMPORTANT]
-> **Homebridge v2.0 Information**
->
-> This template currently has a
-> - `package.json -> engines.homebridge` value of `"^1.8.0 || ^2.0.0-beta.0"`
-> - `package.json -> devDependencies.homebridge` value of `"^2.0.0-beta.0"`
->
-> This is to ensure that your plugin will build and run on both Homebridge v1 and v2.
->
-> Once Homebridge v2.0 has been released, you can remove the `-beta.0` in both places.
+## Installation
 
-> [!IMPORTANT]
-> **Node v22 Information**
->
-> This template currently has a
-> - `package.json -> engines.node` value of `"^18.20.4 || ^20.16.0 || ^22.5.1"`
->
-> This is to remind developers that plugins should be supporting Node v22 from October 2024.
+You can install this plugin via the Homebridge UI or by typing:
 
----
-
-This is a template Homebridge dynamic platform plugin and can be used as a base to help you get started developing your own plugin.
-
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
-
-### Clone As Template
-
-Click the link below to create a new GitHub Repository using this template, or click the *Use This Template* button above.
-
-<span align="center">
-
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
-
-</span>
-
-### Setup Development Environment
-
-To develop Homebridge plugins you must have Node.js 18 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
-
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-
-### Install Development Dependencies
-
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
-
-```shell
-npm install
+```
+npm install -g homebridge-virtual-accessories
 ```
 
-### Update package.json
+## Configuration
 
-Open the [`package.json`](./package.json) and change the following attributes:
+You can configure the plugin from the Homebridge UI, or by ediiting the JSON configuration directly in the Homebridge JSON Config editor.
+In the UI, required fields will be marked with an asterist (*).
 
-- `name` - this should be prefixed with `homebridge-` or `@username/homebridge-`, is case-sensitive, and contains no spaces nor special characters apart from a dash `-`
-- `displayName` - this is the "nice" name displayed in the Homebridge UI
-- `homepage` - link to your GitHub repo's `README.md`
-- `repository.url` - link to your GitHub repo
-- `bugs.url` - link to your GitHub repo issues page
+`accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
-When you are ready to publish the plugin you should set `private` to false, or remove the attribute entirely.
+Note:
+1. `accessoryID` uniquely identifies an accassory and each accessory must have a different value. If you change the value of `accessoryID` after saving the config, it will handle the change as the accessory having been deleted and a new one created. This will delete the "old" accessory in the Home app, which will then delete automations that use the deleted accessory, as well as any scenes that only use the deleted accessory.
+2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is a good idea to pick different names for each accessory.
 
-### Update Plugin Defaults
+### Doorbell
 
-Open the [`src/settings.ts`](./src/settings.ts) file and change the default values:
-
-- `PLATFORM_NAME` - Set this to be the name of your platform. This is the name of the platform that users will use to register the plugin in the Homebridge `config.json`.
-- `PLUGIN_NAME` - Set this to be the same name you set in the [`package.json`](./package.json) file.
-
-Open the [`config.schema.json`](./config.schema.json) file and change the following attribute:
-
-- `pluginAlias` - set this to match the `PLATFORM_NAME` you defined in the previous step.
-
-### Build Plugin
-
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
-
-```shell
-npm run build
-```
-
-### Link To Homebridge
-
-Run this command so your global installation of Homebridge can discover the plugin in your development environment:
-
-```shell
-npm link
-```
-
-You can now start Homebridge, use the `-D` flag, so you can see debug log messages in your plugin:
-
-```shell
-homebridge -D
-```
-
-### Watch For Changes and Build Automatically
-
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes, you first need to add your plugin as a platform in `~/.homebridge/config.json`:
-```
+```json
 {
-...
-    "platforms": [
+    "name": "Virtual Accessories Platform",
+    "devices": [
         {
-            "name": "Config",
-            "port": 8581,
-            "platform": "config"
-        },
-        {
-            "name": "<PLUGIN_NAME>",
-            //... any other options, as listed in config.schema.json ...
-            "platform": "<PLATFORM_NAME>"
+            "accessoryID": "12345",
+            "accessoryName": "My Doorbel",
+            "accessoryType": "doorbell",
+            "doorbellVolume": 100,
         }
-    ]
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
 
-and then you can run:
+### Garage Door
 
-```shell
-npm run watch
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Garage Door",
+            "accessoryType": "garagedoor",
+            "garageDoorDefaultState": "closed",
+            "accessoryIsStateful": false,
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
 ```
 
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
+### Lock
 
-### Customise Plugin
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Lock",
+            "accessoryType": "lock",
+            "lockDefaultState": "unlocked",
+            "accessoryIsStateful": false,
+            "lockHardwareFinish": "tan",
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+`lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
 
-You can now start customising the plugin template to suit your requirements.
+### Switch
 
-- [`src/platform.ts`](./src/platform.ts) - this is where your device setup and discovery should go.
-- [`src/platformAccessory.ts`](./src/platformAccessory.ts) - this is where your accessory control logic should go, you can rename or create multiple instances of this file for each accessory type you need to implement as part of your platform plugin. You can refer to the [developer documentation](https://developers.homebridge.io/) to see what characteristics you need to implement for each service type.
-- [`config.schema.json`](./config.schema.json) - update the config schema to match the config you expect from the user. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
-
-### Versioning Your Plugin
-
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
-
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
-
-You can use the `npm version` command to help you with this:
-
-```shell
-# major update / breaking changes
-npm version major
-
-# minor update / new features
-npm version update
-
-# patch / bugfixes
-npm version patch
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Switch",
+            "accessoryType": "switch",
+            "switchDefaultState": "off",
+            "accessoryIsStateful": false,
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
 ```
 
-### Publish Package
+### Switch with reset timer
 
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
-
-```shell
-npm publish
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Switch",
+            "accessoryType": "switch",
+            "switchDefaultState": "off",
+            "accessoryIsStateful": false,
+            "accessoryHasResetTimer": true,
+            "resetTimer": {
+                "duration": 10,
+                "units": "seconds",
+                "isResettable": true
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
 ```
 
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
+### Switch with random reset timer
 
-#### Publishing Beta Versions
-
-You can publish *beta* versions of your plugin for other users to test before you release it to everyone.
-
-```shell
-# create a new pre-release version (eg. 2.1.0-beta.1)
-npm version prepatch --preid beta
-
-# publish to @beta
-npm publish --tag=beta
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Switch",
+            "accessoryType": "switch",
+            "switchDefaultState": "off",
+            "accessoryIsStateful": false,
+            "accessoryHasResetTimer": true,
+            "resetTimer": {
+                "durationIsRandom": true,
+                "durationRandomMin": 5,
+                "durationRandomMax": 20,
+                "units": "seconds",
+                "isResettable": true
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
 ```
 
-Users can then install the  *beta* version by appending `@beta` to the install command, for example:
+### Switch with companion sensor (sensor triggered on & off by switch state)
 
-```shell
-sudo npm install -g homebridge-example-plugin@beta
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Switch",
+            "accessoryType": "switch",
+            "switchDefaultState": "off",
+            "accessoryIsStateful": false,
+            "accessoryHasCompanionSensor": true,
+            "companionSensor": {
+                "name": "My Companion Sensor",
+                "type": "contact"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
 ```
 
-### Best Practices
+Note: Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI saves additional fields to the JSON config that may not be related by the particular accessory. This does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON.
+The next release of the dependency used by Homebridge UI should implement the ability to make fields conditionally required and the configuration will be updated to reflect that.
 
-Consider creating your plugin with the [Homebridge Verified](https://github.com/homebridge/verified) criteria in mind. This will help you to create a plugin that is easy to use and works well with Homebridge.
-You can then submit your plugin to the Homebridge Verified list for review.
-The most up-to-date criteria can be found [here](https://github.com/homebridge/verified#requirements).
-For reference, the current criteria are:
+## Issues
 
-- The plugin must successfully install.
-- The plugin must implement the [Homebridge Plugin Settings GUI](https://github.com/oznu/homebridge-config-ui-x/wiki/Developers:-Plugin-Settings-GUI).
-- The plugin must not start unless it is configured.
-- The plugin must not execute post-install scripts that modify the users' system in any way.
-- The plugin must not contain any analytics or calls that enable you to track the user.
-- The plugin must not throw unhandled exceptions, the plugin must catch and log its own errors.
-- The plugin must be published to npm and the source code available on GitHub.
-  - A GitHub release - with patch notes - should be created for every new version of your plugin.
-- The plugin must run on all [supported LTS versions of Node.js](https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js), at the time of writing this is Node.js v16 and v18.
-- The plugin must not require the user to run Homebridge in a TTY or with non-standard startup parameters, even for initial configuration.
-- If the plugin needs to write files to disk (cache, keys, etc.), it must store them inside the Homebridge storage directory.
+If you have problems, please feel free to open a ticket on GitHub. Please attach any log output to the a ticket, making
+sure to remove any sensitive information such as WiFi passwords.
 
-### Useful Links
-
-Note these links are here for help but are not supported/verified by the Homebridge team
-
-- [Custom Characteristics](https://github.com/homebridge/homebridge-plugin-template/issues/20)
+Please also feel free to open a ticket on GitHub if you have any enhancement suggestions.

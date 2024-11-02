@@ -1,14 +1,19 @@
+/* eslint-disable brace-style */
+/* eslint-disable comma-dangle */
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
-import { ExamplePlatformAccessory } from './platformAccessory.js';
+import { VirtualAccessoryFactory } from './virtualAccessoryFactory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+
+import * as path from 'path';
+import { existsSync, unlink } from 'fs';
 
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
+export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
 
@@ -18,12 +23,12 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig,
-    public readonly api: API,
+    public readonly api: API
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
-    this.log.debug('Finished initializing platform:', this.config.name);
+    this.log.debug('Finished initializing platform');
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
@@ -41,7 +46,7 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
    * It should be used to set up event handlers for characteristics and update respective values.
    */
   configureAccessory(accessory: PlatformAccessory) {
-    this.log.info('Loading accessory from cache:', accessory.displayName);
+    this.log.info(`Loading accessory from cache: ${accessory.displayName}`);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
     this.accessories.push(accessory);
@@ -53,26 +58,19 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    // EXAMPLE ONLY
-    // A real plugin you would discover accessories from the local network, cloud services
-    // or a user-defined array in the platform config.
-    const exampleDevices = [
-      {
-        exampleUniqueId: 'ABCD',
-        exampleDisplayName: 'Bedroom',
-      },
-      {
-        exampleUniqueId: 'EFGH',
-        exampleDisplayName: 'Kitchen',
-      },
-    ];
+    let configuredDevices = this.config.devices;
+
+    if (configuredDevices === undefined) {
+      this.log.debug('No configured accessories');
+      configuredDevices = JSON.parse('[]');
+    }
 
     // loop over the discovered devices and register each one if it has not already been registered
-    for (const device of exampleDevices) {
+    for (const configuredDevice of configuredDevices) {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      const uuid = this.api.hap.uuid.generate(device.exampleUniqueId);
+      const uuid = this.api.hap.uuid.generate(configuredDevice.accessoryID);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -80,7 +78,10 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        this.log.info(`Restoring existing accessory: ${existingAccessory.displayName}`);
+
+        // update the device configuration in the `accessory.context`
+        existingAccessory.context.deviceConfiguration = configuredDevice;
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
@@ -88,29 +89,60 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, existingAccessory);
+        VirtualAccessoryFactory.createVirtualAccessory(configuredDevice.accessoryType, this, existingAccessory);
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
         // remove platform accessories when no longer present
         // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
         // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-      } else {
+      } 
+      else {
         // the accessory does not yet exist, so we need to create it
-        this.log.info('Adding new accessory:', device.exampleDisplayName);
+        this.log.info(`Adding new accessory: ${configuredDevice.accessoryName}`);
 
         // create a new accessory
-        const accessory = new this.api.platformAccessory(device.exampleDisplayName, uuid);
+        const accessory = new this.api.platformAccessory(configuredDevice.accessoryName, uuid);
 
-        // store a copy of the device object in the `accessory.context`
+        // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.device = device;
+        accessory.context.deviceConfiguration = configuredDevice;
+
+        const storagePath = path.join(this.api.user.persistPath(), `VA4HB_${configuredDevice.accessoryID}.json`);
+        accessory.context.storagePath = storagePath;
+        this.log.debug(`Storage path if stateful accessory: ${storagePath}`);
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, accessory);
+        VirtualAccessoryFactory.createVirtualAccessory(configuredDevice.accessoryType, this, accessory);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
+    }
+
+    // loop over the cached accessories and unregister each one if it is not in the config
+    for (const accessory of this.accessories) {
+      const configuredDevice = configuredDevices.find(device => this.api.hap.uuid.generate(device.accessoryID) === accessory.UUID);
+
+      // If there is no configured device for this cached accessory
+      if (!configuredDevice) {
+        this.log.info(`Removing deleted accessory: ${accessory.displayName}`);
+
+        // Unregister the accessory from the platform
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+
+        // Delete any stateful info, if it exists
+        const storagePath = accessory.context.storagePath;
+        if (existsSync(storagePath)) {
+          unlink(storagePath, (err) => {
+            if (err) {
+              this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
+            }
+            else {
+              this.log.debug(`Deleted stateful storage for: ${accessory.displayName}`);
+            }
+          }); 
+        }
       }
     }
   }

@@ -1,15 +1,277 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "VirtualAccessoriesForHomebridge",
   "pluginType": "platform",
   "singular": true,
+  "footerDisplay": "* = required fields",
+  "strictValidation": true,
   "schema": {
     "type": "object",
     "properties": {
       "name": {
-        "title": "Name",
+        "title": "Platform Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Virtual Accessories Platform",
+        "readonly": true
+      },
+      "devices": {
+        "type": "array",
+        "items": {
+          "title": "Accessory",
+          "type": "object",
+          "properties": {
+            "accessoryID": {
+              "title": "Accessory ID",
+              "description": "Unique ID for the Accessory (do not modify once assigned)",
+              "type": "string",
+              "required": true,
+              "minLength": 4,
+              "pattern": "^[A-Fa-f0-9\\-]{5,}$"
+            },
+            "accessoryName": {
+              "title": "Accessory Name",
+              "description": "Accessory Name as it will be displayed in HomeKit",
+              "type": "string",
+              "required": true
+            },
+            "accessoryType": {
+              "title": "Type",
+              "description": "Accessory Type",
+              "type": "string",
+              "required": true,
+              "oneOf": [
+                { "title": "Switch", "enum": ["switch"] },
+                { "title": "Lock", "enum": ["lock"] },
+                { "title": "Doorbell", "enum": ["doorbell"] },
+                { "title": "Garage Door", "enum": ["garagedoor"] }
+              ],
+              "default": "switch"
+            },
+            "switchDefaultState": {
+              "title": "Switch Default State *",
+              "description": "Switch default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Off", "enum": ["off"] },
+                { "title": "On", "enum": ["on"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
+              }
+            },
+            "lockDefaultState": {
+              "title": "Lock Default State *",
+              "description": "Lock default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Unlocked", "enum": ["unlocked"] },
+                { "title": "Locked", "enum": ["locked"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "garageDoorDefaultState": {
+              "title": "Garage Door Default State *",
+              "description": "Garage Door default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Closed", "enum": ["closed"] },
+                { "title": "Open", "enum": ["open"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
+              }
+            },
+            "accessoryIsStateful": {
+              "title": "Accessory Is Stateful",
+              "description": "Accessory state survives Homebridge restart",
+              "type": "boolean",
+              "condition": {
+                "functionBody": "return ['switch', 'lock', 'garagedoor'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
+              }
+            },
+            "accessoryHasResetTimer": {
+              "title": "Accessory Has a Reset Timer",
+              "description": "Accessory resets to default state when timer ends",
+              "type": "boolean",
+              "condition": {
+                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryIsStateful);"
+              }
+            },
+            "accessoryHasCompanionSensor": {
+              "title": "Accessory Has a Companion Sensor",
+              "description": "Accessory triggers a sensor when its state changes",
+              "type": "boolean",
+              "condition": {
+                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "lockHardwareFinish": {
+              "title": "Hardware Finish *",
+              "description": "Color of the virtual HomeKey in the Wallet app",
+              "type": "string",
+              "oneOf": [
+                { "title": "Tan", "enum": ["tan"] },
+                { "title": "Gold", "enum": ["gold"] },
+                { "title": "Silver", "enum": ["silver"] },
+                { "title": "Black", "enum": ["black"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "doorbellVolume": {
+              "title": "Volume *",
+              "description": "Doorbell volume *",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
+            "resetTimer": {
+              "title": "Reset Timer",
+              "type": "object",
+              "properties": {
+                "durationIsRandom": {
+                  "title": "Timer Duration is Random",
+                  "description": "The timer duration is random",
+                  "type": "boolean"
+                },
+                "duration": {
+                  "title": "Timer Duration *",
+                  "description": "Set timer duration for accessory reset to default state",
+                  "type": "integer",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
+                  }
+                },
+                "durationRandomMin": {
+                  "title": "Timer Min Duration *",
+                  "description": "Set minimum timer duration for accessory reset to default state",
+                  "type": "integer",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "durationRandomMax": {
+                  "title": "Timer Max Duration *",
+                  "description": "Set maximum timer duration for accessory reset to default state",
+                  "type": "integer",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "units": {
+                  "title": "Timer Units *",
+                  "description": "Timer units",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Seconds", "enum": ["seconds"] },
+                    { "title": "Minutes", "enum": ["minutes"] },
+                    { "title": "Hours", "enum": ["hours"] },
+                    { "title": "Days", "enum": ["days"] }
+                  ]
+                },
+                "isResettable": {
+                  "title": "Timer is Resettable",
+                  "description": "The timer is reset every time the accessory is triggered, even if the accessory's state doesn't change",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryHasResetTimer === true;"
+              }
+            },
+            "companionSensor": {
+              "title": "Companion Sensor",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "title": "Name *",
+                  "description": "Sensor Name as it will be displayed in HomeKit",
+                  "type": "string"
+                },
+                "type": {
+                  "title": "Type *",
+                  "description": "Sensor Type triggered by accessory state change",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Contact", "enum": ["contact"] },
+                    { "title": "Leak", "enum": ["leak"] },
+                    { "title": "Motion", "enum": ["motion"] },
+                    { "title": "Occupancy", "enum": ["occupancy"] },
+                    { "title": "Carbon Dioxide", "enum": ["carbonDioxide"] },
+                    { "title": "Carbon Monoxide", "enum": ["carbonMonoxide"] },
+                    { "title": "Smoke", "enum": ["smoke"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryHasCompanionSensor === true;"
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "switch" }
+                }
+              },
+              "then": {
+                "required": [ "switchDefaultState" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "doorbell" }
+                }
+              },
+              "then": {
+                "required": [ "doorbellVolume" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lock" }
+                }
+              },
+              "then": {
+                "required": [ "lockDefaultState", "lockHardwareFinish" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "garagedoor" }
+                }
+              },
+              "then": {
+                "required": [ "garageDoorDefaultState" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryHasCompanionSensor": { "const": true }
+                },
+                "required": [ "accessoryHasCompanionSensor" ]
+              },
+              "then": {
+                "properties": {
+                  "companionSensor": {
+                    "required": [ "name", "type" ]
+                  }
+                }
+              }
+            }
+          ]
+        }
       }
     }
   }
