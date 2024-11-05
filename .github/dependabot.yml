@@ -6,8 +6,10 @@
 version: 2
 updates:
   # Configuration for npm
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0
+    # Disable all pull requests for npm dependencies
+    #open-pull-requests-limit: 0
