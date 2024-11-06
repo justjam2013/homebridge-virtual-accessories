@@ -93,16 +93,6 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
         this.platform, this.accessory, this.device.companionSensor.type, this.device.companionSensor.name);
 
       this.companionSensor!.setSensorState(this.states.SensorState);
-
-      // this.companionSensorService = this.createVirtualCompanionSensor(this.platform, this.accessory,
-      //   this.device.companionSensor.type, this.device.companionSensor.name);
-
-      // // Update the initial state of the companion sensor
-      // this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getCompanionSensorStateName(this.states.SensorState)}`);
-      // this.companionSensorService.updateCharacteristic(this.companionSensorCharacteristic, this.states.SensorState);
-
-      // this.companionSensorService.getCharacteristic(this.companionSensorCharacteristic)
-      //   .onGet(this.handleSensorStateGet.bind(this)); // GET - bind to the `handleSensorStateGet` method below
     }
   }
 

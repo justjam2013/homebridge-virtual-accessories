@@ -51,7 +51,11 @@ export abstract class VirtualSensor extends VirtualAccessory {
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.device.accessoryName);
+    if (companionSensorName === undefined) {
+      this.service.setCharacteristic(this.platform.Characteristic.Name, this.device.accessoryName);
+    } else {
+      this.service.setCharacteristic(this.platform.Characteristic.Name, companionSensorName);
+    }
 
     // Update the initial state of the accessory
     this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);

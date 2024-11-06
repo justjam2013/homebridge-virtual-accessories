@@ -27,8 +27,6 @@ export abstract class VirtualAccessory {
   protected storagePath: string;
 
   protected timerId;
-  // protected companionSensorService;
-  // protected companionSensorCharacteristic;
   protected companionSensor: VirtualSensor | undefined;
 
   constructor(
@@ -99,80 +97,6 @@ export abstract class VirtualAccessory {
       }
     }
   }
-
-  // protected createVirtualCompanionSensor(
-  //   platform: VirtualAccessoryPlatform,
-  //   accessory: PlatformAccessory,
-  //   sensorType: string,
-  //   sensorName: string,
-  // ): Service {
-  //   let sensorServiceType;
-
-  //   switch (sensorType) {
-  //   // case "airQuality":
-  //   //   // int: 0-5
-  //   //   sensorServiceType = platform.Service.AirQualitySensor;
-  //   //   this.companionSensorCharacteristic = platform.Characteristic.AirQuality;
-  //   //   break;
-  //   case 'carbonDioxide':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.CarbonDioxideSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.CarbonDioxideDetected;
-  //     break;
-  //   case 'carbonMonoxide':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.CarbonMonoxideSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.CarbonMonoxideDetected;
-  //     break;
-  //   case 'contact':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.ContactSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.ContactSensorState;
-  //     break;
-  //   // case "humidity":
-  //     //   // float
-  //     //   serviceType = platform.Service.HumiditySensor;
-  //     //   this.companionSensorCharacteristic = platform.Characteristic.CurrentRelativeHumidity;
-  //     //   break;
-  //   case 'leak':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.LeakSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.LeakDetected;
-  //     break;
-  //   // case "light":
-  //     //   // float
-  //     //   serviceType = platform.Service.LightSensor;
-  //     //   this.companionSensorCharacteristic = platform.Characteristic.CurrentAmbientLightLevel;
-  //     //   break;
-  //   case 'motion':
-  //     // T,F
-  //     sensorServiceType = platform.Service.MotionSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.MotionDetected;
-  //     break;
-  //   case 'occupancy':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.OccupancySensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.OccupancyDetected;
-  //     break;
-  //   case 'smoke':
-  //     // 0,1
-  //     sensorServiceType = platform.Service.SmokeSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.SmokeDetected;
-  //     break;
-  //   // case "temperature":
-  //     //   // float
-  //     //   serviceType = platform.Service.TemperatureSensor;
-  //     //   this.companionSensorCharacteristic = platform.Characteristic.CurrentTemperature;
-  //     //   break;
-  //   default:
-  //     // 0,1
-  //     sensorServiceType = platform.Service.ContactSensor;
-  //     this.companionSensorCharacteristic = platform.Characteristic.ContactSensorState;
-  //   }
-
-  //   const sensor: Service = accessory.getService(sensorName) || accessory.addService(sensorServiceType, sensorName, accessory.UUID + '-sensor');
-  //   return sensor;
-  // }
 
   protected getCompanionSensorStateName(state: number): string {
     let sensorStateName: string;
