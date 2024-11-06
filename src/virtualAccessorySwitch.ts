@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
 import { VirtualAccessory } from './virtualAccessory.js';
+import { AccessoryFactory } from './accessoryFactory.js';
 
 /**
  * Platform Accessory
@@ -13,16 +14,13 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
   private ON: boolean = true;
   private OFF: boolean = false;
 
-  private CONTACT_DETECTED: number = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;          // 0
-  private CONTACT_NOT_DETECTED: number = this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;  // 1
-
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
   private states = {
     SwitchState: this.OFF,
-    SensorState: this.CONTACT_DETECTED,
+    SensorState: this.CLOSED_NORMAL,
   };
 
   private readonly stateStorageKey: string = 'SwitchState';
@@ -35,25 +33,21 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.device.switchDefaultState === 'on' ? this.ON : this.OFF;
-    this.platform.log.info(`[${this.device.accessoryName}] Default state: ${this.getStateName(this.defaultState)}`);
-
-    this.platform.log.info(`[${this.device.accessoryName}] Is stateful: ${this.isStateful}`);
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.isStateful) {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as boolean;
-      this.platform.log.info(`[${this.device.accessoryName}] Cached state: ${this.getStateName(cachedState)}`);
 
       if (cachedState !== undefined) {
         this.states.SwitchState = cachedState;
         this.states.SensorState = this.determineSensorState();
       } else {
         this.states.SwitchState = this.defaultState;
-        this.states.SensorState = this.CONTACT_DETECTED;
+        this.states.SensorState = this.CLOSED_NORMAL;
       }
     } else {
       this.states.SwitchState = this.defaultState;
-      this.states.SensorState = this.CONTACT_DETECTED;
+      this.states.SensorState = this.CLOSED_NORMAL;
     }
 
     // set accessory information
@@ -95,14 +89,20 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
 
     // Create sensor service
     if (this.hasCompanionSensor) {
-      this.sensorService = this.createCompanionSensor(this.accessory.UUID, this.device.companionSensor);
+      this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
+        this.platform, this.accessory, this.device.companionSensor.type, this.device.companionSensor.name);
 
-      // Update the initial state of the companion sensor
-      this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getSensorStateName(this.states.SensorState)}`);
-      this.sensorService.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+      this.companionSensor!.setSensorState(this.states.SensorState);
 
-      this.sensorService.getCharacteristic(this.sensorCharacteristic)
-        .onGet(this.handleSensorStateGet.bind(this)); // GET - bind to the `handleSensorStateGet` method below
+      // this.companionSensorService = this.createVirtualCompanionSensor(this.platform, this.accessory,
+      //   this.device.companionSensor.type, this.device.companionSensor.name);
+
+      // // Update the initial state of the companion sensor
+      // this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getCompanionSensorStateName(this.states.SensorState)}`);
+      // this.companionSensorService.updateCharacteristic(this.companionSensorCharacteristic, this.states.SensorState);
+
+      // this.companionSensorService.getCharacteristic(this.companionSensorCharacteristic)
+      //   .onGet(this.handleSensorStateGet.bind(this)); // GET - bind to the `handleSensorStateGet` method below
     }
   }
 
@@ -121,7 +121,7 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     if (this.hasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
 
-      this.sensorService.updateCharacteristic(this.sensorCharacteristic, this.states.SensorState);
+      this.companionSensor!.setSensorState(this.states.SensorState);
     }
 
     if (this.isStateful) {
@@ -162,7 +162,7 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
   handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Sensor Current State: ${this.getSensorStateName(sensorState)}`);
+    this.platform.log.debug(`[${this.device.accessoryName}] Getting Sensor Current State: ${this.getCompanionSensorStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -222,9 +222,9 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     let sensorState: number;
 
     if (this.defaultState === this.OFF) {
-      sensorState = (this.states.SwitchState === this.OFF) ? this.CONTACT_DETECTED : this.CONTACT_NOT_DETECTED;
+      sensorState = (this.states.SwitchState === this.OFF) ? this.CLOSED_NORMAL : this.OPEN_TRIGGERED;
     } else {
-      sensorState = (this.states.SwitchState === this.ON) ? this.CONTACT_DETECTED : this.CONTACT_NOT_DETECTED;
+      sensorState = (this.states.SwitchState === this.ON) ? this.CLOSED_NORMAL : this.OPEN_TRIGGERED;
     }
 
     return sensorState;
@@ -241,18 +241,5 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     }
 
     return stateName;
-  }
-
-  private getSensorStateName(state: number): string {
-    let sensorStateName: string;
-
-    switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    case this.CONTACT_DETECTED: { sensorStateName = 'CONTACT DETECTED'; break; }
-    case this.CONTACT_NOT_DETECTED: { sensorStateName = 'CONTACT NOT DETECTED'; break; }
-    default: { sensorStateName = state.toString();}
-    }
-
-    return sensorStateName;
   }
 }

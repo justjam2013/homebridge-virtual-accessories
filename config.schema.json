@@ -15,9 +15,9 @@
         "readonly": true
       },
       "devices": {
+        "title": "Accessories",
         "type": "array",
         "items": {
-          "title": "Accessory",
           "type": "object",
           "properties": {
             "accessoryID": {
@@ -35,7 +35,7 @@
               "required": true
             },
             "accessoryType": {
-              "title": "Type",
+              "title": "Accessory Type",
               "description": "Accessory Type",
               "type": "string",
               "required": true,
@@ -43,7 +43,8 @@
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
-                { "title": "Garage Door", "enum": ["garagedoor"] }
+                { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Sensor", "enum": ["sensor"] }
               ],
               "default": "switch"
             },
@@ -83,6 +84,47 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
+            "sensorType": {
+              "title": "Sensor Type *",
+              "description": "Sensor Type (critical notifications bypass Do Not Disturb)",
+              "type": "string",
+              "oneOf": [
+                { "title": "Contact", "enum": ["contact"] },
+                { "title": "Leak (critical)", "enum": ["leak"] },
+                { "title": "Motion", "enum": ["motion"] },
+                { "title": "Occupancy", "enum": ["occupancy"] },
+                { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
+                { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
+                { "title": "Smoke (critical)", "enum": ["smoke"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
+              }
+            },
+            "lockHardwareFinish": {
+              "title": "Lock Hardware Finish *",
+              "description": "Color of the virtual HomeKey in the Wallet app",
+              "type": "string",
+              "oneOf": [
+                { "title": "Tan", "enum": ["tan"] },
+                { "title": "Gold", "enum": ["gold"] },
+                { "title": "Silver", "enum": ["silver"] },
+                { "title": "Black", "enum": ["black"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "doorbellVolume": {
+              "title": "Doorbell Volume *",
+              "description": "Doorbell volume *",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
             "accessoryIsStateful": {
               "title": "Accessory Is Stateful",
               "description": "Accessory state survives Homebridge restart",
@@ -97,38 +139,6 @@
               "type": "boolean",
               "condition": {
                 "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryIsStateful);"
-              }
-            },
-            "accessoryHasCompanionSensor": {
-              "title": "Accessory Has a Companion Sensor",
-              "description": "Accessory triggers a sensor when its state changes",
-              "type": "boolean",
-              "condition": {
-                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType);"
-              }
-            },
-            "lockHardwareFinish": {
-              "title": "Hardware Finish *",
-              "description": "Color of the virtual HomeKey in the Wallet app",
-              "type": "string",
-              "oneOf": [
-                { "title": "Tan", "enum": ["tan"] },
-                { "title": "Gold", "enum": ["gold"] },
-                { "title": "Silver", "enum": ["silver"] },
-                { "title": "Black", "enum": ["black"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
-              }
-            },
-            "doorbellVolume": {
-              "title": "Volume *",
-              "description": "Doorbell volume *",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 100,
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
               }
             },
             "resetTimer": {
@@ -153,7 +163,7 @@
                   "description": "Set minimum timer duration for accessory reset to default state",
                   "type": "integer",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
@@ -161,7 +171,7 @@
                   "description": "Set maximum timer duration for accessory reset to default state",
                   "type": "integer",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "units": {
@@ -183,6 +193,30 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryHasResetTimer === true;"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "durationIsRandom": { "const": true }
+                    },
+                    "required": [ "durationIsRandom" ]
+                  },
+                  "then": {
+                    "required": [ "durationRandomMin", "durationRandomMax" ]
+                  },
+                  "else": {
+                    "required": [ "duration" ]
+                  }
+                }
+              ]
+            },
+            "accessoryHasCompanionSensor": {
+              "title": "Accessory Has a Companion Sensor",
+              "description": "Accessory triggers a sensor when its state changes",
+              "type": "boolean",
+              "condition": {
+                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "companionSensor": {
@@ -190,22 +224,22 @@
               "type": "object",
               "properties": {
                 "name": {
-                  "title": "Name *",
+                  "title": "Sensor Name *",
                   "description": "Sensor Name as it will be displayed in HomeKit",
                   "type": "string"
                 },
                 "type": {
-                  "title": "Type *",
-                  "description": "Sensor Type triggered by accessory state change",
+                  "title": "Sensor Type *",
+                  "description": "Sensor Type triggered by accessory state change (critical notifications bypass Do Not Disturb)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
-                    { "title": "Leak", "enum": ["leak"] },
+                    { "title": "Leak (critical)", "enum": ["leak"] },
                     { "title": "Motion", "enum": ["motion"] },
                     { "title": "Occupancy", "enum": ["occupancy"] },
-                    { "title": "Carbon Dioxide", "enum": ["carbonDioxide"] },
-                    { "title": "Carbon Monoxide", "enum": ["carbonMonoxide"] },
-                    { "title": "Smoke", "enum": ["smoke"] }
+                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
+                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
+                    { "title": "Smoke (critical)", "enum": ["smoke"] }
                   ]
                 }
               },
@@ -258,11 +292,38 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "sensor" }
+                }
+              },
+              "then": {
+                "required": [ "sensorType" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryHasResetTimer": { "const": true }
+                },
+                "required": [ "accessoryHasResetTimer" ]
+              },
+              "then": {
+                "required": [ "resetTimer" ],
+                "properties": {
+                  "resetTimer": {
+                    "required": [ "units" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryHasCompanionSensor": { "const": true }
                 },
                 "required": [ "accessoryHasCompanionSensor" ]
               },
               "then": {
+                "required": [ "companionSensor" ],
                 "properties": {
                   "companionSensor": {
                     "required": [ "name", "type" ]
@@ -274,5 +335,13 @@
         }
       }
     }
-  }
+  },
+  "form": [
+    {
+      "type": "fieldset",
+      "title": "Platform",
+      "items": []
+    },
+    "*"
+  ]
 }
