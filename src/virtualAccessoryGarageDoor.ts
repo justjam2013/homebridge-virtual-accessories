@@ -35,14 +35,10 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.device.garageDoorDefaultState === 'open' ? this.OPEN : this.CLOSED;
-    this.platform.log.info(`[${this.device.accessoryName}] Default state: ${this.getStateName(this.defaultState)}`);
-
-    this.platform.log.info(`[${this.device.accessoryName}] Is stateful: ${this.isStateful}`);
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.isStateful) {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
-      this.platform.log.info(`[${this.device.accessoryName}] Cached state: ${this.getStateName(cachedState)}`);
 
       if (cachedState !== undefined) {
         this.states.GarageDoorState = cachedState;
@@ -52,8 +48,6 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     } else {
       this.states.GarageDoorState = this.defaultState;
     }
-
-    this.platform.log.info(`[${this.device.accessoryName}] Set initial state: ${this.getStateName(this.states.GarageDoorState)}`);
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -128,7 +122,6 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
 
     // Store device state if stateful
     if (this.isStateful) {
-      this.platform.log.info(`[${this.device.accessoryName}] Saving Target Door State: ${this.getStateName(this.states.GarageDoorState)}`);
       this.saveState(this.storagePath, this.stateStorageKey, this.states.GarageDoorState);
     }
 

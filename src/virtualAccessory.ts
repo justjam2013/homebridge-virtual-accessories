@@ -1,6 +1,7 @@
 import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
+import { VirtualSensor } from './virtualSensor.js';
 
 import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
 
@@ -14,6 +15,9 @@ export abstract class VirtualAccessory {
   protected readonly platform: VirtualAccessoryPlatform;
   protected readonly accessory: PlatformAccessory;
 
+  protected CLOSED_NORMAL: number;   // 0
+  protected OPEN_TRIGGERED: number;  // 1
+
   protected device;
   protected isStateful;
   protected defaultState;
@@ -23,8 +27,7 @@ export abstract class VirtualAccessory {
   protected storagePath: string;
 
   protected timerId;
-  protected sensorService;
-  protected sensorCharacteristic;
+  protected companionSensor: VirtualSensor | undefined;
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -33,6 +36,9 @@ export abstract class VirtualAccessory {
     this.accessory = accessory;
     this.platform = platform;
 
+    this.CLOSED_NORMAL = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;       // 0
+    this.OPEN_TRIGGERED = this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;  // 1
+  
     // The device configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.device = accessory.context.deviceConfiguration;
 
@@ -60,7 +66,7 @@ export abstract class VirtualAccessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.info(`[${this.device.accessoryName}] Stored state: ${JSON.stringify(json)}`);
+    this.platform.log.debug(`[${this.device.accessoryName}] Stored state: ${JSON.stringify(json)}`);
     return json[key];
   }
 
@@ -70,7 +76,7 @@ export abstract class VirtualAccessory {
     value: boolean | number,
   ): void {
     // Overwrite the existing persistence file
-    this.platform.log.info(`[${this.device.accessoryName}] Saving state: ${key} ${value}`);
+    this.platform.log.debug(`[${this.device.accessoryName}] Saving state: ${key} ${value}`);
     writeFileSync(
       storagePath,
       JSON.stringify({
@@ -92,74 +98,16 @@ export abstract class VirtualAccessory {
     }
   }
 
-  protected createCompanionSensor(
-    uuid: string,
-    sensorConfig,
-  ): Service {
-    let sensorService;
-    switch (sensorConfig.type) {
-    // case "airQuality":
-    //   // int: 0-5
-    //   sensorService = this.platform.Service.AirQualitySensor;
-    //   this.sensorCharacteristic = this.platform.Characteristic.AirQuality;
-    //   break;
-    case 'carbonDioxide':
-      // 0,1
-      sensorService = this.platform.Service.CarbonDioxideSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.CarbonDioxideDetected;
-      break;
-    case 'carbonMonoxide':
-      // 0,1
-      sensorService = this.platform.Service.CarbonMonoxideSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.CarbonMonoxideDetected;
-      break;
-    case 'contact':
-      // 0,1
-      sensorService = this.platform.Service.ContactSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.ContactSensorState;
-      break;
-    // case "humidity":
-      //   // float
-      //   sensorService = this.platform.Service.HumiditySensor;
-      //   this.sensorCharacteristic = this.platform.Characteristic.CurrentRelativeHumidity;
-      //   break;
-    case 'leak':
-      // 0,1
-      sensorService = this.platform.Service.LeakSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.LeakDetected;
-      break;
-    // case "light":
-      //   // float
-      //   sensorService = this.platform.Service.LightSensor;
-      //   this.sensorCharacteristic = this.platform.Characteristic.CurrentAmbientLightLevel;
-      //   break;
-    case 'motion':
-      // T,F
-      sensorService = this.platform.Service.MotionSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.MotionDetected;
-      break;
-    case 'occupancy':
-      // 0,1
-      sensorService = this.platform.Service.OccupancySensor;
-      this.sensorCharacteristic = this.platform.Characteristic.OccupancyDetected;
-      break;
-    case 'smoke':
-      // 0,1
-      sensorService = this.platform.Service.SmokeSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.SmokeDetected;
-      break;
-    // case "temperature":
-      //   // float
-      //   sensorService = this.platform.Service.TemperatureSensor;
-      //   this.sensorCharacteristic = this.platform.Characteristic.CurrentTemperature;
-      //   break;
-    default:
-      // 0,1
-      sensorService = this.platform.Service.ContactSensor;
-      this.sensorCharacteristic = this.platform.Characteristic.ContactSensorState;
+  protected getCompanionSensorStateName(state: number): string {
+    let sensorStateName: string;
+
+    switch (state) {
+    case undefined: { sensorStateName = 'undefined'; break; }
+    case this.CLOSED_NORMAL: { sensorStateName = 'NORMAL-CLOSED'; break; }
+    case this.OPEN_TRIGGERED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    default: { sensorStateName = state.toString();}
     }
 
-    const sensor: Service = this.accessory.getService(sensorConfig.name) || this.accessory.addService(sensorService, sensorConfig.name, uuid + '-sensor');
-    return sensor;
+    return sensorStateName;
   }
 }

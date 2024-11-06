@@ -1,8 +1,6 @@
-/* eslint-disable brace-style */
-/* eslint-disable comma-dangle */
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
-import { VirtualAccessoryFactory } from './virtualAccessoryFactory.js';
+import { AccessoryFactory } from './accessoryFactory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
@@ -23,7 +21,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig,
-    public readonly api: API
+    public readonly api: API,
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
@@ -89,14 +87,16 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        VirtualAccessoryFactory.createVirtualAccessory(configuredDevice.accessoryType, this, existingAccessory);
+        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredDevice.accessoryType);
+        if (virtualAccessory === undefined) {
+          this.log.error(`Error restoring existing accessory: ${existingAccessory.displayName}`);
+        }
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
         // remove platform accessories when no longer present
         // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
         // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-      } 
-      else {
+      } else {
         // the accessory does not yet exist, so we need to create it
         this.log.info(`Adding new accessory: ${configuredDevice.accessoryName}`);
 
@@ -113,10 +113,13 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        VirtualAccessoryFactory.createVirtualAccessory(configuredDevice.accessoryType, this, accessory);
-
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, accessory, configuredDevice.accessoryType);
+        if (virtualAccessory === undefined) {
+          this.log.error(`Error adding new accessory: ${configuredDevice.accessoryName}`);
+        } else {
+          // link the accessory to your platform
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        }
       }
     }
 
@@ -137,8 +140,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
           unlink(storagePath, (err) => {
             if (err) {
               this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
-            }
-            else {
+            } else {
               this.log.debug(`Deleted stateful storage for: ${accessory.displayName}`);
             }
           }); 
