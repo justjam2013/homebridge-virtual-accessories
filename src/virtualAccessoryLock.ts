@@ -50,7 +50,7 @@ export class VirtualLockAccessory extends VirtualAccessory {
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Lock')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Lock')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
       .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.device.lockHardwareFinish);
 

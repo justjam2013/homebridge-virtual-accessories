@@ -2,6 +2,7 @@ import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
 import { VirtualSensor } from './virtualSensor.js';
+import { Timer } from './timer.js';
 
 import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
 
@@ -10,15 +11,15 @@ import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
  * Abstract superclass for all virtual accessories and place to store common functionality
  */
 export abstract class VirtualAccessory {
-  protected service!: Service;
+  service?: Service;
 
-  protected readonly platform: VirtualAccessoryPlatform;
-  protected readonly accessory: PlatformAccessory;
+  readonly platform: VirtualAccessoryPlatform;
+  readonly accessory: PlatformAccessory;
 
-  protected CLOSED_NORMAL: number;   // 0
-  protected OPEN_TRIGGERED: number;  // 1
+  readonly CLOSED_NORMAL: number = 0;
+  readonly OPEN_TRIGGERED: number = 1;
 
-  protected device;
+  readonly device;
   protected isStateful;
   protected defaultState;
   protected hasResetTimer;
@@ -26,8 +27,8 @@ export abstract class VirtualAccessory {
 
   protected storagePath: string;
 
-  protected timerId;
-  protected companionSensor: VirtualSensor | undefined;
+  protected timer?: Timer;
+  protected companionSensor?: VirtualSensor;
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -36,9 +37,6 @@ export abstract class VirtualAccessory {
     this.accessory = accessory;
     this.platform = platform;
 
-    this.CLOSED_NORMAL = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;       // 0
-    this.OPEN_TRIGGERED = this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;  // 1
-  
     // The device configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.device = accessory.context.deviceConfiguration;
 
@@ -88,7 +86,7 @@ export abstract class VirtualAccessory {
 
   protected deleteState(
     storagePath: string,
-  ): void {
+  ) {
     if (existsSync(storagePath)) {
       try {
         unlinkSync(storagePath); 
@@ -96,18 +94,5 @@ export abstract class VirtualAccessory {
         // For now ignore
       }
     }
-  }
-
-  protected getCompanionSensorStateName(state: number): string {
-    let sensorStateName: string;
-
-    switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    case this.CLOSED_NORMAL: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.OPEN_TRIGGERED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
-    default: { sensorStateName = state.toString();}
-    }
-
-    return sensorStateName;
   }
 }
