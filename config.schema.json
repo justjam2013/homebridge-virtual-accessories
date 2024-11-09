@@ -17,7 +17,9 @@
       "devices": {
         "title": "Accessories",
         "type": "array",
+        "orderable": false,
         "items": {
+          "title": "Accessory",
           "type": "object",
           "properties": {
             "accessoryID": {

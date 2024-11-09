@@ -52,7 +52,7 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Garage Door')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Garage Door')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service

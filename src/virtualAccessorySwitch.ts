@@ -3,6 +3,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoryPlatform } from './platform.js';
 import { VirtualAccessory } from './virtualAccessory.js';
 import { AccessoryFactory } from './accessoryFactory.js';
+import { Timer } from './timer.js';
 
 /**
  * Platform Accessory
@@ -48,12 +49,16 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     } else {
       this.states.SwitchState = this.defaultState;
       this.states.SensorState = this.CLOSED_NORMAL;
+
+      if (this.hasResetTimer) {
+        this.timer = new Timer(this, this.defaultState, this.platform.Characteristic.On);
+      }
     }
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Switch')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Switch')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the Switch service if it exists, otherwise create a new Switch service
@@ -105,7 +110,7 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     this.states.SwitchState = value as boolean;
 
     if (this.hasResetTimer) {
-      this.startResetTimer();
+      this.timer?.startTimer();
     }
 
     if (this.hasCompanionSensor) {
@@ -146,60 +151,12 @@ export class VirtualSwitchAccessory extends VirtualAccessory {
     return switchState;
   }
 
-  /**
-   * Handle requests to get the current value of the "Contact Sensor State" characteristic
-   */
-  handleSensorStateGet() {
-    const sensorState = this.states.SensorState;
-
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Sensor Current State: ${this.getCompanionSensorStateName(sensorState)}`);
-
-    return sensorState;
-  }
-
-  // Create and start the accessory reset delay timer
-  protected startResetTimer() {
-    const isLeadingEdge = (
+  private isActivated() {
+    const isActivated = (
       (this.states.SwitchState === this.ON && this.defaultState === this.OFF) ||
       (this.states.SwitchState === this.OFF && this.defaultState === this.ON)
     );
-    if (isLeadingEdge) {
-      const timerConfig =  this.device.resetTimer;
-
-      let duration: number;
-      if (timerConfig.durationIsRandom) {
-        const minDuration = timerConfig.durationRandomMin;
-        const maxDuration = timerConfig.durationRandomMax;
-        duration = Math.floor(Math.random() * (maxDuration + 1 - minDuration) + minDuration);
-      } else {
-        duration = timerConfig.duration;
-      }
-
-      const units = timerConfig.units;
-      switch (units) {
-      case 'days':
-        duration *= 24;
-        // falls through
-      case 'hours':
-        duration *= 60;
-        // falls through
-      case 'minutes':
-        duration *= 60;
-        // falls through
-      case 'seconds':
-        duration *= 1000;
-      }
-
-      if (timerConfig.isResettable) {
-        clearTimeout(this.timerId);
-      }
-
-      // Start the state reset timer
-      const resetValue = (this.states.SwitchState === this.ON) ? this.OFF : this.ON;
-      this.timerId = setTimeout(() => {
-        this.service!.setCharacteristic(this.platform.Characteristic.On, resetValue);
-      }, duration);
-    }
+    return isActivated;
   }
 
   // Default switch state Off:

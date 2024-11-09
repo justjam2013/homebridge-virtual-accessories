@@ -96,7 +96,7 @@ export abstract class VirtualSensor extends VirtualAccessory {
     this.states.SensorState = sensorState;
 
     this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
-    this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+    this.service?.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
   }
 
   protected getStateName(state: number): string {
