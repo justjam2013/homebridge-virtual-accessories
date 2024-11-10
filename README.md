@@ -1,5 +1,5 @@
 <div>
-    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fjustjam2013%2Fhomebridge-virtual-accessories%2Fraw%2Flatest%2Fpackage.json&query=%24.version&label=Version">
+    <img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories">
 </div>
 
 <div>
