@@ -21,7 +21,7 @@
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches), as well as a few others.
 
-The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins.
+The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may are unmaintained and abandoned.
 
 This is work in progress, so new accessories will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
 
