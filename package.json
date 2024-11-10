@@ -31,7 +31,11 @@
     "virtual doorbell",
     "garage door",
     "virtual garage door",
-    "dummy"
+    "dummy",
+    "sensor",
+    "virtual sensor",
+    "ping sensor",
+    "cron sensor"
   ],
   "main": "dist/index.js",
   "engines": {

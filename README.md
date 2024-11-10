@@ -1,5 +1,14 @@
-<p align="center">
-<img src="VirtualAccessories.png">
+<div>
+    <img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories">
+</div>
+
+<div>
+    <img src="https://img.shields.io/github/license/justjam2013/homebridge-virtual-accessories">
+</div>
+
+<p align="center" vertical-align="middle">
+    <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="VirtualAccessories.png" height="140"></a>
+    <a href="https://github.com/homebridge/homebridge"><img src="https://raw.githubusercontent.com/homebridge/branding/master/logos/homebridge-color-round-stylized.png" height="140"></a>
 </p>
 
 <span align="center">
@@ -18,8 +27,12 @@ This is work in progress, so new accessories will be added as needed or requeste
 
 -   Switch. Nobody can have too many switches! Allows you to create switches, normally on/off, stateful, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod paired in the Home app.
--   Garage Door. Will display a widget in CarPlay when you approach your home. Triggers a HomeKit notification when the accessory's state changes.
--   Lock. This was just low hanging fruit. Triggers a HomeKit notification when the accessory's state changes.
+-   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
+-   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes.
+-   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, with some types of notifications classified as `critical` by Homekit. Critical notifications are allowed to bypass Do Not Disturb and allowed to appear on CarPlay display. Sensors can be activated by different triggers. Currently, they options are:
+   - Host Ping trigger. Pings a network host and is actvated when the ping fails. The sensor resets when the ping is successful.
+   - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
+   - Switch trigger. To activate a sensor by a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing through the sensor with trigger switch path.
 
 ## Installation
 
@@ -183,6 +196,60 @@ Note:
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Sensor with ping trigger
+
+```json
+{
+    "accessoryID": "12345",
+    "accessoryName": "My Ping Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "contact",
+    "sensorTrigger": "ping",
+    "pingTrigger": {
+        "host": "192.168.0.200",
+        "failureRetryCount": 3,
+        "isDisabled": false
+    }
+}
+
+```
+
+### Sensor with cron trigger
+
+```json
+{
+    "accessoryID": "7878778",
+    "accessoryName": "Cron Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "leak",
+    "sensorTrigger": "cron",
+    "cronTrigger": {
+        "pattern": "* * * * * *",
+        "zoneId": "America/Los_Angeles",
+        "isDisabled": true
+    }
+}
+```
+
+### Sensor with cron trigger with start and end datetimes
+
+```json
+{
+    "accessoryID": "7878778",
+    "accessoryName": "Cron Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "leak",
+    "sensorTrigger": "cron",
+    "cronTrigger": {
+        "pattern": "* * * * * *",
+        "zoneId": "America/Los_Angeles",
+        "startDate": "2024-11-14T19:41:00Z",
+        "endDate": "2024-11-30T19:42:00Z",
+        "isDisabled": true
+    }
 }
 ```
 
