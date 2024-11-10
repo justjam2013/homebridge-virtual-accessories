@@ -45,6 +45,7 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
+    "@js-joda/core": "^5.6.3",
     "cron": "^3.1.9",
     "net-ping": "^1.2.4"
   },
