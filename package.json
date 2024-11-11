@@ -3,7 +3,6 @@
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
   "version": "1.0.0-beta.2",
-  "private": true,
   "description": "Virtual accessories for Homebridge.",
   "author": "justjam2013",
   "license": "Apache-2.0",

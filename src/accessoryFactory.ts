@@ -21,11 +21,15 @@ import { Trigger } from './trigger.js';
 import { PingTrigger } from './triggerPing.js';
 import { CronTrigger } from './triggerCron.js';
 
+// import { fs } from 'fs';
+
 /**
  * Virtual Accessory Factory
  * Factory class to create virtual accessories
  */
 export abstract class AccessoryFactory {
+
+  // static triggerMap = new Map<string, Trigger>();
 
   constructor(
   ) {
@@ -139,4 +143,16 @@ export abstract class AccessoryFactory {
 
     return trigger;
   }
+
+  // private static loadTriggers() {
+  //   const triggerFolder = './';    // './triggers/'
+
+  //   readdirSync(triggerFolder).forEach(triggerFile => {
+  //     //const trigger: Trigger = importSync(triggerFile);
+  //     // eslint-disable-next-line @typescript-eslint/no-require-imports
+  //     const DynamicTrigger = require( '../ruleValidator/').dynamicTrigger;
+  //     const trigger = new DynamicTrigger();
+  //     this.triggerMap.set(trigger.key, trigger);
+  //   });
+  // }
 }
