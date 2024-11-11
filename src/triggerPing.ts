@@ -1,11 +1,21 @@
-// import * as dns from 'dns';
-import net from 'net';
-import ping from 'net-ping';
-
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from './virtualSensor.js';
 
-let failures: number = 0;
+// import dns from 'dns';
+import net from 'net';
+import ping from 'net-ping';
+
+// Private wrapper class to pass failureCount by reference and allow 
+class Counter {
+
+  value: number = 0;
+
+  constructor(
+    value: number,
+  ) {
+    this.value = value;
+  }
+}
 
 export class PingTrigger extends Trigger {
 
@@ -13,18 +23,14 @@ export class PingTrigger extends Trigger {
   private IPv4: number = 4;
   private IPv6: number = 6;
 
-  private sensor: VirtualSensor;
-  private sensorConfig;
+  private failureCount = new Counter(0);
 
   private done: boolean = false;
 
   constructor(
     sensor: VirtualSensor,
   ) {
-    super();
-
-    this.sensor = sensor;
-    this.sensorConfig = this.sensor.accessory.context.deviceConfiguration;
+    super(sensor);
 
     const trigger = this.sensorConfig.pingTrigger;
     if (trigger.isDisabled) {
@@ -56,7 +62,7 @@ export class PingTrigger extends Trigger {
     const pingTimeoutMillis = 20 * 1000;    // trigger.pingTimeout: 20 seconds
     const intervalBetweenPingsMillis = 30 * 1000;   // trigger.intervalBetweenPings: 60 seconds
 
-    setInterval(this.ping, intervalBetweenPingsMillis, this.sensor, protocol, trigger.host, pingTimeoutMillis, trigger.failureRetryCount);
+    setInterval(this.ping, intervalBetweenPingsMillis, this.sensor, protocol, trigger.host, pingTimeoutMillis, trigger.failureRetryCount, this.failureCount);
   }
 
   private ping(
@@ -65,6 +71,7 @@ export class PingTrigger extends Trigger {
     ipAddress: string,
     pingTimeoutMillis: number,
     failureRetryCount: number,
+    failureCount: Counter,
   ) {
     const options = {
       networkProtocol: protocol,
@@ -84,12 +91,12 @@ export class PingTrigger extends Trigger {
       if (error) {
         log.error(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
 
-        if (failures < Number.MAX_VALUE) {
-          failures++;
+        if (failureCount.value < Number.MAX_VALUE) {
+          failureCount.value++;
         }
 
-        log.info(`[${sensorConfig.accessoryName}] Failure count: ${failures}`);
-        if (failures === failureRetryCount) {
+        log.info(`[${sensorConfig.accessoryName}] Failure count: ${failureCount.value}`);
+        if (failureCount.value === failureRetryCount) {
           log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${failureRetryCount}. Triggering sensor`);
 
           sensor.setSensorState(sensor.OPEN_TRIGGERED);
@@ -97,11 +104,12 @@ export class PingTrigger extends Trigger {
       } else {
         log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (ms=${millis})`);
 
-        failures = 0;
+        failureCount.value = 0;
         sensor.setSensorState(sensor.CLOSED_NORMAL);
       }
+
+      session.close ();
     });
-    //session.close ();
   }
 
   // private async getIP(hostname: string) {
@@ -118,4 +126,6 @@ export class PingTrigger extends Trigger {
 
   //   return obj?.address;
   // }
-}  
+}
+
+export const dynamicTrigger = PingTrigger;

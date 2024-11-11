@@ -100,11 +100,15 @@ export abstract class VirtualSensor extends VirtualAccessory {
     return sensorState;
   }
 
+  /**
+   * This method is called by the trigger to trigger and reset the sensor
+   */
   setSensorState(sensorState: number) {
     this.states.SensorState = sensorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     this.service?.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+
+    this.platform.log.info(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
 
   protected getStateName(state: number): string {

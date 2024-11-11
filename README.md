@@ -261,4 +261,4 @@ The next release of the dependency used by Homebridge UI should implement the ab
 If you have problems, please feel free to open a ticket on GitHub. Please attach any log output to the a ticket, making
 sure to remove any sensitive information such as WiFi passwords.
 
-Please also feel free to open a ticket on GitHub if you have any enhancement suggestions.
+Also please feel free to open a ticket on GitHub if you have any enhancement suggestions.

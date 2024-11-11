@@ -18,6 +18,7 @@
         "title": "Accessories",
         "type": "array",
         "orderable": false,
+        "uniqueItemProperties": [ "accessoryID" ],
         "items": {
           "title": "Accessory",
           "type": "object",
@@ -294,23 +295,23 @@
                   "title": "Cron Pattern *",
                   "description": "Unix cron pattern (* * * * *)",
                   "type": "string",
-                  "pattern": "^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$"
+                  "pattern": "^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$"
                 },
                 "zoneId": {
-                  "title": "Zone Id *",
-                  "description": "IANA zone id ('America/Los_Angeles')",
+                  "title": "Zone Id",
+                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
-                "startDate": {
-                  "title": "Start Date",
-                  "description": "Start date (for recurring cron, ex: every 1st of the month)",
+                "startDateTime": {
+                  "title": "Start Date-Time",
+                  "description": "Start date and time",
                   "type": "string",
                   "format": "date-time"
                 },
-                "endDate": {
-                  "title": "End Date",
-                  "description": "End date (for recurring cron, ex: every 1st of the month)",
+                "endDateTime": {
+                  "title": "End Date-Time ",
+                  "description": "End date and time",
                   "type": "string",
                   "format": "date-time"
                 },
@@ -435,7 +436,7 @@
                 "required": [ "cronTrigger" ],
                 "properties": {
                   "cronTrigger": {
-                    "required": [ "pattern", "zoneId" ]
+                    "required": [ "pattern" ]
                   }
                 }
               }
