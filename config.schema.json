@@ -18,6 +18,7 @@
         "title": "Accessories",
         "type": "array",
         "orderable": false,
+        "uniqueItemProperties": [ "accessoryID" ],
         "items": {
           "title": "Accessory",
           "type": "object",
@@ -27,18 +28,17 @@
               "description": "Unique ID for the Accessory (do not modify once assigned)",
               "type": "string",
               "required": true,
-              "minLength": 4,
               "pattern": "^[A-Fa-f0-9\\-]{5,}$"
             },
             "accessoryName": {
               "title": "Accessory Name",
-              "description": "Accessory Name as it will be displayed in HomeKit",
+              "description": "Accessory name as it will be displayed in HomeKit",
               "type": "string",
               "required": true
             },
             "accessoryType": {
               "title": "Accessory Type",
-              "description": "Accessory Type",
+              "description": "Accessory type",
               "type": "string",
               "required": true,
               "oneOf": [
@@ -86,26 +86,9 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
-            "sensorType": {
-              "title": "Sensor Type *",
-              "description": "Sensor Type (critical notifications bypass Do Not Disturb)",
-              "type": "string",
-              "oneOf": [
-                { "title": "Contact", "enum": ["contact"] },
-                { "title": "Leak (critical)", "enum": ["leak"] },
-                { "title": "Motion", "enum": ["motion"] },
-                { "title": "Occupancy", "enum": ["occupancy"] },
-                { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                { "title": "Smoke (critical)", "enum": ["smoke"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
-              }
-            },
             "lockHardwareFinish": {
               "title": "Lock Hardware Finish *",
-              "description": "Color of the virtual HomeKey in the Wallet app",
+              "description": "Color of the virtual HomeKey card in the Wallet app",
               "type": "string",
               "oneOf": [
                 { "title": "Tan", "enum": ["tan"] },
@@ -125,6 +108,35 @@
               "maximum": 100,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
+            "sensorType": {
+              "title": "Sensor Type *",
+              "description": "Sensor type (Critical sensor notifications bypass Do Not Disturb)",
+              "type": "string",
+              "oneOf": [
+                { "title": "Contact", "enum": ["contact"] },
+                { "title": "Leak (critical)", "enum": ["leak"] },
+                { "title": "Motion", "enum": ["motion"] },
+                { "title": "Occupancy", "enum": ["occupancy"] },
+                { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
+                { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
+                { "title": "Smoke (critical)", "enum": ["smoke"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
+              }
+            },
+            "sensorTrigger": {
+              "title": "Sensor Trigger *",
+              "description": "Sensor trigger source",
+              "type": "string",
+              "oneOf": [
+                { "title": "Ping Host", "enum": ["ping"] },
+                { "title": "Cron Schedule", "enum": ["cron"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
               }
             },
             "accessoryIsStateful": {
@@ -178,7 +190,7 @@
                 },
                 "units": {
                   "title": "Timer Units *",
-                  "description": "Timer units",
+                  "description": "Reset timer units",
                   "type": "string",
                   "oneOf": [
                     { "title": "Seconds", "enum": ["seconds"] },
@@ -227,12 +239,12 @@
               "properties": {
                 "name": {
                   "title": "Sensor Name *",
-                  "description": "Sensor Name as it will be displayed in HomeKit",
+                  "description": "Sensor name as it will be displayed in HomeKit",
                   "type": "string"
                 },
                 "type": {
                   "title": "Sensor Type *",
-                  "description": "Sensor Type triggered by accessory state change (critical notifications bypass Do Not Disturb)",
+                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass Do Not Disturb)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
@@ -247,6 +259,70 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryHasCompanionSensor === true;"
+              }
+            },
+            "pingTrigger": {
+              "title": "Ping Host Trigger",
+              "type": "object",
+              "properties": {
+                "host": {
+                  "title": "Host *",
+                  "description": "IP address of host to ping (ex: 156.27.86.172)",
+                  "type": "string",
+                  "pattern": "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
+                },
+                "failureRetryCount": {
+                  "title": "Retries Before Faillure",
+                  "description": "Failed ping count before triggering the sensor",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "isDisabled": {
+                  "title": "Disable Ping Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'ping';"
+              }
+            },
+            "cronTrigger": {
+              "title": "Cron Schedule Trigger",
+              "type": "object",
+              "properties": {
+                "pattern": {
+                  "title": "Cron Pattern *",
+                  "description": "Unix cron pattern (* * * * *)",
+                  "type": "string",
+                  "pattern": "^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$"
+                },
+                "zoneId": {
+                  "title": "Zone Id",
+                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "type": "string",
+                  "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
+                },
+                "startDateTime": {
+                  "title": "Start Date-Time",
+                  "description": "Start date and time",
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "endDateTime": {
+                  "title": "End Date-Time ",
+                  "description": "End date and time",
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "isDisabled": {
+                  "title": "Disable Cron Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'cron';"
               }
             }
           },
@@ -329,6 +405,38 @@
                 "properties": {
                   "companionSensor": {
                     "required": [ "name", "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensorTrigger": { "const": "ping" }
+                },
+                "required": [ "sensorTrigger" ]
+              },
+              "then": {
+                "required": [ "pingTrigger" ],
+                "properties": {
+                  "pingTrigger": {
+                    "required": [ "host", "failureRetryCount" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensorTrigger": { "const": "cron" }
+                },
+                "required": [ "sensorTrigger" ]
+              },
+              "then": {
+                "required": [ "cronTrigger" ],
+                "properties": {
+                  "cronTrigger": {
+                    "required": [ "pattern" ]
                   }
                 }
               }

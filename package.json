@@ -31,7 +31,11 @@
     "virtual doorbell",
     "garage door",
     "virtual garage door",
-    "dummy"
+    "dummy",
+    "sensor",
+    "virtual sensor",
+    "ping sensor",
+    "cron sensor"
   ],
   "main": "dist/index.js",
   "engines": {
@@ -45,6 +49,8 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
+    "@js-joda/core": "^5.6.3",
+    "@js-joda/timezone": "^2.21.1",
     "cron": "^3.1.9",
     "net-ping": "^1.2.4"
   },

@@ -4,7 +4,7 @@ import { VirtualAccessoryPlatform } from './platform.js';
 import { VirtualSensor } from './virtualSensor.js';
 import { Timer } from './timer.js';
 
-import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
+import fs from 'fs';
 
 /**
  * Virtual Accessory
@@ -58,8 +58,8 @@ export abstract class VirtualAccessory {
     key: string,
   ): boolean | number {
     let contents = '{}';
-    if (existsSync(storagePath)) {
-      contents = readFileSync(storagePath, 'utf8');
+    if (fs.existsSync(storagePath)) {
+      contents = fs.readFileSync(storagePath, 'utf8');
     }
 
     const json = JSON.parse(contents);
@@ -75,7 +75,7 @@ export abstract class VirtualAccessory {
   ): void {
     // Overwrite the existing persistence file
     this.platform.log.debug(`[${this.device.accessoryName}] Saving state: ${key} ${value}`);
-    writeFileSync(
+    fs.writeFileSync(
       storagePath,
       JSON.stringify({
         [key]: value,
@@ -87,9 +87,9 @@ export abstract class VirtualAccessory {
   protected deleteState(
     storagePath: string,
   ) {
-    if (existsSync(storagePath)) {
+    if (fs.existsSync(storagePath)) {
       try {
-        unlinkSync(storagePath); 
+        fs.unlinkSync(storagePath); 
       } catch (err) {
         // For now ignore
       }

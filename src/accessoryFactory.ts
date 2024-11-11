@@ -17,6 +17,10 @@ import { VirtualSmokeSensor } from './virtualSensorSmoke.js';
 import { VirtualCarbonDioxideSensor } from './virtualSensorCarbonDioxide.js';
 import { VirtualCarbonMonoxideSensor } from './virtualSensorCarbonMonoxide.js';
 
+import { Trigger } from './trigger.js';
+import { PingTrigger } from './triggerPing.js';
+import { CronTrigger } from './triggerCron.js';
+
 /**
  * Virtual Accessory Factory
  * Factory class to create virtual accessories
@@ -31,13 +35,13 @@ export abstract class AccessoryFactory {
   static createVirtualAccessory(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
-    type: string,
+    accessoryType: string,
   ): VirtualAccessory | undefined {
     let virtualAccessory: VirtualAccessory | undefined;
 
     const accessoryConfig = accessory.context.deviceConfiguration;
 
-    switch (type) {
+    switch (accessoryType) {
     case 'switch':
       virtualAccessory = new VirtualSwitchAccessory(platform, accessory);
       break;
@@ -54,7 +58,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfig.sensorType);
       break;
     default:
-      platform.log.error('Error creating accessory. Invalid accessory type:', type);
+      platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
     }
 
     return virtualAccessory;
@@ -114,5 +118,25 @@ export abstract class AccessoryFactory {
     }
 
     return virtualSensor;
+  }
+
+  static createTrigger(
+    sensor: VirtualSensor,
+    triggerType: string,
+  ): Trigger | undefined {
+    let trigger: Trigger | undefined;
+
+    switch (triggerType) {
+    case 'ping':
+      trigger = new PingTrigger(sensor);
+      break;
+    case 'cron':
+      trigger = new CronTrigger(sensor);
+      break;
+    default:
+      sensor.platform.log.error('Error creating trigger. Invalid trigger type:', triggerType);
+    }
+
+    return trigger;
   }
 }

@@ -21,14 +21,18 @@
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches), as well as a few others.
 
-The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins.
+The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may are unmaintained and abandoned.
 
 This is work in progress, so new accessories will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
 
 -   Switch. Nobody can have too many switches! Allows you to create switches, normally on/off, stateful, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod paired in the Home app.
--   Garage Door. Will display a widget in CarPlay when you approach your home. Triggers a HomeKit notification when the accessory's state changes.
--   Lock. This was just low hanging fruit. Triggers a HomeKit notification when the accessory's state changes.
+-   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
+-   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes.
+-   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, with some types of notifications classified as `critical` by Homekit. Critical notifications are allowed to bypass Do Not Disturb and allowed to appear on CarPlay display. Sensors can be activated by different triggers. Currently, they options are:
+   - Host Ping trigger. Pings a network host and is actvated when the ping fails. The sensor resets when the ping is successful.
+   - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
+   - Switch trigger. To activate a sensor by a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing through the sensor with trigger switch path.
 
 ## Installation
 
@@ -195,6 +199,60 @@ Note:
 }
 ```
 
+### Sensor with ping trigger
+
+```json
+{
+    "accessoryID": "12345",
+    "accessoryName": "My Ping Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "contact",
+    "sensorTrigger": "ping",
+    "pingTrigger": {
+        "host": "192.168.0.200",
+        "failureRetryCount": 3,
+        "isDisabled": false
+    }
+}
+
+```
+
+### Sensor with cron trigger
+
+```json
+{
+    "accessoryID": "7878778",
+    "accessoryName": "Cron Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "leak",
+    "sensorTrigger": "cron",
+    "cronTrigger": {
+        "pattern": "* * * * * *",
+        "zoneId": "America/Los_Angeles",
+        "isDisabled": true
+    }
+}
+```
+
+### Sensor with cron trigger with start and end datetimes
+
+```json
+{
+    "accessoryID": "7878778",
+    "accessoryName": "Cron Sensor",
+    "accessoryType": "sensor",
+    "sensorType": "leak",
+    "sensorTrigger": "cron",
+    "cronTrigger": {
+        "pattern": "* * * * * *",
+        "zoneId": "America/Los_Angeles",
+        "startDate": "2024-11-14T19:41:00Z",
+        "endDate": "2024-11-30T19:42:00Z",
+        "isDisabled": true
+    }
+}
+```
+
 **Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI saves additional fields to the JSON config that may not be related by the particular accessory. This does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON.
 The next release of the dependency used by Homebridge UI should implement the ability to make fields conditionally required and the configuration will be updated to reflect that.
 
@@ -203,4 +261,4 @@ The next release of the dependency used by Homebridge UI should implement the ab
 If you have problems, please feel free to open a ticket on GitHub. Please attach any log output to the a ticket, making
 sure to remove any sensitive information such as WiFi passwords.
 
-Please also feel free to open a ticket on GitHub if you have any enhancement suggestions.
+Also please feel free to open a ticket on GitHub if you have any enhancement suggestions.

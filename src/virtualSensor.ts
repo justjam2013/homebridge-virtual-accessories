@@ -2,6 +2,8 @@ import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
 import { VirtualAccessory } from './virtualAccessory.js';
+import { AccessoryFactory } from './accessoryFactory.js';
+import { Trigger } from './trigger.js';
 
 /**
  * Platform Accessory
@@ -14,6 +16,8 @@ export abstract class VirtualSensor extends VirtualAccessory {
   private OFF: boolean = false;
 
   private sensorCharacteristic;
+
+  private trigger: Trigger | undefined;
 
   /**
    * These are just used to create a working example
@@ -79,6 +83,10 @@ export abstract class VirtualSensor extends VirtualAccessory {
      * can use the same subtype id.)
      */
 
+    // Trigger
+    if (this.device.sensorTrigger !== undefined) {
+      this.trigger = AccessoryFactory.createTrigger(this, this.device.sensorTrigger);
+    }
   }
 
   /**
@@ -92,11 +100,15 @@ export abstract class VirtualSensor extends VirtualAccessory {
     return sensorState;
   }
 
+  /**
+   * This method is called by the trigger to trigger and reset the sensor
+   */
   setSensorState(sensorState: number) {
     this.states.SensorState = sensorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     this.service?.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+
+    this.platform.log.info(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
 
   protected getStateName(state: number): string {

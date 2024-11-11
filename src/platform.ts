@@ -4,7 +4,7 @@ import { AccessoryFactory } from './accessoryFactory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
-import { existsSync, unlink } from 'fs';
+import fs from 'fs';
 
 /**
  * HomebridgePlatform
@@ -136,8 +136,8 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
         // Delete any stateful info, if it exists
         const storagePath = accessory.context.storagePath;
-        if (existsSync(storagePath)) {
-          unlink(storagePath, (err) => {
+        if (fs.existsSync(storagePath)) {
+          fs.unlink(storagePath, (err) => {
             if (err) {
               this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
             } else {
