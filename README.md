@@ -229,7 +229,7 @@ Note:
     "cronTrigger": {
         "pattern": "* * * * * *",
         "zoneId": "America/Los_Angeles",
-        "isDisabled": true
+        "isDisabled": false
     }
 }
 ```
@@ -246,9 +246,9 @@ Note:
     "cronTrigger": {
         "pattern": "* * * * * *",
         "zoneId": "America/Los_Angeles",
-        "startDate": "2024-11-14T19:41:00Z",
-        "endDate": "2024-11-30T19:42:00Z",
-        "isDisabled": true
+        "startDateTime": "2024-11-14T19:41:00Z",
+        "endDateTime": "2024-11-30T19:41:00Z",
+        "isDisabled": false
     }
 }
 ```
