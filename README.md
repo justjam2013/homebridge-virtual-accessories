@@ -30,9 +30,9 @@ This is work in progress, so new accessories will be added as needed or requeste
 -   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes.
 -   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, with some types of notifications classified as `critical` by Homekit. Critical notifications are allowed to bypass Do Not Disturb and allowed to appear on CarPlay display. Sensors can be activated by different triggers. Currently, they options are:
-   - Host Ping trigger. Pings a network host and is actvated when the ping fails. The sensor resets when the ping is successful.
-   - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-   - Switch trigger. To activate a sensor by a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing through the sensor with trigger switch path.
+    - Host Ping trigger. Pings a network host and is actvated when the ping fails. The sensor resets when the ping is successful.
+    - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
+    - Switch trigger. To activate a sensor by a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing through the sensor with trigger switch path.
 
 ## Installation
 
