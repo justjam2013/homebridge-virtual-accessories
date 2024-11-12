@@ -1,11 +1,17 @@
-import { Trigger } from './trigger.js';
-import { VirtualSensor } from './virtualSensor.js';
+import { Logging } from 'homebridge';
+
+import { Trigger, TriggerConfig } from './trigger.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 // import dns from 'dns';
 import net from 'net';
 import ping from 'net-ping';
+import transformer from 'class-transformer';
+import { Expose } from 'class-transformer';
 
-// Private wrapper class to pass failureCount by reference and allow 
+/**
+ *  Private wrapper class to pass failureCount by reference and allow 
+ */
 class Counter {
 
   value: number = 0;
@@ -17,6 +23,18 @@ class Counter {
   }
 }
 
+/**
+ * Trigger Configuration implementation for PingTrigger
+ */
+export class PingTriggerConfig extends TriggerConfig {
+  @Expose host!: string;
+  @Expose failureRetryCount!: number;
+  @Expose isDisabled: boolean = false;
+}
+
+/**
+ * PingTrigger - Trigger implementation
+ */
 export class PingTrigger extends Trigger {
 
   private NOT_IP: number = 0;
@@ -32,9 +50,10 @@ export class PingTrigger extends Trigger {
   ) {
     super(sensor);
 
-    const trigger = this.sensorConfig.pingTrigger;
+    const trigger: PingTriggerConfig = <PingTriggerConfig>this.config;
+
     if (trigger.isDisabled) {
-      this.sensor.platform.log.info(`[${this.sensorConfig.accessoryName}] Ping trigger is disabled`);
+      this.log.info(`[${this.sensorConfig.accessoryName}] Ping trigger is disabled`);
       return;
     }
 
@@ -54,19 +73,42 @@ export class PingTrigger extends Trigger {
       protocol = ping.NetworkProtocol.IPv6;
       break;
     default:
-      this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] Unkown or invalid IP protocol version: ${ipProtocolVersion}`);
+      this.log.error(`[${this.sensorConfig.accessoryName}] Unkown or invalid IP protocol version: ${ipProtocolVersion}`);
       return;
     }
-    this.sensor.platform.log.debug(`[${this.sensorConfig.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
     const pingTimeoutMillis = 20 * 1000;    // trigger.pingTimeout: 20 seconds
     const intervalBetweenPingsMillis = 30 * 1000;   // trigger.intervalBetweenPings: 60 seconds
 
-    setInterval(this.ping, intervalBetweenPingsMillis, this.sensor, protocol, trigger.host, pingTimeoutMillis, trigger.failureRetryCount, this.failureCount);
+    setInterval(
+      this.ping, intervalBetweenPingsMillis,
+      this.sensor,
+      this.log,
+      protocol,
+      trigger.host,
+      pingTimeoutMillis,
+      trigger.failureRetryCount,
+      this.failureCount);
   }
+
+  /**
+   * Protected methods
+   */
+
+  // This needs to move to abstract superclass
+  protected transformConfig(sensorConfig): TriggerConfig {
+    const config: PingTriggerConfig = transformer.plainToInstance(PingTriggerConfig, sensorConfig.pingTrigger, { excludeExtraneousValues: true });
+    return config;
+  }
+
+  /**
+   * Private methods
+   */
 
   private ping(
     sensor: VirtualSensor,
+    log: Logging,
     protocol: string,
     ipAddress: string,
     pingTimeoutMillis: number,
@@ -82,7 +124,6 @@ export class PingTrigger extends Trigger {
       ttl: 128,
     };
 
-    const log = sensor.platform.log;
     const sensorConfig = sensor.accessory.context.deviceConfiguration;
 
     const session = ping.createSession(options);

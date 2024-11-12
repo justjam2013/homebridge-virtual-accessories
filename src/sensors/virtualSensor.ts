@@ -1,9 +1,9 @@
-import type { PlatformAccessory } from 'homebridge';
+import type { Logger, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
-import { AccessoryFactory } from './accessoryFactory.js';
-import { Trigger } from './trigger.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessory } from '../accessories/virtualAccessory.js';
+import { AccessoryFactory } from '../accessoryFactory.js';
+import { Trigger } from '../triggers/trigger.js';
 
 /**
  * Platform Accessory
@@ -18,6 +18,8 @@ export abstract class VirtualSensor extends VirtualAccessory {
   private sensorCharacteristic;
 
   private trigger: Trigger | undefined;
+
+  protected log: Logger;
 
   /**
    * These are just used to create a working example
@@ -37,6 +39,8 @@ export abstract class VirtualSensor extends VirtualAccessory {
     super(platform, accessory);
 
     this.sensorCharacteristic = sensorCharacteristic;
+
+    this.log = this.platform.log;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -62,7 +66,7 @@ export abstract class VirtualSensor extends VirtualAccessory {
     }
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -95,7 +99,7 @@ export abstract class VirtualSensor extends VirtualAccessory {
   handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
+    this.log.debug(`[${this.device.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -108,7 +112,7 @@ export abstract class VirtualSensor extends VirtualAccessory {
 
     this.service?.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.platform.log.info(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.info(`[${this.device.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
 
   protected getStateName(state: number): string {

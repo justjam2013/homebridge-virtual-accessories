@@ -1,9 +1,9 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualAccessory } from './virtualAccessory.js';
-import { AccessoryFactory } from './accessoryFactory.js';
-import { Timer } from './timer.js';
+import { AccessoryFactory } from '../accessoryFactory.js';
+import { Timer } from '../timer.js';
 
 /**
  * Platform Accessory

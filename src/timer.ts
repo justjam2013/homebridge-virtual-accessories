@@ -1,5 +1,6 @@
 import { CharacteristicValue } from 'homebridge';
-import { VirtualAccessory } from './virtualAccessory';
+
+import { VirtualAccessory } from './accessories/virtualAccessory';
 
 export class Timer {
 

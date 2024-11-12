@@ -1,31 +1,35 @@
 import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
+// Accessories
+import { VirtualAccessory } from './accessories/virtualAccessory.js';
+import { VirtualSwitchAccessory } from './accessories/virtualAccessorySwitch.js';
+import { VirtualLockAccessory } from './accessories/virtualAccessoryLock.js';
+import { VirtualDoorbellAccessory } from './accessories/virtualAccessoryDoorbell.js';
+import { VirtualGarageDoorAccessory } from './accessories/virtualAccessoryGarageDoor.js';
+// Sensors
+import { VirtualSensor } from './sensors/virtualSensor.js';
+import { VirtualContactSensor } from './sensors/virtualSensorContact.js';
+import { VirtualLeakSensor } from './sensors/virtualSensorLeak.js';
+import { VirtualMotionSensor } from './sensors/virtualSensorMotion.js';
+import { VirtualOccupancySensor } from './sensors/virtualSensorOccupancy.js';
+import { VirtualSmokeSensor } from './sensors/virtualSensorSmoke.js';
+import { VirtualCarbonDioxideSensor } from './sensors/virtualSensorCarbonDioxide.js';
+import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
+// Triggers
+import { Trigger } from './triggers/trigger.js';
+import { PingTrigger } from './triggers/triggerPing.js';
+import { CronTrigger } from './triggers/triggerCron.js';
 
-import { VirtualAccessory } from './virtualAccessory.js';
-import { VirtualSwitchAccessory } from './virtualAccessorySwitch.js';
-import { VirtualLockAccessory } from './virtualAccessoryLock.js';
-import { VirtualDoorbellAccessory } from './virtualAccessoryDoorbell.js';
-import { VirtualGarageDoorAccessory } from './virtualAccessoryGarageDoor.js';
-
-import { VirtualSensor } from './virtualSensor.js';
-import { VirtualContactSensor } from './virtualSensorContact.js';
-import { VirtualLeakSensor } from './virtualSensorLeak.js';
-import { VirtualMotionSensor } from './virtualSensorMotion.js';
-import { VirtualOccupancySensor } from './virtualSensorOccupancy.js';
-import { VirtualSmokeSensor } from './virtualSensorSmoke.js';
-import { VirtualCarbonDioxideSensor } from './virtualSensorCarbonDioxide.js';
-import { VirtualCarbonMonoxideSensor } from './virtualSensorCarbonMonoxide.js';
-
-import { Trigger } from './trigger.js';
-import { PingTrigger } from './triggerPing.js';
-import { CronTrigger } from './triggerCron.js';
+// import { fs } from 'fs';
 
 /**
  * Virtual Accessory Factory
  * Factory class to create virtual accessories
  */
 export abstract class AccessoryFactory {
+
+  // static triggerMap = new Map<string, Trigger>();
 
   constructor(
   ) {
@@ -139,4 +143,16 @@ export abstract class AccessoryFactory {
 
     return trigger;
   }
+
+  // private static loadTriggers() {
+  //   const triggerFolder = './triggers/';
+
+  //   fs.readdirSync(triggerFolder).forEach(triggerFile => {
+  //     //const trigger: Trigger = importSync(triggerFile);
+  //     // eslint-disable-next-line @typescript-eslint/no-require-imports
+  //     const DynamicTrigger = require( '../ruleValidator/').dynamicTrigger;
+  //     const trigger = new DynamicTrigger();
+  //     this.triggerMap.set(trigger.key, trigger);
+  //   });
+  // }
 }
