@@ -62,12 +62,14 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
       this.log.debug('No configured accessories');
       configuredDevices = JSON.parse('[]');
     }
+    this.log.debug(`Found configured accessories: ${configuredDevices}`);
 
     // loop over the discovered devices and register each one if it has not already been registered
     for (const configuredDevice of configuredDevices) {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
+      this.log.debug(`Configured accessory: ${configuredDevice}`);
       const uuid = this.api.hap.uuid.generate(configuredDevice.accessoryID);
 
       // see if an accessory with the same uuid has already been registered and restored from
