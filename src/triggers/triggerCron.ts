@@ -2,7 +2,7 @@ import { DateTimeFormatter, Instant, LocalDateTime, ZonedDateTime, ZoneId } from
 import '@js-joda/timezone';
 
 import { Trigger } from './trigger.js';
-import { VirtualSensor } from './virtualSensor.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 import { CronJob } from 'cron';
 

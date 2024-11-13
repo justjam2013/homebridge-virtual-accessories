@@ -2,24 +2,24 @@ import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
 
-import { VirtualAccessory } from './virtualAccessory.js';
-import { VirtualSwitchAccessory } from './virtualAccessorySwitch.js';
-import { VirtualLockAccessory } from './virtualAccessoryLock.js';
-import { VirtualDoorbellAccessory } from './virtualAccessoryDoorbell.js';
-import { VirtualGarageDoorAccessory } from './virtualAccessoryGarageDoor.js';
+import { VirtualAccessory } from './accessories/virtualAccessory.js';
+import { VirtualSwitchAccessory } from './accessories/virtualAccessorySwitch.js';
+import { VirtualLockAccessory } from './accessories/virtualAccessoryLock.js';
+import { VirtualDoorbellAccessory } from './accessories/virtualAccessoryDoorbell.js';
+import { VirtualGarageDoorAccessory } from './accessories/virtualAccessoryGarageDoor.js';
 
-import { VirtualSensor } from './virtualSensor.js';
-import { VirtualContactSensor } from './virtualSensorContact.js';
-import { VirtualLeakSensor } from './virtualSensorLeak.js';
-import { VirtualMotionSensor } from './virtualSensorMotion.js';
-import { VirtualOccupancySensor } from './virtualSensorOccupancy.js';
-import { VirtualSmokeSensor } from './virtualSensorSmoke.js';
-import { VirtualCarbonDioxideSensor } from './virtualSensorCarbonDioxide.js';
-import { VirtualCarbonMonoxideSensor } from './virtualSensorCarbonMonoxide.js';
+import { VirtualSensor } from './sensors/virtualSensor.js';
+import { VirtualContactSensor } from './sensors/virtualSensorContact.js';
+import { VirtualLeakSensor } from './sensors/virtualSensorLeak.js';
+import { VirtualMotionSensor } from './sensors/virtualSensorMotion.js';
+import { VirtualOccupancySensor } from './sensors/virtualSensorOccupancy.js';
+import { VirtualSmokeSensor } from './sensors/virtualSensorSmoke.js';
+import { VirtualCarbonDioxideSensor } from './sensors/virtualSensorCarbonDioxide.js';
+import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
 
-import { Trigger } from './trigger.js';
-import { PingTrigger } from './triggerPing.js';
-import { CronTrigger } from './triggerCron.js';
+import { Trigger } from './triggers/trigger.js';
+import { PingTrigger } from './triggers/triggerPing.js';
+import { CronTrigger } from './triggers/triggerCron.js';
 
 /**
  * Virtual Accessory Factory

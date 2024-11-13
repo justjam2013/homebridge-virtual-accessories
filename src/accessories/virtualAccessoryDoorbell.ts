@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualAccessory } from './virtualAccessory.js';
 
 /**
