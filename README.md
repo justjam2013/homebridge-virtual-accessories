@@ -45,7 +45,7 @@ npm install -g homebridge-virtual-accessories
 ## Configuration
 
 You can configure the plugin from the Homebridge UI, or by ediiting the JSON configuration directly in the Homebridge JSON Config editor.
-In the UI, required fields will be marked with an asterist (*).
+In the UI, required fields will be marked with an asterisk (*).
 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
