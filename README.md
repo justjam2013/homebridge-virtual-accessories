@@ -39,7 +39,7 @@ This is work in progress, so new accessories will be added as needed or requeste
 You can install this plugin via the Homebridge UI or by typing:
 
 ```
-npm install -g homebridge-virtual-accessories
+npm install -g homebridge-virtual-accessories@latest
 ```
 
 ## Configuration
