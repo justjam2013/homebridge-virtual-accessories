@@ -1,6 +1,6 @@
 import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from './virtualSensor.js';
 
 /**
@@ -8,14 +8,14 @@ import { VirtualSensor } from './virtualSensor.js';
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class VirtualOccupancySensor extends VirtualSensor {
+export class VirtualContactSensor extends VirtualSensor {
 
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
     companionSensorName?: string,
   ) {
-    super(platform, accessory, platform.Service.OccupancySensor, platform.Characteristic.OccupancyDetected, companionSensorName);
+    super(platform, accessory, platform.Service.ContactSensor, platform.Characteristic.ContactSensorState, companionSensorName);
   }
 
   protected getStateName(state: number): string {
@@ -23,8 +23,8 @@ export class VirtualOccupancySensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
+    case this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
     default: { sensorStateName = state.toString();}
     }
 

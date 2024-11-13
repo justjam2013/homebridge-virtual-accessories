@@ -1,8 +1,8 @@
 import type { PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
-import { VirtualSensor } from './virtualSensor.js';
-import { Timer } from './timer.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Timer } from '../timer.js';
 
 import fs from 'fs';
 

@@ -1,4 +1,4 @@
-import { VirtualSensor } from './virtualSensor.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 export abstract class Trigger {
 

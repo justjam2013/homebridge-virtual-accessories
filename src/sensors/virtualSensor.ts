@@ -1,9 +1,9 @@
 import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
-import { AccessoryFactory } from './accessoryFactory.js';
-import { Trigger } from './trigger.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessory } from '../accessories/virtualAccessory.js';
+import { AccessoryFactory } from '../accessoryFactory.js';
+import { Trigger } from '../triggers/trigger.js';
 
 /**
  * Platform Accessory

@@ -1,6 +1,6 @@
 import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from './platform.js';
+import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from './virtualSensor.js';
 
 /**

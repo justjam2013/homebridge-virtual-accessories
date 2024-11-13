@@ -1,5 +1,5 @@
 import { Trigger } from './trigger.js';
-import { VirtualSensor } from './virtualSensor.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 // import dns from 'dns';
 import net from 'net';
