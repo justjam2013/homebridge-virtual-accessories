@@ -51,7 +51,9 @@
     "@js-joda/core": "^5.6.3",
     "@js-joda/timezone": "^2.21.1",
     "cron": "^3.1.9",
-    "net-ping": "^1.2.4"
+    "net-ping": "^1.2.4",
+    "reflect-metadata": "^0.2.2",
+    "typeserializer": "^0.2.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
