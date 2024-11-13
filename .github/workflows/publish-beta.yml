@@ -1,4 +1,4 @@
-name: Publish to NPM
+name: NPM publish beta
 
 on:
   release:
@@ -6,14 +6,16 @@ on:
 
 jobs:
   build:
+    if: "github.event.release.prerelease"
+
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
@@ -22,13 +24,6 @@ jobs:
         run: npm ci && npm run build
 
       - name: Publish package on NPM - Beta 📦
-        if: "!github.event.release.prerelease"
-        run: npm publish --tag latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish package on NPM - Latest 📦
-        if: "github.event.release.prerelease"
         run: npm publish --tag beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
