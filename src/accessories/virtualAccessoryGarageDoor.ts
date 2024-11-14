@@ -62,6 +62,7 @@ export class GarageDoor extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
+    // eslint-disable-next-line max-len
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${this.getStateName(this.states.GarageDoorState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorState));
     this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorState));
