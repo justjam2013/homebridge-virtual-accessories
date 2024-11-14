@@ -4,20 +4,21 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 import { DateTimeFormatter, Instant, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 import { CronJob } from 'cron';
+import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
 
 /**
  * CronTrigger - Trigger implementation
  */
 export class CronTrigger extends Trigger {
 
-  private cronJob;
+  private cronJob!: CronJob;
 
   constructor(
     sensor: VirtualSensor,
   ) {
     super(sensor);
 
-    const trigger = this.sensorConfig.cronTrigger;
+    const trigger: CronTriggerConfiguration = this.sensorConfig.cronTrigger;
 
     if (trigger.isDisabled) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger is disabled`);

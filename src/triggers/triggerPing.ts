@@ -7,6 +7,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 import net from 'net';
 import ping from 'net-ping';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { PingTriggerConfiguration } from '../configuration/configurationPingTrigger.js';
 
 /**
  *  Private wrapper class to pass failureCount by reference
@@ -40,7 +41,7 @@ export class PingTrigger extends Trigger {
   ) {
     super(sensor);
 
-    const trigger = this.sensorConfig.pingTrigger;
+    const trigger: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
 
     this.log.info(`[${this.sensorConfig.accessoryName}] PingTriggerConfig ${JSON.stringify(trigger)}`);
 
