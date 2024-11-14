@@ -1,15 +1,7 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { Accessory, AccessoryConfig } from './virtualAccessory.js';
-
-/**
- * LockConfig - Accessory Configuration implementation
- */
-export class LockConfig extends AccessoryConfig {
-  lockDefaultState!: string;
-  lockHardwareFinish!: string;
-}
+import { Accessory } from './virtualAccessory.js';
 
 /**
  * Lock - Accessory implementation

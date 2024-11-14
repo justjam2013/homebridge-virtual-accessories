@@ -1,6 +1,6 @@
 import { Logging } from 'homebridge';
 
-import { Trigger, TriggerConfig } from './trigger.js';
+import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 // import dns from 'dns';
@@ -22,20 +22,9 @@ class Counter {
 }
 
 /**
- * PingTriggerConfig - Trigger Configuration implementation
- */
-export class PingTriggerConfig extends TriggerConfig {
-  host!: string;
-  failureRetryCount!: number;
-  isDisabled: boolean = false;
-}
-
-/**
  * PingTrigger - Trigger implementation
  */
 export class PingTrigger extends Trigger {
-
-  static TriggerConfigName: string = 'pingTrigger';
 
   private NOT_IP: number = 0;
   private IPv4: number = 4;
@@ -48,9 +37,9 @@ export class PingTrigger extends Trigger {
   constructor(
     sensor: VirtualSensor,
   ) {
-    super(sensor, PingTrigger.TriggerConfigName, PingTriggerConfig);
+    super(sensor);
 
-    const trigger: PingTriggerConfig = <PingTriggerConfig>this.config;
+    const trigger = this.sensorConfig.pingTrigger;
 
     this.log.info(`[${this.sensorConfig.accessoryName}] PingTriggerConfig ${JSON.stringify(trigger)}`);
 
@@ -92,14 +81,6 @@ export class PingTrigger extends Trigger {
       pingTimeoutMillis,
       trigger.failureRetryCount,
       this.failureCount);
-  }
-
-  /**
-   * Protected methods
-   */
-
-  protected getConfigClass(): typeof TriggerConfig {
-    return PingTriggerConfig;
   }
 
   /**

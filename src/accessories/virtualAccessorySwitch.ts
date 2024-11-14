@@ -1,16 +1,9 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { Accessory, AccessoryConfig } from './virtualAccessory.js';
+import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
-
-/**
- * SwitchConfig - Accessory Configuration implementation
- */
-export class SwitchConfig extends AccessoryConfig {
-  switchDefaultState!: string;
-}
 
 /**
  * Switch - Accessory implementation

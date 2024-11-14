@@ -7,18 +7,6 @@ import { Timer } from '../timer.js';
 import fs from 'fs';
 
 /**
- * Abstract Accessory Configuration
- */
-export abstract class AccessoryConfig {
-  accessoryID!: string;
-  accessoryName!: string;
-  accessoryType!: string;
-  accessoryIsStateful: boolean = false;
-  accessoryHasResetTimer: boolean = false;
-  accessoryHasCompanionSensor: boolean = false;
-}
-
-/**
  * Abstract Accessory
  */
 export abstract class Accessory {
@@ -31,6 +19,7 @@ export abstract class Accessory {
   readonly OPEN_TRIGGERED: number = 1;
 
   readonly device;
+
   protected isStateful;
   protected defaultState;
   protected hasResetTimer;
@@ -63,6 +52,10 @@ export abstract class Accessory {
       this.deleteState(this.storagePath);
     }
   }
+
+  /**
+   * Protected methods
+   */
 
   protected loadState(
     storagePath: string,

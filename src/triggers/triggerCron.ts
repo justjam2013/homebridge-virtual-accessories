@@ -1,4 +1,4 @@
-import { Trigger, TriggerConfig } from './trigger.js';
+import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 import { DateTimeFormatter, Instant, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
@@ -6,31 +6,17 @@ import '@js-joda/timezone';
 import { CronJob } from 'cron';
 
 /**
- * CronTriggerConfig - Trigger Configuration implementation
- */
-export class CronTriggerConfig extends TriggerConfig {
-  pattern!: string;
-  zoneId: string  | undefined;
-  startDateTime: string  | undefined;
-  endDateTime: string | undefined;
-  isDisabled: boolean = false;
-}
-
-/**
  * CronTrigger - Trigger implementation
  */
 export class CronTrigger extends Trigger {
-
-  static TriggerConfigName: string = 'cronTrigger';
 
   private cronJob;
 
   constructor(
     sensor: VirtualSensor,
   ) {
-    super(sensor, CronTrigger.TriggerConfigName, CronTriggerConfig);
+    super(sensor);
 
-    // const trigger: CronTriggerConfig = <CronTriggerConfig>this.config;
     const trigger = this.sensorConfig.cronTrigger;
 
     if (trigger.isDisabled) {
@@ -119,14 +105,6 @@ export class CronTrigger extends Trigger {
       timeZone,                 // timeZone
     );
     this.cronJob.start();
-  }
-
-  /**
-   * Protected methods
-   */
-
-  protected getConfigClass(): typeof TriggerConfig {
-    return CronTriggerConfig;
   }
 
   /**

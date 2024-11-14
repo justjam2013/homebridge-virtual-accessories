@@ -1,14 +1,7 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { Accessory, AccessoryConfig } from './virtualAccessory.js';
-
-/**
- * DoorbellConfig - Accessory Configuration implementation
- */
-export class DoorbellConfig extends AccessoryConfig {
-  doorbellVolume!: number;
-}
+import { Accessory } from './virtualAccessory.js';
 
 /**
  * Doorbell - Accessory implementation

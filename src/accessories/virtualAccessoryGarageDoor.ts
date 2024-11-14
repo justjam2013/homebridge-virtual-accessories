@@ -1,14 +1,7 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { Accessory, AccessoryConfig } from './virtualAccessory.js';
-
-/**
- * GarageDoorConfig - Accessory Configuration implementation
- */
-export class GarageDoorConfig extends AccessoryConfig {
-  garageDoorDefaultState!: string;
-}
+import { Accessory } from './virtualAccessory.js';
 
 /**
  * GarageDoor - Accessory implementation
