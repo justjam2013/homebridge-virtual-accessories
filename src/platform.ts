@@ -1,5 +1,7 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
+import { Configuration } from './configuration/configuration.js';
+import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 import { AccessoryFactory } from './accessoryFactory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
@@ -59,18 +61,20 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     let configuredDevices = this.config.devices;
 
     if (configuredDevices === undefined) {
-      this.log.debug('No configured accessories');
+      this.log.info('No configured accessories');
       configuredDevices = JSON.parse('[]');
     }
-    this.log.debug(`Found configured accessories: ${configuredDevices}`);
+    this.log.debug(`Found ${configuredDevices.length} configured accessories: ${JSON.stringify(configuredDevices)}`);
+
+    const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
+    this.log.debug(`Deserialized accessories: ${JSON.stringify(configuredAccessories)}`);
 
     // loop over the discovered devices and register each one if it has not already been registered
-    for (const configuredDevice of configuredDevices) {
+    for (const configuredAccessory of configuredAccessories) {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      this.log.debug(`Configured accessory: ${configuredDevice}`);
-      const uuid = this.api.hap.uuid.generate(configuredDevice.accessoryID);
+      const uuid = this.api.hap.uuid.generate(configuredAccessory.accessoryID);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -81,7 +85,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         this.log.info(`Restoring existing accessory: ${existingAccessory.displayName}`);
 
         // update the device configuration in the `accessory.context`
-        existingAccessory.context.deviceConfiguration = configuredDevice;
+        existingAccessory.context.deviceConfiguration = configuredAccessory;
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
@@ -89,7 +93,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredDevice.accessoryType);
+        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error restoring existing accessory: ${existingAccessory.displayName}`);
         }
@@ -100,24 +104,24 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
       } else {
         // the accessory does not yet exist, so we need to create it
-        this.log.info(`Adding new accessory: ${configuredDevice.accessoryName}`);
+        this.log.info(`Adding new accessory: ${configuredAccessory.accessoryName}`);
 
         // create a new accessory
-        const accessory = new this.api.platformAccessory(configuredDevice.accessoryName, uuid);
+        const accessory = new this.api.platformAccessory(configuredAccessory.accessoryName, uuid);
 
         // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.deviceConfiguration = configuredDevice;
+        accessory.context.deviceConfiguration = configuredAccessory;
 
-        const storagePath = path.join(this.api.user.persistPath(), `VA4HB_${configuredDevice.accessoryID}.json`);
+        const storagePath = path.join(this.api.user.persistPath(), `VA4HB_${configuredAccessory.accessoryID}.json`);
         accessory.context.storagePath = storagePath;
         this.log.debug(`Storage path if stateful accessory: ${storagePath}`);
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, accessory, configuredDevice.accessoryType);
+        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
-          this.log.error(`Error adding new accessory: ${configuredDevice.accessoryName}`);
+          this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
         } else {
           // link the accessory to your platform
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -149,5 +153,34 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         }
       }
     }
+  }
+
+  private deserializeConfiguredAccessories(
+    configuredDevices,
+  ): AccessoryConfiguration[] {
+    const accessoryConfigurations: AccessoryConfiguration[] = [];
+    for (const configuredDevice of configuredDevices) {
+      // Deserialize accessory configuration
+      const configuration: Configuration = new Configuration(this.log);
+      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeConfig(configuredDevice);
+
+      // Skip accessory if the configuration is invalid
+      if (accessoryConfiguration === undefined) {
+        this.log.error(`Error deserializing: ${JSON.stringify(configuredDevice)}`);
+        this.log.info('Skipping accessory until configuration is fixed');
+      } else {
+        this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
+
+        const isValidAccessoryConfig: boolean = accessoryConfiguration.isValid();
+        if (!isValidAccessoryConfig) {
+          this.log.error(`Skipping accessory. Configuration is invalid: ${JSON.stringify(accessoryConfiguration)}`);
+        } else {
+          this.log.debug(`Configuration is valid: ${JSON.stringify(accessoryConfiguration)}`);
+          accessoryConfigurations.push(accessoryConfiguration);
+        }
+      }
+    }
+
+    return accessoryConfigurations;
   }
 }

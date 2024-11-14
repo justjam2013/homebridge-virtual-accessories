@@ -272,7 +272,7 @@
                   "pattern": "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
                 },
                 "failureRetryCount": {
-                  "title": "Retries Before Faillure",
+                  "title": "Retries Before Failure *",
                   "description": "Failed ping count before triggering the sensor",
                   "type": "number",
                   "minimum": 0

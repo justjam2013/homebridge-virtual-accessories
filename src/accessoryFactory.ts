@@ -2,11 +2,11 @@ import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from './platform.js';
 
-import { VirtualAccessory } from './accessories/virtualAccessory.js';
-import { VirtualSwitchAccessory } from './accessories/virtualAccessorySwitch.js';
-import { VirtualLockAccessory } from './accessories/virtualAccessoryLock.js';
-import { VirtualDoorbellAccessory } from './accessories/virtualAccessoryDoorbell.js';
-import { VirtualGarageDoorAccessory } from './accessories/virtualAccessoryGarageDoor.js';
+import { Accessory } from './accessories/virtualAccessory.js';
+import { Switch } from './accessories/virtualAccessorySwitch.js';
+import { Lock } from './accessories/virtualAccessoryLock.js';
+import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
+import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
 
 import { VirtualSensor } from './sensors/virtualSensor.js';
 import { VirtualContactSensor } from './sensors/virtualSensorContact.js';
@@ -20,6 +20,7 @@ import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxi
 import { Trigger } from './triggers/trigger.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { CronTrigger } from './triggers/triggerCron.js';
+import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
 /**
  * Virtual Accessory Factory
@@ -36,26 +37,26 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
     accessoryType: string,
-  ): VirtualAccessory | undefined {
-    let virtualAccessory: VirtualAccessory | undefined;
+  ): Accessory | undefined {
+    let virtualAccessory: Accessory | undefined;
 
-    const accessoryConfig = accessory.context.deviceConfiguration;
+    const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
     case 'switch':
-      virtualAccessory = new VirtualSwitchAccessory(platform, accessory);
+      virtualAccessory = new Switch(platform, accessory);
       break;
     case 'lock':
-      virtualAccessory = new VirtualLockAccessory(platform, accessory);
+      virtualAccessory = new Lock(platform, accessory);
       break;
     case 'doorbell':
-      virtualAccessory = new VirtualDoorbellAccessory(platform, accessory);
+      virtualAccessory = new Doorbell(platform, accessory);
       break;
     case 'garagedoor':
-      virtualAccessory = new VirtualGarageDoorAccessory(platform, accessory);
+      virtualAccessory = new GarageDoor(platform, accessory);
       break;
     case 'sensor':
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfig.sensorType);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
       break;
     default:
       platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);

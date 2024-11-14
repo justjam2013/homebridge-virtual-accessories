@@ -1,14 +1,12 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
+import { Accessory } from './virtualAccessory.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * GarageDoor - Accessory implementation
  */
-export class VirtualGarageDoorAccessory extends VirtualAccessory {
+export class GarageDoor extends Accessory {
   
   private OPEN: number = this.platform.Characteristic.CurrentDoorState.OPEN;        // 0
   private CLOSED: number = this.platform.Characteristic.CurrentDoorState.CLOSED;    // 1
@@ -34,10 +32,10 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.device.garageDoorDefaultState === 'open' ? this.OPEN : this.CLOSED;
+    this.defaultState = this.accessoryConfiguration.garageDoorDefaultState === 'open' ? this.OPEN : this.CLOSED;
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
-    if (this.isStateful) {
+    if (this.accessoryConfiguration.accessoryIsStateful) {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
 
       if (cachedState !== undefined) {
@@ -61,10 +59,11 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.device.accessoryName);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.device.accessoryName}] Setting Garage Door Current State: ${this.getStateName(this.states.GarageDoorState)}`);
+    // eslint-disable-next-line max-len
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${this.getStateName(this.states.GarageDoorState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorState));
     this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorState));
 
@@ -104,7 +103,7 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     // implement your own code to check if the device is on
     const garageDoorState = this.states.GarageDoorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Current Door State: ${this.getStateName(garageDoorState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${this.getStateName(garageDoorState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -121,11 +120,11 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     this.states.GarageDoorState = value as number;
 
     // Store device state if stateful
-    if (this.isStateful) {
+    if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.GarageDoorState);
     }
 
-    this.platform.log.info(`[${this.device.accessoryName}] Setting Target Door State: ${this.getStateName(this.states.GarageDoorState)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${this.getStateName(this.states.GarageDoorState)}`);
   }
 
   /**
@@ -145,7 +144,7 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     // implement your own code to check if the device is on
     const garageDoorState = this.states.GarageDoorState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Target Door State: ${this.getStateName(garageDoorState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${this.getStateName(garageDoorState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -160,7 +159,7 @@ export class VirtualGarageDoorAccessory extends VirtualAccessory {
     // implement your own code to check if the device is on
     const obstructionDetected = this.states.ObstructionDetected;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);

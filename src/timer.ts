@@ -1,24 +1,24 @@
 import { CharacteristicValue } from 'homebridge';
-import { VirtualAccessory } from './accessories/virtualAccessory';
+import { Accessory } from './accessories/virtualAccessory';
 
 export class Timer {
 
   private timerId: ReturnType<typeof setTimeout> | undefined;
 
   private config;
-  private virtualAccessory: VirtualAccessory;
+  private virtualAccessory: Accessory;
   private resetValue: CharacteristicValue;
   private characteristic;
 
   private duration: number;
 
   constructor(
-    virtualAccessory: VirtualAccessory,
+    virtualAccessory: Accessory,
     resetValue: CharacteristicValue,
     characteristic,
   ) {
     this.virtualAccessory = virtualAccessory;
-    this.config = this.virtualAccessory.device.resetTimer;
+    this.config = this.virtualAccessory.accessoryConfiguration.resetTimer;
     this.resetValue = resetValue;
     this.characteristic = characteristic;
 
