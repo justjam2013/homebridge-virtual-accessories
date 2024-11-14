@@ -5,6 +5,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 
 import fs from 'fs';
+import { AccessoryConfiguration } from '../configuration.js';
 
 /**
  * Abstract Accessory
@@ -18,12 +19,9 @@ export abstract class Accessory {
   readonly CLOSED_NORMAL: number = 0;
   readonly OPEN_TRIGGERED: number = 1;
 
-  readonly device;
+  readonly accessoryConfiguration: AccessoryConfiguration;
 
-  protected isStateful;
   protected defaultState;
-  protected hasResetTimer;
-  protected hasCompanionSensor;
 
   protected storagePath: string;
 
@@ -37,18 +35,14 @@ export abstract class Accessory {
     this.accessory = accessory;
     this.platform = platform;
 
-    // The device configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
-    this.device = accessory.context.deviceConfiguration;
+    // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
+    this.accessoryConfiguration = accessory.context.deviceConfiguration;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
-
-    this.isStateful = this.device.accessoryIsStateful;
-    this.hasResetTimer = this.device.accessoryHasResetTimer;
-    this.hasCompanionSensor = this.device.accessoryHasCompanionSensor;
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
     this.storagePath = accessory.context.storagePath;
 
-    if (!this.isStateful) {
+    if (!this.accessoryConfiguration.accessoryIsStateful) {
       this.deleteState(this.storagePath);
     }
   }
@@ -68,7 +62,7 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Stored state: ${JSON.stringify(json)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Stored state: ${JSON.stringify(json)}`);
     return json[key];
   }
 
@@ -78,7 +72,7 @@ export abstract class Accessory {
     value: boolean | number,
   ): void {
     // Overwrite the existing persistence file
-    this.platform.log.debug(`[${this.device.accessoryName}] Saving state: ${key} ${value}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${key} ${value}`);
     fs.writeFileSync(
       storagePath,
       JSON.stringify({

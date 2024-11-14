@@ -1,6 +1,7 @@
 import { Logging } from 'homebridge';
 
 import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { AccessoryConfiguration } from '../configuration.js';
 
 /**
  * Abstract Trigger
@@ -8,7 +9,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 export abstract class Trigger {
 
   protected sensor: VirtualSensor;
-  protected sensorConfig;
+  protected sensorConfig: AccessoryConfiguration;
 
   protected log: Logging;
 
@@ -16,7 +17,7 @@ export abstract class Trigger {
     sensor: VirtualSensor,
   ) {
     this.sensor = sensor;
-    this.sensorConfig = this.sensor.accessory.context.deviceConfiguration;
+    this.sensorConfig = this.sensor.accessoryConfiguration;
 
     this.log = this.sensor.platform.log;
   }

@@ -29,9 +29,9 @@ export class Configuration {
 
 export class TimerConfiguration {
   durationIsRandom: boolean = false;
-  duration: number | undefined;
-  durationRandomMin: number | undefined;
-  durationRandomMax: number | undefined;
+  duration!: number;
+  durationRandomMin!: number;
+  durationRandomMax!: number;
   units!: string;
   isResettable: boolean = false;
 
@@ -81,9 +81,9 @@ export class PingTriggerConfiguration {
 
 export class CronTriggerConfiguration {
   pattern!: string;
-  zoneId: string | undefined;
-  startDateTime: string | undefined;
-  endDateTime: string | undefined;
+  zoneId!: string;
+  startDateTime!: string;
+  endDateTime!: string;
   isDisabled: boolean = false;
 
   isValid(): boolean {
@@ -110,35 +110,35 @@ export class AccessoryConfiguration {
   accessoryHasCompanionSensor: boolean = false;
 
   // Switch
-  switchDefaultState: string | undefined;
+  switchDefaultState!: string;
 
   // Lock required
-  lockDefaultState: string | undefined;
-  lockHardwareFinish: string | undefined;
+  lockDefaultState!: string;
+  lockHardwareFinish!: string;
 
   // Garage Door
-  garageDoorDefaultState: string | undefined;
+  garageDoorDefaultState!: string;
 
   // Doorbell
-  doorbellVolume: number | undefined;
+  doorbellVolume!: number;
 
   // Sensor
-  sensorType: string | undefined;
-  sensorTrigger: string | undefined;
+  sensorType!: string;
+  sensorTrigger!: string;
 
   // Reset timer
   @Type(TimerConfiguration)
-    resetTimer: TimerConfiguration | undefined;
+    resetTimer!: TimerConfiguration;
 
   // Companion Sensor
   @Type(CompanionSensorConfiguration)
-    companionSensor: CompanionSensorConfiguration | undefined;
+    companionSensor!: CompanionSensorConfiguration;
 
   // Triggers
   @Type(PingTriggerConfiguration)
-    pingTrigger: PingTriggerConfiguration | undefined;
+    pingTrigger!: PingTriggerConfiguration;
   @Type(CronTriggerConfiguration)
-    cronTrigger: CronTriggerConfiguration | undefined;
+    cronTrigger!: CronTriggerConfiguration;
 
   isValid(): boolean {
     const isValidAccessoryID: boolean = (this.accessoryID !== undefined);

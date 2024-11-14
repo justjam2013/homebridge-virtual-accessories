@@ -18,7 +18,7 @@ export class Timer {
     characteristic,
   ) {
     this.virtualAccessory = virtualAccessory;
-    this.config = this.virtualAccessory.device.resetTimer;
+    this.config = this.virtualAccessory.accessoryConfiguration.resetTimer;
     this.resetValue = resetValue;
     this.characteristic = characteristic;
 

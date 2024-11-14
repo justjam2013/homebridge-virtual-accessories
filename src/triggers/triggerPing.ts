@@ -6,6 +6,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 // import dns from 'dns';
 import net from 'net';
 import ping from 'net-ping';
+import { AccessoryConfiguration } from '../configuration.js';
 
 /**
  *  Private wrapper class to pass failureCount by reference
@@ -105,7 +106,7 @@ export class PingTrigger extends Trigger {
       ttl: 128,
     };
 
-    const sensorConfig = sensor.accessory.context.deviceConfiguration;
+    const sensorConfig: AccessoryConfiguration = sensor.accessoryConfiguration;
 
     const session = ping.createSession(options);
     session.pingHost(ipAddress, (error, target: string, sent: number, rcvd: number) => {

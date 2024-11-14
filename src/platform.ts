@@ -76,14 +76,14 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         this.log.error(`Skipping accessory. Could not deserialize: ${JSON.stringify(configuredDevice)}`);
         continue;
       }
-      this.log.info(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
+      this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
 
       const isValidAccessoryConfig: boolean = accessoryConfiguration.isValid();
       if (!isValidAccessoryConfig) {
         this.log.error(`Skipping accessory. Configuration is invalid: ${JSON.stringify(accessoryConfiguration)}`);
         continue;
       }
-      this.log.info(`Configuration valid: ${JSON.stringify(accessoryConfiguration)}`);
+      this.log.debug(`Configuration valid: ${JSON.stringify(accessoryConfiguration)}`);
 
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
@@ -99,7 +99,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         this.log.info(`Restoring existing accessory: ${existingAccessory.displayName}`);
 
         // update the device configuration in the `accessory.context`
-        existingAccessory.context.deviceConfiguration = configuredDevice;
+        existingAccessory.context.deviceConfiguration = accessoryConfiguration;
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
@@ -125,7 +125,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
         // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.deviceConfiguration = configuredDevice;
+        accessory.context.deviceConfiguration = accessoryConfiguration;
 
         const storagePath = path.join(this.api.user.persistPath(), `VA4HB_${accessoryConfiguration.accessoryID}.json`);
         accessory.context.storagePath = storagePath;

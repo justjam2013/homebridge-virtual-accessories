@@ -27,7 +27,7 @@ export class Doorbell extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.states.Volume = this.device.doorbellVolume;
+    this.states.Volume = this.accessoryConfiguration.doorbellVolume;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -41,7 +41,7 @@ export class Doorbell extends Accessory {
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.device.accessoryName);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -76,7 +76,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const pressEvent = this.SINGLE_PRESS;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -90,7 +90,7 @@ export class Doorbell extends Accessory {
     // implement your own code to turn your device on/off
     this.states.Volume = value as number;
 
-    this.platform.log.info(`[${this.device.accessoryName}] Setting Volume to ${this.states.Volume}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume to ${this.states.Volume}`);
   }
 
   /**
@@ -110,7 +110,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const volume = this.states.Volume;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Volume: ${volume}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);

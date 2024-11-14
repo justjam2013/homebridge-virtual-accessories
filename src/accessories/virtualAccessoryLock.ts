@@ -30,10 +30,10 @@ export class Lock extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.device.lockDefaultState === 'unlocked' ? this.UNSECURED : this.SECURED;
+    this.defaultState = this.accessoryConfiguration.lockDefaultState === 'unlocked' ? this.UNSECURED : this.SECURED;
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
-    if (this.isStateful) {
+    if (this.accessoryConfiguration.accessoryIsStateful) {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
 
       if (cachedState !== undefined) {
@@ -50,7 +50,7 @@ export class Lock extends Accessory {
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
       .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Lock')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
-      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.device.lockHardwareFinish);
+      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.accessoryConfiguration.lockHardwareFinish);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -58,10 +58,10 @@ export class Lock extends Accessory {
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.device.accessoryName);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.device.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockState));
     this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockState));
 
@@ -109,7 +109,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Lock Current State: ${this.getStateName(lockState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Current State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -125,11 +125,11 @@ export class Lock extends Accessory {
     this.states.LockState = value as number;
 
     // Store device state if stateful
-    if (this.isStateful) {
+    if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.LockState);
     }
 
-    this.platform.log.info(`[${this.device.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
   }
 
   /**
@@ -149,7 +149,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockState;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting Lock Target State: ${this.getStateName(lockState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Target State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -161,7 +161,7 @@ export class Lock extends Accessory {
   async handleConfigurationStateGet(): Promise<CharacteristicValue> {
     const configurationState = 0;
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting NFC Configuration State: ${configurationState}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Configuration State: ${configurationState}`);
 
     return configurationState;
   }
@@ -169,13 +169,13 @@ export class Lock extends Accessory {
   async handleNFCAccessControlPointSet(value: CharacteristicValue) {
     const nfcAccessControlPoint = value;
 
-    this.platform.log.info(`[${this.device.accessoryName}] Setting NFC Access Control Point to ${nfcAccessControlPoint}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point to ${nfcAccessControlPoint}`);
   }
 
   async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
     const nFCAccessSupportedConfiguration = 'AQEQAgEQ';
 
-    this.platform.log.debug(`[${this.device.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
 
     return nFCAccessSupportedConfiguration;
   }

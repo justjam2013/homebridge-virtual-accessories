@@ -20,6 +20,7 @@ import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxi
 import { Trigger } from './triggers/trigger.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { CronTrigger } from './triggers/triggerCron.js';
+import { AccessoryConfiguration } from './configuration.js';
 
 /**
  * Virtual Accessory Factory
@@ -39,7 +40,7 @@ export abstract class AccessoryFactory {
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;
 
-    const accessoryConfig = accessory.context.deviceConfiguration;
+    const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
     case 'switch':
@@ -55,7 +56,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = new GarageDoor(platform, accessory);
       break;
     case 'sensor':
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfig.sensorType);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
       break;
     default:
       platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
