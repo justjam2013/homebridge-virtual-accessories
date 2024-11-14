@@ -7,10 +7,21 @@ import { Timer } from '../timer.js';
 import fs from 'fs';
 
 /**
- * Virtual Accessory
- * Abstract superclass for all virtual accessories and place to store common functionality
+ * Abstract Accessory Configuration
  */
-export abstract class VirtualAccessory {
+export abstract class AccessoryConfig {
+  accessoryID!: string;
+  accessoryName!: string;
+  accessoryType!: string;
+  accessoryIsStateful: boolean = false;
+  accessoryHasResetTimer: boolean = false;
+  accessoryHasCompanionSensor: boolean = false;
+}
+
+/**
+ * Abstract Accessory
+ */
+export abstract class Accessory {
   service?: Service;
 
   readonly platform: VirtualAccessoryPlatform;

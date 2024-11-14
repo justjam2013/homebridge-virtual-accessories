@@ -1,16 +1,21 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
+import { Accessory, AccessoryConfig } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * SwitchConfig - Accessory Configuration implementation
  */
-export class VirtualSwitchAccessory extends VirtualAccessory {
+export class SwitchConfig extends AccessoryConfig {
+  switchDefaultState!: string;
+}
+
+/**
+ * Switch - Accessory implementation
+ */
+export class Switch extends Accessory {
 
   private ON: boolean = true;
   private OFF: boolean = false;

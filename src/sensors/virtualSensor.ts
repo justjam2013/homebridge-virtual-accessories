@@ -1,7 +1,7 @@
 import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from '../accessories/virtualAccessory.js';
+import { Accessory } from '../accessories/virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from '../triggers/trigger.js';
 
@@ -10,7 +10,7 @@ import { Trigger } from '../triggers/trigger.js';
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export abstract class VirtualSensor extends VirtualAccessory {
+export abstract class VirtualSensor extends Accessory {
 
   private ON: boolean = true;
   private OFF: boolean = false;

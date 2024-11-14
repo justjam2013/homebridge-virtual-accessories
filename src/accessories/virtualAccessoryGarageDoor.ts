@@ -1,14 +1,19 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
+import { Accessory, AccessoryConfig } from './virtualAccessory.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * GarageDoorConfig - Accessory Configuration implementation
  */
-export class VirtualGarageDoorAccessory extends VirtualAccessory {
+export class GarageDoorConfig extends AccessoryConfig {
+  garageDoorDefaultState!: string;
+}
+
+/**
+ * GarageDoor - Accessory implementation
+ */
+export class GarageDoor extends Accessory {
   
   private OPEN: number = this.platform.Characteristic.CurrentDoorState.OPEN;        // 0
   private CLOSED: number = this.platform.Characteristic.CurrentDoorState.CLOSED;    // 1

@@ -1,14 +1,19 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
+import { Accessory, AccessoryConfig } from './virtualAccessory.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * DoorbellConfig - Accessory Configuration implementation
  */
-export class VirtualDoorbellAccessory extends VirtualAccessory {
+export class DoorbellConfig extends AccessoryConfig {
+  doorbellVolume!: number;
+}
+
+/**
+ * Doorbell - Accessory implementation
+ */
+export class Doorbell extends Accessory {
 
   private SINGLE_PRESS: number = this.platform.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS;  // 0
   private DOUBLE_PRESS: number = this.platform.Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS;  // 1

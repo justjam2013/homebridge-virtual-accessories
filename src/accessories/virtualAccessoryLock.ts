@@ -1,14 +1,20 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualAccessory } from './virtualAccessory.js';
+import { Accessory, AccessoryConfig } from './virtualAccessory.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * LockConfig - Accessory Configuration implementation
  */
-export class VirtualLockAccessory extends VirtualAccessory {
+export class LockConfig extends AccessoryConfig {
+  lockDefaultState!: string;
+  lockHardwareFinish!: string;
+}
+
+/**
+ * Lock - Accessory implementation
+ */
+export class Lock extends Accessory {
 
   private UNSECURED: number = this.platform.Characteristic.LockCurrentState.UNSECURED;  // 0
   private SECURED: number = this.platform.Characteristic.LockCurrentState.SECURED;      // 1
