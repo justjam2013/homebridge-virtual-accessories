@@ -1,103 +1,13 @@
-import { Logging } from 'homebridge';
+import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
+import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { PingTriggerConfiguration } from './configurationPingTrigger.js';
+import { TimerConfiguration } from './configurationTimer.js';
 
-import { deserialize, Type } from 'typeserializer';
-import 'reflect-metadata';
+import { Type } from 'typeserializer';
 
-export class Configuration {
-
-  private log: Logging;
-
-  constructor(
-    log: Logging,
-  ) {
-    this.log = log;
-  }
-
-  deserializeConfig(config: string | object): AccessoryConfiguration | undefined {
-    let accessoryConfig: AccessoryConfiguration | undefined;
-
-    const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
-    try {
-      accessoryConfig = deserialize(json, AccessoryConfiguration);
-    } catch (error) {
-      this.log.error(`[Configuration] Error: ${JSON.stringify(error)}`);
-    }
-
-    return accessoryConfig;
-  }
-}
-
-export class TimerConfiguration {
-  durationIsRandom: boolean = false;
-  duration!: number;
-  durationRandomMin!: number;
-  durationRandomMax!: number;
-  units!: string;
-  isResettable: boolean = false;
-
-  isValid(): boolean {
-    const validUnits: boolean = (this.units !== undefined);
-    const validDuration: boolean = (
-      this.durationIsRandom === false ?
-        (
-          (this.duration !== undefined) &&
-          (this.duration >= 0)
-        ) :
-        (
-          (this.durationRandomMin !== undefined && this.durationRandomMax !== undefined) &&
-          (this.durationRandomMin >= 0 && this.durationRandomMax >= 0) &&
-          (this.durationRandomMin < this.durationRandomMax)
-        )
-    );
-
-    return (validUnits && validDuration);
-  }
-}
-
-export class CompanionSensorConfiguration {
-  name!: string;
-  type!: string;
-
-  isValid(): boolean {
-    const validName: boolean = (this.name !== undefined);
-    const validType: boolean = (this.type !== undefined);
-
-    return (validName && validType);
-  }
-}
-
-export class PingTriggerConfiguration {
-  host!: string;
-  failureRetryCount!: number;
-  isDisabled: boolean = false;
-
-  isValid(): boolean {
-    const validHost: boolean = (this.host !== undefined);
-    const validFailureRetryCount: boolean = (this.failureRetryCount !== undefined);
-
-    return (validHost && validFailureRetryCount);
-  }
-}
-
-export class CronTriggerConfiguration {
-  pattern!: string;
-  zoneId!: string;
-  startDateTime!: string;
-  endDateTime!: string;
-  isDisabled: boolean = false;
-
-  isValid(): boolean {
-    const validPattern: boolean = (this.pattern !== undefined);
-    const validExecutionRangeDateTime: boolean = (
-      (this.startDateTime === undefined && this.endDateTime === undefined) ||
-      (this.startDateTime !== undefined && this.endDateTime !== undefined)
-    );
-    // Add start date before end date validation
-
-    return (validPattern && validExecutionRangeDateTime);
-  }
-}
-
+/**
+ * 
+ */
 export class AccessoryConfiguration {
   // Required
   accessoryID!: string;

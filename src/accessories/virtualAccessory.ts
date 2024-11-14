@@ -5,7 +5,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 
 import fs from 'fs';
-import { AccessoryConfiguration } from '../configuration.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
 /**
  * Abstract Accessory

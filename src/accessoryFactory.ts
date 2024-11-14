@@ -20,7 +20,7 @@ import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxi
 import { Trigger } from './triggers/trigger.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { CronTrigger } from './triggers/triggerCron.js';
-import { AccessoryConfiguration } from './configuration.js';
+import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
 /**
  * Virtual Accessory Factory

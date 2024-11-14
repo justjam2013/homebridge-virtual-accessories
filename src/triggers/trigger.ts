@@ -1,7 +1,7 @@
 import { Logging } from 'homebridge';
 
 import { VirtualSensor } from '../sensors/virtualSensor.js';
-import { AccessoryConfiguration } from '../configuration.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
 /**
  * Abstract Trigger

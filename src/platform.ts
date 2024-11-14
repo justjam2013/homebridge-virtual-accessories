@@ -1,11 +1,12 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
+import { Configuration } from './configuration/configuration.js';
+import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 import { AccessoryFactory } from './accessoryFactory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
 import fs from 'fs';
-import { AccessoryConfiguration, Configuration } from './configuration.js';
 
 /**
  * HomebridgePlatform

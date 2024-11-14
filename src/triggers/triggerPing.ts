@@ -6,7 +6,7 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
 // import dns from 'dns';
 import net from 'net';
 import ping from 'net-ping';
-import { AccessoryConfiguration } from '../configuration.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
 /**
  *  Private wrapper class to pass failureCount by reference
