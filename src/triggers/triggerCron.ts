@@ -21,14 +21,17 @@ export class CronTriggerConfig extends TriggerConfig {
  */
 export class CronTrigger extends Trigger {
 
+  static TriggerConfigName: string = 'cronTrigger';
+
   private cronJob;
 
   constructor(
     sensor: VirtualSensor,
   ) {
-    super(sensor);
+    super(sensor, CronTrigger.TriggerConfigName, CronTriggerConfig);
 
-    const trigger: CronTriggerConfig = <CronTriggerConfig>this.config;
+    // const trigger: CronTriggerConfig = <CronTriggerConfig>this.config;
+    const trigger = this.sensorConfig.cronTrigger;
 
     if (trigger.isDisabled) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger is disabled`);
@@ -122,7 +125,7 @@ export class CronTrigger extends Trigger {
    * Protected methods
    */
 
-  protected getConfigClass(): TriggerConfig {
+  protected getConfigClass(): typeof TriggerConfig {
     return CronTriggerConfig;
   }
 

@@ -35,6 +35,8 @@ export class PingTriggerConfig extends TriggerConfig {
  */
 export class PingTrigger extends Trigger {
 
+  static TriggerConfigName: string = 'pingTrigger';
+
   private NOT_IP: number = 0;
   private IPv4: number = 4;
   private IPv6: number = 6;
@@ -46,7 +48,7 @@ export class PingTrigger extends Trigger {
   constructor(
     sensor: VirtualSensor,
   ) {
-    super(sensor);
+    super(sensor, PingTrigger.TriggerConfigName, PingTriggerConfig);
 
     const trigger: PingTriggerConfig = <PingTriggerConfig>this.config;
 
@@ -84,6 +86,7 @@ export class PingTrigger extends Trigger {
     setInterval(
       this.ping, intervalBetweenPingsMillis,
       this.sensor,
+      this.log,
       protocol,
       trigger.host,
       pingTimeoutMillis,
@@ -95,7 +98,7 @@ export class PingTrigger extends Trigger {
    * Protected methods
    */
 
-  protected getConfigClass(): TriggerConfig {
+  protected getConfigClass(): typeof TriggerConfig {
     return PingTriggerConfig;
   }
 

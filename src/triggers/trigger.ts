@@ -23,29 +23,26 @@ export abstract class Trigger {
 
   constructor(
     sensor: VirtualSensor,
+    triggerConfigName: string,
+    triggerConfigClass: TriggerConfig,
   ) {
     this.sensor = sensor;
     this.sensorConfig = this.sensor.accessory.context.deviceConfiguration;
 
     this.log = this.sensor.platform.log;
 
-    this.config = this.deserializeConfig(this.sensorConfig);
+    this.config = this.deserializeConfig(this.sensorConfig[triggerConfigName], triggerConfigClass);
   }
-
-  /**
-   * Protected methods
-   */
-
-  protected abstract getConfigClass(): TriggerConfig;
 
   /**
    * Private methods
    */
 
-  private deserializeConfig(sensorConfig): TriggerConfig {
-    const configClass = this.getConfigClass();
-    const config: TriggerConfig = deserialize(sensorConfig, configClass);
+  private deserializeConfig(triggerConfig, triggerConfigClass: TriggerConfig): TriggerConfig {
+    // const configClass = this.getConfigClass();
+    const json = JSON.stringify(triggerConfig);
+    // const config: TriggerConfig = deserialize(json, configClass);
+    const config: TriggerConfig = deserialize(json, triggerConfigClass);
     return config;
   }
-
 }
