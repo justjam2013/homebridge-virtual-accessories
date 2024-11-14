@@ -31,18 +31,16 @@ export abstract class Trigger {
 
     this.log = this.sensor.platform.log;
 
-    this.config = this.deserializeConfig(this.sensorConfig[triggerConfigName], triggerConfigClass);
+    this.config = this.deserializeTriggerConfig(this.sensorConfig[triggerConfigName], triggerConfigClass);
   }
 
   /**
    * Private methods
    */
 
-  private deserializeConfig(triggerConfig, triggerConfigClass: TriggerConfig): TriggerConfig {
-    // const configClass = this.getConfigClass();
-    const json = JSON.stringify(triggerConfig);
-    // const config: TriggerConfig = deserialize(json, configClass);
-    const config: TriggerConfig = deserialize(json, triggerConfigClass);
-    return config;
+  private deserializeTriggerConfig(config, configClass: TriggerConfig): TriggerConfig {
+    const json = JSON.stringify(config);
+    const triggerConfig: TriggerConfig = deserialize(json, configClass);
+    return triggerConfig;
   }
 }
