@@ -15,7 +15,7 @@ export class Doorbell extends Accessory {
   static readonly DOUBLE_PRESS: number = 1;  // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS
   static readonly LONG_PRESS: number = 2;    // Characteristic.ProgrammableSwitchEvent.LONG_PRESS;
 
-  private timerId: ReturnType<typeof setTimeout> | undefined;
+  private companionSensorResetTimerId: ReturnType<typeof setTimeout> | undefined;
 
   /**
    * These are just used to create a working example
@@ -144,31 +144,33 @@ export class Doorbell extends Accessory {
     if (newState === Switch.ON) {
       // this.service!.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent).updateValue(this.state);
       this.triggerDoorbellEvent(Doorbell.SINGLE_PRESS, this.companionSwitch!);
+
+      if (this.companionSensorResetTimerId) {
+        this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Clearing reset timer: ${this.companionSensorResetTimerId}`);
+        clearTimeout(this.companionSensorResetTimerId);
+      }
+
+      // Reset switch after timer delay
+      this.companionSensorResetTimerId = setTimeout(() => {
+        this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, Switch.OFF);
+      }, 1000);
+      this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
     }
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(newState)}`);
-
-    if (this.timerId) {
-      clearTimeout(this.timerId);
-    }
-
-    // Reset switch after timer delay
-    this.timerId = setTimeout(() => {
-      this.companionSwitch!.service!.updateCharacteristic(this.platform.Characteristic.On, Switch.OFF);
-    }, 1000);
   }
 
   /**
    * This method is called by the switch to ring the doorbell
    */
-  private triggerDoorbellEvent(event: number, accessory: Accessory) {
+  private async triggerDoorbellEvent(event: number, accessory: Accessory) {
     if (!(accessory.accessoryConfiguration.accessoryID === this.accessoryConfiguration.accessoryID)) {
       throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
     }
 
     this.service!.updateCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent, (event));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell event: ${Doorbell.getEventName(event)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered doorbell event: ${Doorbell.getEventName(event)}`);
   }
 
   static getEventName(event: number): string {
