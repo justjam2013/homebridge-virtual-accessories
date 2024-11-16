@@ -65,6 +65,15 @@ export abstract class AccessoryFactory {
     return virtualAccessory;
   }
 
+  static createVirtualCompanionSwitch(
+    platform: VirtualAccessoryPlatform,
+    accessory: PlatformAccessory,
+    companionSwitchName: string,
+  ): Switch | undefined {
+    const virtualAccessory: Switch = new Switch(platform, accessory, companionSwitchName);
+    return virtualAccessory;
+  }
+
   static createVirtualCompanionSensor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -124,15 +133,16 @@ export abstract class AccessoryFactory {
   static createTrigger(
     sensor: VirtualSensor,
     triggerType: string,
+    name: string,
   ): Trigger | undefined {
     let trigger: Trigger | undefined;
 
     switch (triggerType) {
     case 'ping':
-      trigger = new PingTrigger(sensor);
+      trigger = new PingTrigger(sensor, name);
       break;
     case 'cron':
-      trigger = new CronTrigger(sensor);
+      trigger = new CronTrigger(sensor, name);
       break;
     default:
       sensor.platform.log.error('Error creating trigger. Invalid trigger type:', triggerType);

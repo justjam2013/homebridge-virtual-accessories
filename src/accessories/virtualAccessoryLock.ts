@@ -8,17 +8,17 @@ import { Accessory } from './virtualAccessory.js';
  */
 export class Lock extends Accessory {
 
-  private UNSECURED: number = this.platform.Characteristic.LockCurrentState.UNSECURED;  // 0
-  private SECURED: number = this.platform.Characteristic.LockCurrentState.SECURED;      // 1
-  private JAMMED: number = this.platform.Characteristic.LockCurrentState.JAMMED;        // 2
-  private UNKNOWN: number = this.platform.Characteristic.LockCurrentState.UNKNOWN;      // 3
+  static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED;
+  static readonly SECURED: number = 0;    // Characteristic.LockCurrentState.SECURED;
+  static readonly JAMMED: number = 0;     // Characteristic.LockCurrentState.JAMMED;
+  static readonly UNKNOWN: number = 0;    // Characteristic.LockCurrentState.UNKNOWN;
 
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
   private states = {
-    LockState: this.UNSECURED,
+    LockState: Lock.UNSECURED,
   };
 
   private readonly stateStorageKey: string = 'LockState';
@@ -30,7 +30,7 @@ export class Lock extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.lockDefaultState === 'unlocked' ? this.UNSECURED : this.SECURED;
+    this.defaultState = this.accessoryConfiguration.lockDefaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -185,10 +185,10 @@ export class Lock extends Accessory {
 
     switch (state) {
     case undefined: { stateName = 'undefined'; break; }
-    case this.UNSECURED: { stateName = 'UNSECURED'; break; }
-    case this.SECURED: { stateName = 'SECURED'; break; }
-    case this.JAMMED: { stateName = 'JAMMED'; break; }
-    case this.UNKNOWN: { stateName = 'UNKNOWN'; break; }
+    case Lock.UNSECURED: { stateName = 'UNSECURED'; break; }
+    case Lock.SECURED: { stateName = 'SECURED'; break; }
+    case Lock.JAMMED: { stateName = 'JAMMED'; break; }
+    case Lock.UNKNOWN: { stateName = 'UNKNOWN'; break; }
     default: { stateName = state.toString(); }
     }
 

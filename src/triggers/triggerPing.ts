@@ -1,5 +1,3 @@
-import { Logging } from 'homebridge';
-
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
@@ -38,8 +36,9 @@ export class PingTrigger extends Trigger {
 
   constructor(
     sensor: VirtualSensor,
+    name: string,
   ) {
-    super(sensor);
+    super(sensor, name);
 
     const trigger: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
 
@@ -76,13 +75,10 @@ export class PingTrigger extends Trigger {
 
     setInterval(
       this.ping, intervalBetweenPingsMillis,
-      this.sensor,
-      this.log,
+      this,
+      trigger,
       protocol,
-      trigger.host,
-      pingTimeoutMillis,
-      trigger.failureRetryCount,
-      this.failureCount);
+      pingTimeoutMillis);
   }
 
   /**
@@ -90,13 +86,10 @@ export class PingTrigger extends Trigger {
    */
 
   private ping(
-    sensor: VirtualSensor,
-    log: Logging,
+    trigger: PingTrigger,
+    triggerConfig: PingTriggerConfiguration,
     protocol: string,
-    ipAddress: string,
     pingTimeoutMillis: number,
-    failureRetryCount: number,
-    failureCount: Counter,
   ) {
     const options = {
       networkProtocol: protocol,
@@ -107,29 +100,29 @@ export class PingTrigger extends Trigger {
       ttl: 128,
     };
 
-    const sensorConfig: AccessoryConfiguration = sensor.accessoryConfiguration;
+    const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
 
     const session = ping.createSession(options);
-    session.pingHost(ipAddress, (error, target: string, sent: number, rcvd: number) => {
+    session.pingHost(triggerConfig.host, (error, target: string, sent: number, rcvd: number) => {
       const millis = rcvd - sent;
       if (error) {
-        log.error(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
+        trigger.log.error(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
 
-        if (failureCount.value < Number.MAX_VALUE) {
-          failureCount.value++;
+        if (trigger.failureCount.value < Number.MAX_VALUE) {
+          trigger.failureCount.value++;
         }
 
-        log.info(`[${sensorConfig.accessoryName}] Failure count: ${failureCount.value}`);
-        if (failureCount.value === failureRetryCount) {
-          log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${failureRetryCount}. Triggering sensor`);
+        trigger.log.info(`[${sensorConfig.accessoryName}] Failure count: ${trigger.failureCount.value}`);
+        if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
+          trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
 
-          sensor.setSensorState(sensor.OPEN_TRIGGERED);
+          trigger.sensor.triggerKeySensorState(trigger.sensor.OPEN_TRIGGERED, trigger);
         }
       } else {
-        log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (ms=${millis})`);
+        trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (ms=${millis})`);
 
-        failureCount.value = 0;
-        sensor.setSensorState(sensor.CLOSED_NORMAL);
+        trigger.failureCount.value = 0;
+        trigger.sensor.triggerKeySensorState(trigger.sensor.CLOSED_NORMAL, trigger);
       }
 
       session.close ();

@@ -10,6 +10,9 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualSmokeSensor extends VirtualSensor {
 
+  static readonly SMOKE_NOT_DETECTED: number = 0;   // Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
+  static readonly SMOKE_DETECTED: number = 1;       // Characteristic.SmokeDetected.SMOKE_DETECTED;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -23,8 +26,8 @@ export class VirtualSmokeSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.SmokeDetected.SMOKE_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case VirtualSmokeSensor.SMOKE_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualSmokeSensor.SMOKE_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 

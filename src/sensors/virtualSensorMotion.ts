@@ -10,11 +10,27 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualMotionSensor extends VirtualSensor {
 
+  static readonly MOTION_NOT_DETECTED: number = 0;  // No Charteristic exists for Motion sensor. Modeled on other sensors
+  static readonly MOTION_DETECTED: number = 1;      // No Charteristic exists for Motion sensor. Modeled on other sensors
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
     companionSensorName?: string,
   ) {
     super(platform, accessory, platform.Service.MotionSensor, platform.Characteristic.MotionDetected, companionSensorName);
+  }
+
+  protected getStateName(state: number): string {
+    let sensorStateName: string;
+
+    switch (state) {
+    case undefined: { sensorStateName = 'undefined'; break; }
+    case VirtualMotionSensor.MOTION_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualMotionSensor.MOTION_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    default: { sensorStateName = state.toString();}
+    }
+
+    return sensorStateName;
   }
 }

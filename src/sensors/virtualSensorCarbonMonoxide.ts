@@ -10,6 +10,9 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualCarbonMonoxideSensor extends VirtualSensor {
 
+  static readonly CO_LEVELS_NORMAL: number = 0;     // Characteristic.CarbonMonoxideDetected.CO_LEVELS_NORMAL;
+  static readonly CO_LEVELS_ABNORMAL: number = 1;   // Characteristic.CarbonMonoxideDetected.CO_LEVELS_ABNORMAL;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -23,8 +26,8 @@ export class VirtualCarbonMonoxideSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.CarbonMonoxideDetected.CO_LEVELS_NORMAL: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.CarbonMonoxideDetected.CO_LEVELS_ABNORMAL: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case VirtualCarbonMonoxideSensor.CO_LEVELS_NORMAL: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualCarbonMonoxideSensor.CO_LEVELS_ABNORMAL: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 

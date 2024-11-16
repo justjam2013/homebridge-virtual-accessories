@@ -15,8 +15,9 @@ export class CronTrigger extends Trigger {
 
   constructor(
     sensor: VirtualSensor,
+    name: string,
   ) {
-    super(sensor);
+    super(sensor, name);
 
     const trigger: CronTriggerConfiguration = this.sensorConfig.cronTrigger;
 
@@ -88,9 +89,9 @@ export class CronTrigger extends Trigger {
 
           this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${trigger.pattern}'. Triggering sensor`);
 
-          sensor.setSensorState(this.sensor.OPEN_TRIGGERED);
+          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
           await this.delay(resetDelayMillis);
-          sensor.setSensorState(this.sensor.CLOSED_NORMAL);
+          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this);
         }
 
         // If we're after the end date, terminate the cron job

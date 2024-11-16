@@ -4,6 +4,7 @@ import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from '../triggers/trigger.js';
+import { NotCompanionError, AccessoryNotAllowedError, TriggerNotAllowedError } from '../errors.js';
 
 /**
  * Platform Accessory
@@ -12,10 +13,17 @@ import { Trigger } from '../triggers/trigger.js';
  */
 export abstract class VirtualSensor extends Accessory {
 
-  private ON: boolean = true;
-  private OFF: boolean = false;
+  static readonly ON: boolean = true;
+  static readonly OFF: boolean = false;
+
+  protected static readonly NORMAL_CLOSED: string = 'NORMAL-CLOSED';
+  protected static readonly TRIGGERED_OPEN: string = 'TRIGGERED-OPEN';
+
+  private uuidPostfix: string = '-sensor';
 
   private sensorCharacteristic;
+
+  private isCompanionSensor: boolean = false;
 
   private trigger: Trigger | undefined;
 
@@ -38,6 +46,10 @@ export abstract class VirtualSensor extends Accessory {
 
     this.sensorCharacteristic = sensorCharacteristic;
 
+    if (companionSensorName !== undefined) {
+      this.isCompanionSensor = true;
+    }
+
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
@@ -46,19 +58,19 @@ export abstract class VirtualSensor extends Accessory {
 
     // get the Switch service if it exists, otherwise create a new Switch service
     // you can create multiple services for each accessory
-    if (companionSensorName === undefined) {
+    if (!this.isCompanionSensor) {
       this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService);
     } else {
-      this.service = this.accessory.getService(companionSensorName) ||
-                    this.accessory.addService(sensorService, companionSensorName, accessory.UUID + '-sensor');
+      this.service = this.accessory.getService(companionSensorName!) ||
+                     this.accessory.addService(sensorService, companionSensorName, accessory.UUID + this.uuidPostfix);
     }
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    if (companionSensorName === undefined) {
+    if (!this.isCompanionSensor) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, companionSensorName);
+      this.service.setCharacteristic(this.platform.Characteristic.Name, companionSensorName!);
     }
 
     // Update the initial state of the accessory
@@ -85,7 +97,7 @@ export abstract class VirtualSensor extends Accessory {
 
     // Trigger
     if (this.accessoryConfiguration.sensorTrigger !== undefined) {
-      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensorTrigger);
+      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensorTrigger, this.accessoryConfiguration.accessoryName + ' Trigger');
     }
   }
 
@@ -101,12 +113,33 @@ export abstract class VirtualSensor extends Accessory {
   }
 
   /**
-   * This method is called by the trigger to trigger and reset the sensor
+   * This method is called by the accessory that has this sensor as a companion
    */
-  setSensorState(sensorState: number) {
+  triggerCompanionSensorState(sensorState: number, accessory: Accessory) {
+    if (!this.isCompanionSensor) {
+      throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
+    } else if (accessory.accessory.UUID === this.accessory.UUID) {
+      throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
+    }
+
     this.states.SensorState = sensorState;
 
-    this.service?.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+    this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+  }
+
+  /**
+   * This method is called by the trigger to toggle the sensor
+   */
+  triggerKeySensorState(sensorState: number, trigger: Trigger) {
+    if (!(trigger.sensorConfig.accessoryID === this.accessoryConfiguration.accessoryID)) {
+      throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
+    }
+
+    this.states.SensorState = sensorState;
+
+    this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
@@ -116,8 +149,8 @@ export abstract class VirtualSensor extends Accessory {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.CLOSED_NORMAL: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.OPEN_TRIGGERED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case this.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case this.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 
