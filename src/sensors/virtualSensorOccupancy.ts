@@ -10,6 +10,9 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualOccupancySensor extends VirtualSensor {
 
+  static readonly OCCUPANCY_NOT_DETECTED: number = 0;   // Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
+  static readonly OCCUPANCY_DETECTED: number = 1;       // Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -23,8 +26,8 @@ export class VirtualOccupancySensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case VirtualOccupancySensor.OCCUPANCY_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualOccupancySensor.OCCUPANCY_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 

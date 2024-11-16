@@ -10,6 +10,9 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualContactSensor extends VirtualSensor {
 
+  static readonly CONTACT_DETECTED: number = 0;       // Characteristic.ContactSensorState.CONTACT_DETECTED;
+  static readonly CONTACT_NOT_DETECTED: number = 1;   // Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -23,8 +26,8 @@ export class VirtualContactSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case VirtualContactSensor.CONTACT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualContactSensor.CONTACT_NOT_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 

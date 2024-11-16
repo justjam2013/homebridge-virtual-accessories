@@ -3,6 +3,13 @@ import { Accessory } from './accessories/virtualAccessory';
 
 export class Timer {
 
+  static Units = {
+    Seconds: 'seconds',
+    Minutes: 'minutes',
+    Hours: 'hours',
+    Days: 'days',
+  };
+
   private timerId: ReturnType<typeof setTimeout> | undefined;
 
   private config;
@@ -32,16 +39,16 @@ export class Timer {
 
     const units = this.config.units;
     switch (units) {
-    case 'days':
+    case Timer.Units.Days:
       this.duration *= 24;
       // falls through
-    case 'hours':
+    case Timer.Units.Hours:
       this.duration *= 60;
       // falls through
-    case 'minutes':
+    case Timer.Units.Minutes:
       this.duration *= 60;
       // falls through
-    case 'seconds':
+    case Timer.Units.Seconds:
       this.duration *= 1000;
     }
   }

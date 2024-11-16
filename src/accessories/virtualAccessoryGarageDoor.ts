@@ -8,18 +8,18 @@ import { Accessory } from './virtualAccessory.js';
  */
 export class GarageDoor extends Accessory {
   
-  private OPEN: number = this.platform.Characteristic.CurrentDoorState.OPEN;        // 0
-  private CLOSED: number = this.platform.Characteristic.CurrentDoorState.CLOSED;    // 1
-  private OPENING: number = this.platform.Characteristic.CurrentDoorState.OPENING;  // 2
-  private CLOSING: number = this.platform.Characteristic.CurrentDoorState.CLOSING;  // 3
-  private STOPPED: number = this.platform.Characteristic.CurrentDoorState.STOPPED;  // 4
+  static readonly OPEN: number = 0;     // Characteristic.CurrentDoorState.OPEN;
+  static readonly CLOSED: number = 1;   // Characteristic.CurrentDoorState.CLOSED;
+  static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING;
+  static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING;
+  static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED;
 
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
   private states = {
-    GarageDoorState: this.CLOSED,
+    GarageDoorState: GarageDoor.CLOSED,
     ObstructionDetected: false,
   };
 
@@ -32,7 +32,7 @@ export class GarageDoor extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.garageDoorDefaultState === 'open' ? this.OPEN : this.CLOSED;
+    this.defaultState = this.accessoryConfiguration.garageDoorDefaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -172,11 +172,11 @@ export class GarageDoor extends Accessory {
 
     switch (state) {
     case undefined: { stateName = 'undefined'; break; }
-    case this.OPEN: { stateName = 'OPEN'; break; }
-    case this.CLOSED: { stateName = 'CLOSED'; break; }
-    case this.OPENING: { stateName = 'OPENING'; break; }
-    case this.CLOSING: { stateName = 'CLOSING'; break; }
-    case this.STOPPED: { stateName = 'STOPPED'; break; }
+    case GarageDoor.OPEN: { stateName = 'OPEN'; break; }
+    case GarageDoor.CLOSED: { stateName = 'CLOSED'; break; }
+    case GarageDoor.OPENING: { stateName = 'OPENING'; break; }
+    case GarageDoor.CLOSING: { stateName = 'CLOSING'; break; }
+    case GarageDoor.STOPPED: { stateName = 'STOPPED'; break; }
     default: { stateName = state.toString(); }
     }
 

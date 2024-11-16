@@ -10,6 +10,9 @@ import { VirtualSensor } from './virtualSensor.js';
  */
 export class VirtualLeakSensor extends VirtualSensor {
 
+  static readonly LEAK_NOT_DETECTED: number = 0;  // Characteristic.LeakDetected.LEAK_NOT_DETECTED;
+  static readonly LEAK_DETECTED: number = 1;      // Characteristic.LeakDetected.LEAK_DETECTED;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -23,8 +26,8 @@ export class VirtualLeakSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED: { sensorStateName = 'NORMAL-CLOSED'; break; }
-    case this.platform.Characteristic.LeakDetected.LEAK_DETECTED: { sensorStateName = 'TRIGGERED-OPEN'; break; }
+    case VirtualLeakSensor.LEAK_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
+    case VirtualLeakSensor.LEAK_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
     default: { sensorStateName = state.toString();}
     }
 

@@ -127,6 +127,9 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         }
       }
+
+      // Cleanup config
+      // const configPath = api.user.configPath();
     }
 
     // loop over the cached accessories and unregister each one if it is not in the config
