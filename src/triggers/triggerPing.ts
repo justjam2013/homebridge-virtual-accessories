@@ -40,7 +40,7 @@ export class PingTrigger extends Trigger {
 
     const triggerConfig: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
 
-    this.log.info(`[${this.sensorConfig.accessoryName}] PingTriggerConfig ${JSON.stringify(triggerConfig)}`);
+    this.log.info(`[${this.sensorConfig.accessoryName}] Ping Trigger Config: ${JSON.stringify(triggerConfig)}`);
 
     if (triggerConfig.isDisabled) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Ping trigger is disabled`);
