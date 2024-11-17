@@ -256,6 +256,10 @@ Note:
 **Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI saves additional fields to the JSON config that may not be related by the particular accessory. This does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON.
 The next release of the dependency used by Homebridge UI should implement the ability to make fields conditionally required and the configuration will be updated to reflect that.
 
+## Known Issues
+
+-   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket.
+
 ## Issues
 
 If you have problems, please feel free to open a ticket on GitHub. Please attach any log output to the a ticket, making

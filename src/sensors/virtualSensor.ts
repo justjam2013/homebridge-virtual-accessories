@@ -118,7 +118,7 @@ export abstract class VirtualSensor extends Accessory {
   triggerCompanionSensorState(sensorState: number, accessory: Accessory) {
     if (!this.isCompanionSensor) {
       throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
-    } else if (accessory.accessory.UUID === this.accessory.UUID) {
+    } else if (accessory.accessory.UUID !== this.accessory.UUID) {
       throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
     }
 
@@ -133,15 +133,19 @@ export abstract class VirtualSensor extends Accessory {
    * This method is called by the trigger to toggle the sensor
    */
   triggerKeySensorState(sensorState: number, trigger: Trigger) {
-    if (!(trigger.sensorConfig.accessoryID === this.accessoryConfiguration.accessoryID)) {
+    if (trigger.sensorConfig.accessoryID !== this.accessoryConfiguration.accessoryID) {
       throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
     }
+
+    const sensorStateChanged: boolean = (this.states.SensorState !== sensorState) ? true : false;
 
     this.states.SensorState = sensorState;
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    if (sensorStateChanged) {
+      this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    }
   }
 
   protected getStateName(state: number): string {

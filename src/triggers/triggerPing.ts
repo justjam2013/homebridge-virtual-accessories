@@ -1,18 +1,18 @@
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { PingTriggerConfiguration } from '../configuration/configurationPingTrigger.js';
 
 // import dns from 'dns';
 import net from 'net';
 import ping from 'net-ping';
-import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { PingTriggerConfiguration } from '../configuration/configurationPingTrigger.js';
 
 /**
- *  Private wrapper class to pass failureCount by reference
+ *  Private helper classes to pass values by reference
  */
 class Counter {
 
-  value: number = 0;
+  value: number;
 
   constructor(
     value: number,
@@ -32,24 +32,22 @@ export class PingTrigger extends Trigger {
 
   private failureCount = new Counter(0);
 
-  private done: boolean = false;
-
   constructor(
     sensor: VirtualSensor,
     name: string,
   ) {
     super(sensor, name);
 
-    const trigger: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
+    const triggerConfig: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
 
-    this.log.info(`[${this.sensorConfig.accessoryName}] PingTriggerConfig ${JSON.stringify(trigger)}`);
+    this.log.info(`[${this.sensorConfig.accessoryName}] PingTriggerConfig ${JSON.stringify(triggerConfig)}`);
 
-    if (trigger.isDisabled) {
+    if (triggerConfig.isDisabled) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Ping trigger is disabled`);
       return;
     }
 
-    const ipProtocolVersion = net.isIP(trigger.host);
+    const ipProtocolVersion = net.isIP(triggerConfig.host);
     // TODO: DNS lookup
     // if (ipVersion === this.NOT_IP) {
     //   const ip = this.getIP(trigger.host);
@@ -64,19 +62,23 @@ export class PingTrigger extends Trigger {
     case this.IPv6:
       protocol = ping.NetworkProtocol.IPv6;
       break;
+    // case this.NOT_IP:
+    //   // TODO: this is a domain name, perform DNS lookup
+    //   protocol = ping.NetworkProtocol.None;  // 0
+    //   break;
     default:
       this.log.error(`[${this.sensorConfig.accessoryName}] Unkown or invalid IP protocol version: ${ipProtocolVersion}`);
       return;
     }
     this.log.debug(`[${this.sensorConfig.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
-    const pingTimeoutMillis = 20 * 1000;    // trigger.pingTimeout: 20 seconds
-    const intervalBetweenPingsMillis = 30 * 1000;   // trigger.intervalBetweenPings: 60 seconds
+    const pingTimeoutMillis = 10 * 1000;    // trigger.pingTimeout: 10 seconds
+    const intervalBetweenPingsMillis = 60 * 1000;   // trigger.intervalBetweenPings: 60 seconds
 
     setInterval(
       this.ping, intervalBetweenPingsMillis,
       this,
-      trigger,
+      triggerConfig,
       protocol,
       pingTimeoutMillis);
   }
@@ -85,16 +87,21 @@ export class PingTrigger extends Trigger {
    * Private methods
    */
 
-  private ping(
+  private async ping(
     trigger: PingTrigger,
     triggerConfig: PingTriggerConfiguration,
     protocol: string,
     pingTimeoutMillis: number,
   ) {
+    // If protocol === None, do a DNS lookup
+    // const host = await getIP(hostname: string);
+    // protocol = ping.NetworkProtocol.IPv4;
+    // Create a helper class for protocol, so the value can be updated
+
     const options = {
       networkProtocol: protocol,
       packetSize: 16,
-      retries: 1,
+      retries: 3,
       sessionId: (process.pid % 65535),
       timeout: pingTimeoutMillis,
       ttl: 128,
@@ -103,6 +110,7 @@ export class PingTrigger extends Trigger {
     const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
 
     const session = ping.createSession(options);
+
     session.pingHost(triggerConfig.host, (error, target: string, sent: number, rcvd: number) => {
       const millis = rcvd - sent;
       if (error) {
@@ -119,7 +127,7 @@ export class PingTrigger extends Trigger {
           trigger.sensor.triggerKeySensorState(trigger.sensor.OPEN_TRIGGERED, trigger);
         }
       } else {
-        trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (ms=${millis})`);
+        trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
         trigger.sensor.triggerKeySensorState(trigger.sensor.CLOSED_NORMAL, trigger);
@@ -130,18 +138,15 @@ export class PingTrigger extends Trigger {
   }
 
   // private async getIP(hostname: string) {
-  //   const obj = await dns.promises.lookup(hostname)
+  //   const response = await dns.promises.lookup(hostname)
   //     .then((result: dns.LookupAddress) => {
   //       this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] IP address retrieved for '${hostname}' is '${result.address}'`);
   //     })
   //     .catch((error: Error) => {
   //       this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] Error retrieving IP address for '${hostname}': ${error.message}`);
   //     })
-  //     .finally(() => {
-  //       this.done = true;
-  //     });
-
-  //   return obj?.address;
+  //
+  //   return response?.address;
   // }
 }
 
