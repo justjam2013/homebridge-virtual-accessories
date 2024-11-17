@@ -42,11 +42,11 @@
               "type": "string",
               "required": true,
               "oneOf": [
-                { "title": "Switch", "enum": ["switch"] },
-                { "title": "Lock", "enum": ["lock"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
-                { "title": "Sensor", "enum": ["sensor"] }
+                { "title": "Lock", "enum": ["lock"] },
+                { "title": "Sensor", "enum": ["sensor"] },
+                { "title": "Switch", "enum": ["switch"] }
               ],
               "default": "switch"
             },
