@@ -21,7 +21,7 @@
 
 </span>
 
-#### homebridge-virtual-accessories is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
+#### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches), as well as a few others.
 
