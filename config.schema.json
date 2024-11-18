@@ -67,8 +67,8 @@
               "description": "Lock default state",
               "type": "string",
               "oneOf": [
-                { "title": "Unlocked", "enum": ["unlocked"] },
-                { "title": "Locked", "enum": ["locked"] }
+                { "title": "Locked", "enum": ["locked"] },
+                { "title": "Unlocked", "enum": ["unlocked"] }
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
