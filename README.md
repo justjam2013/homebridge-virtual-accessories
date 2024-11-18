@@ -25,18 +25,18 @@
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches), as well as a few others.
 
-The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may are unmaintained and abandoned.
+The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may be unmaintained and abandoned.
 
-This is work in progress, so new accessories will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
+This is work in progress, so new accessories and functionality will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
 
--   Switch. Nobody can have too many switches! Allows you to create switches, normally on/off, stateful, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
--   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod paired in the Home app.
+-   Switch. Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
+-   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod.
 -   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
--   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes.
--   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, with some types of notifications classified as `critical` by Homekit. Critical notifications are allowed to bypass Do Not Disturb and allowed to appear on CarPlay display. Sensors can be activated by different triggers. Currently, they options are:
-    - Host Ping trigger. Pings a network host and is actvated when the ping fails. The sensor resets when the ping is successful.
+-   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. And it generates a HomeKey card in the Wallet app.
+-   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
+    - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To activate a sensor by a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing through the sensor with trigger switch path.
+    - Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
 
 ## Installation
 
@@ -257,16 +257,14 @@ Note:
 }
 ```
 
-**Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI saves additional fields to the JSON config that may not be related by the particular accessory. This does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON.
-The next release of the dependency used by Homebridge UI should implement the ability to make fields conditionally required and the configuration will be updated to reflect that.
+**Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant by the particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may cleanup the config. However this does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON config.
 
 ## Known Issues
 
--   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket.
+-   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
 
 ## Issues
 
-If you have problems, please feel free to open a ticket on GitHub. Please attach any log output to the a ticket, making
-sure to remove any sensitive information such as WiFi passwords.
+If you encounter a problem, please open a ticket on GitHub. Please attach any log output to the a ticket, making sure to remove any sensitive information such as passwords, tokens, etc.
 
-Also please feel free to open a ticket on GitHub if you have any enhancement suggestions.
+Also please feel free to open a ticket on GitHub if you have any enhancement suggestions or any additional functionality you would like to see added.
