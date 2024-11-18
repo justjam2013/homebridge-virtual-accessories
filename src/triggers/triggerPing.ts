@@ -80,7 +80,8 @@ export class PingTrigger extends Trigger {
       this,
       triggerConfig,
       protocol,
-      pingTimeoutMillis);
+      pingTimeoutMillis,
+    );
   }
 
   /**

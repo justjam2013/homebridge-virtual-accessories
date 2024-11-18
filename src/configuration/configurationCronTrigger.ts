@@ -8,14 +8,22 @@ export class CronTriggerConfiguration {
   endDateTime!: string;
   isDisabled: boolean = false;
 
+  private static isoTimeNoMillis = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
+
   isValid(): boolean {
     const validPattern: boolean = (this.pattern !== undefined);
-    const validExecutionRangeDateTime: boolean = (
-      (this.startDateTime === undefined && this.endDateTime === undefined) ||
-      (this.startDateTime !== undefined && this.endDateTime !== undefined)
-    );
-    // Add start date before end date validation
 
-    return (validPattern && validExecutionRangeDateTime);
+    const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillis);
+    const validStartDateTime = (this.startDateTime !== undefined) ? isoTimeRegex.test(this.startDateTime) : true;
+    const validEndDateTime = (this.endDateTime !== undefined) ? isoTimeRegex.test(this.endDateTime) : true;
+
+    let validExecutionRangeDateTime = true;
+    if (this.startDateTime !== undefined && this.endDateTime !== undefined) {
+      const startDate = new Date(this.startDateTime);
+      const endDate = new Date(this.endDateTime);
+      validExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
+    }
+
+    return (validPattern && validStartDateTime && validEndDateTime && validExecutionRangeDateTime);
   }
 }
