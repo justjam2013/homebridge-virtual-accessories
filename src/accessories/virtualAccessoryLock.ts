@@ -9,9 +9,9 @@ import { Accessory } from './virtualAccessory.js';
 export class Lock extends Accessory {
 
   static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED;
-  static readonly SECURED: number = 0;    // Characteristic.LockCurrentState.SECURED;
-  static readonly JAMMED: number = 0;     // Characteristic.LockCurrentState.JAMMED;
-  static readonly UNKNOWN: number = 0;    // Characteristic.LockCurrentState.UNKNOWN;
+  static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED;
+  static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
+  static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
   /**
    * These are just used to create a working example
