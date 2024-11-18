@@ -6,6 +6,10 @@
     <img src="https://img.shields.io/github/license/justjam2013/homebridge-virtual-accessories">
 </div>
 
+<div>
+    <img src="https://img.shields.io/badge/homebridge-verification_pending-BAD5F3">
+</div>
+
 <p align="center" vertical-align="middle">
     <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="VirtualAccessories.png" height="140"></a>
     <a href="https://github.com/homebridge/homebridge"><img src="https://raw.githubusercontent.com/homebridge/branding/master/logos/homebridge-color-round-stylized.png" height="140"></a>
