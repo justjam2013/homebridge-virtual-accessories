@@ -127,10 +127,11 @@ export class CronTrigger extends Trigger {
 
   private isValidZoneId(zoneId: string): boolean {
     const availableZoneIds: string[] = ZoneId.getAvailableZoneIds();
+
     const isValidZoneId: boolean = availableZoneIds.includes(zoneId);
 
     if (!isValidZoneId) {
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Zone id ${zoneId} not found (available zone ids: ${availableZoneIds.length})`);
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Zone id "${zoneId}" not found (available zone ids: ${availableZoneIds.length})`);
     }
 
     return isValidZoneId;
