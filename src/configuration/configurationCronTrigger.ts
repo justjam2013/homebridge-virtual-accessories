@@ -1,3 +1,8 @@
+/* eslint-disable curly */
+
+import { ZoneId } from '@js-joda/core';
+import '@js-joda/timezone';
+
 /**
  * 
  */
@@ -8,22 +13,60 @@ export class CronTriggerConfiguration {
   endDateTime!: string;
   isDisabled: boolean = false;
 
-  private static isoTimeNoMillis = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
+  // private static cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';
+  // 5: minutes granularity
+  // 6: seconds granularity
+  // 7: milliseconds granularity
+  private static cronMinutesGranularityPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
+  private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
 
-  isValid(): boolean {
-    const validPattern: boolean = (this.pattern !== undefined);
+  private errorFields: string[] = [];
 
-    const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillis);
-    const validStartDateTime = (this.startDateTime !== undefined) ? isoTimeRegex.test(this.startDateTime) : true;
-    const validEndDateTime = (this.endDateTime !== undefined) ? isoTimeRegex.test(this.endDateTime) : true;
+  isValid(): [boolean, string[]] {
+    const patternRegex = new RegExp(CronTriggerConfiguration.cronMinutesGranularityPattern);
+    const isValidPattern: boolean = (
+      (this.pattern !== undefined) &&
+      patternRegex.test(this.pattern)
+    );
 
-    let validExecutionRangeDateTime = true;
+    const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
+    const isValidStartDateTime = (
+      (this.startDateTime !== undefined) ?
+        isoTimeRegex.test(this.startDateTime) :
+        true
+    );
+    const isValidEndDateTime = (
+      (this.endDateTime !== undefined) ?
+        isoTimeRegex.test(this.endDateTime) :
+        true
+    );
+
+    let isValidExecutionRangeDateTime = true;
     if (this.startDateTime !== undefined && this.endDateTime !== undefined) {
       const startDate = new Date(this.startDateTime);
       const endDate = new Date(this.endDateTime);
-      validExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
+      isValidExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
     }
 
-    return (validPattern && validStartDateTime && validEndDateTime && validExecutionRangeDateTime);
+    if (!isValidPattern) this.errorFields.push('pattern');
+    if (!isValidStartDateTime) this.errorFields.push('startDateTime');
+    if (!isValidEndDateTime) this.errorFields.push('endDateTime');
+    if (!isValidExecutionRangeDateTime) this.errorFields.push('startDateTime', 'endDateTime');
+
+    return [
+      (isValidPattern &&
+        isValidStartDateTime &&
+        isValidEndDateTime &&
+        isValidExecutionRangeDateTime),
+      this.errorFields,
+    ];
+  }
+
+  private isValidZoneId(zoneId: string): boolean {
+    const availableZoneIds: string[] = ZoneId.getAvailableZoneIds();
+
+    const isValidZoneId: boolean = availableZoneIds.includes(zoneId);
+
+    return isValidZoneId;
   }
 }

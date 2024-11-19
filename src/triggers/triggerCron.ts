@@ -31,27 +31,8 @@ export class CronTrigger extends Trigger {
 
     const timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;  // 'America/Los_Angeles'
 
-    if (!this.isValidCronPattern(trigger.pattern)) {
-      this.log.error(`[${this.sensorConfig.accessoryName}] Cron time ${trigger.pattern} is not valid`);
-      return;
-    }
-
-    let zoneId: ZoneId;
-    if (trigger.zoneId === undefined) {
-      zoneId = ZoneId.SYSTEM;
-
-      // eslint-disable-next-line brace-style
-    }
-    else if (!this.isValidZoneId(trigger.zoneId)) {
-      this.log.error(`[${this.sensorConfig.accessoryName}] ZoneId ${trigger.zoneId} is not valid. Cron trigger was not created`);
-      return;
-
-      // eslint-disable-next-line brace-style
-    }
-    else {
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${trigger.zoneId}'`);
-      zoneId = ZoneId.of(trigger.zoneId);
-    }
+    const zoneId: ZoneId = (trigger.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(trigger.zoneId);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
 
     const cronStart: ZonedDateTime | undefined = this.getZonedDateTime(trigger.startDateTime, zoneId);
     const cronEnd: ZonedDateTime | undefined = this.getZonedDateTime(trigger.endDateTime, zoneId);
@@ -115,26 +96,6 @@ export class CronTrigger extends Trigger {
 
   private delay(millis: number) {
     return new Promise(resolve => setTimeout(resolve, millis));
-  }
-
-  private isValidCronPattern(cronTime: string): boolean {
-    // Constrain trigger frequency to minute granularity
-    const cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
-    // const cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';
-    const regex = new RegExp(cronPattern);
-    return regex.test(cronTime);
-  }
-
-  private isValidZoneId(zoneId: string): boolean {
-    const availableZoneIds: string[] = ZoneId.getAvailableZoneIds();
-
-    const isValidZoneId: boolean = availableZoneIds.includes(zoneId);
-
-    if (!isValidZoneId) {
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Zone id "${zoneId}" not found (available zone ids: ${availableZoneIds.length})`);
-    }
-
-    return isValidZoneId;
   }
 
   private getZonedDateTime(datetime: string | undefined, zoneId: ZoneId): ZonedDateTime | undefined {

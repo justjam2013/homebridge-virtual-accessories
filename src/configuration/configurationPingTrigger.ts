@@ -1,3 +1,5 @@
+/* eslint-disable curly */
+
 /**
  * 
  */
@@ -6,10 +8,19 @@ export class PingTriggerConfiguration {
   failureRetryCount!: number;
   isDisabled: boolean = false;
 
-  isValid(): boolean {
-    const validHost: boolean = (this.host !== undefined);
-    const validFailureRetryCount: boolean = (this.failureRetryCount !== undefined);
+  private errorFields: string[] = [];
 
-    return (validHost && validFailureRetryCount);
+  isValid(): [boolean, string[]] {
+    const isValidHost: boolean = (this.host !== undefined);
+    const isValidFailureRetryCount: boolean = (this.failureRetryCount !== undefined);
+
+    if (!isValidHost) this.errorFields.push('host');
+    if (!isValidFailureRetryCount) this.errorFields.push('failureRetryCount');
+
+    return [
+      (isValidHost &&
+        isValidFailureRetryCount),
+      this.errorFields,
+    ];
   }
 }
