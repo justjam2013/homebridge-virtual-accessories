@@ -132,7 +132,7 @@ export class Switch extends Accessory {
     // implement your own code to turn your device on/off
     this.states.SwitchState = value as boolean;
 
-    if (this.accessoryConfiguration.accessoryHasResetTimer) {
+    if (this.accessoryConfiguration.accessoryHasResetTimer && this.states.SwitchState !== this.defaultState) {
       this.timer!.startTimer();
     }
 
