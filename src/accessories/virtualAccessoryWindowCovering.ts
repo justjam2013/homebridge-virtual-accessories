@@ -11,9 +11,9 @@ export class WindowCovering extends Accessory {
   static readonly CLOSED: number = 0;   // 0%
   static readonly OPEN: number = 100;   // 100%
 
-  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING;
-  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;
-  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;
+  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING;  -> CLOSING
+  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;  -> OPENING
+  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;     -> OPEN or CLOSED
 
   /**
    * These are just used to create a working example
@@ -161,7 +161,7 @@ export class WindowCovering extends Accessory {
    */
   async handlePositionStateGet() {
     // implement your own code to check if the device is on
-    const windowCoveringPosition = this.platform.Characteristic.PositionState.DECREASING;
+    const windowCoveringPosition = this.platform.Characteristic.PositionState.STOPPED;
 
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Window Covering Position: ${this.getPositionName(windowCoveringPosition)}`);
 
