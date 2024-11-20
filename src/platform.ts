@@ -174,9 +174,12 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
       } else {
         this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
 
-        const isValidAccessoryConfig: boolean = accessoryConfiguration.isValid();
+        let isValidAccessoryConfig: boolean = false;
+        let errorFields: string[] = [];
+        [isValidAccessoryConfig, errorFields] = accessoryConfiguration.isValid();
         if (!isValidAccessoryConfig) {
           this.log.error(`Skipping accessory. Configuration is invalid: ${JSON.stringify(accessoryConfiguration)}`);
+          this.log.error(`Invalid fields: ${errorFields.toString()}`);
         } else {
           this.log.debug(`Configuration is valid: ${JSON.stringify(accessoryConfiguration)}`);
           accessoryConfigurations.push(accessoryConfiguration);
