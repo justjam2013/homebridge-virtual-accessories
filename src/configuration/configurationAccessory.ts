@@ -1,3 +1,5 @@
+/* eslint-disable curly */
+
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
@@ -50,23 +52,32 @@ export class AccessoryConfiguration {
   @Type(CronTriggerConfiguration)
     cronTrigger!: CronTriggerConfiguration;
 
-  isValid(): boolean {
+  private errorFields: string[] = [];
+
+  isValid(): [boolean, string[]] {
     const isValidAccessoryID: boolean = (this.accessoryID !== undefined);
     const isValidAccessoryName: boolean = (this.accessoryName !== undefined);
     const isValidAccessoryType: boolean = (this.accessoryType !== undefined);
 
-    const isValidAccessoryState: boolean = (
-      (!this.accessoryIsStateful && !this.accessoryHasResetTimer) ||
-      (this.accessoryIsStateful || this.accessoryHasResetTimer)
-    );
+    // There can be only one!
+    const isValidAccessoryState: boolean = (!(this.accessoryIsStateful && this.accessoryHasResetTimer));
+
+    // Store fields failing validation
+    if (!isValidAccessoryID) this.errorFields.push('accessoryID');
+    if (!isValidAccessoryName) this.errorFields.push('accessoryName');
+    if (!isValidAccessoryType) this.errorFields.push('accessoryType');
+    if (!isValidAccessoryState) this.errorFields.push('accessoryIsStateful', 'accessoryHasResetTimer');
 
     const isValidAccessory: boolean = this.isValidAccessory(isValidAccessoryType);
 
-    return (isValidAccessoryID &&
-      isValidAccessoryName &&
-      isValidAccessoryType &&
-      isValidAccessoryState &&
-      isValidAccessory);
+    return [
+      (isValidAccessoryID &&
+        isValidAccessoryName &&
+        isValidAccessoryType &&
+        isValidAccessoryState &&
+        isValidAccessory),
+      this.errorFields,
+    ];
   }
 
   private isValidAccessory(isValidAccessoryType: boolean): boolean {
@@ -100,42 +111,98 @@ export class AccessoryConfiguration {
       (this.doorbellVolume >= 0 && this.doorbellVolume <= 100)
     );
 
-    return (isValidDoorbellVolume);
+    // Store fields failing validation
+    if (!isValidDoorbellVolume) this.errorFields.push('doorbellVolume');
+
+    return (
+      isValidDoorbellVolume
+    );
   };
 
   private isValidGarageDoor(): boolean {
     const isValidGarageDoorDefaultState: boolean = (this.garageDoorDefaultState !== undefined);
 
-    return (isValidGarageDoorDefaultState);
+    // Store fields failing validation
+    if (!isValidGarageDoorDefaultState) this.errorFields.push('garageDoorDefaultState');
+
+    return (
+      isValidGarageDoorDefaultState
+    );
   };
 
   private isValidLock(): boolean {
     const isValidLockDefaultState: boolean = (this.lockDefaultState !== undefined);
     const isValidLockHardwareFinish: boolean = (this.lockHardwareFinish !== undefined);
 
-    return (isValidLockDefaultState &&
-      isValidLockHardwareFinish);
+    // Store fields failing validation
+    if (!isValidLockDefaultState) this.errorFields.push('lockDefaultState');
+    if (!isValidLockHardwareFinish) this.errorFields.push('lockHardwareFinish');
+
+    return (
+      isValidLockDefaultState &&
+      isValidLockHardwareFinish
+    );
   };
 
   private isValidSensor(): boolean {
     const isValidSensorType: boolean = (this.sensorType !== undefined);
     const isValidSensorTrigger: boolean = (this.sensorTrigger !== undefined);
-    const isValidTrigger = this.isValidTrigger(isValidSensorTrigger);
 
-    return (isValidSensorType &&
+    // Store fields failing validation
+    if (!isValidSensorType) this.errorFields.push('sensorType');
+    if (!isValidSensorTrigger) this.errorFields.push('sensorTrigger');
+
+    // Validate Trigger
+    let isValidTrigger: boolean;
+    let triggerErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidTrigger, triggerErrorFields] = this.isValidResetTimer();
+    if (!isValidTrigger && triggerErrorFields.length === 0) {
+      this.errorFields.push(this.sensorTrigger + 'Trigger');
+    } else {
+      this.errorFields.push(...triggerErrorFields);
+    }
+
+    return (
+      isValidSensorType &&
       isValidSensorTrigger &&
-      isValidTrigger);
+      isValidTrigger
+    );
   };
 
   private isValidSwitch(): boolean {
     const isValidSwitchDefaultState: boolean = (this.switchDefaultState !== undefined);
 
-    const isValidResetTimer: boolean = this.isValidResetTimer();
-    const isValidCompanionSensor: boolean = this.isValidCompanionSensor();
+    // Store fields failing validation
+    if (!isValidSwitchDefaultState) this.errorFields.push('switchDefaultState');
 
-    return (isValidSwitchDefaultState &&
+    // Validate ResetTimer
+    let isValidResetTimer: boolean;
+    let resetTimerErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
+    if (!isValidResetTimer && resetTimerErrorFields.length === 0) {
+      this.errorFields.push('resetTimer');
+    } else {
+      this.errorFields.push(...resetTimerErrorFields);
+    }
+
+    // Validate CompanionSensor
+    let isValidCompanionSensor: boolean;
+    let companionSensorErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidCompanionSensor, companionSensorErrorFields] = this.isValidCompanionSensor();
+    if (!isValidCompanionSensor && companionSensorErrorFields.length === 0) {
+      this.errorFields.push('companionSensor');
+    } else {
+      this.errorFields.push(...companionSensorErrorFields);
+    }
+
+    return (
+      isValidSwitchDefaultState &&
       isValidResetTimer &&
-      isValidCompanionSensor);
+      isValidCompanionSensor
+    );
   };
 
   /**
@@ -143,49 +210,68 @@ export class AccessoryConfiguration {
    */
 
   // Validate if accessory has reset timer - default true
-  private isValidResetTimer(): boolean {
+  private isValidResetTimer(): [boolean, string[]] {
     if (this.accessoryHasResetTimer) {
-      const validResetTimer: boolean =
-        (this.resetTimer !== undefined) &&
-        this.resetTimer.isValid();
+      let isValidResetTimer: boolean;
+      let errorFields: string[];
 
-      return validResetTimer;
+      if (this.resetTimer === undefined) {
+        return [false, []];
+      }
+
+      // eslint-disable-next-line prefer-const
+      [isValidResetTimer, errorFields] = this.resetTimer.isValid();
+      return [isValidResetTimer, errorFields];
     }
 
-    return true;
+    return [true, []];
   }
 
   // Validate if accessory has companion sensor - default true
-  private isValidCompanionSensor(): boolean {
-    if (this.accessoryHasResetTimer) {
-      const validCompanionSensor: boolean =
-        (this.resetTimer !== undefined) &&
-        this.resetTimer.isValid();
+  private isValidCompanionSensor(): [boolean, string[]] {
+    if (this.accessoryHasCompanionSensor) {
+      let isValidCompanionSensor: boolean;
+      let errorFields: string[];
 
-      return validCompanionSensor;
+      if (this.companionSensor === undefined) {
+        return [false, []];
+      }
+
+      // eslint-disable-next-line prefer-const
+      [isValidCompanionSensor, errorFields] = this.companionSensor.isValid();
+      return [isValidCompanionSensor, errorFields];
     }
 
-    return true;
+    return [true, []];
   }
 
-  private isValidTrigger(isValidSensorTrigger: boolean): boolean {
-    if (isValidSensorTrigger) {
+  private isValidTrigger(): [boolean, string[]] {
+    if (this.sensorTrigger !== undefined) {
+      let isValidTrigger: boolean;
+      let errorFields: string[];
+
       switch (this.sensorTrigger) {
       case 'cron':
-        return (
-          (this.cronTrigger !== undefined) &&
-          this.cronTrigger.isValid()
-        );
+        if (this.cronTrigger === undefined) {
+          return [false, []];
+        }
+
+        [isValidTrigger, errorFields] = this.cronTrigger.isValid();
+        break;
       case 'ping':
-        return (
-          (this.pingTrigger !== undefined) &&
-          this.pingTrigger.isValid()
-        );
+        if (this.pingTrigger === undefined) {
+          return [false, []];
+        }
+
+        [isValidTrigger, errorFields] = this.pingTrigger.isValid();
+        break;
       default:
-        return false;
+        return [false, []];
       }
+
+      return [isValidTrigger, errorFields];
     }
 
-    return false;
+    return [true, []];
   }
 }
