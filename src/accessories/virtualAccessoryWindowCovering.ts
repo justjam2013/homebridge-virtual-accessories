@@ -8,8 +8,8 @@ import { Accessory } from './virtualAccessory.js';
  */
 export class WindowCovering extends Accessory {
   
-  static readonly OPEN: number = 0;     // 0%
-  static readonly CLOSED: number = 100; // 100%
+  static readonly CLOSED: number = 0;   // 0%
+  static readonly OPEN: number = 100;   // 100%
 
   static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING;
   static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;
@@ -66,6 +66,7 @@ export class WindowCovering extends Accessory {
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${this.getStateName(this.states.WindowCoveringPosition)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringPosition));
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringPosition));
+    this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (WindowCovering.STOPPED));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -162,7 +163,7 @@ export class WindowCovering extends Accessory {
     // implement your own code to check if the device is on
     const windowCoveringPosition = this.platform.Characteristic.PositionState.DECREASING;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Window Covering Position: ${this.getPositionName(windowCoveringPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -170,13 +171,28 @@ export class WindowCovering extends Accessory {
     return windowCoveringPosition;
   }
 
-  private getStateName(state: number): string {
+  private getStateName(position: number): string {
+    let positionName: string;
+
+    switch (position) {
+    case undefined: { positionName = 'undefined'; break; }
+    case WindowCovering.CLOSED: { positionName = 'CLOSED'; break; }
+    case WindowCovering.OPEN: { positionName = 'OPEN'; break; }
+    default: { positionName = `POSITION: ${position.toString()}%`; }
+    }
+
+    if (position > WindowCovering.OPEN) {
+      positionName = `INVALID ${positionName}%`;
+    }
+
+    return positionName;
+  }
+
+  private getPositionName(state: number): string {
     let stateName: string;
 
     switch (state) {
     case undefined: { stateName = 'undefined'; break; }
-    case WindowCovering.OPEN: { stateName = 'OPEN'; break; }
-    case WindowCovering.CLOSED: { stateName = 'CLOSED'; break; }
     case WindowCovering.DECREASING: { stateName = 'DECREASING'; break; }
     case WindowCovering.INCREASING: { stateName = 'INCREASING'; break; }
     case WindowCovering.STOPPED: { stateName = 'STOPPED'; break; }
