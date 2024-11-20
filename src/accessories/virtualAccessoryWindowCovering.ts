@@ -20,7 +20,9 @@ export class WindowCovering extends Accessory {
    * You should implement your own code to track the state of your accessory
    */
   private states = {
-    WindowCoveringPosition: WindowCovering.CLOSED,
+    WindowCoveringCurrentPosition: WindowCovering.CLOSED,
+    // WindowCoveringTargetPosition: WindowCovering.CLOSED,
+    WindowCoveringPositionState: WindowCovering.STOPPED,
   };
 
   private readonly stateStorageKey: string = 'WindowCoveringPosition';
@@ -39,12 +41,12 @@ export class WindowCovering extends Accessory {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
 
       if (cachedState !== undefined) {
-        this.states.WindowCoveringPosition = cachedState;
+        this.states.WindowCoveringCurrentPosition = cachedState;
       } else {
-        this.states.WindowCoveringPosition = this.defaultState;
+        this.states.WindowCoveringCurrentPosition = this.defaultState;
       }
     } else {
-      this.states.WindowCoveringPosition = this.defaultState;
+      this.states.WindowCoveringCurrentPosition = this.defaultState;
     }
 
     // set accessory information
@@ -63,10 +65,10 @@ export class WindowCovering extends Accessory {
 
     // Update the initial state of the accessory
     // eslint-disable-next-line max-len
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${this.getStateName(this.states.WindowCoveringPosition)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringPosition));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringPosition));
-    this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (WindowCovering.STOPPED));
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${this.getStateName(this.states.WindowCoveringCurrentPosition)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringCurrentPosition));
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringCurrentPosition));
+    this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -102,15 +104,15 @@ export class WindowCovering extends Accessory {
    */
   async handleCurrentPositionGet() {
     // implement your own code to check if the device is on
-    const windowCoveringPosition = this.states.WindowCoveringPosition;
+    const windowCoveringCurrentPosition = this.states.WindowCoveringCurrentPosition;
 
     // eslint-disable-next-line max-len
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Window Covering Position: ${this.getStateName(windowCoveringCurrentPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
-    return windowCoveringPosition;
+    return windowCoveringCurrentPosition;
   }
 
   /**
@@ -119,15 +121,21 @@ export class WindowCovering extends Accessory {
    */
   async handleTargetPositionSet(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
-    this.states.WindowCoveringPosition = value as number;
+    this.states.WindowCoveringCurrentPosition = value as number;
+
+    // PositionState DECREASING/INCREASING
+    // Timer
+    // PositionState STOPPED
+    // CurrentPosition OPEN/CLOSED
+    this.service!.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringCurrentPosition));
 
     // Store device state if stateful
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveState(this.storagePath, this.stateStorageKey, this.states.WindowCoveringPosition);
+      this.saveState(this.storagePath, this.stateStorageKey, this.states.WindowCoveringCurrentPosition);
     }
 
     // eslint-disable-next-line max-len
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Window Covering Position: ${this.getStateName(this.states.WindowCoveringPosition)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Window Covering Position: ${this.getStateName(this.states.WindowCoveringCurrentPosition)}`);
   }
 
   /**
@@ -145,7 +153,7 @@ export class WindowCovering extends Accessory {
    */
   async handleTargetPositionGet(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
-    const windowCoveringPosition = this.states.WindowCoveringPosition;
+    const windowCoveringPosition = this.states.WindowCoveringCurrentPosition;
 
     // eslint-disable-next-line max-len
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
@@ -161,7 +169,7 @@ export class WindowCovering extends Accessory {
    */
   async handlePositionStateGet() {
     // implement your own code to check if the device is on
-    const windowCoveringPosition = this.platform.Characteristic.PositionState.STOPPED;
+    const windowCoveringPosition = this.states.WindowCoveringPositionState;
 
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Window Covering Position: ${this.getPositionName(windowCoveringPosition)}`);
 
