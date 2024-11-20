@@ -4,26 +4,26 @@ import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
- * GarageDoor - Accessory implementation
+ * WindowCovering - Accessory implementation
  */
-export class GarageDoor extends Accessory {
+export class WindowCovering extends Accessory {
   
-  static readonly OPEN: number = 0;     // Characteristic.CurrentDoorState.OPEN;
-  static readonly CLOSED: number = 1;   // Characteristic.CurrentDoorState.CLOSED;
-  static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING;
-  static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING;
-  static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED;
+  static readonly OPEN: number = 0;     // 0%
+  static readonly CLOSED: number = 100; // 100%
+
+  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING;
+  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;
+  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;
 
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
   private states = {
-    GarageDoorState: GarageDoor.CLOSED,
-    ObstructionDetected: false,
+    WindowCoveringPosition: WindowCovering.CLOSED,
   };
 
-  private readonly stateStorageKey: string = 'GarageDoorState';
+  private readonly stateStorageKey: string = 'WindowCoveringPosition';
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -32,30 +32,30 @@ export class GarageDoor extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.garageDoorDefaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
+    this.defaultState = this.accessoryConfiguration.windowCoveringDefaultState === 'open' ? WindowCovering.OPEN : WindowCovering.CLOSED;
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
 
       if (cachedState !== undefined) {
-        this.states.GarageDoorState = cachedState;
+        this.states.WindowCoveringPosition = cachedState;
       } else {
-        this.states.GarageDoorState = this.defaultState;
+        this.states.WindowCoveringPosition = this.defaultState;
       }
     } else {
-      this.states.GarageDoorState = this.defaultState;
+      this.states.WindowCoveringPosition = this.defaultState;
     }
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Garage Door')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Window Covering')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.GarageDoorOpener) || this.accessory.addService(this.platform.Service.GarageDoorOpener);
+    this.service = this.accessory.getService(this.platform.Service.WindowCovering) || this.accessory.addService(this.platform.Service.WindowCovering);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -63,25 +63,25 @@ export class GarageDoor extends Accessory {
 
     // Update the initial state of the accessory
     // eslint-disable-next-line max-len
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${this.getStateName(this.states.GarageDoorState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorState));
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${this.getStateName(this.states.WindowCoveringPosition)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringPosition));
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringPosition));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
     // register handlers for the CurrentDoorState Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentDoorState)
-      .onGet(this.handleCurrentDoorStateGet.bind(this)); // GET - bind to the 'handleCurrentDoorStateGet` method below
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
+      .onGet(this.handleCurrentPositionGet.bind(this)); // GET - bind to the 'handleCurrentPositionGet` method below
 
     // register handlers for the TargetDoorState Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState)
-      .onSet(this.handleTargetDoorStateSet.bind(this)) // SET - bind to the `handleTargetDoorStateSet` method below
-      .onGet(this.handleTargetDoorStateGet.bind(this)); // GET - bind to the `handleTargetDoorStateGet` method below
+    this.service.getCharacteristic(this.platform.Characteristic.TargetPosition)
+      .onSet(this.handleTargetPositionSet.bind(this)) // SET - bind to the `handleTargetPositionSet` method below
+      .onGet(this.handleTargetPositionGet.bind(this)); // GET - bind to the `handleTargetPositionGet` method below
 
     // register handlers for the ObstructionDetected Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.ObstructionDetected)
-      .onGet(this.handleObstructionDetectedGet.bind(this)); // GET - bind to the 'handleObstructionDetectedGet` method below
+    this.service.getCharacteristic(this.platform.Characteristic.PositionState)
+      .onGet(this.handlePositionStateGet.bind(this)); // GET - bind to the 'handlePositionStateGet` method below
 
     /**
      * Creating multiple services of the same type.
@@ -99,33 +99,34 @@ export class GarageDoor extends Accessory {
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleCurrentDoorStateGet() {
+  async handleCurrentPositionGet() {
     // implement your own code to check if the device is on
-    const garageDoorState = this.states.GarageDoorState;
+    const windowCoveringPosition = this.states.WindowCoveringPosition;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Garage Door State: ${this.getStateName(garageDoorState)}`);
+    // eslint-disable-next-line max-len
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
-    return garageDoorState;
+    return windowCoveringPosition;
   }
 
   /**
    * Handle "SET" requests from HomeKit
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
-  async handleTargetDoorStateSet(value: CharacteristicValue) {
+  async handleTargetPositionSet(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
-    this.states.GarageDoorState = value as number;
+    this.states.WindowCoveringPosition = value as number;
 
     // Store device state if stateful
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveState(this.storagePath, this.stateStorageKey, this.states.GarageDoorState);
+      this.saveState(this.storagePath, this.stateStorageKey, this.states.WindowCoveringPosition);
     }
 
     // eslint-disable-next-line max-len
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Garage Door State: ${this.getStateName(this.states.GarageDoorState)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Window Covering Position: ${this.getStateName(this.states.WindowCoveringPosition)}`);
   }
 
   /**
@@ -141,31 +142,32 @@ export class GarageDoor extends Accessory {
    * @example
    * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
-  async handleTargetDoorStateGet(): Promise<CharacteristicValue> {
+  async handleTargetPositionGet(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
-    const garageDoorState = this.states.GarageDoorState;
+    const windowCoveringPosition = this.states.WindowCoveringPosition;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Garage Door State: ${this.getStateName(garageDoorState)}`);
+    // eslint-disable-next-line max-len
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
-    return garageDoorState;
+    return windowCoveringPosition;
   }
 
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleObstructionDetectedGet() {
+  async handlePositionStateGet() {
     // implement your own code to check if the device is on
-    const obstructionDetected = this.states.ObstructionDetected;
+    const windowCoveringPosition = this.platform.Characteristic.PositionState.DECREASING;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Window Covering Position: ${this.getStateName(windowCoveringPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
-    return obstructionDetected;
+    return windowCoveringPosition;
   }
 
   private getStateName(state: number): string {
@@ -173,11 +175,11 @@ export class GarageDoor extends Accessory {
 
     switch (state) {
     case undefined: { stateName = 'undefined'; break; }
-    case GarageDoor.OPEN: { stateName = 'OPEN'; break; }
-    case GarageDoor.CLOSED: { stateName = 'CLOSED'; break; }
-    case GarageDoor.OPENING: { stateName = 'OPENING'; break; }
-    case GarageDoor.CLOSING: { stateName = 'CLOSING'; break; }
-    case GarageDoor.STOPPED: { stateName = 'STOPPED'; break; }
+    case WindowCovering.OPEN: { stateName = 'OPEN'; break; }
+    case WindowCovering.CLOSED: { stateName = 'CLOSED'; break; }
+    case WindowCovering.DECREASING: { stateName = 'DECREASING'; break; }
+    case WindowCovering.INCREASING: { stateName = 'INCREASING'; break; }
+    case WindowCovering.STOPPED: { stateName = 'STOPPED'; break; }
     default: { stateName = state.toString(); }
     }
 

@@ -36,6 +36,9 @@ export class AccessoryConfiguration {
   sensorType!: string;
   sensorTrigger!: string;
 
+  // Window Covering
+  windowCoveringDefaultState!: string;
+
   // Reset timer
   @Type(TimerConfiguration)
     resetTimer!: TimerConfiguration;
