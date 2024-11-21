@@ -124,7 +124,15 @@ export class GarageDoor extends Accessory {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.GarageDoorState);
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${this.getStateName(this.states.GarageDoorState)}`);
+    // CurrentDoorState CLOSING/OPENING
+    // Timer
+    // CurrentDoorState OPEN/CLOSED
+    this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorState));
+    // eslint-disable-next-line max-len
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Garage Door State: ${this.getStateName(this.states.GarageDoorState)}`);
+
+    // eslint-disable-next-line max-len
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Garage Door State: ${this.getStateName(this.states.GarageDoorState)}`);
   }
 
   /**
