@@ -47,7 +47,7 @@
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
-                { "title": "Window Covering - Blinds, Shades)", "enum": ["windowcovering"] }
+                { "title": "Window Covering - Blinds, Shades", "enum": ["windowcovering"] }
               ],
               "default": "switch"
             },
