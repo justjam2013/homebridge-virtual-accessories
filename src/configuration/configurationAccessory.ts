@@ -34,6 +34,9 @@ export class AccessoryConfiguration {
   // Doorbell
   doorbellVolume!: number;
 
+  // Window Covering
+  windowCoveringDefaultState!: string;
+
   // Sensor
   sensorType!: string;
   sensorTrigger!: string;
@@ -93,6 +96,8 @@ export class AccessoryConfiguration {
         return this.isValidSensor();
       case 'switch':
         return this.isValidSwitch();
+      case 'windowcovering':
+        return this.isValidWindowCovering();
       default:
         return false;
       }
@@ -204,6 +209,17 @@ export class AccessoryConfiguration {
       isValidCompanionSensor
     );
   };
+
+  private isValidWindowCovering(): boolean {
+    const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
+
+    // Store fields failing validation
+    if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
+
+    return (
+      isValidWindowCoveringDefaultState
+    );
+  }
 
   /**
    * Adornment validation

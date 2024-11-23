@@ -103,7 +103,7 @@ export class GarageDoor extends Accessory {
     // implement your own code to check if the device is on
     const garageDoorState = this.states.GarageDoorState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${this.getStateName(garageDoorState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Garage Door State: ${this.getStateName(garageDoorState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -158,7 +158,7 @@ export class GarageDoor extends Accessory {
     // implement your own code to check if the device is on
     const garageDoorState = this.states.GarageDoorState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${this.getStateName(garageDoorState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Garage Door State: ${this.getStateName(garageDoorState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);

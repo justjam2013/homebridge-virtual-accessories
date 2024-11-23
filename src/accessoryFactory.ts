@@ -7,6 +7,7 @@ import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
+import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
 import { VirtualSensor } from './sensors/virtualSensor.js';
 import { VirtualContactSensor } from './sensors/virtualSensorContact.js';
@@ -54,6 +55,9 @@ export abstract class AccessoryFactory {
       break;
     case 'garagedoor':
       virtualAccessory = new GarageDoor(platform, accessory);
+      break;
+    case 'windowcovering':
+      virtualAccessory = new WindowCovering(platform, accessory);
       break;
     case 'sensor':
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);

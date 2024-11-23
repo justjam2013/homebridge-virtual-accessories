@@ -46,32 +46,18 @@
                 { "title": "Garage Door", "enum": ["garagedoor"] },
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Sensor", "enum": ["sensor"] },
-                { "title": "Switch", "enum": ["switch"] }
+                { "title": "Switch", "enum": ["switch"] },
+                { "title": "Window Covering - Blinds, Shades", "enum": ["windowcovering"] }
               ],
               "default": "switch"
             },
-            "switchDefaultState": {
-              "title": "Switch Default State *",
-              "description": "Switch default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Off", "enum": ["off"] },
-                { "title": "On", "enum": ["on"] }
-              ],
+            "doorbellVolume": {
+              "title": "Doorbell Volume *",
+              "description": "Doorbell volume *",
+              "type": "integer",
+              "minimum": 0,
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
-              }
-            },
-            "lockDefaultState": {
-              "title": "Lock Default State *",
-              "description": "Lock default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Locked", "enum": ["locked"] },
-                { "title": "Unlocked", "enum": ["unlocked"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
               }
             },
             "garageDoorDefaultState": {
@@ -84,6 +70,18 @@
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
+              }
+            },
+            "lockDefaultState": {
+              "title": "Lock Default State *",
+              "description": "Lock default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Locked", "enum": ["locked"] },
+                { "title": "Unlocked", "enum": ["unlocked"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
               }
             },
             "lockHardwareFinish": {
@@ -100,13 +98,28 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
               }
             },
-            "doorbellVolume": {
-              "title": "Doorbell Volume *",
-              "description": "Doorbell volume *",
-              "type": "integer",
-              "minimum": 0,
+            "switchDefaultState": {
+              "title": "Switch Default State *",
+              "description": "Switch default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Off", "enum": ["off"] },
+                { "title": "On", "enum": ["on"] }
+              ],
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
+              }
+            },
+            "windowCoveringDefaultState": {
+              "title": "Window Covering Default State *",
+              "description": "Window Covering default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Closed", "enum": ["closed"] },
+                { "title": "Open", "enum": ["open"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
             },
             "sensorType": {
@@ -143,7 +156,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['switch', 'lock', 'garagedoor'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
+                "functionBody": "return ['switch', 'lock', 'garagedoor', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
               }
             },
             "accessoryHasResetTimer": {
