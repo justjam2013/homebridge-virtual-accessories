@@ -7,7 +7,11 @@
 </div>
 
 <div>
-    <img src="https://img.shields.io/badge/homebridge-verification_pending-BAD5F3">
+    <img src="https://img.shields.io/badge/_homebridge_-_verification_pending_-BAD5F3">
+</div>
+
+<div>
+    <img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50">
 </div>
 
 <p align="center" vertical-align="middle">
@@ -25,9 +29,9 @@
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches), as well as a few others.
 
-The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may be unmaintained and abandoned.
+The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may be unmaintained and abandoned. Also, this plugin is Homebridge 2.0 ready.
 
-This is work in progress, so new accessories and functionality will be added as needed or requested. The first accessories offered are virtual devices that are most useful:
+This is work in progress, so new accessories and functionality will be added as needed or, more likely, as requested. The first accessories offered are virtual devices that are most useful:
 
 -   Switch. Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod.
@@ -36,7 +40,8 @@ This is work in progress, so new accessories and functionality will be added as 
 -   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
     - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
+-   Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
+-   Window Covering - Blinds, Shades. Currently in beta.
 
 ## Installation
 
@@ -45,6 +50,11 @@ You can install this plugin via the Homebridge UI or by typing:
 ```
 npm install -g homebridge-virtual-accessories
 ```
+**Note:** If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. This is required to build the `node-gyp` native library dependecy. To install Xcode or the Xcode Command Line Tools, use the following command:
+```
+xcode-select --install
+```
+If you're having issues installing the plugin, please look at the details in this ticket: ["Cannot install"](https://github.com/justjam2013/homebridge-virtual-accessories/issues/31).
 
 ## Configuration
 
@@ -111,6 +121,24 @@ Note:
 }
 ```
 `lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
+
+### Window Covering - Blinds, Shades (beta)
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Blinds",
+            "accessoryType": "windowcovering",
+            "windowCoveringDefaultState": "closed",
+            "accessoryIsStateful": false,
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Switch
 
@@ -262,6 +290,7 @@ Note:
 ## Known Issues
 
 -   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
+-   The Homebridge UI does not support expanding and collapsing accessory sections, so if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: ["Homebridge UI improvements"](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32). Please read the details and provide your support for this enhancement to the Homebridge UI functionality.
 
 ## Issues
 
