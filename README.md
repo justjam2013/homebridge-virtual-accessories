@@ -1,17 +1,17 @@
 <div>
-    <img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories">
+    <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories"></a>
 </div>
 
 <div>
-    <img src="https://img.shields.io/github/license/justjam2013/homebridge-virtual-accessories">
+    <a href="https://github.com/homebridge/homebridge"><img src="https://img.shields.io/badge/_homebridge_-_verification_pending_-BAD5F3"></a>
 </div>
 
 <div>
-    <img src="https://img.shields.io/badge/_homebridge_-_verification_pending_-BAD5F3">
+    <a href="https://github.com/homebridge/homebridge"><img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50"></a>
 </div>
 
 <div>
-    <img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50">
+    <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/_discord (homebridge)_-737CF8"></a>
 </div>
 
 <p align="center" vertical-align="middle">
