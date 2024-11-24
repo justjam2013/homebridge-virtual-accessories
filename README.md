@@ -10,11 +10,6 @@
     <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50"></a>
 </div>
 
-<p></p>
-<div>
-    <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/badge/_npm_-_Virtual_Accessories_For_Homebridge_-ffb3b3?labelColor=CB0000"></a>
-</div>
-
 <div>
     <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/_discord (homebridge)_-737CF8"></a>
 </div>
