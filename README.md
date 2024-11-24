@@ -316,8 +316,8 @@ Note:
 -   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
 -   The Homebridge UI does not support expanding and collapsing accessory sections, so if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: ["Homebridge UI improvements"](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32). Please read the details and provide your support for this enhancement to the Homebridge UI functionality.
 
-## Issues
+## What if I run into a problem?
 
 If you encounter a problem, please open a ticket on GitHub. Please attach any log output to the a ticket, making sure to remove any sensitive information such as passwords, tokens, etc.
 
-Also please feel free to open a ticket on GitHub if you have any enhancement suggestions or any additional functionality you would like to see added.
+Also please feel free to open a ticket if you have any enhancement suggestions or any additional functionality that you would like to see added.
