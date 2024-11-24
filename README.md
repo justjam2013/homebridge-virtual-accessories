@@ -51,11 +51,17 @@ You can install this plugin via the Homebridge UI or by typing:
 ```
 npm install -g homebridge-virtual-accessories
 ```
-**Note:** If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. This is required to build the `node-gyp` native library dependecy. To install Xcode or the Xcode Command Line Tools, use the following command:
+**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, specifically `node-gyp`, which gets compiled for that platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. I have not tested every possible platform that Homebridge runs on as I siply don't own every single device that can Homebridge can be installed on. The only platforms I tested are the Homebridge Docker image, which I use for my home, and Apple silicone Mac, which I use for development. However, unless you are using the Homebridge Docker image, everyone'e environment is different. Below are installation notes for specific platforms, which I will update as users of this plugin report issues:
+
+#### MacOS
+If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
 ```
 xcode-select --install
 ```
-If you're having issues installing the plugin, please look at the details in this ticket: ["Cannot install"](https://github.com/justjam2013/homebridge-virtual-accessories/issues/31).
+If you're having issues installing the plugin, please look at the details in this ticket: "[Cannot install (macOS)](https://github.com/justjam2013/homebridge-virtual-accessories/issues/31)".
+
+#### Synology
+If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology, you will need to ensure that a build toolchain is imstalled. This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
 
 ## Configuration
 
