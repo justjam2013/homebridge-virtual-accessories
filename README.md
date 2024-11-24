@@ -242,34 +242,45 @@ Note:
 
 ```json
 {
-    "accessoryID": "12345",
-    "accessoryName": "My Ping Sensor",
-    "accessoryType": "sensor",
-    "sensorType": "contact",
-    "sensorTrigger": "ping",
-    "pingTrigger": {
-        "host": "192.168.0.200",
-        "failureRetryCount": 3,
-        "isDisabled": false
-    }
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Ping Sensor",
+            "accessoryType": "sensor",
+            "sensorType": "contact",
+            "sensorTrigger": "ping",
+            "pingTrigger": {
+                "host": "192.168.0.200",
+                "failureRetryCount": 3,
+                "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 }
-
 ```
 
 ### Sensor with cron trigger
 
 ```json
 {
-    "accessoryID": "7878778",
-    "accessoryName": "Cron Sensor",
-    "accessoryType": "sensor",
-    "sensorType": "leak",
-    "sensorTrigger": "cron",
-    "cronTrigger": {
-        "pattern": "* * * * * *",
-        "zoneId": "America/Los_Angeles",
-        "isDisabled": false
-    }
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "7878778",
+            "accessoryName": "Cron Sensor",
+            "accessoryType": "sensor",
+            "sensorType": "leak",
+            "sensorTrigger": "cron",
+            "cronTrigger": {
+                "pattern": "* * * * * *",
+                "zoneId": "America/Los_Angeles",
+                "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
 
@@ -277,18 +288,24 @@ Note:
 
 ```json
 {
-    "accessoryID": "7878778",
-    "accessoryName": "Cron Sensor",
-    "accessoryType": "sensor",
-    "sensorType": "leak",
-    "sensorTrigger": "cron",
-    "cronTrigger": {
-        "pattern": "* * * * * *",
-        "zoneId": "America/Los_Angeles",
-        "startDateTime": "2024-11-14T19:41:00Z",
-        "endDateTime": "2024-11-30T19:41:00Z",
-        "isDisabled": false
-    }
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "7878778",
+            "accessoryName": "Cron Sensor",
+            "accessoryType": "sensor",
+            "sensorType": "leak",
+            "sensorTrigger": "cron",
+            "cronTrigger": {
+                "pattern": "* * * * * *",
+                "zoneId": "America/Los_Angeles",
+                "startDateTime": "2024-11-14T19:41:00Z",
+                "endDateTime": "2024-11-30T19:41:00Z",
+                "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
 
