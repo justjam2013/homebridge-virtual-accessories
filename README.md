@@ -37,11 +37,11 @@ This is work in progress, so new accessories and functionality will be added as 
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod.
 -   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. And it generates a HomeKey card in the Wallet app.
+-   Window Covering - Blinds, Shades. Currently in beta.
 -   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
     - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
--   Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
--   Window Covering - Blinds, Shades. Currently in beta.
+    - Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
 
 ## Installation
 
