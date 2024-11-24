@@ -129,7 +129,7 @@ export class WindowCovering extends Accessory {
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${this.getStateName(this.states.WindowCoveringTargetPosition)}`);
 
     // PositionState DECREASING/INCREASING
-    this.states.WindowCoveringPositionState = (this.states.WindowCoveringCurrentPosition === WindowCovering.OPEN) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
+    this.states.WindowCoveringPositionState = (this.states.WindowCoveringTargetPosition === WindowCovering.OPEN) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
     this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${this.getPositionName(this.states.WindowCoveringPositionState)}`);
     
