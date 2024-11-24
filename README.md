@@ -41,7 +41,7 @@ This is work in progress, so new accessories and functionality will be added as 
 -   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
     - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switvh trigger.
+    - Switch trigger. To activate a sensor with a switch flip, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch trigger.
 
 ## Installation
 
