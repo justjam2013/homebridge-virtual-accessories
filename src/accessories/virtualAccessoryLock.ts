@@ -161,7 +161,7 @@ export class Lock extends Accessory {
   async handleConfigurationStateGet(): Promise<CharacteristicValue> {
     const configurationState = 0;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Configuration State: ${configurationState}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configuration State: ${configurationState}`);
 
     return configurationState;
   }
@@ -169,7 +169,7 @@ export class Lock extends Accessory {
   async handleNFCAccessControlPointSet(value: CharacteristicValue) {
     const nfcAccessControlPoint = value;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point to ${nfcAccessControlPoint}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
   }
 
   async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
