@@ -51,7 +51,7 @@ You can install this plugin via the Homebridge UI or by typing:
 ```
 npm install -g homebridge-virtual-accessories
 ```
-**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, specifically `node-gyp`, which gets compiled for that platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. If you are choosing to install on a platform other than the official Homebridge Docker image, I will assume that you have the necessary technical skills to do so. Below are platform specific installation notes, which I will try to update as users of this plugin report issues:
+**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, specifically `node-gyp`, which gets compiled for that platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. If you are choosing to install on a platform other than the official Homebridge Docker image, I will assume that you have the necessary technical skills to do so, as I neither have the bandwidth nor the hardware to test every single platform that Homebridge runs on. Below are platform specific installation notes, which I will try to update as users of this plugin report issues:
 
 #### MacOS
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
