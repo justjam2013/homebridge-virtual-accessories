@@ -32,7 +32,7 @@ This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https
 
 The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may be unmaintained and abandoned. Also, this plugin is Homebridge 2.0 ready.
 
-This is work in progress, so new accessories and functionality will be added as needed or, more likely, as requested. The first accessories offered are virtual devices that are most useful:
+This is work in progress, so new accessories and functionality will be added as needed or, more likely, as requested. The current virtual accessories offered are:
 
 -   Switch. Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   Doorbell. Allows you to use any button as a doorbell and have it play a chime on a Homepod.
