@@ -61,7 +61,7 @@ xcode-select --install
 If you're having issues installing the plugin, please look at the details in this ticket: "[Cannot install (macOS)](https://github.com/justjam2013/homebridge-virtual-accessories/issues/31)".
 
 #### Synology
-If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology, you will need to ensure that a build toolchain is imstalled. This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
+If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology, you will need to ensure that a build toolchain is installed. This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
 
 ## Configuration
 
