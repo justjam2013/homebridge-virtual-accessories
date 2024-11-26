@@ -136,17 +136,17 @@ export class Switch extends Accessory {
       this.resetTimer!.startTimer();
     }
 
-    if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
-      this.states.SensorState = this.determineSensorState();
-
-      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
-    }
-
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.SwitchState);
     }
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
+
+    if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
+      this.states.SensorState = this.determineSensorState();
+
+      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
+    }
   }
 
   setCompanionSwitchState(value: boolean) {
