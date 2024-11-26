@@ -104,7 +104,7 @@ export abstract class VirtualSensor extends Accessory {
   /**
    * Handle requests to get the current value of the "Sensor State" characteristic
    */
-  handleSensorStateGet() {
+  async handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
@@ -115,7 +115,7 @@ export abstract class VirtualSensor extends Accessory {
   /**
    * This method is called by the accessory that has this sensor as a companion
    */
-  triggerCompanionSensorState(sensorState: number, accessory: Accessory) {
+  async triggerCompanionSensorState(sensorState: number, accessory: Accessory) {
     if (!this.isCompanionSensor) {
       throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
     } else if (accessory.accessory.UUID !== this.accessory.UUID) {
