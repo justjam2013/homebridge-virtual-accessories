@@ -127,9 +127,9 @@ export class GarageDoor extends Accessory {
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${this.getStateName(this.states.GarageDoorTargetState)}`);
 
     // CurrentDoorState CLOSING/OPENING
-    const transitionState: number = (this.states.GarageDoorTargetState === GarageDoor.OPEN) ? GarageDoor.OPENING : GarageDoor.CLOSING;
-    this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (transitionState));
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Curent Door State: ${this.getStateName(transitionState)}`);
+    this.states.GarageDoorCurrentState = (this.states.GarageDoorTargetState === GarageDoor.OPEN) ? GarageDoor.OPENING : GarageDoor.CLOSING;
+    this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Curent Door State: ${this.getStateName(this.states.GarageDoorCurrentState)}`);
 
     // CurrentDoorState CLOSED/OPEN with 3 second delay
     const transitionDelayMillis: number = 3 * 1000;
