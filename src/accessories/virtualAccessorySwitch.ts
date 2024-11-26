@@ -3,7 +3,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { Timer } from '../timer.js';
+import { ResetTimer } from '../resetTimer.js';
 import { NotCompanionError } from '../errors.js';
 
 /**
@@ -62,7 +62,7 @@ export class Switch extends Accessory {
         this.states.SensorState = this.CLOSED_NORMAL;
 
         if (this.accessoryConfiguration.accessoryHasResetTimer) {
-          this.timer = new Timer(this, this.defaultState, this.platform.Characteristic.On);
+          this.resetTimer = new ResetTimer(this, this.defaultState, this.platform.Characteristic.On);
         }
       }
     }
@@ -133,7 +133,7 @@ export class Switch extends Accessory {
     this.states.SwitchState = value as boolean;
 
     if (this.accessoryConfiguration.accessoryHasResetTimer && this.states.SwitchState !== this.defaultState) {
-      this.timer!.startTimer();
+      this.resetTimer!.startTimer();
     }
 
     if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
@@ -146,7 +146,7 @@ export class Switch extends Accessory {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.SwitchState);
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Switch Cureent State: ${Switch.getStateName(this.states.SwitchState)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
   }
 
   setCompanionSwitchState(value: boolean) {
@@ -174,7 +174,7 @@ export class Switch extends Accessory {
     // implement your own code to check if the device is on
     const switchState = this.states.SwitchState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Switch Current State: ${Switch.getStateName(switchState)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Switch.getStateName(switchState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);

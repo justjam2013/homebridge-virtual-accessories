@@ -90,7 +90,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const pressEvent = Doorbell.SINGLE_PRESS;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(pressEvent)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -104,7 +104,7 @@ export class Doorbell extends Accessory {
     // implement your own code to turn your device on/off
     this.states.Volume = value as number;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume to ${this.states.Volume}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
   }
 
   /**
@@ -170,17 +170,17 @@ export class Doorbell extends Accessory {
 
     this.service!.updateCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent, (event));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered doorbell event: ${Doorbell.getEventName(event)}`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${this.getEventName(event)}`);
   }
 
-  static getEventName(event: number): string {
+  private getEventName(event: number): string {
     let eventName: string;
 
     switch (event) {
     case undefined: { eventName = 'undefined'; break; }
-    case Doorbell.SINGLE_PRESS: { eventName = 'SINGLE_PRESS'; break; }
-    case Doorbell.DOUBLE_PRESS: { eventName = 'DOUBLE_PRESS'; break; }
-    case Doorbell.LONG_PRESS: { eventName = 'LONG_PRESS'; break; }
+    case Doorbell.SINGLE_PRESS: { eventName = 'SINGLE PRESS'; break; }
+    case Doorbell.DOUBLE_PRESS: { eventName = 'DOUBLE PRESS'; break; }
+    case Doorbell.LONG_PRESS: { eventName = 'LONG PRESS'; break; }
     default: { eventName = event.toString(); }
     }
 
