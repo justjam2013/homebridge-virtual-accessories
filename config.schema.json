@@ -20,8 +20,10 @@
         "orderable": false,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": "Accessory",
+          "title": " ",
           "type": "object",
+          "expandable": true,
+          "expanded": false,
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
