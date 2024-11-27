@@ -23,7 +23,7 @@
           "title": " ",
           "type": "object",
           "expandable": true,
-          "expanded": false,
+          "expanded": true,
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
