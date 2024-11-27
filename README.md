@@ -318,7 +318,7 @@ Note:
 ## Known Issues
 
 -   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
--   The Homebridge UI does not support expanding and collapsing accessory sections, so if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality.
+-   The Homebridge UI does not provide expanding and collapsing accessory sections, except for the deprecated plugin types. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header. The ticket with Homebridge UI has been updated.
 
 ## What if I run into a problem?
 
