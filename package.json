@@ -16,8 +16,9 @@
   },
   "keywords": [
     "homebridge",
-    "plugin",
     "homebridge-plugin",
+    "plugin",
+    "homebridge plugin",
     "virtual",
     "virtual accessory",
     "virtual accessories",
@@ -32,11 +33,17 @@
     "virtual doorbell",
     "garage door",
     "virtual garage door",
-    "dummy",
+    "window covering",
+    "virtual window covering",
+    "binds",
+    "virtual blinds",
+    "shades",
+    "virtual shades",
     "sensor",
     "virtual sensor",
     "ping sensor",
-    "cron sensor"
+    "cron sensor",
+    "dummy"
   ],
   "main": "dist/index.js",
   "engines": {
