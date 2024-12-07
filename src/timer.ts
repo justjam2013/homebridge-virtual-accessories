@@ -9,9 +9,9 @@ export class Timer {
   };
 
   private timerId: ReturnType<typeof setTimeout> | undefined;
-  private duration: number = 0;   // Timer duration in seconds
+  private durationMillis: number = 0;   // Timer duration in seconds
 
-  private startTime: number = 0;
+  private endTime: number = 0;
 
   constructor();
   constructor(
@@ -22,7 +22,9 @@ export class Timer {
     duration?: number,
     units?: string,
   ) {
-    this.setDuration(duration, units);
+    if (duration !== undefined) {
+      this.setDuration(duration, units!);
+    }
   }
 
   start(
@@ -38,30 +40,34 @@ export class Timer {
     duration?: number,
     units?: string,
   ): void {
+    // In case timer is running, stop it
     this.stop();
 
-    this.setDuration(duration, units);
+    if (duration !== undefined) {
+      this.setDuration(duration, units!);
+    }
 
-    if (this.duration > 0) {
-      this.startTime = (new Date()).getTime();
+    if (this.durationMillis > 0) {
+      this.endTime = (new Date()).getTime() + this.durationMillis;
 
       this.timerId = setTimeout(() => {
+        // Run timeout action
         callback();
-        this.timerId = undefined;
-      }, this.duration * 1000);
+
+        this.stop();
+      }, this.durationMillis);
     }
   }
 
   stop(): void {
     clearTimeout(this.timerId);
-    this.startTime = 0;
   }
 
   /**
    * Returns duration in seconds
    */
   getDuration(): number {
-    return this.duration;
+    return this.durationMillis / 1000;
   }
 
   /**
@@ -69,34 +75,33 @@ export class Timer {
    */
   getRemainingTime(): number {
     const now: number = (new Date()).getTime();
-    const remaining: number = ((this.startTime === 0) ? 0 : now - this.startTime) / 1000;
+    const timediffMillis = this.endTime - now;
+    const remaining: number = (timediffMillis <= 0) ? 0 : Math.trunc(timediffMillis / 1000);
 
     return remaining;
   }
 
-  private setDuration(
-    duration?: number,
-    units?: string,
+  setDuration(
+    duration: number,
+    units: string,
   ) {
-    this.duration = duration ? duration : 0;
+    this.durationMillis = duration;
 
-    if (this.duration > 0 && units !== undefined) {
-      switch (units) {
-      case Timer.Units.Days:
-        this.duration *= 24;
+    switch (units) {
+    case Timer.Units.Days:
+      this.durationMillis *= 24;
       // falls through
-      case Timer.Units.Hours:
-        this.duration *= 60;
+    case Timer.Units.Hours:
+      this.durationMillis *= 60;
       // falls through
-      case Timer.Units.Minutes:
-        this.duration *= 60;
+    case Timer.Units.Minutes:
+      this.durationMillis *= 60;
       // falls through
-      case Timer.Units.Seconds:
-        this.duration *= 1000;
-        break;
-      default:
-        this.duration = 0;
-      }
+    case Timer.Units.Seconds:
+      this.durationMillis *= 1000;
+      break;
+    default:
+      this.durationMillis = 0;
     }
   }
 }
