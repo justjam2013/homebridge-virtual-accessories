@@ -4,7 +4,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
-// import { Timer } from '../timer.js';
+import { Timer } from '../timer.js';
 
 export class Valve extends Accessory {
 
@@ -20,7 +20,7 @@ export class Valve extends Accessory {
   static readonly IN_USE: number = 1;       // Characteristic.InUse.IN_USE
 
   private valveType: number;
-  // private durationTimer: Timer;
+  private durationTimer: Timer;
 
   /**
    * These are just used to create a working example
@@ -56,7 +56,7 @@ export class Valve extends Accessory {
       break;
     }
 
-    // this.durationTimer = new Timer(this.accessoryConfiguration.valveDuration, Timer.Units.Seconds);
+    this.durationTimer = new Timer(this.accessoryConfiguration.valveDuration, Timer.Units.Seconds);
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -92,12 +92,12 @@ export class Valve extends Accessory {
     this.service.getCharacteristic(this.platform.Characteristic.InUse)
       .onGet(this.handleInUseGet.bind(this));
 
-    // this.service.getCharacteristic(this.platform.Characteristic.SetDuration)
-    //   .onSet(this.handleDurationSet.bind(this))
-    //   .onGet(this.handleDurationGet.bind(this));
+    this.service.getCharacteristic(this.platform.Characteristic.SetDuration)
+      .onSet(this.handleDurationSet.bind(this))
+      .onGet(this.handleDurationGet.bind(this));
 
-    // this.service.getCharacteristic(this.platform.Characteristic.RemainingDuration)
-    //   .onGet(this.handleRemainingDuration.bind(this));
+    this.service.getCharacteristic(this.platform.Characteristic.RemainingDuration)
+      .onGet(this.handleRemainingDuration.bind(this));
 
     /**
      * Creating multiple services of the same type.
@@ -135,25 +135,23 @@ export class Valve extends Accessory {
     // implement your own code to turn your device on/off
     this.states.ValveActive = value as number;
 
-    // if (this.states.ValveActive === Valve.ACTIVE) {
-    //   this.durationTimer.start(
-    //     () => {
-    //       this.service!.setCharacteristic(this.platform.Characteristic.Active, (Valve.INACTIVE));
-    //     },
-    //   );
-    // }
-    // if (this.states.ValveActive === Valve.INACTIVE) {
-    //   this.durationTimer.stop();
-    // }
-
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${this.getActiveName(this.states.ValveActive)}`);
 
-    const transitionDelayMillis = 100;
-    setTimeout(() => {
-      this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
-      this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
-      this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
-    }, transitionDelayMillis);
+    this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
+    this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
+
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
+
+    if (this.states.ValveActive === Valve.ACTIVE) {
+      this.durationTimer.start(
+        () => {
+          this.service!.setCharacteristic(this.platform.Characteristic.Active, (Valve.INACTIVE));
+        },
+      );
+    }
+    if (this.states.ValveActive === Valve.INACTIVE) {
+      this.durationTimer.stop();
+    }
   }
 
   /**
@@ -200,29 +198,29 @@ export class Valve extends Accessory {
   /**
    * Duration
    */
-  // async handleDurationSet(value: CharacteristicValue) {
-  //   const duration = value as number;
+  async handleDurationSet(value: CharacteristicValue) {
+    const duration = value as number;
 
-  //   this.durationTimer.setDuration(duration, Timer.Units.Seconds);
+    this.durationTimer.setDuration(duration, Timer.Units.Seconds);
 
-  //   this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
-  // }
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
+  }
 
-  // async handleDurationGet(): Promise<CharacteristicValue> {
-  //   const duration = this.durationTimer.getDuration();
+  async handleDurationGet(): Promise<CharacteristicValue> {
+    const duration = this.durationTimer.getDuration();
 
-  //   this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
 
-  //   return duration;
-  // }
+    return duration;
+  }
 
-  // async handleRemainingDuration(): Promise<CharacteristicValue> {
-  //   const remainingDuration = this.durationTimer.getRemainingTime();
+  async handleRemainingDuration(): Promise<CharacteristicValue> {
+    const remainingDuration = this.durationTimer.getRemainingTime();
 
-  //   this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
 
-  //   return remainingDuration;
-  // }
+    return remainingDuration;
+  }
 
   private getValveTypeName(event: number): string {
     let eventName: string;

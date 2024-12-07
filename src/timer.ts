@@ -61,6 +61,7 @@ export class Timer {
 
   stop(): void {
     clearTimeout(this.timerId);
+    this.endTime = 0;
   }
 
   /**
@@ -76,7 +77,14 @@ export class Timer {
   getRemainingTime(): number {
     const now: number = (new Date()).getTime();
     const timediffMillis = this.endTime - now;
-    const remaining: number = (timediffMillis <= 0) ? 0 : Math.trunc(timediffMillis / 1000);
+    const remaining: number =
+      this.endTime === 0 ?
+        0 :
+        (
+          (timediffMillis <= 0) ?
+            0 :
+            Math.trunc(timediffMillis / 1000)
+        );
 
     return remaining;
   }
