@@ -35,15 +35,15 @@ The purpose of this plugin is to be able to create different types of virtual Ho
 This is work in progress, so new accessories and functionality will be added as needed or, more likely, as requested. The current virtual accessories supported are:
 
 -   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
--   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on a Homepod.
+-   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
--   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. And it generates a HomeKey card in the Wallet app.
--   **Window Covering** - Blinds, Shades.
--   **Valve** - Generic, Irrigation, Shower Head, Water Faucet
+-   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
+-   **Window Covering.** These are blinds and shades. This was created for a user that wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off ..".
+-   **Valve** - Generic, Irrigation, Shower Head, Water Faucet.
 -   **Sensor.** Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
-    - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
+    - Host Ping trigger. Pings a network host. It is actvated after 3 failed ping attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch trigger.
+    - Switch trigger. To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as a trigger.
 
 ## Installation
 
