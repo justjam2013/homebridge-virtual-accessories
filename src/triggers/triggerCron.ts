@@ -19,9 +19,9 @@ export class CronTrigger extends Trigger {
   ) {
     super(sensor, name);
 
-    const trigger: CronTriggerConfiguration = this.sensorConfig.cronTrigger;
+    const triggerConfig: CronTriggerConfiguration = this.sensorConfig.cronTrigger;
 
-    if (trigger.isDisabled) {
+    if (triggerConfig.isDisabled) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger is disabled`);
       return;
     }
@@ -31,11 +31,11 @@ export class CronTrigger extends Trigger {
 
     const timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;  // 'America/Los_Angeles'
 
-    const zoneId: ZoneId = (trigger.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(trigger.zoneId);
+    const zoneId: ZoneId = (triggerConfig.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(triggerConfig.zoneId);
     this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
 
-    const cronStart: ZonedDateTime | undefined = this.getZonedDateTime(trigger.startDateTime, zoneId);
-    const cronEnd: ZonedDateTime | undefined = this.getZonedDateTime(trigger.endDateTime, zoneId);
+    const cronStart: ZonedDateTime | undefined = this.getZonedDateTime(triggerConfig.startDateTime, zoneId);
+    const cronEnd: ZonedDateTime | undefined = this.getZonedDateTime(triggerConfig.endDateTime, zoneId);
 
     this.log.debug(`[${this.sensorConfig.accessoryName}] Start time: '${cronStart?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
     this.log.debug(`[${this.sensorConfig.accessoryName}] End time:   '${cronEnd?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
@@ -43,22 +43,22 @@ export class CronTrigger extends Trigger {
 
     // If we're past the end date, don't even bother starting up the cron job
     if (cronEnd && this.now().isAfter(cronEnd)) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] After cron end: '${trigger.endDateTime}'. Not setting up cron job`);
+      this.log.info(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Not setting up cron job`);
       return;
 
       // eslint-disable-next-line brace-style
     }
     else if (cronStart && (this.now().isEqual(cronStart) || this.now().isBefore(cronStart))) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Before cron start: '${trigger.startDateTime}'. Waiting for start time`);
+      this.log.info(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Waiting for start time`);
     }
 
     let firstTrigger: boolean = true;
     this.cronJob = new CronJob(
-      trigger.pattern,
+      triggerConfig.pattern,
       (async () => {
         // If we're before the start date, skip
         if (cronStart && this.now().isBefore(cronStart)) {
-          this.log.debug(`[${this.sensorConfig.accessoryName}] Before cron start: '${trigger.startDateTime}'. Not triggering sensor`);
+          this.log.debug(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Not triggering sensor`);
 
           // eslint-disable-next-line brace-style
         }
@@ -68,7 +68,7 @@ export class CronTrigger extends Trigger {
             firstTrigger = false;
           }
 
-          this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${trigger.pattern}'. Triggering sensor`);
+          this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
           sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
           await this.delay(resetDelayMillis);
@@ -77,7 +77,7 @@ export class CronTrigger extends Trigger {
 
         // If we're after the end date, terminate the cron job
         if (cronEnd && this.now().isAfter(cronEnd)) {
-          this.log.debug(`[${this.sensorConfig.accessoryName}] After cron end: '${trigger.endDateTime}'. Stopping cron job`);
+          this.log.debug(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Stopping cron job`);
 
           this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);
           this.cronJob.stop();
