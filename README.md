@@ -28,18 +28,20 @@
 
 #### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
-This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin and the [homebridge-random-delay-switches](https://github.com/kernie66/homebridge-random-delay-switches) plugin, as well as a few others.
+This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations.
 
-The purpose of this plugin is to be able to create different types of virtual HomeKit accessories from a single plugin, rather than have to hunt down and install multiple individual plugins, some of which may be unmaintained and abandoned. Also, this plugin is Homebridge 2.0 ready.
+The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories, instead of having to pull together a large number of plugins, each of which may provide part of the needed functionality, and many of which may be unmaintained or abandoned. This plugin implements the latest Homebridge architecture and is ready for Homebridge 2.0.
 
-This is work in progress, so new accessories and functionality will be added as needed or, more likely, as requested. The current virtual accessories supported are:
+The downside to a single plugin is trading ease of maintenance of installed plugins with a single point of failure, however, this is work in progress so ongoing bug fixes will be provided. Also, I will be slowly adding new accessories and functionality, either as I need them, or more likely in response to requests by users who find this plugin useful.
+
+The current virtual accessories provided are:
 
 -   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
--   **Window Covering.** These are blinds and shades. This was created for a user that wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off ..".
--   **Valve** - Generic, Irrigation, Shower Head, Water Faucet.
+-   **Window Covering.** These are blinds and shades. This was created for a user that wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off .." as would be required with switches.
+-   **Valve** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
 -   **Sensor.** Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
     - Host Ping trigger. Pings a network host. It is actvated after 3 failed ping attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
@@ -344,4 +346,4 @@ Note:
 
 If you encounter a problem, [please open a ticket on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please attach any log output to the a ticket, making sure to remove any sensitive information such as passwords, tokens, etc.
 
-Also please feel free to open a ticket if you have any enhancement suggestions or any additional functionality that you would like to see added.
+Please open a ticket if you have any enhancement suggestions or any additional functionality that you would like to see added.
