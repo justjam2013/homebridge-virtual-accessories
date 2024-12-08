@@ -8,10 +8,10 @@ export class Timer {
     Days: 'days',
   };
 
-  private timerId: ReturnType<typeof setTimeout> | undefined;
-  private durationMillis: number = 0;   // Timer duration in seconds
+  private timerId: ReturnType<typeof setInterval> | undefined;
+  private duration: number = 0;
 
-  private endTime: number = 0;
+  private remainingDuration: number = 0;
 
   constructor();
   constructor(
@@ -47,27 +47,30 @@ export class Timer {
       this.setDuration(duration, units!);
     }
 
-    if (this.durationMillis > 0) {
-      this.endTime = (new Date()).getTime() + this.durationMillis;
+    if (this.duration > 0) {
+      this.remainingDuration = this.duration;
 
-      this.timerId = setTimeout(() => {
-        // Run timeout action
-        callback();
+      this.timerId = setInterval(() => {
+        this.remainingDuration--;
 
-        this.stop();
-      }, this.durationMillis);
+        if (this.remainingDuration === 0) {
+          callback();
+          this.stop();
+        }
+      }, 1000);
     }
   }
 
   stop(): void {
-    clearTimeout(this.timerId);
+    clearInterval(this.timerId);
+    this.remainingDuration = 0;
   }
 
   /**
    * Returns duration in seconds
    */
   getDuration(): number {
-    return Math.trunc(this.durationMillis / 1000);
+    return this.duration;
   }
 
   /**
@@ -77,23 +80,23 @@ export class Timer {
     duration: number,
     units: string,
   ) {
-    this.durationMillis = duration;
+    this.duration = duration;
 
     switch (units) {
     case Timer.Units.Days:
-      this.durationMillis *= 24;
+      this.duration *= 24;
       // falls through
     case Timer.Units.Hours:
-      this.durationMillis *= 60;
+      this.duration *= 60;
       // falls through
     case Timer.Units.Minutes:
-      this.durationMillis *= 60;
+      this.duration *= 60;
       // falls through
     case Timer.Units.Seconds:
-      this.durationMillis *= 1000;
+      this.duration *= 1;
       break;
     default:
-      this.durationMillis = 0;
+      this.duration = 0;
     }
   }
 
@@ -101,11 +104,6 @@ export class Timer {
    * Returns remaining duration in seconds
    */
   getRemainingDuration(): number {
-    const now: number = (new Date()).getTime();
-    const timeDiffMillis: number = this.endTime - now;
-
-    const remainingDuration = Math.max(Math.ceil(timeDiffMillis / 1000), 0);
-
-    return remainingDuration;
+    return this.remainingDuration;
   }
 }
