@@ -8,10 +8,10 @@ export class Timer {
     Days: 'days',
   };
 
-  private timerId: ReturnType<typeof setTimeout> | undefined;
-  private duration: number = 0;   // Timer duration in seconds
+  private timerId: ReturnType<typeof setInterval> | undefined;
+  private duration: number = 0;
 
-  private startTime: number = 0;
+  private remainingDuration: number = 0;
 
   constructor();
   constructor(
@@ -22,7 +22,9 @@ export class Timer {
     duration?: number,
     units?: string,
   ) {
-    this.setDuration(duration, units);
+    if (duration !== undefined) {
+      this.setDuration(duration, units!);
+    }
   }
 
   start(
@@ -38,23 +40,30 @@ export class Timer {
     duration?: number,
     units?: string,
   ): void {
+    // In case timer is running, stop it
     this.stop();
 
-    this.setDuration(duration, units);
+    if (duration !== undefined) {
+      this.setDuration(duration, units!);
+    }
 
     if (this.duration > 0) {
-      this.startTime = (new Date()).getTime();
+      this.remainingDuration = this.duration;
 
-      this.timerId = setTimeout(() => {
-        callback();
-        this.timerId = undefined;
-      }, this.duration * 1000);
+      this.timerId = setInterval(() => {
+        this.remainingDuration--;
+
+        if (this.remainingDuration === 0) {
+          callback();
+          this.stop();
+        }
+      }, 1000);
     }
   }
 
   stop(): void {
-    clearTimeout(this.timerId);
-    this.startTime = 0;
+    clearInterval(this.timerId);
+    this.remainingDuration = 0;
   }
 
   /**
@@ -65,38 +74,36 @@ export class Timer {
   }
 
   /**
-   * Returns remaining time in seconds
+   * Set duration in seconds/minutes/hours/days
    */
-  getRemainingTime(): number {
-    const now: number = (new Date()).getTime();
-    const remaining: number = ((this.startTime === 0) ? 0 : now - this.startTime) / 1000;
+  setDuration(
+    duration: number,
+    units: string,
+  ) {
+    this.duration = duration;
 
-    return remaining;
+    switch (units) {
+    case Timer.Units.Days:
+      this.duration *= 24;
+      // falls through
+    case Timer.Units.Hours:
+      this.duration *= 60;
+      // falls through
+    case Timer.Units.Minutes:
+      this.duration *= 60;
+      // falls through
+    case Timer.Units.Seconds:
+      this.duration *= 1;
+      break;
+    default:
+      this.duration = 0;
+    }
   }
 
-  private setDuration(
-    duration?: number,
-    units?: string,
-  ) {
-    this.duration = duration ? duration : 0;
-
-    if (this.duration > 0 && units !== undefined) {
-      switch (units) {
-      case Timer.Units.Days:
-        this.duration *= 24;
-      // falls through
-      case Timer.Units.Hours:
-        this.duration *= 60;
-      // falls through
-      case Timer.Units.Minutes:
-        this.duration *= 60;
-      // falls through
-      case Timer.Units.Seconds:
-        this.duration *= 1000;
-        break;
-      default:
-        this.duration = 0;
-      }
-    }
+  /**
+   * Returns remaining duration in seconds
+   */
+  getRemainingDuration(): number {
+    return this.remainingDuration;
   }
 }

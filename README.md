@@ -39,6 +39,7 @@ This is work in progress, so new accessories and functionality will be added as 
 -   Garage Door. Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   Lock. This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. And it generates a HomeKey card in the Wallet app.
 -   Window Covering - Blinds, Shades.
+-   Valve - Generic, Irrigation, Shower Head, Water Faucet
 -   Sensor. Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, they options are:
     - Host Ping trigger. Pings a network host and is actvated when ping fails afer 3 attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
@@ -132,6 +133,24 @@ Note:
 }
 ```
 `lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
+
+### Valve
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "7022976",
+            "accessoryName": "Test Valve",
+            "accessoryType": "valve",
+            "valveType": "waterfaucet",
+            "valveDuration": 0
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Window Covering - Blinds, Shades
 
@@ -319,6 +338,7 @@ Note:
 
 -   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
 -   The Homebridge UI does not provide expanding and collapsing accessory sections, except for the deprecated plugin types. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header. The ticket with Homebridge UI has been updated.
+-   The Homebridge UI does not have dedicated icons for Shower Head and Water Faucet type valves. It reuses the icon for the Generic type valve. A ticket and fix has been submitted to Homebridge UI. This does not affect the display in the Home app.
 
 ## What if I run into a problem?
 

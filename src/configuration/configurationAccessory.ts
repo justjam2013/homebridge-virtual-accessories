@@ -34,6 +34,10 @@ export class AccessoryConfiguration {
   // Doorbell
   doorbellVolume!: number;
 
+  // Valve
+  valveType!: string;
+  valveDuration!: number;
+
   // Window Covering
   windowCoveringDefaultState!: string;
 
@@ -96,6 +100,8 @@ export class AccessoryConfiguration {
         return this.isValidSensor();
       case 'switch':
         return this.isValidSwitch();
+      case 'valve':
+        return this.isValidValve();
       case 'windowcovering':
         return this.isValidWindowCovering();
       default:
@@ -157,12 +163,17 @@ export class AccessoryConfiguration {
     if (!isValidSensorType) this.errorFields.push('sensorType');
     if (!isValidSensorTrigger) this.errorFields.push('sensorTrigger');
 
-    // Validate Trigger
-    let isValidTrigger: boolean;
+    // TODO: fix this validation of sensor trigger and reset timer
+
+    // Validate SensorTrigger
+    // this.isValidSensorTrigger();
+
+    // Validate ResetTimer
+    let isValidResetTimer: boolean;
     let triggerErrorFields: string[];
     // eslint-disable-next-line prefer-const
-    [isValidTrigger, triggerErrorFields] = this.isValidResetTimer();
-    if (!isValidTrigger && triggerErrorFields.length === 0) {
+    [isValidResetTimer, triggerErrorFields] = this.isValidResetTimer();
+    if (!isValidResetTimer && triggerErrorFields.length === 0) {
       this.errorFields.push(this.sensorTrigger + 'Trigger');
     } else {
       this.errorFields.push(...triggerErrorFields);
@@ -171,7 +182,7 @@ export class AccessoryConfiguration {
     return (
       isValidSensorType &&
       isValidSensorTrigger &&
-      isValidTrigger
+      isValidResetTimer
     );
   };
 
@@ -221,6 +232,26 @@ export class AccessoryConfiguration {
     );
   }
 
+  private isValidValve(): boolean {
+    const isValidValveType: boolean = (
+      (this.valveType !== undefined) &&
+      ['generic', 'irrigation', 'showerhead', 'waterfaucet'].includes(this.valveType)
+    );
+    const isValidValveDuration: boolean = (
+      (this.valveDuration !== undefined) &&
+      (this.valveDuration >= 0 && this.valveDuration <= 3600)
+    );
+
+    // Store fields failing validation
+    if (!isValidValveType) this.errorFields.push('valveType');
+    if (!isValidValveDuration) this.errorFields.push('valveDuration');
+
+    return (
+      isValidValveType &&
+      isValidValveDuration
+    );
+  }
+
   /**
    * Adornment validation
    */
@@ -261,7 +292,7 @@ export class AccessoryConfiguration {
     return [true, []];
   }
 
-  private isValidTrigger(): [boolean, string[]] {
+  private isValidSensorTrigger(): [boolean, string[]] {
     if (this.sensorTrigger !== undefined) {
       let isValidTrigger: boolean;
       let errorFields: string[];

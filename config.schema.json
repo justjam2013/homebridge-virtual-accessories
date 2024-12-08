@@ -49,6 +49,7 @@
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
+                { "title": "Valve", "enum": ["valve"] },
                 { "title": "Window Covering - Blinds, Shades", "enum": ["windowcovering"] }
               ],
               "default": "switch"
@@ -122,6 +123,29 @@
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
+              }
+            },
+            "valveType": {
+              "title": "Valve Type *",
+              "description": "Valve type",
+              "type": "string",
+              "oneOf": [
+                { "title": "Generic Valve", "enum": ["generic"] },
+                { "title": "Irrigation", "enum": ["irrigation"] },
+                { "title": "Shower Head", "enum": ["showerhead"] },
+                { "title": "Water Faucet", "enum": ["waterfaucet"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
+              }
+            },
+            "valveDuration": {
+              "title": "Valve Shut-Off Time *",
+              "description": "Valve shut-off time in seconds (0 = no time limit)",
+              "type": "integer",
+              "maximum": 3600,
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
             },
             "sensorType": {
