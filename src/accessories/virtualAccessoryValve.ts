@@ -78,9 +78,6 @@ export class Valve extends Accessory {
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
     this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valveDuration));
 
-    // eslint-disable-next-line max-len
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] SetDuration: ${JSON.stringify(this.service.getCharacteristic(this.platform.Characteristic.SetDuration))}`);
-
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
