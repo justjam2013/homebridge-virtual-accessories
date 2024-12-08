@@ -61,34 +61,18 @@ export class Timer {
 
   stop(): void {
     clearTimeout(this.timerId);
-    this.endTime = 0;
   }
 
   /**
    * Returns duration in seconds
    */
   getDuration(): number {
-    return this.durationMillis / 1000;
+    return Math.trunc(this.durationMillis / 1000);
   }
 
   /**
-   * Returns remaining time in seconds
+   * Set duration in seconds/minutes/hours/days
    */
-  getRemainingTime(): number {
-    const now: number = (new Date()).getTime();
-    const timediffMillis = this.endTime - now;
-    const remaining: number =
-      this.endTime === 0 ?
-        0 :
-        (
-          (timediffMillis <= 0) ?
-            0 :
-            Math.trunc(timediffMillis / 1000)
-        );
-
-    return remaining;
-  }
-
   setDuration(
     duration: number,
     units: string,
@@ -111,5 +95,17 @@ export class Timer {
     default:
       this.durationMillis = 0;
     }
+  }
+
+  /**
+   * Returns remaining duration in seconds
+   */
+  getRemainingDuration(): number {
+    const now: number = (new Date()).getTime();
+    const timeDiffMillis: number = this.endTime - now;
+
+    const remainingDuration = Math.max(Math.ceil(timeDiffMillis / 1000), 0);
+
+    return remainingDuration;
   }
 }

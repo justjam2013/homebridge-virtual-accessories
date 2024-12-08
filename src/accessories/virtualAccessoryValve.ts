@@ -78,6 +78,9 @@ export class Valve extends Accessory {
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
     this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valveDuration));
 
+    // eslint-disable-next-line max-len
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] SetDuration: ${JSON.stringify(this.service.getCharacteristic(this.platform.Characteristic.SetDuration))}`);
+
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
@@ -93,11 +96,11 @@ export class Valve extends Accessory {
       .onGet(this.handleInUseGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.SetDuration)
-      .onSet(this.handleDurationSet.bind(this))
-      .onGet(this.handleDurationGet.bind(this));
+      .onSet(this.handleSetDurationSet.bind(this))
+      .onGet(this.handleSetDurationGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.RemainingDuration)
-      .onGet(this.handleRemainingDuration.bind(this));
+      .onGet(this.handleRemainingDurationGet.bind(this));
 
     /**
      * Creating multiple services of the same type.
@@ -142,15 +145,13 @@ export class Valve extends Accessory {
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
 
+    this.durationTimer.stop();
     if (this.states.ValveActive === Valve.ACTIVE) {
       this.durationTimer.start(
         () => {
           this.service!.setCharacteristic(this.platform.Characteristic.Active, (Valve.INACTIVE));
         },
       );
-    }
-    if (this.states.ValveActive === Valve.INACTIVE) {
-      this.durationTimer.stop();
     }
   }
 
@@ -198,7 +199,7 @@ export class Valve extends Accessory {
   /**
    * Duration
    */
-  async handleDurationSet(value: CharacteristicValue) {
+  async handleSetDurationSet(value: CharacteristicValue) {
     const duration = value as number;
 
     this.durationTimer.setDuration(duration, Timer.Units.Seconds);
@@ -206,7 +207,7 @@ export class Valve extends Accessory {
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
-  async handleDurationGet(): Promise<CharacteristicValue> {
+  async handleSetDurationGet(): Promise<CharacteristicValue> {
     const duration = this.durationTimer.getDuration();
 
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
@@ -214,8 +215,8 @@ export class Valve extends Accessory {
     return duration;
   }
 
-  async handleRemainingDuration(): Promise<CharacteristicValue> {
-    const remainingDuration = this.durationTimer.getRemainingTime();
+  async handleRemainingDurationGet(): Promise<CharacteristicValue> {
+    const remainingDuration = this.durationTimer.getRemainingDuration();
 
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
 
