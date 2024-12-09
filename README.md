@@ -32,7 +32,7 @@ This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https
 
 The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories, instead of having to pull together a large number of plugins, each of which may provide part of the needed functionality, and many of which may be unmaintained or abandoned. This plugin implements the latest Homebridge architecture and is ready for Homebridge 2.0.
 
-The downside to a single plugin is trading ease of maintenance of installed plugins with a single point of failure, however, this is work in progress so ongoing bug fixes will be provided. Also, I will be slowly adding new accessories and functionality, either as I need them, or more likely in response to requests by users who find this plugin useful.
+The downside to a single plugin is trading ease of maintenance of installed plugins for a single point of failure, however, this is work in progress so ongoing bug fixes will be provided. Also, I will be slowly adding new accessories and functionality, either as I need them, or more likely in response to requests by users who find this plugin useful.
 
 The current virtual accessories provided are:
 
@@ -54,7 +54,7 @@ You can install this plugin via the Homebridge UI or by typing:
 ```
 npm install -g homebridge-virtual-accessories
 ```
-**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, which get compiled for that particular platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, I will assume that you have the necessary technical skills to do the required installs. I neither have the bandwidth nor the hardware to support every single platform that Homebridge runs on, but I will try my best to help get the plugin working for you. Below are platform specific installation notes, which I will try to update as users of this plugin report issues:
+**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, which get compiled for that particular platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, you will require the necessary technical skills to do the required installs. I neither have the bandwidth nor the hardware to support every single platform that Homebridge runs on, but I will try my best to help you get the plugin working. Below are platform specific installation notes, which I will try to update as users of this plugin report issues:
 
 #### MacOS
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
@@ -78,8 +78,8 @@ In the UI, required fields will be marked with an asterisk (*).
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
 Note:
-1. `accessoryID` uniquely identifies an accassory and each accessory must have a different value. If you change the value of `accessoryID` after saving the config, it will handle the change as the accessory having been deleted and a new one created. This will delete the "old" accessory in the Home app, which will then delete automations that use the deleted accessory, as well as any scenes that only use the deleted accessory.
-2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is a good idea to pick different names for each accessory.
+1. `accessoryID` uniquely identifies an accassory and each accessory must have a different value. If you do assign the same value by mistake, the plugin will skip any accessory that has a duplicate ID and output a message in the logs aterting you to correct the configuration. If you change the value of `accessoryID` after saving the config, Homebridge will handle the change as the accessory having been deleted and a new one created. This will cause the Home app to delete the "old" accessory, which in turn will delete any automations that use the deleted accessory, as well as any scenes that only use the deleted accessory.
+2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is recommended to assign different names to each accessory.
 
 ### Doorbell
 
@@ -334,16 +334,15 @@ Note:
 }
 ```
 
-**Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant by the particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may cleanup the config. However this does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON config.
+**Note:** Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant by the particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However this does not affect the behavior of the accessory, nor does it hurt to manually remove those fields from the JSON config.
 
 ## Known Issues
 
--   When creating a Cron Trigger, the date-time is saved properly, but upon editing is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
--   The Homebridge UI does not provide expanding and collapsing accessory sections, except for the deprecated plugin types. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header. The ticket with Homebridge UI has been updated.
--   The Homebridge UI does not have dedicated icons for Shower Head and Water Faucet type valves. It reuses the icon for the Generic type valve. A ticket and fix has been submitted to Homebridge UI. This does not affect the display in the Home app.
+-   When creating a Cron Trigger, the date-time is saved properly, but upon editing it is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
+-   The Homebridge UI does not provide expanding and folding accessory sections, except for the deprecated plugin type. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/fold functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header.
 
 ## What if I run into a problem?
 
-If you encounter a problem, [please open a ticket on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please attach any log output to the a ticket, making sure to remove any sensitive information such as passwords, tokens, etc.
+If you encounter a problem, [please open a ticket on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please attach any log output to the ticket, making sure to remove any sensitive information such as passwords, tokens, etc.
 
 Please open a ticket if you have any enhancement suggestions or any additional functionality that you would like to see added.
