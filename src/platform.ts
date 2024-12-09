@@ -162,6 +162,8 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     configuredDevices,
   ): AccessoryConfiguration[] {
     const accessoryConfigurations: AccessoryConfiguration[] = [];
+    const accessoryUUIDs: string[] = [];
+
     for (const configuredDevice of configuredDevices) {
       // Deserialize accessory configuration
       const configuration: Configuration = new Configuration(this.log);
@@ -170,6 +172,9 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
       // Skip accessory if the configuration is invalid
       if (accessoryConfiguration === undefined) {
         this.log.error(`Error deserializing: ${JSON.stringify(configuredDevice)}`);
+        this.log.info('Skipping accessory until configuration is fixed');
+      } else if (accessoryUUIDs.includes(accessoryConfiguration.accessoryID)) {
+        this.log.error(`Found accessory with duplicate ID: ${JSON.stringify(configuredDevice)}`);
         this.log.info('Skipping accessory until configuration is fixed');
       } else {
         this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
@@ -183,6 +188,8 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         } else {
           this.log.debug(`Configuration is valid: ${JSON.stringify(accessoryConfiguration)}`);
           accessoryConfigurations.push(accessoryConfiguration);
+
+          accessoryUUIDs.push(accessoryConfiguration.accessoryID);
         }
       }
     }
