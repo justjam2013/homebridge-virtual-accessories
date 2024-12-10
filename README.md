@@ -61,7 +61,6 @@ If you are installing Virtual Accessories For Homebridge in a Homebridge instanc
 ```
 xcode-select --install
 ```
-If you're having issues installing the plugin, please look at the details in this ticket: "[Cannot install (macOS)](https://github.com/justjam2013/homebridge-virtual-accessories/issues/31)".
 
 #### Synology
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology, you will need to ensure that a build toolchain is installed.
