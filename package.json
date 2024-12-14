@@ -3,7 +3,7 @@
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
   "version": "1.2.1-beta.1",
-  "description": "Virtual accessories for Homebridge.",
+  "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "Apache-2.0",
   "homepage": "https://github.com/justjam2013/homebridge-virtual-accessories#readme",
