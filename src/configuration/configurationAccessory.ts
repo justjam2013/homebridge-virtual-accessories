@@ -157,26 +157,30 @@ export class AccessoryConfiguration {
 
   private isValidSensor(): boolean {
     const isValidSensorType: boolean = (this.sensorType !== undefined);
-    const isValidSensorTrigger: boolean = (this.sensorTrigger !== undefined);
 
     // Store fields failing validation
     if (!isValidSensorType) this.errorFields.push('sensorType');
-    if (!isValidSensorTrigger) this.errorFields.push('sensorTrigger');
-
-    // TODO: fix this validation of sensor trigger and reset timer
 
     // Validate SensorTrigger
-    // this.isValidSensorTrigger();
+    let isValidSensorTrigger: boolean;
+    let sensorTriggerErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidSensorTrigger, sensorTriggerErrorFields] = this.isValidSensorTrigger();
+    if (!isValidSensorTrigger && sensorTriggerErrorFields.length === 0) {
+      this.errorFields.push(this.sensorTrigger + 'Trigger');
+    } else {
+      this.errorFields.push(...sensorTriggerErrorFields);
+    }
 
     // Validate ResetTimer
     let isValidResetTimer: boolean;
-    let triggerErrorFields: string[];
+    let resetTimerErrorFields: string[];
     // eslint-disable-next-line prefer-const
-    [isValidResetTimer, triggerErrorFields] = this.isValidResetTimer();
-    if (!isValidResetTimer && triggerErrorFields.length === 0) {
-      this.errorFields.push(this.sensorTrigger + 'Trigger');
+    [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
+    if (!isValidResetTimer && resetTimerErrorFields.length === 0) {
+      this.errorFields.push('resetTimer');
     } else {
-      this.errorFields.push(...triggerErrorFields);
+      this.errorFields.push(...resetTimerErrorFields);
     }
 
     return (
@@ -319,6 +323,6 @@ export class AccessoryConfiguration {
       return [isValidTrigger, errorFields];
     }
 
-    return [true, []];
+    return [false, ['sensorTrigger']];
   }
 }
