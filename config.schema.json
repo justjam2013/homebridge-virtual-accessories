@@ -20,7 +20,7 @@
         "orderable": false,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": " ",
+          "title": "{{ $index }}",
           "type": "object",
           "expandable": true,
           "expanded": true,
@@ -56,7 +56,7 @@
             },
             "doorbellVolume": {
               "title": "Doorbell Volume *",
-              "description": "Doorbell volume *",
+              "description": "Doorbell volume (0 - 100) *",
               "type": "integer",
               "minimum": 0,
               "condition": {
