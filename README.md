@@ -90,7 +90,7 @@ Note:
             "accessoryID": "12345",
             "accessoryName": "My Doorbel",
             "accessoryType": "doorbell",
-            "doorbellVolume": 100,
+            "doorbellVolume": 100
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -108,7 +108,7 @@ Note:
             "accessoryName": "My Garage Door",
             "accessoryType": "garagedoor",
             "garageDoorDefaultState": "closed",
-            "accessoryIsStateful": false,
+            "accessoryIsStateful": false
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -127,7 +127,7 @@ Note:
             "accessoryType": "lock",
             "lockDefaultState": "unlocked",
             "accessoryIsStateful": false,
-            "lockHardwareFinish": "tan",
+            "lockHardwareFinish": "tan"
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -165,6 +165,7 @@ Note:
             "accessoryType": "windowcovering",
             "windowCoveringDefaultState": "closed",
             "accessoryIsStateful": false,
+            "transitionDuration": 3
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -182,7 +183,7 @@ Note:
             "accessoryName": "My Switch",
             "accessoryType": "switch",
             "switchDefaultState": "off",
-            "accessoryIsStateful": false,
+            "accessoryIsStateful": false
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
