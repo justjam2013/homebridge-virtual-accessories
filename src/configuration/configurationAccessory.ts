@@ -41,6 +41,9 @@ export class AccessoryConfiguration {
   // Window Covering
   windowCoveringDefaultState!: string;
 
+  //
+  transitionDuration!: number;
+
   // Sensor
   sensorType!: string;
   sensorTrigger!: string;
@@ -227,12 +230,15 @@ export class AccessoryConfiguration {
 
   private isValidWindowCovering(): boolean {
     const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
+    const isValidTransitionDuration: boolean = (this.transitionDuration !== undefined);
 
     // Store fields failing validation
     if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
+    if (!isValidTransitionDuration) this.errorFields.push('transitionDuration');
 
     return (
-      isValidWindowCoveringDefaultState
+      isValidWindowCoveringDefaultState &&
+      isValidTransitionDuration
     );
   }
 
