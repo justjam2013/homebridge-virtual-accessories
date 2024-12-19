@@ -1,3 +1,6 @@
+# Keeping separate publish workflows for beta and latest, as it
+# makes it easier to see in 'Actions' which workflow ran
+
 name: NPM publish latest
 
 on:
@@ -5,7 +8,7 @@ on:
     types: [published]
 
 jobs:
-  build:
+  publish:
     if: "!github.event.release.prerelease"
 
     runs-on: ubuntu-latest
@@ -23,7 +26,21 @@ jobs:
       - name: Install dependencies and build 🔧
         run: npm ci && npm run build
 
-      - name: Publish package on NPM - Latest 📦
+      - name: Publish package to NPM - Latest 📦
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  post-release-to-discord:
+    name: Discord Webhooks
+
+    needs: [publish]
+
+    uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    with:
+      title: Virtual Accessories for Homebridge - Latest Release
+      description: |
+        Version `v${{ needs.publish.outputs.NPM_VERSION }}`
+      url: 'https://github.com/justjam2013/homebridge-virtual-accessories/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}'
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL_LATEST }}
