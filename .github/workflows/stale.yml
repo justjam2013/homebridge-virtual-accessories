@@ -14,14 +14,12 @@ jobs:
 
     steps:
       - name: Mark stale issues
-        uses: actions/stale@v5
+        uses: actions/stale@v9
         with:
           days-before-issue-stale: 30
           days-before-issue-close: -1     # Do not close the issue
           stale-issue-label: stale
           stale-issue-message: "This issue is stale because it has been open for 30 days with no activity."
-          only-issue-labels: bug, "waiting for response"
-          include-only-assigned: true
 
           days-before-pr-stale: -1
           days-before-pr-close: -1
