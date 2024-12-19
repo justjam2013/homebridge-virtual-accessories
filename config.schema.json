@@ -148,6 +148,15 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
             },
+            "transitionDuration": {
+              "title": "Transition Duration *",
+              "description": "Open & close transition duration in seconds",
+              "type": "integer",
+              "mminimum": 0,
+              "condition": {
+                "functionBody": "return ['windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
             "sensorType": {
               "title": "Sensor Type *",
               "description": "Sensor type (Critical sensor notifications bypass Do Not Disturb)",

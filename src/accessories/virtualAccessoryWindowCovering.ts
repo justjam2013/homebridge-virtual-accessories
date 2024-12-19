@@ -134,8 +134,7 @@ export class WindowCovering extends Accessory {
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${this.getPositionName(this.states.WindowCoveringPositionState)}`);
     
     // PositionState STOPPED
-    // CurrentPosition OPEN/CLOSED with 3 second delay
-    const transitionDelayMillis: number = 3 * 1000;
+    const transitionDelayMillis: number = this.accessoryConfiguration.transitionDuration * 1000;
     this.timerId = setTimeout(() => {
       // Reset timer
       clearTimeout(this.timerId);
