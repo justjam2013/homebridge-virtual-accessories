@@ -11,7 +11,7 @@
 </div>
 
 <div>
-    <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/_discord (homebridge)_-737CF8"></a>
+    <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/discord-%23virtual--accessories-737CF8"></a>
 </div>
 
 <p></p>
