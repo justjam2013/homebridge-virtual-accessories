@@ -26,7 +26,7 @@
 
 </span>
 
-#### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
+### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
 This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations.
 
@@ -56,13 +56,27 @@ npm install -g homebridge-virtual-accessories
 ```
 **Note:** Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, you will require the necessary technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on, but I will try my best to help you get the plugin working. Below are platform specific installation notes, which I will try to update as users of this plugin report issues.
 
-#### MacOS
+**Note:** If you mamually update the Node.js version that Homebridge is running on, you will need to ensure that the platform-native library `raw-socket` will also be updated. Run the following commands immediately after the Node.js update:
+```
+npm uninstall raw-socket
+npm install raw-socket
+```
+
+### Docker
+If you are installing Virtual Accessories For Homebridge in a Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
+```
+npm uninstall raw-socket
+npm install raw-socket
+```
+This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated. 
+
+### MacOS
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
 ```
 xcode-select --install
 ```
 
-#### Synology
+### Synology
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology DSM, you will need to ensure that a build toolchain is installed.
 
 This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
