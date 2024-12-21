@@ -49,12 +49,12 @@ The current virtual accessories provided are:
 
 ## Installation
 
-You can install this plugin via the Homebridge UI or by typing:
+You can install this plugin via the Homebridge UI or from the command line, by typing:
 
 ```
 npm install -g homebridge-virtual-accessories
 ```
-**Note:** Virtual Accessories For Homebridge has dependencies on platform native libraries, which get compiled for that particular platform at installation time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, you will require the necessary technical skills to do the required installs. I neither have the bandwidth nor the hardware to support every single platform that Homebridge runs on, but I will try my best to help you get the plugin working. Below are platform specific installation notes, which I will try to update as users of this plugin report issues:
+**Note:** Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, you will require the necessary technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on, but I will try my best to help you get the plugin working. Below are platform specific installation notes, which I will try to update as users of this plugin report issues.
 
 #### MacOS
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
@@ -63,7 +63,7 @@ xcode-select --install
 ```
 
 #### Synology
-If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology, you will need to ensure that a build toolchain is installed.
+If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology DSM, you will need to ensure that a build toolchain is installed.
 
 This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
 
@@ -75,6 +75,12 @@ You can configure the plugin from the Homebridge UI, or by ediiting the JSON con
 In the UI, required fields will be marked with an asterisk (*).
 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
+
+In the event that an accessory is misconfigured, you will see error entries in the logs to help you to correct the configuration. The log entries will look something like this:
+```
+[12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Skipping accessory. Configuration is invalid: { "accessoryID": "12345", "accessoryName": "My Switch", ... }
+[12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Invalid fields: [switchDefaultState]
+```
 
 Note:
 1. `accessoryID` uniquely identifies an accassory and each accessory must have a different value. If you do assign the same value by mistake, the plugin will skip any accessory that has a duplicate ID and output a message in the logs aterting you to correct the configuration. If you change the value of `accessoryID` after saving the config, Homebridge will handle the change as the accessory having been deleted and a new one created. This will cause the Home app to delete the "old" accessory, which in turn will delete any automations that use the deleted accessory, as well as any scenes that only use the deleted accessory.
@@ -88,7 +94,7 @@ Note:
     "devices": [
         {
             "accessoryID": "12345",
-            "accessoryName": "My Doorbel",
+            "accessoryName": "My Doorbell",
             "accessoryType": "doorbell",
             "doorbellVolume": 100
         }
