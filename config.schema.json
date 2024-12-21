@@ -140,8 +140,8 @@
               }
             },
             "valveDuration": {
-              "title": "Valve Shut-Off Time *",
-              "description": "Valve shut-off time in seconds (0 = no time limit)",
+              "title": "Valve Runtime *",
+              "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
               "type": "integer",
               "maximum": 3600,
               "condition": {
