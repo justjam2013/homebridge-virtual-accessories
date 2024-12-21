@@ -63,12 +63,12 @@ npm install raw-socket
 ```
 
 ### Docker
-If you are installing Virtual Accessories For Homebridge in a Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
+If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
 ```
 npm uninstall raw-socket
 npm install raw-socket
 ```
-This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated. 
+This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
 
 ### MacOS
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
