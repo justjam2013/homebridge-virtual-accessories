@@ -61,7 +61,7 @@ npm install -g homebridge-virtual-accessories
 npm uninstall raw-socket
 npm install raw-socket
 ```
-**Note:** Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js it may cause the plugin fail to load and Homebridge to delete all its accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on. This setting is in the `Settings` screen, `Startup & Environment` section:
+**Note:** Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js, if the `raw-socket` module is also not updated (see above), it may cause the plugin fail to load and Homebridge to delete all its accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on. This setting is in the `Settings` screen, `Startup & Environment` section:
 <img src="assets/keepaccessories.png" height="240">
 
 ### Docker
