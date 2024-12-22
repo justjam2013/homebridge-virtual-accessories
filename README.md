@@ -4,6 +4,7 @@
 
 <div>
     <a href="https://github.com/homebridge/homebridge"><img src="https://img.shields.io/badge/_homebridge_-_verification_pending_-BAD5F3"></a>
+    [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 </div>
 
 <div>
