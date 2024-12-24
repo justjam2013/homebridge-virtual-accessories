@@ -26,8 +26,8 @@ export class VirtualCarbonDioxideSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualCarbonDioxideSensor.CO2_LEVELS_NORMAL: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
-    case VirtualCarbonDioxideSensor.CO2_LEVELS_ABNORMAL: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    case VirtualCarbonDioxideSensor.CO2_LEVELS_NORMAL: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case VirtualCarbonDioxideSensor.CO2_LEVELS_ABNORMAL: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

@@ -26,8 +26,8 @@ export class VirtualOccupancySensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualOccupancySensor.OCCUPANCY_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
-    case VirtualOccupancySensor.OCCUPANCY_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    case VirtualOccupancySensor.OCCUPANCY_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case VirtualOccupancySensor.OCCUPANCY_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 
