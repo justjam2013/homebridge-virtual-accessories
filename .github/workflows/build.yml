@@ -4,12 +4,13 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
         node-version: [18.x, 20.x, 22.x]
+        os: [ubuntu-latest, ubuntu-24.04, ubuntu-22.04, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
