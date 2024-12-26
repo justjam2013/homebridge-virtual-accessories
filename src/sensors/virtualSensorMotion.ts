@@ -26,8 +26,8 @@ export class VirtualMotionSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualMotionSensor.MOTION_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
-    case VirtualMotionSensor.MOTION_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    case VirtualMotionSensor.MOTION_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case VirtualMotionSensor.MOTION_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

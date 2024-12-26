@@ -26,8 +26,8 @@ export class VirtualContactSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualContactSensor.CONTACT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
-    case VirtualContactSensor.CONTACT_NOT_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    case VirtualContactSensor.CONTACT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case VirtualContactSensor.CONTACT_NOT_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

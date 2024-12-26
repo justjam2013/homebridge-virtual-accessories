@@ -16,8 +16,8 @@ export abstract class VirtualSensor extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
-  protected static readonly NORMAL_CLOSED: string = 'NORMAL-CLOSED';
-  protected static readonly TRIGGERED_OPEN: string = 'TRIGGERED-OPEN';
+  protected static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
+  protected static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
 
   private uuidPostfix: string = '-sensor';
 
@@ -153,8 +153,8 @@ export abstract class VirtualSensor extends Accessory {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_CLOSED; break; }
-    case this.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_OPEN; break; }
+    case this.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case this.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 
