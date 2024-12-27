@@ -3,8 +3,9 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { ResetTimer } from '../resetTimer.js';
+import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
+import { TimerConfiguration } from '../configuration/configurationTimer.js';
 
 /**
  * Switch - Accessory implementation
@@ -14,6 +15,7 @@ export class Switch extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
+  private durationTimer?: Timer;
   private isCompanionSwitch: boolean = false;
 
   private uuidPostfix: string = '-switch';
@@ -62,7 +64,11 @@ export class Switch extends Accessory {
         this.states.SensorState = this.CLOSED_NORMAL;
 
         if (this.accessoryConfiguration.accessoryHasResetTimer) {
-          this.resetTimer = new ResetTimer(this, this.defaultState, this.platform.Characteristic.On);
+          const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
+          const duration: number = timerConfig.durationIsRandom ?
+            Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
+            timerConfig.duration;
+          this.durationTimer = new Timer(duration, timerConfig.units);
         }
       }
     }
@@ -133,7 +139,12 @@ export class Switch extends Accessory {
     this.states.SwitchState = value as boolean;
 
     if (this.accessoryConfiguration.accessoryHasResetTimer && this.states.SwitchState !== this.defaultState) {
-      this.resetTimer!.startTimer();
+      this.durationTimer!.stop();
+      this.durationTimer!.start(
+        () => {
+          this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+        },
+      );
     }
 
     if (this.accessoryConfiguration.accessoryIsStateful) {

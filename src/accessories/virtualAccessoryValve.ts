@@ -146,7 +146,7 @@ export class Valve extends Accessory {
     if (this.states.ValveActive === Valve.ACTIVE) {
       this.durationTimer.start(
         () => {
-          this.service!.setCharacteristic(this.platform.Characteristic.Active, (Valve.INACTIVE));
+          this.service!.setCharacteristic(this.platform.Characteristic.Active, Valve.INACTIVE);
         },
       );
     }
