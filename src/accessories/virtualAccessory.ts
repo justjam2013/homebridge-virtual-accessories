@@ -2,7 +2,6 @@ import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
-import { ResetTimer } from '../resetTimer.js';
 
 import fs from 'fs';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -25,7 +24,6 @@ export abstract class Accessory {
 
   protected storagePath: string;
 
-  protected resetTimer?: ResetTimer;
   protected companionSensor?: VirtualSensor;
 
   constructor(
