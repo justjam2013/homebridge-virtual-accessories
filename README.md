@@ -36,9 +36,9 @@ The current virtual accessories provided are:
 -   **Window Covering.** These are blinds and shades. This was created for a user that wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off .." as would be required with switches.
 -   **Valve** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
 -   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
-    - Host Ping trigger. Pings a network host. It is actvated after 3 failed ping attempts. The sensor resets when ping is successful.
-    - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as trigger.
+    - **Host Ping trigger.** Pings a network host. It is actvated after 3 failed ping attempts. The sensor resets when ping is successful.
+    - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
+    - **Switch trigger.** To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as trigger.
 
 ## Installation
 
@@ -55,6 +55,7 @@ npm uninstall raw-socket
 npm install raw-socket
 ```
 **Note:** Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js, if the `raw-socket` module is also not updated (see above), it may cause the plugin fail to load and Homebridge to delete all its accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on. This setting is in the `Settings` screen, `Startup & Environment` section:
+
 <img src="assets/keepaccessories.png" height="240">
 
 ### Docker
