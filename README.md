@@ -25,20 +25,20 @@ This plugin is inspired by Nick Farina's most excellent [homebridge-dummy](https
 
 The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories, instead of having to pull together a large number of plugins, each of which may provide part of the needed functionality, and many of which may be unmaintained or abandoned. This plugin implements the latest Homebridge architecture and is ready for Homebridge 2.0.
 
-The downside to a single plugin is trading ease of maintenance of installed plugins for a single point of failure, however, this is work in progress so ongoing bug fixes will be provided. Also, I will be slowly adding new accessories and functionality, either as I need them, or more likely in response to requests by users who find this plugin useful.
+The downside to a single plugin is trading ease of maintenance of installed plugins for a single point of failure, however, this is work in progress so ongoing bug fixes will be provided. Also, I will be slowly adding new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
 The current virtual accessories provided are:
 
--   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with set or random timers, and switches with companion sensors to trigger HomeKit notifications.
+-   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with fixed or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
 -   **Window Covering.** These are blinds and shades. This was created for a user that wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off .." as would be required with switches.
 -   **Valve** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
--   **Sensor.** Allows you to create different types of sensors. Sensors will generate notifications when their state changes, if configured in the Home app. Some types of notifications classified as `critical` by Homekit are allowed to bypass Do Not Disturb and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
+-   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - Host Ping trigger. Pings a network host. It is actvated after 3 failed ping attempts. The sensor resets when ping is successful.
     - Cron trigger. Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
-    - Switch trigger. To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as a trigger.
+    - Switch trigger. To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as trigger.
 
 ## Installation
 
