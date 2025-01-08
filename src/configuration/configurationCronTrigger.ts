@@ -11,6 +11,7 @@ export class CronTriggerConfiguration {
   zoneId!: string;
   startDateTime!: string;
   endDateTime!: string;
+  disableTriggerEventLogging: boolean = false;
   isDisabled: boolean = false;
 
   // private static cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';

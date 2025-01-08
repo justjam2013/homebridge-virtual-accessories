@@ -26,6 +26,10 @@ export class CronTrigger extends Trigger {
       return;
     }
 
+    if (triggerConfig.disableTriggerEventLogging) {
+      this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger event logging is disabled. Sensor state changes will not be displayed in the logs`);
+    }
+
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
@@ -70,9 +74,9 @@ export class CronTrigger extends Trigger {
 
           this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
+          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
           await this.delay(resetDelayMillis);
-          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this);
+          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
         }
 
         // If we're after the end date, terminate the cron job

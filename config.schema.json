@@ -362,6 +362,11 @@
                   "type": "string",
                   "format": "date-time"
                 },
+                "disableTriggerEventLogging": {
+                  "title": "Disable Trigger Event Logging",
+                  "description": "Disable logging for high frequency trigger events",
+                  "type": "boolean"
+                },
                 "isDisabled": {
                   "title": "Disable Cron Trigger",
                   "description": "Turn off/on trigger",
