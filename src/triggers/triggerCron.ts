@@ -70,9 +70,9 @@ export class CronTrigger extends Trigger {
 
           this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
+          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
           await this.delay(resetDelayMillis);
-          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this);
+          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
         }
 
         // If we're after the end date, terminate the cron job

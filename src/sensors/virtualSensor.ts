@@ -132,7 +132,7 @@ export abstract class VirtualSensor extends Accessory {
   /**
    * This method is called by the trigger to toggle the sensor
    */
-  triggerKeySensorState(sensorState: number, trigger: Trigger) {
+  triggerKeySensorState(sensorState: number, trigger: Trigger, isLoggingDisabled: boolean = false) {
     if (trigger.sensorConfig.accessoryID !== this.accessoryConfiguration.accessoryID) {
       throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
     }
@@ -143,7 +143,7 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    if (sensorStateChanged) {
+    if (sensorStateChanged && !isLoggingDisabled) {
       this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     }
   }
