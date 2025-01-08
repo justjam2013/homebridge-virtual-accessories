@@ -26,6 +26,10 @@ export class CronTrigger extends Trigger {
       return;
     }
 
+    if (triggerConfig.disableTriggerEventLogging) {
+      this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger event logging is disabled. Sensor state changes will not be displayed in the logs`);
+    }
+
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
