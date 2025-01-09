@@ -18,6 +18,8 @@ jobs:
         with:
           days-before-issue-stale: 30
           days-before-issue-close: 5
+          exempt-issue-labels: 'blocked'
+
           stale-issue-label: stale
           stale-issue-message: "This issue is stale because it has been open for 30 days with no activity."
 
