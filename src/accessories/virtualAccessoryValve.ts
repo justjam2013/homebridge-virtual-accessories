@@ -22,6 +22,8 @@ export class Valve extends Accessory {
   private valveType: number;
   private durationTimer: Timer;
 
+  private readonly stateStorageKey: string = 'ValveActive';
+
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
@@ -54,6 +56,16 @@ export class Valve extends Accessory {
     default:
       this.valveType = Valve.GENERIC_VALVE;
       break;
+    }
+
+    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
+    
+      if (cachedState !== undefined) {
+        this.states.ValveActive = cachedState;
+        this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
+      }
     }
 
     this.durationTimer = new Timer(this.accessoryConfiguration.valveDuration, Timer.Units.Seconds);
@@ -141,6 +153,11 @@ export class Valve extends Accessory {
     this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
+
+    // Store device state if stateful
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      this.saveState(this.storagePath, this.stateStorageKey, this.states.ValveActive);
+    }
 
     this.durationTimer.stop();
     if (this.states.ValveActive === Valve.ACTIVE) {

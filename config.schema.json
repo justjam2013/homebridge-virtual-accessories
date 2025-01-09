@@ -191,7 +191,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['switch', 'lock', 'garagedoor', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
+                "functionBody": "return ['garagedoor', 'lock', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
               }
             },
             "accessoryHasResetTimer": {
