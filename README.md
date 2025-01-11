@@ -27,7 +27,7 @@ The purpose of this plugin is to provide a single solution for creating differen
 
 The downside to a single plugin is trading ease of maintenance of installed plugins for a single point of failure. However, this is work in progress so ongoing bug fixes will be published. Also, new accessories and functionality will slowly be added, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
-The current virtual accessories provided are:
+Currently implemented virtual accessories:
 
 -   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with fixed or random timers, and switches with companion sensors to trigger HomeKit notifications.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
