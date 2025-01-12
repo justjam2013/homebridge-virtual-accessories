@@ -23,7 +23,7 @@
           "title": " Accessory {{ $index }}",
           "type": "object",
           "expandable": true,
-          "expanded": true,
+          "expanded": false,
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
