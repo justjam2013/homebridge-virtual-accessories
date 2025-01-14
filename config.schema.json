@@ -354,13 +354,13 @@
                   "title": "Start Date-Time",
                   "description": "Start date and time",
                   "type": "string",
-                  "format": "date-time"
+                  "format": "datetime-local"
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
                   "description": "End date and time",
                   "type": "string",
-                  "format": "date-time"
+                  "format": "datetime-local"
                 },
                 "disableTriggerEventLogging": {
                   "title": "Disable Trigger Event Logging",
