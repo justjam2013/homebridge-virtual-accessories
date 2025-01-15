@@ -23,6 +23,7 @@ import { Trigger } from './triggers/trigger.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { CronTrigger } from './triggers/triggerCron.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 
 /**
  * Virtual Accessory Factory
@@ -62,6 +63,9 @@ export abstract class AccessoryFactory {
       break;
     case 'windowcovering':
       virtualAccessory = new WindowCovering(platform, accessory);
+      break;
+    case 'lightbulb':
+      virtualAccessory = new Lightbulb(platform, accessory);
       break;
     case 'sensor':
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
