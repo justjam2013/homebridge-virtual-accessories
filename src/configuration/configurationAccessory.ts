@@ -2,6 +2,7 @@
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
 import { TimerConfiguration } from './configurationTimer.js';
 
@@ -33,6 +34,10 @@ export class AccessoryConfiguration {
 
   // Doorbell
   doorbellVolume!: number;
+
+  // Lightbulb
+  @Type(LightbulbConfiguration)
+    lightbulb!: LightbulbConfiguration;
 
   // Valve
   valveType!: string;
@@ -97,6 +102,8 @@ export class AccessoryConfiguration {
         return this.isValidDoorbell();
       case 'garagedoor':
         return this.isValidGarageDoor();
+      case 'lightbulb':
+        return this.isValidLighbulb();
       case 'lock':
         return this.isValidLock();
       case 'sensor':
@@ -143,6 +150,22 @@ export class AccessoryConfiguration {
       isValidGarageDoorDefaultState
     );
   };
+
+  private isValidLighbulb(): boolean {
+    let isValidLightbulb: boolean;
+    let lightbulbErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidLightbulb, lightbulbErrorFields] = this.lightbulb.isValid();
+    if (!isValidLightbulb && lightbulbErrorFields.length === 0) {
+      this.errorFields.push('Lightbulb');
+    } else {
+      this.errorFields.push(...lightbulbErrorFields);
+    }
+
+    return (
+      isValidLightbulb
+    );
+  }
 
   private isValidLock(): boolean {
     const isValidLockDefaultState: boolean = (this.lockDefaultState !== undefined);

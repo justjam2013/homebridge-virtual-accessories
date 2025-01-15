@@ -49,6 +49,7 @@ export abstract class Accessory {
    * Protected methods
    */
 
+  // deprecated
   protected loadState(
     storagePath: string,
     key: string,
@@ -60,10 +61,11 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Stored state: ${JSON.stringify(json)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Storing state: ${JSON.stringify(json)}`);
     return json[key];
   }
 
+  // deprecated
   protected saveState(
     storagePath: string,
     key: string,
@@ -76,6 +78,33 @@ export abstract class Accessory {
       JSON.stringify({
         [key]: value,
       }),
+      { encoding: 'utf8', flag: 'w' },
+    );
+  }
+
+  protected loadAccessoryState(
+    storagePath: string,
+  ): string {
+    let contents = '{}';
+    if (fs.existsSync(storagePath)) {
+      contents = fs.readFileSync(storagePath, 'utf8');
+    }
+
+    const json = JSON.parse(contents);
+
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Storing state: ${JSON.stringify(json)}`);
+    return json;
+  }
+
+  protected saveAccessoryState(
+    storagePath: string,
+    stateJson: string,
+  ): void {
+    // Overwrite the existing persistence file
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
+    fs.writeFileSync(
+      storagePath,
+      stateJson,
       { encoding: 'utf8', flag: 'w' },
     );
   }

@@ -46,6 +46,7 @@
               "oneOf": [
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
@@ -73,6 +74,38 @@
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
+              }
+            },
+            "lightbulb": {
+              "title": "Lightbulb",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Lightbulb Default State *",
+                  "description": "Lightbulb default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Off", "enum": ["off"] },
+                    { "title": "On", "enum": ["on"] }
+                  ]
+                },
+                "brightness": {
+                  "title": "Lightbulb Brightness *",
+                  "description": "Lightbulb Brightness (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "type": {
+                  "title": "Lightbulb Type *",
+                  "description": "Lightbulb type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "White", "enum": ["white"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lightbulb';"
               }
             },
             "lockDefaultState": {
@@ -397,6 +430,21 @@
               },
               "then": {
                 "required": [ "doorbellVolume" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lightbulb" }
+                }
+              },
+              "then": {
+                "required": [ "lightbulb" ],
+                "properties": {
+                  "lightbulb": {
+                    "required": [ "defaultState", "brightness", "type" ]
+                  }
+                }
               }
             },
             {
