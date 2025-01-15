@@ -30,6 +30,7 @@ The downside to a single plugin is trading ease of maintenance of installed plug
 Currently implemented virtual accessories:
 
 -   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with fixed or random timers, and switches with companion sensors to trigger HomeKit notifications.
+-   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
