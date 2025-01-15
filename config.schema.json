@@ -77,7 +77,7 @@
               }
             },
             "lightbulb": {
-              "title": "Reset Timer",
+              "title": "Lightbulb",
               "type": "object",
               "properties": {
                 "defaultState": {
@@ -94,6 +94,14 @@
                   "description": "Lightbulb Brightness (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0
+                },
+                "type": {
+                  "title": "Lightbulb Type *",
+                  "description": "Lightbulb type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "White", "enum": ["white"] }
+                  ]
                 }
               },
               "condition": {
@@ -434,7 +442,7 @@
                 "required": [ "lightbulb" ],
                 "properties": {
                   "lightbulb": {
-                    "required": [ "defaultState", "brightness" ]
+                    "required": [ "defaultState", "brightness", "type" ]
                   }
                 }
               }

@@ -5,6 +5,7 @@
  */
 export class LightbulbConfiguration {
   defaultState!: string;
+  type!: string;
   brightness!: number;
   // TODO:
   // colorTemperature!: number;
@@ -15,6 +16,11 @@ export class LightbulbConfiguration {
 
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (this.defaultState !== undefined);
+
+    const isValidType: boolean = (
+      (this.type !== undefined) &&
+      ['white', 'ambient', 'color'].includes(this.type)
+    );
 
     const isValidBrightness: boolean = (
       (this.brightness !== undefined) &&
@@ -27,6 +33,7 @@ export class LightbulbConfiguration {
 
     return [
       (isValidDefaultState &&
+        isValidType &&
         isValidBrightness),
       this.errorFields,
     ];
