@@ -29,13 +29,18 @@ The downside to a single plugin is trading ease of maintenance of installed plug
 
 Currently implemented virtual accessories:
 
--   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with fixed or random timers, and switches with companion sensors to trigger HomeKit notifications.
--   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
+-   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
 -   **Window Covering.** These are blinds and shades. This was created in response to a request from a user who wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off .." as would be required with switches.
 -   **Valve** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
+-   **Switch.** Nobody can have too many switches! Allows you to create a number of different types of switches.
+    - **Plain old switches.** What it says on the tin.
+    - **Normally on/off switches.** Select if you want the default state of the switch to be on or off. This is the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge.
+    - **Timed switches.** The switch will revert back to the default state when the timer expires.
+    - **Switches with companion sensors.** The switch will trigger the sensor when it changes state, sending a notification to the Home app. Picking critical sensors will allow notifications to bypass "Do Not Disturb".
 -   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
