@@ -29,13 +29,18 @@ The downside to a single plugin is trading ease of maintenance of installed plug
 
 Currently implemented virtual accessories:
 
--   **Switch.** Nobody can have too many switches! Allows you to create plain old switches, normally on/off switches, stateful switches, switches with fixed or random timers, and switches with companion sensors to trigger HomeKit notifications.
--   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
+-   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
 -   **Window Covering.** These are blinds and shades. This was created in response to a request from a user who wanted to use "Siri open/close .." to control their automation, as opposed to "Siri on/off .." as would be required with switches.
 -   **Valve** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
+-   **Switch.** Nobody can have too many switches! Allows you to create a number of different types of switches.
+    - **Plain old switches.** What it says on the tin.
+    - **Normally on/off switches.** Select if you want the default state of the switch to be on or off. This is the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge.
+    - **Timed switches.** The switch will revert back to the default state when the timer expires.
+    - **Switches with companion sensors.** The switch will trigger the sensor when it changes state, sending a notification to the Home app. Picking critical sensors will allow notifications to bypass "Do Not Disturb".
 -   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
@@ -151,6 +156,25 @@ Note:
 }
 ```
 `lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
+
+### Lghtbulb
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Lightbulb",
+            "accessoryType": "lightbulb",
+            "lightbulb": {
+                "defaultState": "off",
+                "brightness": 100,
+                "type": "white"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
 
 ### Valve
 
@@ -355,8 +379,8 @@ Note:
 
 ## Known Issues
 
--   When creating a Cron Trigger, the date-time is saved properly, but upon editing it is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
--   The Homebridge UI does not provide expanding and folding accessory sections, except for the deprecated plugin type. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/fold functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header.
+-   When creating a Cron Trigger, the date-time is saved properly (you can check the JSON config), but it is not displayed back in the config UI. This is due to Homebridge UI using an older date-time implementation. A request has been opened for supporting the newer date-time implementation.
+-   The framework used by Homebridge UI to render config forms does not provide header/title customization for an array of items. So if you have a lot of accessories, it's going to either require a lot of scrolling if they are expanded, or if they are collapsed you see a list of numbered accessories. I have chosen to display items collapsed by default. A feature request has been opened to support customized titles.
 
 ## What if I run into a problem?
 
