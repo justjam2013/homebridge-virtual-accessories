@@ -68,7 +68,12 @@ export class Valve extends Accessory {
       }
     }
 
-    this.durationTimer = new Timer(this.accessoryConfiguration.valveDuration, Timer.Units.Seconds);
+    this.durationTimer = new Timer(
+      this.accessoryConfiguration.accessoryName,
+      this.platform.log,
+      this.accessoryConfiguration.valveDuration,
+      Timer.Units.Seconds,
+    );
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!

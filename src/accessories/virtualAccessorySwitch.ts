@@ -68,7 +68,12 @@ export class Switch extends Accessory {
           const duration: number = timerConfig.durationIsRandom ?
             Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
             timerConfig.duration;
-          this.durationTimer = new Timer(duration, timerConfig.units);
+          this.durationTimer = new Timer(
+            this.accessoryConfiguration.accessoryName,
+            this.platform.log,
+            duration,
+            timerConfig.units,
+          );
         }
       }
     }

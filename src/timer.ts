@@ -1,3 +1,4 @@
+import { Logging } from 'homebridge';
 
 export class Timer {
 
@@ -8,20 +9,33 @@ export class Timer {
     Days: 'days',
   };
 
+  private accessoryName: string;
+  private log: Logging;
+
   private timerId: ReturnType<typeof setInterval> | undefined;
   private duration: number = 0;
 
   private remainingDuration: number = 0;
 
-  constructor();
   constructor(
+    accessoryName: string,
+    log: Logging,
+  );
+  constructor(
+    accessoryName: string,
+    log: Logging,
     duration: number,
     units: string,
   );
   constructor(
+    accessoryName: string,
+    log: Logging,
     duration?: number,
     units?: string,
   ) {
+    this.accessoryName = accessoryName;
+    this.log = log;
+
     if (duration !== undefined) {
       this.setDuration(duration, units!);
     }
@@ -49,9 +63,14 @@ export class Timer {
 
     if (this.duration > 0) {
       this.remainingDuration = this.duration;
+      this.log.info(`[${this.accessoryName} Timer] Duration: ${this.duration}`);
 
       this.timerId = setInterval(() => {
         this.remainingDuration--;
+
+        if (this.remainingDuration % 10 === 0) {
+          this.log.info(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
+        }
 
         if (this.remainingDuration === 0) {
           callback();
@@ -98,6 +117,8 @@ export class Timer {
     default:
       this.duration = 0;
     }
+
+    this.log.info(`[${this.accessoryName} Timer] Set Duration: ${this.duration}`);
   }
 
   /**
