@@ -41,6 +41,7 @@ Currently implemented virtual accessories:
     - **Stateful switches.** The state of the switch persists across restarts of Homebridge.
     - **Timed switches.** The switch will revert back to the default state when the timer expires.
     - **Switches with companion sensors.** The switch will trigger the sensor when it changes state, sending a notification to the Home app. Picking critical sensors will allow notifications to bypass "Do Not Disturb".
+    - **Dimmer switches.** To create a dimmer switch use a lightbulb. Then in the Home app, select for it to be displayed as a switch.
 -   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
