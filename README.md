@@ -152,6 +152,25 @@ Note:
 ```
 `lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
 
+### Lghtbulb
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Lightbulb",
+            "accessoryType": "lightbulb",
+            "lightbulb": {
+                "defaultState": "off",
+                "brightness": 100,
+                "type": "white"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
 ### Valve
 
 ```json
@@ -355,8 +374,8 @@ Note:
 
 ## Known Issues
 
--   When creating a Cron Trigger, the date-time is saved properly, but upon editing it is not displayed back. This is a UI bug with an open ticket. If you check the JSON config, you will see that the date-time values are saved correctly.
--   The Homebridge UI does not provide expanding and folding accessory sections, except for the deprecated plugin type. So if you have a lot of accessories, it's going to require a lot of scrolling. An enhancement request has been opened here: "[Homebridge UI improvements](https://github.com/justjam2013/homebridge-virtual-accessories/issues/32)". Please read the details and provide your support for this enhancement to the Homebridge UI functionality. I have added expand/fold functionality provided by the underlying framework, but I haven't yet found a way to display the accessory name on the collapsed section header.
+-   When creating a Cron Trigger, the date-time is saved properly (you can check the JSON config), but it is not displayed back in the config UI. This is due to Homebridge UI using an older date-time implementation. A request has been opened for supporting the newer date-time implementation.
+-   The framework used by Homebridge UI to render config forms does not provide header/title customization for an array of items. So if you have a lot of accessories, it's going to either require a lot of scrolling if they are expanded, or if they are collapsed you see a list of numbered accessories. I have chosen to display items collapsed by default. A feature request has been opened to support customized titles.
 
 ## What if I run into a problem?
 
