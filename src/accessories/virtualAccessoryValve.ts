@@ -68,9 +68,11 @@ export class Valve extends Accessory {
       }
     }
 
+    // isTimerResettable = false
     this.durationTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.platform.log,
+      false,
       this.accessoryConfiguration.valveDuration,
       Timer.Units.Seconds,
     );
@@ -164,7 +166,11 @@ export class Valve extends Accessory {
       this.saveState(this.storagePath, this.stateStorageKey, this.states.ValveActive);
     }
 
-    this.durationTimer.stop();
+    // Valve was turned off: turn off timer
+    if (this.states.ValveActive === Valve.INACTIVE) {
+      this.durationTimer.stop();
+    }
+    // Valve was turned on: try to start timer
     if (this.states.ValveActive === Valve.ACTIVE) {
       this.durationTimer.start(
         () => {

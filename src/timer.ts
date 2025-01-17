@@ -12,29 +12,36 @@ export class Timer {
   private accessoryName: string;
   private log: Logging;
 
+  private timerIsResettable: boolean = false;
+
   private timerId: ReturnType<typeof setInterval> | undefined;
   private duration: number = 0;
 
   private remainingDuration: number = 0;
+  private timerIsRunning: boolean = false;
 
   constructor(
     accessoryName: string,
     log: Logging,
+    timerIsResettable: boolean,
   );
   constructor(
     accessoryName: string,
     log: Logging,
+    timerIsResettable: boolean,
     duration: number,
     units: string,
   );
   constructor(
     accessoryName: string,
     log: Logging,
+    timerIsResettable: boolean = false,
     duration?: number,
     units?: string,
   ) {
     this.accessoryName = accessoryName;
     this.log = log;
+    this.timerIsResettable = timerIsResettable;
 
     if (duration !== undefined) {
       this.setDuration(duration, units!);
@@ -54,6 +61,10 @@ export class Timer {
     duration?: number,
     units?: string,
   ): void {
+    if (this.timerIsRunning && !this.timerIsResettable) {
+      return;
+    }
+
     // In case timer is running, stop it
     this.stop();
 
@@ -63,13 +74,13 @@ export class Timer {
 
     if (this.duration > 0) {
       this.remainingDuration = this.duration;
-      this.log.info(`[${this.accessoryName} Timer] Duration: ${this.duration}`);
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.duration}`);
 
       this.timerId = setInterval(() => {
         this.remainingDuration--;
 
         if (this.remainingDuration % 10 === 0) {
-          this.log.info(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
+          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
         }
 
         if (this.remainingDuration === 0) {
@@ -77,12 +88,18 @@ export class Timer {
           this.stop();
         }
       }, 1000);
+
+      this.timerIsRunning = true;
     }
   }
 
   stop(): void {
     clearInterval(this.timerId);
+
+    this.timerIsRunning = false;
     this.remainingDuration = 0;
+
+    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
   }
 
   /**
@@ -118,7 +135,7 @@ export class Timer {
       this.duration = 0;
     }
 
-    this.log.info(`[${this.accessoryName} Timer] Set Duration: ${this.duration}`);
+    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.duration}`);
   }
 
   /**

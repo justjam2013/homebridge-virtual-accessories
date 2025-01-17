@@ -71,6 +71,7 @@ export class Switch extends Accessory {
           this.durationTimer = new Timer(
             this.accessoryConfiguration.accessoryName,
             this.platform.log,
+            this.accessoryConfiguration.resetTimer.isResettable,
             duration,
             timerConfig.units,
           );
@@ -143,13 +144,18 @@ export class Switch extends Accessory {
     // implement your own code to turn your device on/off
     this.states.SwitchState = value as boolean;
 
-    if (this.accessoryConfiguration.accessoryHasResetTimer && this.states.SwitchState !== this.defaultState) {
-      this.durationTimer!.stop();
-      this.durationTimer!.start(
-        () => {
-          this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-        },
-      );
+    if (this.accessoryConfiguration.accessoryHasResetTimer) {
+      // switch is reset: turn off timer
+      if (this.states.SwitchState === this.defaultState) {
+        this.durationTimer!.stop();
+      } else {
+        // try to restart timer - timer will be restarted only if its resettable
+        this.durationTimer!.start(
+          () => {
+            this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+          },
+        );
+      }
     }
 
     if (this.accessoryConfiguration.accessoryIsStateful) {
