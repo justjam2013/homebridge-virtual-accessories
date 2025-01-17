@@ -380,7 +380,7 @@ Note:
 ## Known Issues
 
 -   When creating a Cron Trigger, the date-time is saved properly (you can check the JSON config), but it is not displayed back in the config UI. This is due to Homebridge UI using an older date-time implementation. A request has been opened for supporting the newer date-time implementation.
--   The framework used by Homebridge UI to render config forms does not provide header/title customization for an array of items. So if you have a lot of accessories, it's going to either require a lot of scrolling if they are expanded, or if they are collapsed you see a list of numbered accessories. I have chosen to display items collapsed by default. A feature request has been opened to support customized titles.
+-   The framework used by Homebridge UI to render config forms does not provide header/title customization for an array of items. So if you have a lot of accessories, it's going to either require a lot of scrolling if they are expanded, or if they are collapsed you will see a list of numbered accessories. I have opted to go with items collapsed by default. A feature request has been opened to support customized titles.
 
 ## What if I run into a problem?
 
