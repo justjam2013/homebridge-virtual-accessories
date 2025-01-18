@@ -421,7 +421,7 @@ I started this plugin as a Homebridge 2.0 ready plugin to replace [homebridge-du
 
 Then I started getting some really odd requests, like a window covering. Okay ... what the heck are you going to do with a virtual window covering?? Well, the user who requested it wanted to use "Siri open/close .." to control their trash bin, as opposed to "Siri on/off .." as would be required with switches. Yup, "I use [your plugin] for my trash" is what every plugin developer wants to hear! 🤣 <br/>
 
-So here creative ways people have used this plugin. Maybe they might inspire others.
+So here are creative ways people have used this plugin. Maybe they might inspire others.
 
 #
 
