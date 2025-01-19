@@ -34,7 +34,8 @@ export class Lock extends Accessory {
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedState = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.LockState = cachedState;
@@ -126,7 +127,7 @@ export class Lock extends Accessory {
 
     // Store device state if stateful
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveState(this.storagePath, this.stateStorageKey, this.states.LockState);
+      this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
@@ -178,6 +179,13 @@ export class Lock extends Accessory {
     this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
 
     return nFCAccessSupportedConfiguration;
+  }
+
+  private getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.states.LockState,
+    });
+    return json;
   }
 
   private getStateName(state: number): string {

@@ -45,43 +45,6 @@ export abstract class Accessory {
     }
   }
 
-  /**
-   * Protected methods
-   */
-
-  // deprecated
-  protected loadState(
-    storagePath: string,
-    key: string,
-  ): boolean | number {
-    let contents = '{}';
-    if (fs.existsSync(storagePath)) {
-      contents = fs.readFileSync(storagePath, 'utf8');
-    }
-
-    const json = JSON.parse(contents);
-
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Storing state: ${JSON.stringify(json)}`);
-    return json[key];
-  }
-
-  // deprecated
-  protected saveState(
-    storagePath: string,
-    key: string,
-    value: boolean | number,
-  ): void {
-    // Overwrite the existing persistence file
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${key} ${value}`);
-    fs.writeFileSync(
-      storagePath,
-      JSON.stringify({
-        [key]: value,
-      }),
-      { encoding: 'utf8', flag: 'w' },
-    );
-  }
-
   protected loadAccessoryState(
     storagePath: string,
   ): string {
@@ -92,7 +55,7 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Storing state: ${JSON.stringify(json)}`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Loading state: ${JSON.stringify(json)}`);
     return json;
   }
 
