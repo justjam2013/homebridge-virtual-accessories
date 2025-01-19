@@ -50,8 +50,9 @@ export class Switch extends Accessory {
 
       // If the accessory is stateful retrieve stored state, otherwise set to default state
       if (this.accessoryConfiguration.accessoryIsStateful) {
-        const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as boolean;
-
+        const accessoryState = this.loadAccessoryState(this.storagePath);
+        const cachedState = accessoryState[this.stateStorageKey] as boolean;
+  
         if (cachedState !== undefined) {
           this.states.SwitchState = cachedState;
           this.states.SensorState = this.determineSensorState();
@@ -159,7 +160,7 @@ export class Switch extends Accessory {
     }
 
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveState(this.storagePath, this.stateStorageKey, this.states.SwitchState);
+      this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
     this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
@@ -202,6 +203,13 @@ export class Switch extends Accessory {
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return switchState;
+  }
+
+  private getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.states.SwitchState,
+    });
+    return json;
   }
 
   // Default switch state Off:

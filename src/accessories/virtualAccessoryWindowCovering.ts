@@ -42,7 +42,8 @@ export class WindowCovering extends Accessory {
 
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      const cachedState = this.loadState(this.storagePath, this.stateStorageKey) as number;
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedState = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.WindowCoveringCurrentPosition = cachedState;
@@ -149,7 +150,7 @@ export class WindowCovering extends Accessory {
 
       // Store device state if stateful
       if (this.accessoryConfiguration.accessoryIsStateful) {
-        this.saveState(this.storagePath, this.stateStorageKey, this.states.WindowCoveringCurrentPosition);
+        this.saveAccessoryState(this.storagePath, this.getJsonState());
       }
     }, transitionDelayMillis);
   }
@@ -192,6 +193,13 @@ export class WindowCovering extends Accessory {
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return windowCoveringPositionState;
+  }
+
+  private getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.states.WindowCoveringCurrentPosition,
+    });
+    return json;
   }
 
   private getStateName(position: number): string {
