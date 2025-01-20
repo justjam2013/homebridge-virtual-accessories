@@ -81,7 +81,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Lightbulb Default State *",
+                  "title": "Default State *",
                   "description": "Lightbulb default state",
                   "type": "string",
                   "oneOf": [
@@ -90,13 +90,13 @@
                   ]
                 },
                 "brightness": {
-                  "title": "Lightbulb Brightness *",
+                  "title": "Brightness *",
                   "description": "Lightbulb Brightness (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0
                 },
                 "type": {
-                  "title": "Lightbulb Type *",
+                  "title": "Type *",
                   "description": "Lightbulb type",
                   "type": "string",
                   "oneOf": [
