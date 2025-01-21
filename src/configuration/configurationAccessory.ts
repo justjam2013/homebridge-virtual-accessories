@@ -2,6 +2,7 @@
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { FanConfiguration } from './configurationFan.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
 import { TimerConfiguration } from './configurationTimer.js';
@@ -28,6 +29,10 @@ export class AccessoryConfiguration {
   // Lock required
   lockDefaultState!: string;
   lockHardwareFinish!: string;
+
+  // Fan
+  @Type(FanConfiguration)
+    fan!: FanConfiguration;
 
   // Garage Door
   garageDoorDefaultState!: string;
@@ -100,6 +105,8 @@ export class AccessoryConfiguration {
       switch (this.accessoryType) {
       case 'doorbell':
         return this.isValidDoorbell();
+      case 'fan':
+        return this.isValidFan();
       case 'garagedoor':
         return this.isValidGarageDoor();
       case 'lightbulb':
@@ -139,6 +146,22 @@ export class AccessoryConfiguration {
       isValidDoorbellVolume
     );
   };
+
+  private isValidFan(): boolean {
+    let isValidFan: boolean;
+    let fanErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidFan, fanErrorFields] = this.fan.isValid();
+    if (!isValidFan && fanErrorFields.length === 0) {
+      this.errorFields.push('Fan');
+    } else {
+      this.errorFields.push(...fanErrorFields);
+    }
+
+    return (
+      isValidFan
+    );
+  }
 
   private isValidGarageDoor(): boolean {
     const isValidGarageDoorDefaultState: boolean = (this.garageDoorDefaultState !== undefined);

@@ -45,6 +45,7 @@
               "required": true,
               "oneOf": [
                 { "title": "Doorbell", "enum": ["doorbell"] },
+                { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
@@ -62,6 +63,39 @@
               "minimum": 0,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
+            "fan": {
+              "title": "Fan",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Fan default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Off", "enum": ["off"] },
+                    { "title": "On", "enum": ["on"] }
+                  ]
+                },
+                "rotationDirection": {
+                  "title": "Rotation Direction *",
+                  "description": "Fan Rotation Direction",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Clockwise", "enum": ["clockwise"] },
+                    { "title": "Counter Clockwise", "enum": ["counterclockwise"] }
+                  ]
+                },
+                "rotationSpeed": {
+                  "title": "Rotation Speed *",
+                  "description": "Fan Rotation Speed (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'fan';"
               }
             },
             "garageDoorDefaultState": {
@@ -91,7 +125,7 @@
                 },
                 "brightness": {
                   "title": "Brightness *",
-                  "description": "Lightbulb Brightness (0% - 100%) *",
+                  "description": "Lightbulb Brightness (0% - 100%)",
                   "type": "integer",
                   "minimum": 0
                 },
@@ -224,7 +258,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['garagedoor', 'lock', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
+                "functionBody": "return ['fan', 'garagedoor', 'lock', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
               }
             },
             "accessoryHasResetTimer": {
