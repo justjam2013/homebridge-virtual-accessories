@@ -18,7 +18,7 @@ export class Switch extends Accessory {
   private durationTimer?: Timer;
   private isCompanionSwitch: boolean = false;
 
-  private uuidPostfix: string = '-switch';
+  private companionSwitchPostfix: string = '-switch';
 
   /**
    * These are just used to create a working example
@@ -92,7 +92,7 @@ export class Switch extends Accessory {
       this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
     } else {
       this.service = this.accessory.getService(companionSwitchName!) ||
-                     this.accessory.addService(this.platform.Service.Switch, companionSwitchName, accessory.UUID + this.uuidPostfix);
+                     this.accessory.addService(this.platform.Service.Switch, companionSwitchName, accessory.UUID + this.companionSwitchPostfix);
     }
 
     // set the service name, this is what is displayed as the default name on the Home app
@@ -132,7 +132,7 @@ export class Switch extends Accessory {
         this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
           this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
-      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
+        this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
       }
     }
   }
@@ -172,14 +172,6 @@ export class Switch extends Accessory {
     }
   }
 
-  setCompanionSwitchState(value: boolean) {
-    if (this.isCompanionSwitch) {
-      this.states.SwitchState = value;
-    } else {
-      throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion switch`);
-    }
-  }
-
   /**
    * Handle the "GET" requests from HomeKit
    * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
@@ -203,6 +195,14 @@ export class Switch extends Accessory {
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return switchState;
+  }
+
+  setCompanionSwitchState(value: boolean) {
+    if (this.isCompanionSwitch) {
+      this.states.SwitchState = value;
+    } else {
+      throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion switch`);
+    }
   }
 
   private getJsonState(): string {
