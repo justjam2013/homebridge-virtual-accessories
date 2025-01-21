@@ -1,6 +1,6 @@
 /* eslint-disable curly */
 
-import { isPowerState, isPercentage, isRotation } from '../customTypes.js';
+import { isPowerState, isPercentage } from '../customTypes.js';
 
 /**
  * 
