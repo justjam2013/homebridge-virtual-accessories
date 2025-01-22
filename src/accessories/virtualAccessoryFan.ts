@@ -3,12 +3,6 @@ import { VirtualAccessoryPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { percentage } from '../customTypes.js';
 
-// type FanStates = {
-//   FanState: boolean;
-//   FanRotationDirection: RotationDirection;
-//   FanRotationSpeed: percentage;
-// };
-
 /**
  * Fan - Accessory implementation
  */
@@ -60,6 +54,8 @@ export class Fan extends Accessory {
       }
     } else {
       this.states.FanState = this.defaultState;
+      this.states.FanRotationDirection = rotationDirection;
+      this.states.FanRotationSpeed = rotationSpeed;
     }
 
     // set accessory information
