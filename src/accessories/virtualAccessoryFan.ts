@@ -11,8 +11,8 @@ export class Fan extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
-  static readonly CLOCKWISE: number = 0;  // Characteristic.ProgrammableSwitchEvent.CLOCKWISE
-  static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.COUNTER_CLOCKWISE
+  static readonly CLOCKWISE: number = 0;          // Characteristic.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE;
+  static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE;
 
   private states = {
     FanState: Fan.OFF,
@@ -156,13 +156,13 @@ export class Fan extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}%`);
+    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}`);
   }
 
   async getRotationDirection(): Promise<CharacteristicValue> {
     const fanRotationDirection = this.states.FanRotationDirection;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${fanRotationDirection}%`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${fanRotationDirection}`);
 
     return fanRotationDirection;
   }
