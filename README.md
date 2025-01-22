@@ -25,6 +25,9 @@
 <details>
 <summary>Table Of Contents</summary>
 
+- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
+    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
+  - [](#)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -32,19 +35,22 @@
     - [Synology](#synology)
   - [Configuration](#configuration)
     - [Doorbell](#doorbell)
+    - [Fan](#fan)
     - [Garage Door](#garage-door)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
-      - [Switch with reset timer](#switch-with-reset-timer)
-      - [Switch with random reset timer](#switch-with-random-reset-timer)
-      - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+    - [Switch with reset timer](#switch-with-reset-timer)
+    - [Switch with random reset timer](#switch-with-random-reset-timer)
+    - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
-      - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
+    - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
   - [Creative Uses](#creative-uses)
+- [](#-1)
+- [](#-2)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
@@ -60,6 +66,7 @@ The downside to a single plugin is trading ease of maintenance of installed plug
 Currently implemented virtual accessories:
 
 -   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Homepods.
+-   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
@@ -149,6 +156,26 @@ In the event that an accessory is misconfigured, you will see error entries in t
             "accessoryName": "My Doorbell",
             "accessoryType": "doorbell",
             "doorbellVolume": 100
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+### Fan
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "12345",
+            "accessoryName": "My Fan",
+            "accessoryType": "fan",
+            "fan": {
+                "defaultState": "off",
+                "rotationDirection": "clockwise",
+                "rotationSpeed": 80
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
