@@ -29,6 +29,7 @@ export class LightbulbConfiguration {
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push('lightbulb.defaultState');
+    if (!isValidType) this.errorFields.push('lightbulb.type');
     if (!isValidBrightness) this.errorFields.push('lightbulb.brightness');
 
     return [
