@@ -469,6 +469,31 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "fan" }
+                }
+              },
+              "then": {
+                "required": [ "fan" ],
+                "properties": {
+                  "lightbulb": {
+                    "required": [ "defaultState", "rotationDirection", "rotationSpeed" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "garagedoor" }
+                }
+              },
+              "then": {
+                "required": [ "garageDoorDefaultState" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryType": { "const": "lightbulb" }
                 }
               },
@@ -494,11 +519,11 @@
             {
               "if": {
                 "properties": {
-                  "accessoryType": { "const": "garagedoor" }
+                  "accessoryType": { "const": "valve" }
                 }
               },
               "then": {
-                "required": [ "garageDoorDefaultState" ]
+                "required": [ "valveType", "valveDuration" ]
               }
             },
             {
