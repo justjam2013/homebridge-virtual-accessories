@@ -475,7 +475,7 @@
               "then": {
                 "required": [ "fan" ],
                 "properties": {
-                  "lightbulb": {
+                  "fan": {
                     "required": [ "defaultState", "rotationDirection", "rotationSpeed" ]
                   }
                 }
