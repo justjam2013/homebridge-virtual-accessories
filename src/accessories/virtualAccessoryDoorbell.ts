@@ -79,7 +79,7 @@ export class Doorbell extends Accessory {
 
     // Overwrite the "onSet" handler to trigger doorbell
     this.companionSwitch!.service!.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this));  // SET - bind to the `setOn` method below
+      .onSet(this.companionSwitchSetOn.bind(this));  // SET - bind to the `setOn` method below
   }
 
   /**
@@ -136,7 +136,7 @@ export class Doorbell extends Accessory {
    * Handle "SET" requests from HomeKit
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
-  async setOn(value: CharacteristicValue) {
+  async companionSwitchSetOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
     const newState = value as boolean;
     this.companionSwitch!.setCompanionSwitchState(newState);
