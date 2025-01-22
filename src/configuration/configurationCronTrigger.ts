@@ -30,6 +30,8 @@ export class CronTriggerConfiguration {
       patternRegex.test(this.pattern)
     );
 
+    const isValidZoneId = this.isValidZoneId(this.zoneId);
+
     const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
     const isValidStartDateTime = (
       (this.startDateTime !== undefined) ?
@@ -50,12 +52,14 @@ export class CronTriggerConfiguration {
     }
 
     if (!isValidPattern) this.errorFields.push('pattern');
+    if (!isValidZoneId) this.errorFields.push('zoneId');
     if (!isValidStartDateTime) this.errorFields.push('startDateTime');
     if (!isValidEndDateTime) this.errorFields.push('endDateTime');
     if (!isValidExecutionRangeDateTime) this.errorFields.push('startDateTime', 'endDateTime');
 
     return [
       (isValidPattern &&
+        isValidZoneId &&
         isValidStartDateTime &&
         isValidEndDateTime &&
         isValidExecutionRangeDateTime),
