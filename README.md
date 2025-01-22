@@ -71,7 +71,7 @@ Currently implemented virtual accessories:
 -   **Lightbulb.** Allows you to create a white lightbulb with on/off and brightness properties. In the Home app, this can be displayed as a switch and then used as a dimmer switch.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
 -   **Window Covering.** These are blinds and shades.
--   **Valve.** - Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
+-   **Valve.** Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
 -   **Switch.** Nobody can have too many switches! Allows you to create a number of different types of switches.
     - **Plain old switches.** What it says on the tin.
     - **Normally on/off switches.** Select if you want the default state of the switch to be on or off. This is the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
