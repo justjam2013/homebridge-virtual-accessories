@@ -147,7 +147,7 @@ export class Lightbulb extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
+    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
