@@ -1,0 +1,77 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Discord Webhooks
+
+# Controls when the workflow will run
+on:
+  workflow_call:
+    inputs:
+      status:
+        required: false
+        type: string
+      content:
+        required: false
+        type: string
+      title:
+        required: false
+        type: string
+      description:
+        required: false
+        type: string
+      image:
+        required: false
+        type: string
+      color:
+        required: false
+        type: string
+      url:
+        required: false
+        type: string
+      username:
+        required: false
+        type: string
+      avatar_url:
+        required: false
+        type: string
+      nofail:
+        required: false
+        type: boolean
+      noprefix:
+        required: false
+        type: boolean
+      nodetail:
+        required: false
+        type: boolean
+      nocontext:
+        required: false
+        type: boolean
+      notimestamp:
+        required: false
+        type: boolean
+    secrets:
+      DISCORD_WEBHOOK:
+        required: true
+
+jobs:
+  github-releases-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ inputs.status || 'Success'}}
+          content: ${{ inputs.content || ''}}
+          title: ${{ inputs.title || ''}}
+          description: |
+            ${{ inputs.description || ''}}
+          image: ${{ inputs.image || ''}}
+          color: ${{ inputs.color || 'FFE87F'}}
+          url: ${{ inputs.url || 'https://homebridge.io'}}
+          username: ${{ inputs.username || 'Virtual Accessories For Homebridge'}}
+          avatar_url: ${{ inputs.avatar_url || 'https://raw.githubusercontent.com/justjam2013/homebridge-virtual-accessories/latest/VirtualAccessories.png'}}
+          nofail: ${{ inputs.nofail || true}}
+          noprefix: ${{ inputs.noprefix || false}}
+          nodetail: ${{ inputs.nodetail || false}}
+          nocontext: ${{ inputs.nocontext || false}}
+          notimestamp: ${{ inputs.notimestamp || false}}

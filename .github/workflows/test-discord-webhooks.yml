@@ -1,0 +1,23 @@
+# This is a manually triggered workfow to test discord-webhooks workflow
+
+name: Test Discord Webhooks
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch
+
+jobs:
+  post-test-release-to-discord:
+    name: Discord Webhooks
+
+    needs: [publish]
+
+    uses: justjam2013/homebridge-virtual-accessories/.github/workflows/discord-webhooks.yml@latest
+
+    with:
+      title: Virtual Accessories for Homebridge - Test
+      description: |
+        Version `${{ github.event.release.tag_name }}`
+      url: 'https://github.com/justjam2013/homebridge-virtual-accessories/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}'
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
