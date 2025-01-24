@@ -11,7 +11,6 @@ jobs:
     name: Discord Webhooks
 
     uses: justjam2013/homebridge-virtual-accessories/.github/workflows/discord-webhooks.yml@latest
-
     with:
       title: Test
       description: |
