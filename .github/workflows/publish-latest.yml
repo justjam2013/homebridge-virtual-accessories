@@ -36,7 +36,8 @@ jobs:
 
     needs: [publish]
 
-    uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    # uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    uses: justjam2013/homebridge-virtual-accessories/.github/workflows/discord-webhooks.yml@latest
     with:
       title: Virtual Accessories for Homebridge - Latest Release
       description: |
