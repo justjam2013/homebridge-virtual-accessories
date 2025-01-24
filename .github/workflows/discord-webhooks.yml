@@ -67,7 +67,7 @@ jobs:
             ${{ inputs.description || ''}}
           image: ${{ inputs.image || ''}}
           color: ${{ inputs.color || 'FFE87F'}}
-          url: ${{ inputs.url || 'https://homebridge.io'}}
+          url: ${{ inputs.url || 'https://github.com/justjam2013/homebridge-virtual-accessories/'}}
           username: ${{ inputs.username || 'Virtual Accessories For Homebridge'}}
           avatar_url: ${{ inputs.avatar_url || 'https://raw.githubusercontent.com/justjam2013/homebridge-virtual-accessories/latest/VirtualAccessories.png'}}
           nofail: ${{ inputs.nofail || true}}
