@@ -1,10 +1,11 @@
-import type { Logging, PlatformAccessory, Service } from 'homebridge';
+import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 import fs from 'fs';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { VirtualLogger } from '../virtualLogger.js';
 
 /**
  * Abstract Accessory
@@ -26,7 +27,7 @@ export abstract class Accessory {
 
   protected companionSensor?: VirtualSensor;
 
-  protected log: Logging;
+  readonly log: VirtualLogger;
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -37,7 +38,7 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
-    this.log = this.platform.log;
+    this.log = new VirtualLogger(this.platform.log);
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 

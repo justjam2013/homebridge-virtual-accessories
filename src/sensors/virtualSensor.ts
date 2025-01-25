@@ -143,8 +143,9 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    if (sensorStateChanged && !isLoggingDisabled) {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    if (sensorStateChanged) {
+      // eslint-disable-next-line max-len
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
 

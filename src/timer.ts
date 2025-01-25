@@ -1,4 +1,4 @@
-import { Logging } from 'homebridge';
+import { VirtualLogger } from './virtualLogger';
 
 export class Timer {
 
@@ -10,7 +10,7 @@ export class Timer {
   };
 
   private accessoryName: string;
-  private log: Logging;
+  private log: VirtualLogger;
 
   private timerIsResettable: boolean = false;
 
@@ -22,19 +22,19 @@ export class Timer {
 
   constructor(
     accessoryName: string,
-    log: Logging,
+    log: VirtualLogger,
     timerIsResettable: boolean,
   );
   constructor(
     accessoryName: string,
-    log: Logging,
+    log: VirtualLogger,
     timerIsResettable: boolean,
     duration: number,
     units: string,
   );
   constructor(
     accessoryName: string,
-    log: Logging,
+    log: VirtualLogger,
     timerIsResettable: boolean = false,
     duration?: number,
     units?: string,

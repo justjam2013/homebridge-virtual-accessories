@@ -162,7 +162,7 @@ export abstract class AccessoryFactory {
       trigger = new CronTrigger(sensor, name);
       break;
     default:
-      sensor.platform.log.error('Error creating trigger. Invalid trigger type:', triggerType);
+      sensor.log.error('Error creating trigger. Invalid trigger type:', [triggerType]);
     }
 
     return trigger;
