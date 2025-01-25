@@ -1,4 +1,4 @@
-import type { PlatformAccessory, Service } from 'homebridge';
+import type { Logging, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
@@ -26,6 +26,8 @@ export abstract class Accessory {
 
   protected companionSensor?: VirtualSensor;
 
+  protected log: Logging;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -35,8 +37,9 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
+    this.log = this.platform.log;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
     this.storagePath = accessory.context.storagePath;
 
@@ -55,7 +58,7 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Loading state: ${JSON.stringify(json)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Loading state: ${JSON.stringify(json)}`);
     return json;
   }
 
@@ -64,7 +67,7 @@ export abstract class Accessory {
     stateJson: string,
   ): void {
     // Overwrite the existing persistence file
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
     fs.writeFileSync(
       storagePath,
       stateJson,
@@ -75,11 +78,12 @@ export abstract class Accessory {
   protected deleteState(
     storagePath: string,
   ) {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Deleting state file ${storagePath}`);
     if (fs.existsSync(storagePath)) {
       try {
         fs.unlinkSync(storagePath); 
       } catch (err) {
-        // For now ignore
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error deleting state file ${storagePath}`);
       }
     }
   }

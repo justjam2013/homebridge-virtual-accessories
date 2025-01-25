@@ -90,7 +90,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const pressEvent = Doorbell.SINGLE_PRESS;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -104,7 +104,7 @@ export class Doorbell extends Accessory {
     // implement your own code to turn your device on/off
     this.states.Volume = value as number;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
   }
 
   /**
@@ -124,7 +124,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const volume = this.states.Volume;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -146,7 +146,7 @@ export class Doorbell extends Accessory {
       this.triggerDoorbellEvent(Doorbell.SINGLE_PRESS, this.companionSwitch!);
 
       if (this.companionSensorResetTimerId) {
-        this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Clearing reset timer: ${this.companionSensorResetTimerId}`);
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Clearing reset timer: ${this.companionSensorResetTimerId}`);
         clearTimeout(this.companionSensorResetTimerId);
       }
 
@@ -154,10 +154,10 @@ export class Doorbell extends Accessory {
       this.companionSensorResetTimerId = setTimeout(() => {
         this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, Switch.OFF);
       }, 1000);
-      this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(newState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(newState)}`);
   }
 
   /**
@@ -170,7 +170,7 @@ export class Doorbell extends Accessory {
 
     this.service!.updateCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent, (event));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${this.getEventName(event)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${this.getEventName(event)}`);
   }
 
   private getEventName(event: number): string {

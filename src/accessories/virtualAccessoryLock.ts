@@ -62,7 +62,7 @@ export class Lock extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockState));
     this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockState));
 
@@ -110,7 +110,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Current State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Current State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -130,7 +130,7 @@ export class Lock extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
   }
 
   /**
@@ -150,7 +150,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Target State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Target State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -162,7 +162,7 @@ export class Lock extends Accessory {
   async handleConfigurationStateGet(): Promise<CharacteristicValue> {
     const configurationState = 0;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configuration State: ${configurationState}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configuration State: ${configurationState}`);
 
     return configurationState;
   }
@@ -170,13 +170,13 @@ export class Lock extends Accessory {
   async handleNFCAccessControlPointSet(value: CharacteristicValue) {
     const nfcAccessControlPoint = value;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
   }
 
   async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
     const nFCAccessSupportedConfiguration = 'AQEQAgEQ';
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
 
     return nFCAccessSupportedConfiguration;
   }

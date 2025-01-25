@@ -74,7 +74,7 @@ export abstract class VirtualSensor extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -107,7 +107,7 @@ export abstract class VirtualSensor extends Accessory {
   async handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -126,7 +126,7 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
 
   /**
@@ -144,7 +144,7 @@ export abstract class VirtualSensor extends Accessory {
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     if (sensorStateChanged && !isLoggingDisabled) {
-      this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     }
   }
 
