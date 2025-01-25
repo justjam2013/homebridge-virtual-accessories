@@ -69,8 +69,7 @@ export class Lightbulb extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    // eslint-disable-next-line max-len
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.LightbulbState));
     this.service.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
 
@@ -112,7 +111,7 @@ export class Lightbulb extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
 
   /**
@@ -132,7 +131,7 @@ export class Lightbulb extends Accessory {
     // implement your own code to check if the device is on
     const lightbulbState = this.states.LightbulbState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -147,13 +146,13 @@ export class Lightbulb extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
     const lightbulbBrightness = this.states.LightbulbBrightness;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
 
     return lightbulbBrightness;
   }

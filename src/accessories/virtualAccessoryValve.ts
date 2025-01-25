@@ -72,7 +72,7 @@ export class Valve extends Accessory {
     // isTimerResettable = false
     this.durationTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
-      this.platform.log,
+      this.log,
       false,
       this.accessoryConfiguration.valveDuration,
       Timer.Units.Seconds,
@@ -93,7 +93,7 @@ export class Valve extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${this.getActiveName(this.states.ValveActive)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${this.getActiveName(this.states.ValveActive)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.states.ValveActive));
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
     this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valveDuration));
@@ -140,7 +140,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveType = this.valveType;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${this.getValveTypeName(valveType)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${this.getValveTypeName(valveType)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -155,12 +155,12 @@ export class Valve extends Accessory {
     // implement your own code to turn your device on/off
     this.states.ValveActive = value as number;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${this.getActiveName(this.states.ValveActive)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${this.getActiveName(this.states.ValveActive)}`);
 
     this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
     this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
 
     // Store device state if stateful
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -198,7 +198,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveActive = this.states.ValveActive;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${this.getActiveName(valveActive)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${this.getActiveName(valveActive)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -214,7 +214,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveInUse = this.states.ValveInUse;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${this.getInUseName(valveInUse)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${this.getInUseName(valveInUse)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -230,13 +230,13 @@ export class Valve extends Accessory {
 
     this.durationTimer.setDuration(duration, Timer.Units.Seconds);
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
   async handleSetDurationGet(): Promise<CharacteristicValue> {
     const duration = this.durationTimer.getDuration();
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
 
     return duration;
   }
@@ -244,7 +244,7 @@ export class Valve extends Accessory {
   async handleRemainingDurationGet(): Promise<CharacteristicValue> {
     const remainingDuration = this.durationTimer.getRemainingDuration();
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
 
     return remainingDuration;
   }

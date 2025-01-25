@@ -73,7 +73,7 @@ export class Fan extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory     
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Fan Current State: ${Fan.getStateName(this.states.FanState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Fan Current State: ${Fan.getStateName(this.states.FanState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.FanState));
     this.service.updateCharacteristic(this.platform.Characteristic.RotationDirection, (this.states.FanRotationDirection));
     this.service.updateCharacteristic(this.platform.Characteristic.RotationSpeed, (this.states.FanRotationSpeed));
@@ -121,7 +121,7 @@ export class Fan extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
   }
 
   /**
@@ -141,7 +141,7 @@ export class Fan extends Accessory {
     // implement your own code to check if the device is on
     const fanState = this.states.FanState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Fan.getStateName(fanState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Fan.getStateName(fanState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -156,13 +156,13 @@ export class Fan extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}`);
   }
 
   async getRotationDirection(): Promise<CharacteristicValue> {
     const fanRotationDirection = this.states.FanRotationDirection;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${fanRotationDirection}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${fanRotationDirection}`);
 
     return fanRotationDirection;
   }
@@ -174,13 +174,13 @@ export class Fan extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.FanRotationSpeed}%`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.FanRotationSpeed}%`);
   }
 
   async getRotationSpeed(): Promise<CharacteristicValue> {
     const fanRotationSpeed = this.states.FanRotationSpeed;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Speed: ${fanRotationSpeed}%`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Speed: ${fanRotationSpeed}%`);
 
     return fanRotationSpeed;
   }

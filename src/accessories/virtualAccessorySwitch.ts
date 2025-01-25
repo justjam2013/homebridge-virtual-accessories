@@ -71,7 +71,7 @@ export class Switch extends Accessory {
             timerConfig.duration;
           this.durationTimer = new Timer(
             this.accessoryConfiguration.accessoryName,
-            this.platform.log,
+            this.log,
             this.accessoryConfiguration.resetTimer.isResettable,
             duration,
             timerConfig.units,
@@ -104,7 +104,7 @@ export class Switch extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Switch Current State: ${Switch.getStateName(this.states.SwitchState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Switch Current State: ${Switch.getStateName(this.states.SwitchState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.SwitchState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -163,7 +163,7 @@ export class Switch extends Accessory {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
 
     if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
@@ -189,7 +189,7 @@ export class Switch extends Accessory {
     // implement your own code to check if the device is on
     const switchState = this.states.SwitchState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Switch.getStateName(switchState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Switch.getStateName(switchState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
