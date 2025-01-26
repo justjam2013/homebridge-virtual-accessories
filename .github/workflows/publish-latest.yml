@@ -49,6 +49,7 @@ jobs:
       title: Virtual Accessories for Homebridge - Latest Release
       description: |
         Version `${{ github.event.release.tag_name }}`
+      color: '0xAFFF8F'
       url: 'https://github.com/justjam2013/homebridge-virtual-accessories/releases/tag/v${{ needs.publish.outputs.NPM_PACKAGE_VERSION }}'
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
