@@ -66,6 +66,13 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     }
     this.log.debug(`Found ${configuredDevices.length} configured accessories: ${JSON.stringify(configuredDevices)}`);
 
+    // Nasty hack to fix the cron date values
+    try {
+      this.hackCronTriggerDate();
+    } catch(error) {
+      // Do nothing
+    }
+
     const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
     this.log.debug(`Deserialized accessories: ${JSON.stringify(configuredAccessories)}`);
 
@@ -195,5 +202,62 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     }
 
     return accessoryConfigurations;
+  }
+   
+  private hackCronTriggerDate() {
+    this.log.debug('Hacking Cron Trigger dates');
+    let saveMods: boolean = false;
+
+    const configFile = this.api.user.configPath();
+
+    // Make a backup
+    fs.copyFileSync(configFile, `${configFile}.bak`);
+
+    let contents = '{}';
+    if (fs.existsSync(configFile)) {
+      contents = fs.readFileSync(configFile, 'utf8');
+    }
+    const config = JSON.parse(contents);
+
+    const platforms = config.platforms;
+    for (const platform of platforms) {
+
+      if (platform.platform === 'VirtualAccessoriesForHomebridge') {
+        const devices = platform.devices;
+
+        for (const device of devices) {
+
+          if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
+            this.log.debug(`Device: ${device.accessoryName}, ${device.accessoryType}`);
+
+            const startTimestamp = device.cronTrigger.startDateTime as string;
+            this.log.debug(`Start Timestamp: ${startTimestamp}`);
+            if (startTimestamp !== undefined && startTimestamp.endsWith('Z')) {
+              device.cronTrigger.startDateTime = startTimestamp.slice(0, -1);
+              saveMods = true;
+              this.log.info(`Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+            }
+
+            const endTimestamp = device.cronTrigger.endDateTime as string;
+            this.log.debug(`End Timestamp: ${endTimestamp}`);
+            if (endTimestamp !== undefined && endTimestamp.endsWith('Z')) {
+              device.cronTrigger.endDateTime = endTimestamp.slice(0, -1);
+              saveMods = true;
+              this.log.info(`Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+            }
+          }
+        }
+      }
+    }
+    
+    if (saveMods) {
+      this.log.debug('Saving hacked Cron Trigger dates');
+
+      fs.writeFileSync(
+        configFile,
+        JSON.stringify(config, null, 4),
+        { encoding: 'utf8', flag: 'w' },
+      );
+    }
   }
 }
