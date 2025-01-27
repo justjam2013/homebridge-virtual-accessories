@@ -13,8 +13,8 @@ export class SunEventsTrigger extends Trigger {
 
   private SunTimesURL = (latitude: string, longitude: string) => `https://api.sunrisesunset.io/json?lat=${latitude}&lng=${longitude}`;
 
-  private eventCronJob: Cron;
-  private dataCronJob: Cron;
+  private eventCronJob!: Cron;
+  private dataCronJob!: Cron;
 
   private timezone: string | undefined;
 
