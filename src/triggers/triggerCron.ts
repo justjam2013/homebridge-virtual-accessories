@@ -1,10 +1,10 @@
+import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
 import { DateTimeFormatter, Instant, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 import { CronJob } from 'cron';
-import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
 
 /**
  * CronTrigger - Trigger implementation
@@ -34,6 +34,7 @@ export class CronTrigger extends Trigger {
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
     const timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;  // 'America/Los_Angeles'
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting cron timeZone to '${timeZone}'`);
 
     const zoneId: ZoneId = (triggerConfig.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(triggerConfig.zoneId);
     this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
