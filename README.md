@@ -45,6 +45,7 @@
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
+    - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
@@ -77,6 +78,7 @@ Currently implemented virtual accessories:
 -   **Sensor.** Allows you to create different types of sensors. If configured in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by the cron expression. The sensor resets after a brief delay.
+    - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for those photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To trigger a sensor from a switch, create a switch with a companion sensor. A future release may provide the ability to create this pairing as a sensor with a switch as trigger.
 
 ## Installation
@@ -148,7 +150,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Doorbell",
             "accessoryType": "doorbell",
             "doorbellVolume": 100
@@ -164,7 +166,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Fan",
             "accessoryType": "fan",
             "fan": {
@@ -185,7 +187,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Garage Door",
             "accessoryType": "garagedoor",
             "garageDoorDefaultState": "closed",
@@ -202,7 +204,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Lightbulb",
             "accessoryType": "lightbulb",
             "lightbulb": {
@@ -222,7 +224,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Lock",
             "accessoryType": "lock",
             "lockDefaultState": "unlocked",
@@ -242,7 +244,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "7022976",
+            "accessoryID": "1234567",
             "accessoryName": "Test Valve",
             "accessoryType": "valve",
             "valveType": "waterfaucet",
@@ -260,7 +262,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Blinds",
             "accessoryType": "windowcovering",
             "windowCoveringDefaultState": "closed",
@@ -279,7 +281,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
             "switchDefaultState": "off",
@@ -297,7 +299,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
             "switchDefaultState": "off",
@@ -321,7 +323,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
             "switchDefaultState": "off",
@@ -347,7 +349,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
             "switchDefaultState": "off",
@@ -370,7 +372,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "12345",
+            "accessoryID": "1234567",
             "accessoryName": "My Ping Sensor",
             "accessoryType": "sensor",
             "sensorType": "contact",
@@ -393,14 +395,15 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "7878778",
+            "accessoryID": "1234567",
             "accessoryName": "Cron Sensor",
             "accessoryType": "sensor",
-            "sensorType": "leak",
+            "sensorType": "contact",
             "sensorTrigger": "cron",
             "cronTrigger": {
                 "pattern": "* * * * * *",
                 "zoneId": "America/Los_Angeles",
+                "disableTriggerEventLogging": false,
                 "isDisabled": false
             }
         }
@@ -416,16 +419,42 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "name": "Virtual Accessories Platform",
     "devices": [
         {
-            "accessoryID": "7878778",
+            "accessoryID": "1234567",
             "accessoryName": "Cron Sensor",
             "accessoryType": "sensor",
-            "sensorType": "leak",
+            "sensorType": "contact",
             "sensorTrigger": "cron",
             "cronTrigger": {
                 "pattern": "* * * * * *",
                 "zoneId": "America/Los_Angeles",
-                "startDateTime": "2024-11-14T19:41:00Z",
-                "endDateTime": "2024-11-30T19:41:00Z",
+                "startDateTime": "2024-11-14T19:41:00",
+                "endDateTime": "2024-11-30T19:41:00",
+                "disableTriggerEventLogging": false,
+                "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Sensor with sun events trigger
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "Sunrise trigger",
+            "accessoryType": "sensor",
+            "sensorType": "contact",
+            "sensorTrigger": "sunevents",
+            "sunEventsTrigger": {
+                "event": "sunrise",
+                "latitude": "37.226148",
+                "longitude": "-115.837523",
+                "zoneId": "America/Los_Angeles",
                 "isDisabled": false
             }
         }
