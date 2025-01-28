@@ -639,7 +639,23 @@
                 "required": [ "cronTrigger" ],
                 "properties": {
                   "cronTrigger": {
-                    "required": [ "pattern" ]
+                    "required": [ "pattern", "zoneId" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensorTrigger": { "const": "sunevents" }
+                },
+                "required": [ "sensorTrigger" ]
+              },
+              "then": {
+                "required": [ "sunEventsTrigger" ],
+                "properties": {
+                  "cronTrigger": {
+                    "required": [ "latitude", "longitude", "zoneId" ]
                   }
                 }
               }
