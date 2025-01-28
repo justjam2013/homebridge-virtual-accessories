@@ -52,7 +52,7 @@
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Valve", "enum": ["valve"] },
-                { "title": "Window Covering - Blinds, Shades", "enum": ["windowcovering"] }
+                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
               ],
               "default": "switch"
             },
@@ -247,7 +247,8 @@
               "type": "string",
               "oneOf": [
                 { "title": "Ping Host", "enum": ["ping"] },
-                { "title": "Cron Schedule", "enum": ["cron"] }
+                { "title": "Cron Schedule", "enum": ["cron"] },
+                { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] }
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
@@ -407,8 +408,9 @@
               "properties": {
                 "pattern": {
                   "title": "Cron Pattern *",
-                  "description": "Unix cron pattern (* * * * *)",
+                  "description": "Unix cron pattern (minute, hour, day, month, weekday)",
                   "type": "string",
+                  "placeholder": "* * * * *",
                   "pattern": "^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$"
                 },
                 "zoneId": {
@@ -442,6 +444,48 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'cron';"
+              }
+            },
+            "sunEventsTrigger": {
+              "title": "Sunrise/Sunset Trigger",
+              "type": "object",
+              "properties": {
+                "event": {
+                  "title": "Event *",
+                  "description": "Sun event",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Sunrise", "enum": ["sunrise"] },
+                    { "title": "Sunset", "enum": ["sunset"] },
+                    { "title": "Golden Hour", "enum": ["goldenhour"] }
+                  ]
+                },
+                "latitude": {
+                  "title": "Latitude *",
+                  "description": "Latitude for your location (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
+                },
+                "longitude": {
+                  "title": "Longitude *",
+                  "description": "Longitude for your location (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+                },
+                "zoneId": {
+                  "title": "Zone Id",
+                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "type": "string",
+                  "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
+                },
+                "isDisabled": {
+                  "title": "Disable Sunrise/Sunset Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'sunevents';"
               }
             }
           },

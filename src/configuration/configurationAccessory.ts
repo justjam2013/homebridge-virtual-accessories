@@ -5,6 +5,7 @@ import { CronTriggerConfiguration } from './configurationCronTrigger.js';
 import { FanConfiguration } from './configurationFan.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
+import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
 import { TimerConfiguration } from './configurationTimer.js';
 
 import { Type } from 'typeserializer';
@@ -69,8 +70,12 @@ export class AccessoryConfiguration {
   // Triggers
   @Type(PingTriggerConfiguration)
     pingTrigger!: PingTriggerConfiguration;
+  
   @Type(CronTriggerConfiguration)
     cronTrigger!: CronTriggerConfiguration;
+
+  @Type(SunEventsTriggerConfiguration)
+    sunEventsTrigger!: SunEventsTriggerConfiguration;
 
   private errorFields: string[] = [];
 
@@ -367,6 +372,13 @@ export class AccessoryConfiguration {
         }
 
         [isValidTrigger, errorFields] = this.pingTrigger.isValid();
+        break;
+      case 'sunevents':
+        if (this.sunEventsTrigger === undefined) {
+          return [false, []];
+        }
+
+        [isValidTrigger, errorFields] = this.sunEventsTrigger.isValid();
         break;
       default:
         return [false, []];

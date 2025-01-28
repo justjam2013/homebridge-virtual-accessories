@@ -26,6 +26,7 @@ import { CronTrigger } from './triggers/triggerCron.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 /**
  * Virtual Accessory Factory
@@ -160,6 +161,9 @@ export abstract class AccessoryFactory {
       break;
     case 'cron':
       trigger = new CronTrigger(sensor, name);
+      break;
+    case 'sunevents':
+      trigger = new SunEventsTrigger(sensor, name);
       break;
     default:
       sensor.log.error('Error creating trigger. Invalid trigger type:', [triggerType]);
