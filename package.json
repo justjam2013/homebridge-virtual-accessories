@@ -52,8 +52,11 @@
     "virtual shades",
     "sensor",
     "virtual sensor",
-    "ping sensor",
-    "cron sensor",
+    "ping",
+    "cron",
+    "sunrise",
+    "sunset",
+    "golden hour",
     "dummy"
   ],
   "main": "dist/index.js",
