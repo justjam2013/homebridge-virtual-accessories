@@ -20,8 +20,8 @@ jobs:
           days-before-issue-close: 3
           any-of-issue-labels: 'waiting for reply'
 
-          stale-issue-label: stale
-          stale-issue-message: "This issue is stale because there has been no reply for 7 days."
+          stale-issue-label: abandoned
+          stale-issue-message: "This issue is abandoned because there has been no reply for 7 days."
 
           days-before-pr-stale: -1
           days-before-pr-close: -1
