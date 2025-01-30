@@ -5,6 +5,8 @@ import { Trigger } from './trigger.js';
 import { Cron } from 'croner';
 import { Type, deserialize } from 'typeserializer';
 import 'reflect-metadata';
+import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
+import '@js-joda/timezone';
 
 /**
  * SunEventsTrigger - Trigger implementation
@@ -63,7 +65,9 @@ export class SunEventsTrigger extends Trigger {
     cronJob: Cron,
   ) {
     let nextRunTimestamp: string | undefined = cronJob.nextRun()?.toISOString();
-    nextRunTimestamp = (nextRunTimestamp === undefined) ? 'None scheduled' : `${nextRunTimestamp.split('.')[0]} (${cronJob.options.maxRuns})`;
+    nextRunTimestamp = (nextRunTimestamp === undefined) ?
+      'None scheduled' :
+      `${nextRunTimestamp.split('.')[0]} (count: ${cronJob.options.maxRuns})`;
     this.log.debug(`[${this.sensorConfig.accessoryName}] Next ${cronJob.name} run: ${nextRunTimestamp}`);
   }
 
@@ -172,7 +176,8 @@ export class SunEventsTrigger extends Trigger {
         timezone: runTimezone,
       },
       (async () => {
-        this.log.debug(`[${this.sensorConfig.accessoryName}] Matched event time '${cronRunTimestamp}'. Triggering sensor`);
+        const now = this.now().toString();
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
         sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
         await this.delay(resetDelayMillis);
@@ -202,6 +207,11 @@ export class SunEventsTrigger extends Trigger {
     }
 
     return unitParts.join(':');
+  }
+
+  private now() {
+    const now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
+    return now;
   }
 }
 
