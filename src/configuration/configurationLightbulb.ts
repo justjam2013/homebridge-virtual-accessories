@@ -7,8 +7,8 @@ export class LightbulbConfiguration {
   defaultState!: string;
   type!: string;
   brightness!: number;
+  colorTemperatureKelvin!: number;
   // TODO:
-  // colorTemperature!: number;
   // hue!: number;
   // saturation!: number;
 
@@ -19,7 +19,7 @@ export class LightbulbConfiguration {
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
-      ['white', 'ambient', 'color'].includes(this.type)
+      ['white', 'ambiance', 'color'].includes(this.type)
     );
 
     const isValidBrightness: boolean = (
@@ -27,15 +27,23 @@ export class LightbulbConfiguration {
       (this.brightness >= 0 && this.brightness <= 100)
     );
 
+    const isValidColorTemperature: boolean = (
+      this.colorTemperatureKelvin === undefined?
+        true :
+        (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536)
+    );
+
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push('lightbulb.defaultState');
     if (!isValidType) this.errorFields.push('lightbulb.type');
     if (!isValidBrightness) this.errorFields.push('lightbulb.brightness');
+    if (!isValidColorTemperature) this.errorFields.push('lightbulb.colorTemperature');
 
     return [
       (isValidDefaultState &&
         isValidType &&
-        isValidBrightness),
+        isValidBrightness &&
+        isValidColorTemperature),
       this.errorFields,
     ];
   }
