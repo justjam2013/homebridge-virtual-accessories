@@ -127,20 +127,43 @@
                   "title": "Brightness *",
                   "description": "Lightbulb Brightness (0% - 100%)",
                   "type": "integer",
-                  "minimum": 0
+                  "placeholder": 0
                 },
                 "type": {
                   "title": "Type *",
                   "description": "Lightbulb type",
                   "type": "string",
                   "oneOf": [
-                    { "title": "White", "enum": ["white"] }
+                    { "title": "White", "enum": ["white"] },
+                    { "title": "White Ambiance", "enum": ["ambiance"] }
                   ]
+                },
+                "colorTemperatureKelvin": {
+                  "title": "Color Temperature *",
+                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K) *",
+                  "type": "integer",
+                  "placeholder": 2700,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
+                  }
                 }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lightbulb';"
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "ambiance" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "colorTemperatureKelvin" ]
+                  }
+                }
+              ]
             },
             "lockDefaultState": {
               "title": "Lock Default State *",
