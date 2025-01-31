@@ -27,7 +27,7 @@
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (do not modify once assigned)",
+              "description": "Unique ID for the Accessory (https://www.random.org/) Do not modify once assigned!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Fa-f0-9\\-]{5,}$"
@@ -58,7 +58,7 @@
             },
             "doorbellVolume": {
               "title": "Doorbell Volume *",
-              "description": "Doorbell volume (0 - 100) *",
+              "description": "Doorbell volume (0% - 100%)",
               "type": "integer",
               "minimum": 0,
               "condition": {
@@ -226,7 +226,7 @@
             },
             "sensorType": {
               "title": "Sensor Type *",
-              "description": "Sensor type (Critical sensor notifications bypass Do Not Disturb)",
+              "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
               "type": "string",
               "oneOf": [
                 { "title": "Contact", "enum": ["contact"] },
@@ -359,7 +359,7 @@
                 },
                 "type": {
                   "title": "Sensor Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass Do Not Disturb)",
+                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb')",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
