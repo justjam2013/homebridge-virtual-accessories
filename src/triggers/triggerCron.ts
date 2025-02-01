@@ -2,7 +2,7 @@ import { CronTriggerConfiguration } from '../configuration/configurationCronTrig
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
-import { DateTimeFormatter, Instant, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
+import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 import { CronJob } from 'cron';
 
@@ -113,11 +113,6 @@ export class CronTrigger extends Trigger {
 
     const zonedDateTime: ZonedDateTime = ZonedDateTime.of(LocalDateTime.parse(localDatetime), zoneId);
     return zonedDateTime;
-  }
-
-  private now() {
-    const now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
-    return now;
   }
 }
 

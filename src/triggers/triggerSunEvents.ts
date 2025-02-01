@@ -5,8 +5,6 @@ import { Trigger } from './trigger.js';
 import { Cron } from 'croner';
 import { Type, deserialize } from 'typeserializer';
 import 'reflect-metadata';
-import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
-import '@js-joda/timezone';
 
 /**
  * SunEventsTrigger - Trigger implementation
@@ -207,11 +205,6 @@ export class SunEventsTrigger extends Trigger {
     }
 
     return unitParts.join(':');
-  }
-
-  private now() {
-    const now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
-    return now;
   }
 }
 
