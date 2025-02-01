@@ -3,6 +3,9 @@ import { Logging } from 'homebridge';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
+import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
+import '@js-joda/timezone';
+
 /**
  * Abstract Trigger
  */
@@ -25,5 +28,10 @@ export abstract class Trigger {
     this.name = name;
 
     this.log = this.sensor.platform.log;
+  }
+
+  protected now() {
+    const now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
+    return now;
   }
 }
