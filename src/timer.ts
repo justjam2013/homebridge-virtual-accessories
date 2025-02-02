@@ -1,4 +1,6 @@
 import { VirtualLogger } from './virtualLogger';
+import { Utils } from './utils.js';
+import { ZonedDateTime } from '@js-joda/core';
 
 export class Timer {
 
@@ -16,6 +18,7 @@ export class Timer {
 
   private timerId: ReturnType<typeof setInterval> | undefined;
   private duration: number = 0;
+  private startTime: ZonedDateTime;
 
   private remainingDuration: number = 0;
   private timerIsRunning: boolean = false;
@@ -42,6 +45,8 @@ export class Timer {
     this.accessoryName = accessoryName;
     this.log = log;
     this.timerIsResettable = timerIsResettable;
+
+    this.startTime = Utils.now();
 
     if (duration !== undefined) {
       this.setDuration(duration, units!);
@@ -89,6 +94,7 @@ export class Timer {
         }
       }, 1000);
 
+      this.startTime = Utils.now();
       this.timerIsRunning = true;
     }
   }
@@ -96,10 +102,16 @@ export class Timer {
   stop(): void {
     clearInterval(this.timerId);
 
+    this.duration = 0;
+
     this.timerIsRunning = false;
     this.remainingDuration = 0;
 
     this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
+  }
+
+  getStartTime(): ZonedDateTime {
+    return this.startTime;
   }
 
   /**

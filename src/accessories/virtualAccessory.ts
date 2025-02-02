@@ -3,9 +3,10 @@ import type { PlatformAccessory, Service } from 'homebridge';
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
-import fs from 'fs';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { VirtualLogger } from '../virtualLogger.js';
+
+import fs from 'fs';
 
 /**
  * Abstract Accessory
@@ -45,7 +46,7 @@ export abstract class Accessory {
     this.storagePath = accessory.context.storagePath;
 
     if (!this.accessoryConfiguration.accessoryIsStateful) {
-      this.deleteState(this.storagePath);
+      this.deleteAccessoryState(this.storagePath);
     }
   }
 
@@ -83,7 +84,7 @@ export abstract class Accessory {
     );
   }
 
-  protected deleteState(
+  protected deleteAccessoryState(
     storagePath: string,
   ) {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Deleting state file ${storagePath}`);
