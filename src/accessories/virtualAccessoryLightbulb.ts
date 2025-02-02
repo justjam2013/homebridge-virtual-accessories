@@ -49,8 +49,8 @@ export class Lightbulb extends Accessory {
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState = accessoryState[this.stateStorageKey];
-      const cachedBrightness = accessoryState[this.brightnessStorageKey];
+      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+      const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
 
       if (cachedState !== undefined && cachedBrightness !== undefined) {
         this.states.LightbulbState = cachedState;
@@ -61,7 +61,7 @@ export class Lightbulb extends Accessory {
       }
 
       if (this.type === Lightbulb.AMBIANCE) {
-        const cachedColorTemperature = accessoryState[this.colorTemperatureStorageKey];
+        const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
 
         if (cachedColorTemperature !== undefined) {
           this.states.LightbulbColorTemperature = cachedColorTemperature;
