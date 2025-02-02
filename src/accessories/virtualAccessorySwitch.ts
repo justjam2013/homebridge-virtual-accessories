@@ -6,6 +6,9 @@ import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
+import { Utils } from '../utils.js';
+
+import { Duration } from '@js-joda/core';
 
 /**
  * Switch - Accessory implementation
@@ -30,6 +33,8 @@ export class Switch extends Accessory {
   };
 
   private readonly stateStorageKey: string = 'SwitchState';
+  private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  private readonly timerDurationStorageKey: string = 'TimerDuration';
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -48,10 +53,25 @@ export class Switch extends Accessory {
       // First configure the device based on the accessory details
       this.defaultState = this.accessoryConfiguration.switchDefaultState === 'on' ? Switch.ON : Switch.OFF;
 
+      // Setup reset timer first
+      if (this.accessoryConfiguration.accessoryHasResetTimer) {
+        const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
+        const duration: number = timerConfig.durationIsRandom ?
+          Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
+          timerConfig.duration;
+        this.durationTimer = new Timer(
+          this.accessoryConfiguration.accessoryName,
+          this.log,
+          this.accessoryConfiguration.resetTimer.isResettable,
+          duration,
+          timerConfig.units,
+        );
+      }
+
       // If the accessory is stateful retrieve stored state, otherwise set to default state
       if (this.accessoryConfiguration.accessoryIsStateful) {
         const accessoryState = this.loadAccessoryState(this.storagePath);
-        const cachedState = accessoryState[this.stateStorageKey] as boolean;
+        const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
   
         if (cachedState !== undefined) {
           this.states.SwitchState = cachedState;
@@ -60,23 +80,29 @@ export class Switch extends Accessory {
           this.states.SwitchState = this.defaultState;
           this.states.SensorState = this.CLOSED_NORMAL;
         }
+
+        if (this.accessoryConfiguration.accessoryHasResetTimer) {
+          const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
+          const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+
+          // If there was time left on the timer
+          if (cachedTimerDuration > 0) {
+            // TODO: This is time elapsed since last state change. We want time elapsed since shutdown
+            const elapsedTime: number = Duration.between(Utils.now(), Utils.zonedDateTime(cachedTimerStartTime)).toMillis() / 1000;
+            const remainingTimerDuration: number = (cachedTimerDuration <= elapsedTime) ? 1 : (cachedTimerDuration - elapsedTime);
+
+            this.durationTimer!.start(
+              () => {
+                this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+              },
+              remainingTimerDuration,
+              Timer.Units.Seconds,
+            );
+          }
+        }
       } else {
         this.states.SwitchState = this.defaultState;
         this.states.SensorState = this.CLOSED_NORMAL;
-
-        if (this.accessoryConfiguration.accessoryHasResetTimer) {
-          const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
-          const duration: number = timerConfig.durationIsRandom ?
-            Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
-            timerConfig.duration;
-          this.durationTimer = new Timer(
-            this.accessoryConfiguration.accessoryName,
-            this.log,
-            this.accessoryConfiguration.resetTimer.isResettable,
-            duration,
-            timerConfig.units,
-          );
-        }
       }
     }
 
@@ -151,9 +177,12 @@ export class Switch extends Accessory {
         this.durationTimer!.stop();
       } else {
         // try to restart timer - timer will be restarted only if its resettable
+        // this.durationTimer!.start(
+        //   this.resetSwitch,
+        // );  
         this.durationTimer!.start(
           () => {
-            this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+          this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
           },
         );
       }
@@ -209,6 +238,15 @@ export class Switch extends Accessory {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.SwitchState,
     });
+
+    if (this.accessoryConfiguration.accessoryHasResetTimer) {
+      const timerStartTime: string = this.durationTimer!.getStartTime().toString();
+      const timerDuration: number = this.durationTimer!.getDuration();
+
+      Object.assign(json, { [this.timerStartTimeStorageKey]: timerStartTime });
+      Object.assign(json, { [this.timerDurationStorageKey]: timerDuration });
+    }
+
     return json;
   }
 
