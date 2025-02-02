@@ -85,11 +85,18 @@ export class Switch extends Accessory {
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
 
-          // If there was time left on the timer
+          // If the timer was running, calculate elapsed time and set timer for remaining duration
           if (cachedTimerDuration > 0) {
-            // TODO: This is time elapsed since last state change. We want time elapsed since shutdown
             const elapsedTime: number = Duration.between(Utils.now(), Utils.zonedDateTime(cachedTimerStartTime)).toMillis() / 1000;
-            const remainingTimerDuration: number = (cachedTimerDuration <= elapsedTime) ? 1 : (cachedTimerDuration - elapsedTime);
+            // If the timer is expired, set timer to 1 second to trigger switch off
+            const timerExpired = cachedTimerDuration <= elapsedTime;
+            const remainingTimerDuration: number = (timerExpired) ? 1 : (cachedTimerDuration - elapsedTime);
+
+            if (timerExpired) {
+              this.log.info(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Triggering switch`);
+            } else {
+              this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+            }
 
             this.durationTimer!.start(
               () => {
