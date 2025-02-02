@@ -1,6 +1,7 @@
 import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Utils } from '../utils.js';
 
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
@@ -44,16 +45,16 @@ export class CronTrigger extends Trigger {
 
     this.log.debug(`[${this.sensorConfig.accessoryName}] Start time: '${cronStart?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
     this.log.debug(`[${this.sensorConfig.accessoryName}] End time:   '${cronEnd?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Now time:   '${this.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Now time:   '${Utils.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
 
     // If we're past the end date, don't even bother starting up the cron job
-    if (cronEnd && this.now().isAfter(cronEnd)) {
+    if (cronEnd && Utils.now().isAfter(cronEnd)) {
       this.log.info(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Not setting up cron job`);
       return;
 
       // eslint-disable-next-line brace-style
     }
-    else if (cronStart && (this.now().isEqual(cronStart) || this.now().isBefore(cronStart))) {
+    else if (cronStart && (Utils.now().isEqual(cronStart) || Utils.now().isBefore(cronStart))) {
       this.log.info(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Waiting for start time`);
     }
 
@@ -62,7 +63,7 @@ export class CronTrigger extends Trigger {
       triggerConfig.pattern,
       (async () => {
         // If we're before the start date, skip
-        if (cronStart && this.now().isBefore(cronStart)) {
+        if (cronStart && Utils.now().isBefore(cronStart)) {
           this.log.debug(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Not triggering sensor`);
 
           // eslint-disable-next-line brace-style
@@ -81,7 +82,7 @@ export class CronTrigger extends Trigger {
         }
 
         // If we're after the end date, terminate the cron job
-        if (cronEnd && this.now().isAfter(cronEnd)) {
+        if (cronEnd && Utils.now().isAfter(cronEnd)) {
           this.log.debug(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Stopping cron job`);
 
           this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);

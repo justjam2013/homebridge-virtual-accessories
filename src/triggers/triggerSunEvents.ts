@@ -1,6 +1,7 @@
 import { SunEventsTriggerConfiguration } from '../configuration/configurationSunEventsTrigger.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 import { Trigger } from './trigger.js';
+import { Utils } from '../utils.js';
 
 import { Cron } from 'croner';
 import { Type, deserialize } from 'typeserializer';
@@ -174,7 +175,7 @@ export class SunEventsTrigger extends Trigger {
         timezone: runTimezone,
       },
       (async () => {
-        const now = this.now().toString();
+        const now = Utils.now().toString();
         this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
         sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
