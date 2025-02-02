@@ -43,7 +43,7 @@ export class WindowCovering extends Accessory {
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState = accessoryState[this.stateStorageKey] as number;
+      const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.WindowCoveringCurrentPosition = cachedState;

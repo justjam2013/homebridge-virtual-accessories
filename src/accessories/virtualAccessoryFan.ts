@@ -39,9 +39,9 @@ export class Fan extends Accessory {
     // If the accessory is stateful retrieve stored state, otherwise set to default state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState = accessoryState[this.stateStorageKey];
-      const cachedRotationDirection = accessoryState[this.rotatioDirectionStorageKey];
-      const cachedRotationSpeed = accessoryState[this.rotatioSpeedStorageKey];
+      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+      const cachedRotationDirection: number = accessoryState[this.rotatioDirectionStorageKey] as number;
+      const cachedRotationSpeed: number = accessoryState[this.rotatioSpeedStorageKey] as number;
 
       if (cachedState !== undefined && cachedRotationDirection !== undefined && cachedRotationSpeed !== undefined) {
         this.states.FanState = cachedState;
