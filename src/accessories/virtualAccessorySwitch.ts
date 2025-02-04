@@ -6,9 +6,9 @@ import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
-import { Utils } from '../utils.js';
+// import { Utils } from '../utils.js';
 
-import { Duration } from '@js-joda/core';
+// import { Duration } from '@js-joda/core';
 
 /**
  * Switch - Accessory implementation
@@ -33,8 +33,9 @@ export class Switch extends Accessory {
   };
 
   private readonly stateStorageKey: string = 'SwitchState';
-  private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
-  private readonly timerDurationStorageKey: string = 'TimerDuration';
+  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  // private readonly timerDurationStorageKey: string = 'TimerDuration';
+  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -81,32 +82,33 @@ export class Switch extends Accessory {
           this.states.SensorState = this.CLOSED_NORMAL;
         }
 
-        if (this.accessoryConfiguration.accessoryHasResetTimer) {
-          const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
-          const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+        // if (this.accessoryConfiguration.accessoryHasResetTimer) {
+        //   const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
+        //   const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+        //   const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
 
-          // If the timer was running, calculate elapsed time and set timer for remaining duration
-          if (cachedTimerDuration > 0) {
-            const elapsedTime: number = Duration.between(Utils.now(), Utils.zonedDateTime(cachedTimerStartTime)).toMillis() / 1000;
-            // If the timer is expired, set timer to 1 second to trigger switch off
-            const timerExpired = cachedTimerDuration <= elapsedTime;
-            const remainingTimerDuration: number = (timerExpired) ? 1 : (cachedTimerDuration - elapsedTime);
+        //   // If the timer was running, calculate elapsed time and set timer for remaining duration
+        //   if (cachedTimerIsRunning) {
+        //     const elapsedTime: number = Duration.between(Utils.now(), Utils.zonedDateTime(cachedTimerStartTime)).toMillis() / 1000;
+        //     // If the timer is expired, set timer to 1 second to trigger switch off
+        //     const timerExpired = cachedTimerDuration <= elapsedTime;
+        //     const remainingTimerDuration: number = (timerExpired) ? 1 : (cachedTimerDuration - elapsedTime);
 
-            if (timerExpired) {
-              this.log.info(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Triggering switch`);
-            } else {
-              this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
-            }
+        //     if (timerExpired) {
+        //       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Triggering switch`);
+        //     } else {
+        //       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+        //     }
 
-            this.durationTimer!.start(
-              () => {
-                this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-              },
-              remainingTimerDuration,
-              Timer.Units.Seconds,
-            );
-          }
-        }
+        //     this.durationTimer!.start(
+        //       () => {
+        //         this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+        //       },
+        //       remainingTimerDuration,
+        //       Timer.Units.Seconds,
+        //     );
+        //   }
+        // }
       } else {
         this.states.SwitchState = this.defaultState;
         this.states.SensorState = this.CLOSED_NORMAL;
@@ -183,13 +185,9 @@ export class Switch extends Accessory {
       if (this.states.SwitchState === this.defaultState) {
         this.durationTimer!.stop();
       } else {
-        // try to restart timer - timer will be restarted only if its resettable
-        // this.durationTimer!.start(
-        //   this.resetSwitch,
-        // );  
         this.durationTimer!.start(
           () => {
-          this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+            this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
           },
         );
       }
@@ -246,13 +244,15 @@ export class Switch extends Accessory {
       [this.stateStorageKey]: this.states.SwitchState,
     });
 
-    if (this.accessoryConfiguration.accessoryHasResetTimer) {
-      const timerStartTime: string = this.durationTimer!.getStartTime().toString();
-      const timerDuration: number = this.durationTimer!.getDuration();
+    // if (this.accessoryConfiguration.accessoryHasResetTimer) {
+    //   const timerStartTime: string = this.durationTimer!.getStartTime().toString();
+    //   const timerDuration: number = this.durationTimer!.getDuration();
+    //   const timerIsRunning: boolean = this.durationTimer!.isTimerRunning();
 
-      Object.assign(json, { [this.timerStartTimeStorageKey]: timerStartTime });
-      Object.assign(json, { [this.timerDurationStorageKey]: timerDuration });
-    }
+    //   Object.assign(json, { [this.timerStartTimeStorageKey]: timerStartTime });
+    //   Object.assign(json, { [this.timerDurationStorageKey]: timerDuration });
+    //   Object.assign(json, { [this.timerIsRunningStorageKey]: timerIsRunning });
+    // }
 
     return json;
   }

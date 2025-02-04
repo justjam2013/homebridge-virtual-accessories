@@ -23,6 +23,9 @@ export class Valve extends Accessory {
   private durationTimer: Timer;
 
   private readonly stateStorageKey: string = 'ValveActive';
+  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  // private readonly timerDurationStorageKey: string = 'TimerDuration';
+  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
   /**
    * These are just used to create a working example
@@ -69,11 +72,12 @@ export class Valve extends Accessory {
       }
     }
 
-    // isTimerResettable = false
+    // Timer is not resettable
+    const timerIsResettable: boolean = false;
     this.durationTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.log,
-      false,
+      timerIsResettable,
       this.accessoryConfiguration.valveDuration,
       Timer.Units.Seconds,
     );
@@ -252,6 +256,9 @@ export class Valve extends Accessory {
   private getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.ValveActive,
+      // [this.timerStartTimeStorageKey]: this.durationTimer.getStartTime().toString(),
+      // [this.timerDurationStorageKey]: this.durationTimer.getDuration(),
+      // [this.timerIsRunningStorageKey]: this.durationTimer.isTimerRunning(),
     });
     return json;
   }
