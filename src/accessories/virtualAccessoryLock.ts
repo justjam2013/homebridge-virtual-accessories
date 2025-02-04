@@ -13,15 +13,18 @@ export class Lock extends Accessory {
   static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
   static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
+  private readonly stateStorageKey: string = 'LockState';
+
+  private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
+
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
   private states = {
-    LockState: Lock.UNSECURED,
+    LockCurrentState: Lock.SECURED,
+    LockTargetState: Lock.SECURED,
   };
-
-  private readonly stateStorageKey: string = 'LockState';
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -38,13 +41,14 @@ export class Lock extends Accessory {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.LockState = cachedState;
+        this.states.LockCurrentState = cachedState;
       } else {
-        this.states.LockState = this.defaultState;
+        this.states.LockCurrentState = this.defaultState;
       }
     } else  {
-      this.states.LockState = this.defaultState;
+      this.states.LockCurrentState = this.defaultState;
     }
+    this.states.LockTargetState = this.states.LockCurrentState;
     
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -62,9 +66,9 @@ export class Lock extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockState));
-    this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockState));
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockCurrentState)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
+    this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockTargetState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -108,9 +112,9 @@ export class Lock extends Accessory {
    */
   async handleLockCurrentStateGet() {
     // implement your own code to check if the device is on
-    const lockState = this.states.LockState;
+    const lockState = this.states.LockCurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Current State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -123,14 +127,18 @@ export class Lock extends Accessory {
    */
   async handleLockTargetStateSet(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
-    this.states.LockState = value as number;
+    this.states.LockTargetState = value as number;
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${this.getStateName(this.states.LockTargetState)}`);
+
+    this.states.LockCurrentState = this.states.LockTargetState;
+    this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${this.getStateName(this.states.LockCurrentState)}`);
 
     // Store device state if stateful
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Target State to ${this.getStateName(this.states.LockState)}`);
   }
 
   /**
@@ -148,9 +156,9 @@ export class Lock extends Accessory {
    */
   async handleLockTargetStateGet(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
-    const lockState = this.states.LockState;
+    const lockState = this.states.LockTargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Target State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${this.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -183,7 +191,7 @@ export class Lock extends Accessory {
 
   private getJsonState(): string {
     const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.LockState,
+      [this.stateStorageKey]: this.states.LockCurrentState,
     });
     return json;
   }
