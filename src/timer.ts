@@ -102,8 +102,6 @@ export class Timer {
   stop(): void {
     clearInterval(this.timerId);
 
-    this.duration = 0;
-
     this.timerIsRunning = false;
     this.remainingDuration = 0;
 
@@ -155,5 +153,9 @@ export class Timer {
    */
   getRemainingDuration(): number {
     return this.remainingDuration;
+  }
+
+  isTimerRunning(): boolean {
+    return this.timerIsRunning;
   }
 }
