@@ -109,6 +109,7 @@ export class SunEventsTrigger extends Trigger {
     // 5 * 2 = 10 mins  / :20 + 10 mins = :30
 
     let dataResponse: string | undefined;
+    let gaveUp: boolean = false;
 
     try {
       let attempts: number = 0;
@@ -122,6 +123,7 @@ export class SunEventsTrigger extends Trigger {
           const baseErrorMsg: string = `Failed ${attempts} of ${maxAttempts} attempts.`;
 
           if (attempts === maxAttempts) {
+            gaveUp = true;
             this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Giving up`);
           } else {
             const backoffMinutes: number = (attempts * waitMinutes);
@@ -131,12 +133,29 @@ export class SunEventsTrigger extends Trigger {
         }
       } while (!dataFetchResponse.ok && attempts < maxAttempts);
 
-      dataResponse = await dataFetchResponse.text();
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Retrieved sunrise/sunset data: ${(dataResponse)}`);
+      if (!gaveUp) {
+        dataResponse = await dataFetchResponse.text();
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
 
-      response = deserialize(dataResponse, SunEventsResponse);
+        response = this.desrializeSunEventsResponse(dataResponse);
+      }
     } catch (error) {
       this.log.error(`[${this.sensorConfig.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
+    }
+
+    return response;
+  }
+
+  desrializeSunEventsResponse(
+    dataResponse: string,
+  ): SunEventsResponse | undefined {
+    let response: SunEventsResponse | undefined;
+
+    try {
+      response = deserialize(dataResponse, SunEventsResponse);
+    } catch (error) {
+      this.log.error(`[${this.sensorConfig.accessoryName}] Error deserializing response data: ${JSON.stringify(error)}`);
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Response data: ${response}`);
     }
 
     return response;
