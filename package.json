@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "1.5.5-beta.1",
+  "version": "1.5.5-beta.2",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -73,7 +73,6 @@
   "dependencies": {
     "@js-joda/core": "^5.6.3",
     "@js-joda/timezone": "^2.21.1",
-    "cron": "^3.1.9",
     "croner": "^9.0.0",
     "net-ping": "^1.2.4",
     "reflect-metadata": "^0.2.2",

@@ -5,14 +5,14 @@ import { Utils } from '../utils.js';
 
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
-import { CronJob } from 'cron';
+import { Cron } from 'croner';
 
 /**
  * CronTrigger - Trigger implementation
  */
 export class CronTrigger extends Trigger {
 
-  private cronJob!: CronJob;
+  private cronJob!: Cron;
 
   constructor(
     sensor: VirtualSensor,
@@ -34,9 +34,11 @@ export class CronTrigger extends Trigger {
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
+    // System settings - date/time formatting - timezone
     const timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;  // 'America/Los_Angeles'
     this.log.debug(`[${this.sensorConfig.accessoryName}] Setting cron timeZone to '${timeZone}'`);
 
+    // User entered zone id - it is never undefined
     const zoneId: ZoneId = (triggerConfig.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(triggerConfig.zoneId);
     this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
 
@@ -59,46 +61,44 @@ export class CronTrigger extends Trigger {
     }
 
     let firstTrigger: boolean = true;
-    this.cronJob = new CronJob(
+    this.cronJob = new Cron(
       triggerConfig.pattern,
+      {
+        name: 'Schedule Cron Job',
+        startAt: triggerConfig.startDateTime, 
+        stopAt: triggerConfig.endDateTime,
+        timezone: triggerConfig.zoneId,
+      },
       (async () => {
-        // If we're before the start date, skip
-        if (cronStart && Utils.now().isBefore(cronStart)) {
-          this.log.debug(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Not triggering sensor`);
-
-          // eslint-disable-next-line brace-style
-        }
-        else {
-          if (firstTrigger) {
-            this.log.info(`[${this.sensorConfig.accessoryName}] Starting cron job`);
-            firstTrigger = false;
-          }
-
-          this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
-
-          sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
-          await this.delay(resetDelayMillis);
-          sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
+        if (firstTrigger) {
+          this.log.info(`[${this.sensorConfig.accessoryName}] Starting cron job`);
+          firstTrigger = false;
         }
 
-        // If we're after the end date, terminate the cron job
-        if (cronEnd && Utils.now().isAfter(cronEnd)) {
-          this.log.debug(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Stopping cron job`);
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-          this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);
-          this.cronJob.stop();
-        }
-      }),                       // onTick
-      null,                     // onComplete
-      false,                    // start
-      timeZone,                 // timeZone
+        sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
+        await this.delay(resetDelayMillis);
+        sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
+      }),
     );
-    this.cronJob.start();
+
+    this.displayNextRun(this.cronJob);
   }
 
   /**
    * Private methods
    */
+
+  private displayNextRun(
+    cronJob: Cron,
+  ) {
+    let nextRunTimestamp: string | undefined = cronJob.nextRun()?.toISOString();
+    nextRunTimestamp = (nextRunTimestamp === undefined) ?
+      'None scheduled' :
+      `${nextRunTimestamp.split('.')[0]} (count: ${cronJob.options.maxRuns})`;
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Next ${cronJob.name} run: ${nextRunTimestamp}`);
+  }
 
   private delay(millis: number) {
     return new Promise(resolve => setTimeout(resolve, millis));
