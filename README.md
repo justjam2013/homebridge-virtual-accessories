@@ -20,10 +20,14 @@
 
 ### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
-##
+## <!-- Thin separator line -->
 
 <details>
-<summary>Table Of Contents</summary>
+  <summary>
+    
+  ## Table Of Contents
+
+  </summary>
 
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
@@ -50,6 +54,9 @@
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
+
+## <!-- Thin separator line -->
+<br />
 
 ## About Virtual Accessories For Homebridge
 
