@@ -14,7 +14,7 @@ export class SunEventsTrigger extends Trigger {
 
   private SunTimesURL = (latitude: string, longitude: string) => `https://api.sunrisesunset.io/json?lat=${latitude}&lng=${longitude}`;
 
-  private eventCronJob!: Cron;
+  private triggerCronJob!: Cron;
   private dataCronJob!: Cron;
 
   private timezone: string | undefined;
@@ -45,7 +45,7 @@ export class SunEventsTrigger extends Trigger {
     this.dataCronJob = new Cron(
       pattern,
       {
-        name: 'Data Cron Job',
+        name: 'Fetch Sun Data Cron Job',
         timezone: timezone,
       },
       (async () => {
@@ -76,12 +76,12 @@ export class SunEventsTrigger extends Trigger {
   ) {
     await this.getSunEventsData(triggerConfig.latitude, triggerConfig.longitude)
       .then(
-        (async (response: Response | undefined) => {
+        (async (response: SunEventsResponse | undefined) => {
           if (response !== undefined) {
-            if (response.status !== Response.OK) {
+            if (response.status !== SunEventsResponse.OK) {
               this.log.error(`[${this.sensorConfig.accessoryName}] Sunrise/sunset server returned error response: ${response.status}`);
             } else {
-              await this.setupEventCron(triggerConfig.event, response.results, sensor);
+              await this.setupTriggerCron(triggerConfig.event, response.results, sensor);
             }
           }
         }),
@@ -91,15 +91,22 @@ export class SunEventsTrigger extends Trigger {
   private async getSunEventsData(
     latitude: string,
     longitude: string,
-  ): Promise<Response | undefined> {
-    let response: Response | undefined;
+  ): Promise<SunEventsResponse | undefined> {
+    let response: SunEventsResponse | undefined;
 
     const request = new Request(this.SunTimesURL(latitude, longitude), { method: 'GET' });
     this.log.debug(`[${this.sensorConfig.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
 
-    const maxAttempts: number = 3;
+    const maxAttempts: number = 5;
     const millis: number = 60 * 1000;
-    const waitMinutes: number = 5;
+    const waitMinutes: number = 2;
+    // Attempts over 30 minutes
+    // Backoff / retry schedule:
+    // 1 * 2 = 2 mins   / :00 + 2 mins = :02
+    // 2 * 2 = 4 mins   / :02 + 4 mins = :06
+    // 3 * 2 = 6 mins   / :06 + 6 mins = :12
+    // 4 * 2 = 8 mins   / :12 + 8 mins = :20
+    // 5 * 2 = 10 mins  / :20 + 10 mins = :30
 
     let dataResponse: string | undefined;
 
@@ -127,7 +134,7 @@ export class SunEventsTrigger extends Trigger {
       dataResponse = await dataFetchResponse.text();
       this.log.debug(`[${this.sensorConfig.accessoryName}] Retrieved sunrise/sunset data: ${(dataResponse)}`);
 
-      response = deserialize(dataResponse, Response);
+      response = deserialize(dataResponse, SunEventsResponse);
     } catch (error) {
       this.log.error(`[${this.sensorConfig.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
     }
@@ -135,7 +142,7 @@ export class SunEventsTrigger extends Trigger {
     return response;
   }
 
-  private async setupEventCron(
+  private async setupTriggerCron(
     event: string,
     dailyDetails: DailyDetails,
     sensor: VirtualSensor,
@@ -163,14 +170,15 @@ export class SunEventsTrigger extends Trigger {
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
-    if (this.eventCronJob !== undefined) {
-      this.eventCronJob.stop();
+    // Just in case
+    if (this.triggerCronJob !== undefined) {
+      this.triggerCronJob.stop();
     }
 
-    this.eventCronJob = new Cron(
+    this.triggerCronJob = new Cron(
       cronRunTimestamp,
       {
-        name: 'Event Cron Job',
+        name: 'Sun Events Cron Job',
         maxRuns: 1,
         timezone: runTimezone,
       },
@@ -184,7 +192,7 @@ export class SunEventsTrigger extends Trigger {
       }),
     );
 
-    this.displayNextRun(this.eventCronJob);
+    this.displayNextRun(this.triggerCronJob);
   }
 
   private delay(millis: number) {
@@ -225,7 +233,7 @@ class DailyDetails {
   utc_offset!: string;
 }
 
-class Response {
+class SunEventsResponse {
 
   static readonly OK: string = 'OK';
 
