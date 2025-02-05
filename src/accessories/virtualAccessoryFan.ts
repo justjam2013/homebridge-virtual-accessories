@@ -14,15 +14,15 @@ export class Fan extends Accessory {
   static readonly CLOCKWISE: number = 0;          // Characteristic.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE;
   static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE;
 
+  private readonly stateStorageKey: string = 'FanState';
+  private readonly rotatioDirectionStorageKey: string = 'FanRotationDirection';
+  private readonly rotatioSpeedStorageKey: string = 'FanRotationSpeed';
+
   private states = {
     FanState: Fan.OFF,
     FanRotationDirection: Fan.CLOCKWISE,
     FanRotationSpeed: 100,
   };
-
-  private readonly stateStorageKey: string = 'FanState';
-  private readonly rotatioDirectionStorageKey: string = 'FanRotationDirection';
-  private readonly rotatioSpeedStorageKey: string = 'FanRotationSpeed';
 
   constructor(
     platform: VirtualAccessoryPlatform,
