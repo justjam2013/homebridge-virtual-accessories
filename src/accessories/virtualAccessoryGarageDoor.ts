@@ -18,6 +18,8 @@ export class GarageDoor extends Accessory {
 
   private readonly stateStorageKey: string = 'GarageDoorState';
 
+  private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
+
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
@@ -27,8 +29,6 @@ export class GarageDoor extends Accessory {
     GarageDoorTargetState: GarageDoor.CLOSED,
     ObstructionDetected: false,
   };
-
-  private timerId: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -134,9 +134,9 @@ export class GarageDoor extends Accessory {
 
     // CurrentDoorState CLOSED/OPEN with 3 second delay
     const transitionDelayMillis: number = 3 * 1000;
-    this.timerId = setTimeout(() => {
+    this.transitionTimerId = setTimeout(() => {
       // Reset timer
-      clearTimeout(this.timerId);
+      clearTimeout(this.transitionTimerId);
 
       this.states.GarageDoorCurrentState = this.states.GarageDoorTargetState;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));

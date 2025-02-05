@@ -19,6 +19,8 @@ export class WindowCovering extends Accessory {
 
   private readonly stateStorageKey: string = 'WindowCoveringPosition';
 
+  private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
+
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
@@ -28,8 +30,6 @@ export class WindowCovering extends Accessory {
     WindowCoveringCurrentPosition: WindowCovering.CLOSED,
     WindowCoveringPositionState: WindowCovering.STOPPED,
   };
-
-  private timerId: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     platform: VirtualAccessoryPlatform,
@@ -136,9 +136,9 @@ export class WindowCovering extends Accessory {
     
     // PositionState STOPPED
     const transitionDelayMillis: number = this.accessoryConfiguration.transitionDuration * 1000;
-    this.timerId = setTimeout(() => {
+    this.transitionTimerId = setTimeout(() => {
       // Reset timer
-      clearTimeout(this.timerId);
+      clearTimeout(this.transitionTimerId);
 
       this.states.WindowCoveringPositionState = WindowCovering.STOPPED;
       this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));

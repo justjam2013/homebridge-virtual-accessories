@@ -15,6 +15,11 @@ export class Lightbulb extends Accessory {
   static readonly AMBIANCE: string = 'ambiance';
   static readonly COLOR: string = 'color';
 
+  // TODO: Add Brightness, Hue, Saturation
+  private readonly stateStorageKey: string = 'LightbulbState';
+  private readonly brightnessStorageKey: string = 'LightbulbBrightness';
+  private readonly colorTemperatureStorageKey: string = 'LightbulbColorTemperature';
+
   private type: string;
 
   /**
@@ -27,11 +32,6 @@ export class Lightbulb extends Accessory {
     LightbulbColorTemperature: this.kelvinToMired(2700),
     // TODO: Add Brightness, Hue, Saturation
   };
-
-  // TODO: Add Brightness, Color Temperature, Hue, Saturation
-  private readonly stateStorageKey: string = 'LightbulbState';
-  private readonly brightnessStorageKey: string = 'LightbulbBrightness';
-  private readonly colorTemperatureStorageKey: string = 'LightbulbColorTemperature';
 
   constructor(
     platform: VirtualAccessoryPlatform,

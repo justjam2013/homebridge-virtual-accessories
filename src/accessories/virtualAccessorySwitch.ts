@@ -18,6 +18,11 @@ export class Switch extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
+  private readonly stateStorageKey: string = 'SwitchState';
+  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  // private readonly timerDurationStorageKey: string = 'TimerDuration';
+  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
+
   private durationTimer?: Timer;
   private isCompanionSwitch: boolean = false;
 
@@ -31,11 +36,6 @@ export class Switch extends Accessory {
     SwitchState: Switch.OFF,
     SensorState: this.CLOSED_NORMAL,
   };
-
-  private readonly stateStorageKey: string = 'SwitchState';
-  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
-  // private readonly timerDurationStorageKey: string = 'TimerDuration';
-  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
   constructor(
     platform: VirtualAccessoryPlatform,
