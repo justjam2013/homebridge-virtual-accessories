@@ -66,9 +66,9 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     }
     this.log.debug(`Found ${configuredDevices.length} configured accessories: ${JSON.stringify(configuredDevices)}`);
 
-    // Nasty hack to fix the cron date values
+    // Patch the cron start date and end date values
     try {
-      this.hackCronTriggerDate();
+      Patch.patchCronTriggerDates(this.log, this.api.user.configPath());
     } catch(error) {
       // Do nothing
     }
@@ -203,19 +203,39 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
     return accessoryConfigurations;
   }
-   
-  private hackCronTriggerDate() {
-    this.log.debug('Hacking Cron Trigger dates');
+}
+
+class Patch {
+
+  /**
+   * This method "patches" the 'date-time' field values (start time & end time) used by the Cron trigger.
+   * 
+   * The implementation of the 'date-time' field is broken as the round trip data is modified by the component.
+   * I.e. the value returned is not the same as the value provided:
+   * Pre-populate the 'date-time' field with the value: "2025-01-01T01:01:01"
+   * On submit, the returned 'date-time' value will be: "2025-01-01T01:01:01Z"
+   * Pre-populate the 'date-time' field with the value: "2025-01-01T01:01:01Z"
+   * the field will fail to parse the value and will not display it.
+   * 
+   * This method reads the incoming configuration data, removes the trailing "Z" chareacter,
+   * if present, and saves the changes back to the config file.
+   * 
+   * A ticket is open with ng-formworks:
+   * [Implementation of "datetime" and "datetime-local" formats are broken](https://github.com/zahmo/ng-formworks/issues/16)
+   */
+  static patchCronTriggerDates(
+    log: Logging,
+    configFilePath: string,
+  ): void {
+    log.debug('Hacking Cron Trigger dates');
     let saveMods: boolean = false;
 
-    const configFile = this.api.user.configPath();
-
     // Make a backup
-    fs.copyFileSync(configFile, `${configFile}.bak`);
+    fs.copyFileSync(configFilePath, `${configFilePath}.bak`);
 
     let contents = '{}';
-    if (fs.existsSync(configFile)) {
-      contents = fs.readFileSync(configFile, 'utf8');
+    if (fs.existsSync(configFilePath)) {
+      contents = fs.readFileSync(configFilePath, 'utf8');
     }
     const config = JSON.parse(contents);
 
@@ -228,22 +248,22 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         for (const device of devices) {
 
           if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
-            this.log.debug(`Device: ${device.accessoryName}, ${device.accessoryType}`);
+            log.debug(`Device: ${device.accessoryName}, ${device.accessoryType}`);
 
             const startTimestamp = device.cronTrigger.startDateTime as string;
-            this.log.debug(`Start Timestamp: ${startTimestamp}`);
+            log.debug(`Start Timestamp: ${startTimestamp}`);
             if (startTimestamp !== undefined && startTimestamp.endsWith('Z')) {
               device.cronTrigger.startDateTime = startTimestamp.slice(0, -1);
               saveMods = true;
-              this.log.info(`Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+              log.info(`Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
             }
 
             const endTimestamp = device.cronTrigger.endDateTime as string;
-            this.log.debug(`End Timestamp: ${endTimestamp}`);
+            log.debug(`End Timestamp: ${endTimestamp}`);
             if (endTimestamp !== undefined && endTimestamp.endsWith('Z')) {
               device.cronTrigger.endDateTime = endTimestamp.slice(0, -1);
               saveMods = true;
-              this.log.info(`Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+              log.info(`Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
             }
           }
         }
@@ -251,10 +271,10 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
     }
     
     if (saveMods) {
-      this.log.debug('Saving hacked Cron Trigger dates');
+      log.debug('Saving hacked Cron Trigger dates');
 
       fs.writeFileSync(
-        configFile,
+        configFilePath,
         JSON.stringify(config, null, 4),
         { encoding: 'utf8', flag: 'w' },
       );
