@@ -20,7 +20,7 @@
         "orderable": false,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": " Accessory {{ $index }}",
+          "title": "{{ value.accessoryName || 'New Accessory ' + $index }}",
           "type": "object",
           "expandable": true,
           "expanded": false,

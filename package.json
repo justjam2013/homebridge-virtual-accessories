@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
