@@ -227,7 +227,7 @@ class Patch {
     log: Logging,
     configFilePath: string,
   ): void {
-    log.debug('Hacking Cron Trigger dates');
+    log.debug('BUG Patch: Patching Cron Trigger dates');
     let saveMods: boolean = false;
 
     // Make a backup
@@ -248,22 +248,31 @@ class Patch {
         for (const device of devices) {
 
           if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
-            log.debug(`Device: ${device.accessoryName}, ${device.accessoryType}`);
+            log.debug(`BUG Patch: Device: ${device.accessoryName}, ${device.accessoryType}`);
 
             const startTimestamp = device.cronTrigger.startDateTime as string;
-            log.debug(`Start Timestamp: ${startTimestamp}`);
-            if (startTimestamp !== undefined && startTimestamp.endsWith('Z')) {
-              device.cronTrigger.startDateTime = startTimestamp.slice(0, -1);
+            log.debug(`BUG Patch: Start Timestamp: ${startTimestamp}`);
+            if (startTimestamp !== undefined && startTimestamp === 'null') {
+              delete device.cronTrigger.startDateTime;
               saveMods = true;
-              log.info(`Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+              log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
             }
 
             const endTimestamp = device.cronTrigger.endDateTime as string;
-            log.debug(`End Timestamp: ${endTimestamp}`);
-            if (endTimestamp !== undefined && endTimestamp.endsWith('Z')) {
-              device.cronTrigger.endDateTime = endTimestamp.slice(0, -1);
+            log.debug(`BUG Patch: End Timestamp: ${endTimestamp}`);
+            if (endTimestamp !== undefined && endTimestamp === 'null') {
+              delete device.cronTrigger.endDateTime;
               saveMods = true;
-              log.info(`Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+              log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+            }
+
+            // eslint-disable-next-line brace-style
+          }
+          else {
+            if (device.cronTrigger !== undefined) {
+              delete device.cronTrigger;
+              saveMods = true;
+              log.info(`BUG Patch: Deleting Cron Trigger section from device ${device.accessoryName}`);
             }
           }
         }
@@ -271,7 +280,7 @@ class Patch {
     }
     
     if (saveMods) {
-      log.debug('Saving hacked Cron Trigger dates');
+      log.info('Saving patched configuration');
 
       fs.writeFileSync(
         configFilePath,
