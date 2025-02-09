@@ -34,14 +34,14 @@ export class CronTriggerConfiguration {
     const isValidZoneId = this.isValidZoneId(this.zoneId);
 
     const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
-    const isValidStartDateTime = (
+    let isValidStartDateTime = (
       (this.startDateTime !== undefined) ?
-        isoTimeRegex.test(this.startDateTime) :
+        isoTimeRegex.test(this.startDateTime):
         true
     );
-    const isValidEndDateTime = (
+    let isValidEndDateTime = (
       (this.endDateTime !== undefined) ?
-        isoTimeRegex.test(this.endDateTime) :
+        isoTimeRegex.test(this.endDateTime):
         true
     );
 
@@ -50,6 +50,16 @@ export class CronTriggerConfiguration {
       const startDate = new Date(this.startDateTime);
       const endDate = new Date(this.endDateTime);
       isValidExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
+    }
+
+    // Temporary fix to handle "null" value for "startDateTime" and "endDateTime"
+    if (this.startDateTime === 'null') {
+      isValidStartDateTime = true;
+      isValidExecutionRangeDateTime = true;
+    }
+    if (this.endDateTime === 'null') {
+      isValidEndDateTime = true;
+      isValidExecutionRangeDateTime = true;
     }
 
     if (!isValidPattern) this.errorFields.push('pattern');
