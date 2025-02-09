@@ -36,7 +36,11 @@ export class Fan extends Accessory {
     const rotationDirection: number = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
     const rotationSpeed: percentage = this.accessoryConfiguration.fan.rotationSpeed as percentage;
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    this.states.FanState = this.defaultState;
+    this.states.FanRotationDirection = rotationDirection;
+    this.states.FanRotationSpeed = rotationSpeed;
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
@@ -47,15 +51,7 @@ export class Fan extends Accessory {
         this.states.FanState = cachedState;
         this.states.FanRotationDirection = cachedRotationDirection;
         this.states.FanRotationSpeed = cachedRotationSpeed;
-      } else {
-        this.states.FanState = this.defaultState;
-        this.states.FanRotationDirection = rotationDirection;
-        this.states.FanRotationSpeed = rotationSpeed;
       }
-    } else {
-      this.states.FanState = this.defaultState;
-      this.states.FanRotationDirection = rotationDirection;
-      this.states.FanRotationSpeed = rotationSpeed;
     }
 
     // set accessory information

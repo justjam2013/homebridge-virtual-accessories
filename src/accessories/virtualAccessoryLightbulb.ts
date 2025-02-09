@@ -29,7 +29,7 @@ export class Lightbulb extends Accessory {
   private states = {
     LightbulbState: Lightbulb.OFF,
     LightbulbBrightness: 100,
-    LightbulbColorTemperature: this.kelvinToMired(2700),
+    LightbulbColorTemperature: 2700,  // Kelvin
     // TODO: Add Brightness, Hue, Saturation
   };
 
@@ -46,31 +46,28 @@ export class Lightbulb extends Accessory {
     const brightness = this.accessoryConfiguration.lightbulb.brightness;
     const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    this.states.LightbulbState = this.defaultState;
+    this.states.LightbulbBrightness = brightness;
+
+    if (this.type === Lightbulb.AMBIANCE) {
+      this.states.LightbulbColorTemperature = colorTemperatureKelvin;
+    }
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
       const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
+      const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
 
       if (cachedState !== undefined && cachedBrightness !== undefined) {
         this.states.LightbulbState = cachedState;
         this.states.LightbulbBrightness = cachedBrightness;
-      } else {
-        this.states.LightbulbState = this.defaultState;
-        this.states.LightbulbBrightness = brightness;
       }
 
-      if (this.type === Lightbulb.AMBIANCE) {
-        const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
-
-        if (cachedColorTemperature !== undefined) {
-          this.states.LightbulbColorTemperature = cachedColorTemperature;
-        } else {
-          this.states.LightbulbColorTemperature = this.kelvinToMired(colorTemperatureKelvin);
-        }
+      if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
+        this.states.LightbulbColorTemperature = cachedColorTemperature;
       }
-    } else {
-      this.states.LightbulbState = this.defaultState;
     }
 
     // set accessory information
@@ -192,22 +189,24 @@ export class Lightbulb extends Accessory {
     return lightbulbBrightness;
   }
 
-  async setColorTemperature(value: CharacteristicValue) {
-    this.states.LightbulbColorTemperature = value as number;
+  // Receive value in mireds
+  async setColorTemperature(miredValue: CharacteristicValue) {
+    this.states.LightbulbColorTemperature = this.miredToKelvin(miredValue as number);
 
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.miredToKelvin(this.states.LightbulbColorTemperature)} K`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
   }
 
+  // Return value in mireds
   async getColorTemperature() {
-    const lightbulbColorTemperature = this.states.LightbulbColorTemperature;
+    const miredValue = this.kelvinToMired(this.states.LightbulbColorTemperature);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Color Temperature: ${this.miredToKelvin(lightbulbColorTemperature)} K`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
 
-    return lightbulbColorTemperature;
+    return miredValue;
   }
 
   private getJsonState(): string {
@@ -240,12 +239,12 @@ export class Lightbulb extends Accessory {
   private kelvinToMired(
     kelvin: number,
   ): number {
-    return (1000000 / kelvin);
+    return Math.round(1000000 / kelvin);
   }
 
   private miredToKelvin(
     mired: number,
   ): number {
-    return (1000000 / mired);
+    return Math.round(1000000 / mired);
   }
 }

@@ -35,19 +35,18 @@ export class Lock extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lockDefaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    this.states.LockCurrentState = this.defaultState;
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
-      } else {
-        this.states.LockCurrentState = this.defaultState;
       }
-    } else  {
-      this.states.LockCurrentState = this.defaultState;
     }
+
     this.states.LockTargetState = this.states.LockCurrentState;
     
     // set accessory information
