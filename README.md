@@ -493,7 +493,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   The framework used by Homebridge UI to render config forms does not provide header/title customization for an array of items. So if you have a lot of accessories, it's going to either require a lot of scrolling if they are expanded, or if they are collapsed you will see a list of numbered accessories. I have opted to go with items collapsed by default. A feature request has been opened to support customized titles.
+-   None.
 
 ## What if I run into a problem?
 
