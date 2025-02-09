@@ -444,13 +444,13 @@
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time",
+                  "description": "Start date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
                   "format": "date-time"
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time",
+                  "description": "End date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
                   "format": "date-time"
                 },
@@ -677,7 +677,7 @@
               "then": {
                 "required": [ "sunEventsTrigger" ],
                 "properties": {
-                  "cronTrigger": {
+                  "sunEventsTrigger": {
                     "required": [ "latitude", "longitude", "zoneId" ]
                   }
                 }
