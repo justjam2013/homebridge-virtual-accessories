@@ -40,19 +40,18 @@ export class WindowCovering extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.windowCoveringDefaultState === 'open' ? WindowCovering.OPEN : WindowCovering.CLOSED;
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    this.states.WindowCoveringCurrentPosition = this.defaultState;
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.WindowCoveringCurrentPosition = cachedState;
-      } else {
-        this.states.WindowCoveringCurrentPosition = this.defaultState;
       }
-    } else {
-      this.states.WindowCoveringCurrentPosition = this.defaultState;
     }
+
     this.states.WindowCoveringTargetPosition = this.states.WindowCoveringCurrentPosition;
 
     // set accessory information

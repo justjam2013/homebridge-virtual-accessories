@@ -39,19 +39,18 @@ export class GarageDoor extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.garageDoorDefaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    this.states.GarageDoorCurrentState = this.defaultState;
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.GarageDoorCurrentState = cachedState;
-      } else {
-        this.states.GarageDoorCurrentState = this.defaultState;
       }
-    } else {
-      this.states.GarageDoorCurrentState = this.defaultState;
     }
+
     this.states.GarageDoorTargetState = this.states.GarageDoorCurrentState;
 
     // set accessory information

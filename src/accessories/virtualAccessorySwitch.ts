@@ -51,9 +51,6 @@ export class Switch extends Accessory {
     // If this is a companion switch to a doorbell, it will be a plain Switch
     if (!this.isCompanionSwitch) {
 
-      // First configure the device based on the accessory details
-      this.defaultState = this.accessoryConfiguration.switchDefaultState === 'on' ? Switch.ON : Switch.OFF;
-
       // Setup reset timer first
       if (this.accessoryConfiguration.accessoryHasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
@@ -69,7 +66,13 @@ export class Switch extends Accessory {
         );
       }
 
-      // If the accessory is stateful retrieve stored state, otherwise set to default state
+      // First configure the device based on the accessory details
+      this.defaultState = this.accessoryConfiguration.switchDefaultState === 'on' ? Switch.ON : Switch.OFF;
+
+      this.states.SwitchState = this.defaultState;
+      this.states.SensorState = this.CLOSED_NORMAL;
+
+      // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
         const accessoryState = this.loadAccessoryState(this.storagePath);
         const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
@@ -77,9 +80,6 @@ export class Switch extends Accessory {
         if (cachedState !== undefined) {
           this.states.SwitchState = cachedState;
           this.states.SensorState = this.determineSensorState();
-        } else {
-          this.states.SwitchState = this.defaultState;
-          this.states.SensorState = this.CLOSED_NORMAL;
         }
 
         // if (this.accessoryConfiguration.accessoryHasResetTimer) {
@@ -109,9 +109,6 @@ export class Switch extends Accessory {
         //     );
         //   }
         // }
-      } else {
-        this.states.SwitchState = this.defaultState;
-        this.states.SensorState = this.CLOSED_NORMAL;
       }
     }
 

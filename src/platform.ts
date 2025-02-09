@@ -208,20 +208,25 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 class Patch {
 
   /**
-   * This method "patches" the 'date-time' field values (start time & end time) used by the Cron trigger.
+   * This method "patches" the 'date-time' fields and field values used by the Cron trigger.
    * 
-   * The implementation of the 'date-time' field is broken as the round trip data is modified by the component.
-   * I.e. the value returned is not the same as the value provided:
-   * Pre-populate the 'date-time' field with the value: "2025-01-01T01:01:01"
-   * On submit, the returned 'date-time' value will be: "2025-01-01T01:01:01Z"
-   * Pre-populate the 'date-time' field with the value: "2025-01-01T01:01:01Z"
-   * the field will fail to parse the value and will not display it.
+   * The implementation of the 'date-time' field is broken. If no value is entered, the form 
+   * returns the value of the string "null", even if the field is not marked as "required".
+   * This means that each accessory will have the following attached to it:
    * 
-   * This method reads the incoming configuration data, removes the trailing "Z" chareacter,
-   * if present, and saves the changes back to the config file.
+   * "cronTrigger": {
+   *     "startDateTime": "null",
+   *     "endDateTime": "null",
+   * }
+   * 
+   * This method reads the incoming configuration data and iterates over all accessories.
+   * If the accessory is a sensor with a cron trigger, it removes the 'date-time' fields if they
+   * have value "null".
+   * If the accessory is anything other, it removes the "cronTrigger" object, if one is attached.
+   * Finally it saves the cleaned up configuration.
    * 
    * A ticket is open with ng-formworks:
-   * [Implementation of "datetime" and "datetime-local" formats are broken](https://github.com/zahmo/ng-formworks/issues/16)
+   * [Field with "date-time" format returns "null" when field unpopulated](https://github.com/zahmo/ng-formworks/issues/19)
    */
   static patchCronTriggerDates(
     log: Logging,

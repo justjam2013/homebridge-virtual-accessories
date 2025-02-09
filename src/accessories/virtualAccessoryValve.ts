@@ -61,7 +61,11 @@ export class Valve extends Accessory {
       break;
     }
 
-    // If the accessory is stateful retrieve stored state, otherwise set to default state
+    // First configure the device based on the accessory details
+    this.states.ValveActive = Valve.INACTIVE;
+    this.states.ValveInUse = Valve.NOT_IN_USE;
+
+    // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
