@@ -89,7 +89,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info(`Restoring existing accessory: ${existingAccessory.displayName}`);
+        this.log.info(`Restoring existing accessory: ${configuredAccessory.accessoryName}`);
 
         // update the device configuration in the `accessory.context`
         existingAccessory.context.deviceConfiguration = configuredAccessory;
@@ -97,12 +97,15 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
         // this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.displayName = configuredAccessory.accessoryName;
+        existingAccessory._associatedHAPAccessory.displayName = configuredAccessory.accessoryName;
+        this.api.updatePlatformAccessories([existingAccessory]);
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
-          this.log.error(`Error restoring existing accessory: ${existingAccessory.displayName}`);
+          this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
