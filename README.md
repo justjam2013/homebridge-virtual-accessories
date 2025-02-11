@@ -60,7 +60,7 @@
 <br />
 
 > [!CAUTION]
-> **The upcoming Virtual Accessories For Homebridge 2.0 will be a breaking upgrade.** I will update the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-2.0) as details become available.
+> **The upcoming Virtual Accessories For Homebridge v2.0.0 will be a breaking upgrade.** I will update the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) as details become available.
 
 ## About Virtual Accessories For Homebridge
 
