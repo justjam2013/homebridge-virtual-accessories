@@ -8,6 +8,7 @@ import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
+import { SecuritySystem } from './accessories/virtualSecuritySystem.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
@@ -24,9 +25,9 @@ import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxi
 import { Trigger } from './triggers/trigger.js';
 import { CronTrigger } from './triggers/triggerCron.js';
 import { PingTrigger } from './triggers/triggerPing.js';
+import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
-import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 /**
  * Virtual Accessory Factory
@@ -63,6 +64,9 @@ export abstract class AccessoryFactory {
       break;
     case 'lock':
       virtualAccessory = new Lock(platform, accessory);
+      break;
+    case 'securitysystem':
+      virtualAccessory = new SecuritySystem(platform, accessory);
       break;
     case 'switch':
       virtualAccessory = new Switch(platform, accessory);
