@@ -49,6 +49,7 @@
                 { "title": "Garage Door", "enum": ["garagedoor"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
+                { "title": "Security System", "enum": ["securitysystem"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Valve", "enum": ["valve"] },
@@ -191,6 +192,26 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
               }
             },
+            "securitySystem": {
+              "title": "Security System",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Security System default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Armed - Away", "enum": ["awayarm"] },
+                    { "title": "Armed - Home", "enum": ["stayarm"] },
+                    { "title": "Armed - Night", "enum": ["nightarm"] },
+                    { "title": "Disarmed", "enum": ["disarmed"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
+              }
+            },
             "switchDefaultState": {
               "title": "Switch Default State *",
               "description": "Switch default state",
@@ -201,18 +222,6 @@
               ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
-              }
-            },
-            "windowCoveringDefaultState": {
-              "title": "Window Covering Default State *",
-              "description": "Window Covering default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Closed", "enum": ["closed"] },
-                { "title": "Open", "enum": ["open"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
             },
             "valveType": {
@@ -236,6 +245,18 @@
               "maximum": 3600,
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
+              }
+            },
+            "windowCoveringDefaultState": {
+              "title": "Window Covering Default State *",
+              "description": "Window Covering default state",
+              "type": "string",
+              "oneOf": [
+                { "title": "Closed", "enum": ["closed"] },
+                { "title": "Open", "enum": ["open"] }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
             },
             "transitionDuration": {

@@ -5,6 +5,7 @@ import { CronTriggerConfiguration } from './configurationCronTrigger.js';
 import { FanConfiguration } from './configurationFan.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
+import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
 import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
 import { TimerConfiguration } from './configurationTimer.js';
 
@@ -24,12 +25,8 @@ export class AccessoryConfiguration {
   accessoryHasResetTimer: boolean = false;
   accessoryHasCompanionSensor: boolean = false;
 
-  // Switch
-  switchDefaultState!: string;
-
-  // Lock required
-  lockDefaultState!: string;
-  lockHardwareFinish!: string;
+  // Doorbell
+  doorbellVolume!: number;
 
   // Fan
   @Type(FanConfiguration)
@@ -38,12 +35,20 @@ export class AccessoryConfiguration {
   // Garage Door
   garageDoorDefaultState!: string;
 
-  // Doorbell
-  doorbellVolume!: number;
-
   // Lightbulb
   @Type(LightbulbConfiguration)
     lightbulb!: LightbulbConfiguration;
+
+  // Lock
+  lockDefaultState!: string;
+  lockHardwareFinish!: string;
+
+  // SecuritySystem
+  @Type(SecuritySystemConfiguration)
+    securitySystem!: SecuritySystemConfiguration;
+
+  // Switch
+  switchDefaultState!: string;
 
   // Valve
   valveType!: string;
@@ -118,6 +123,8 @@ export class AccessoryConfiguration {
         return this.isValidLighbulb();
       case 'lock':
         return this.isValidLock();
+      case 'securitysystem':
+        return this.isValidSecuritySystem();
       case 'sensor':
         return this.isValidSensor();
       case 'switch':
@@ -209,6 +216,22 @@ export class AccessoryConfiguration {
     );
   };
 
+  private isValidSecuritySystem(): boolean {
+    let isValidSecuritySystem: boolean;
+    let securitySystemErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
+    if (!isValidSecuritySystem && securitySystemErrorFields.length === 0) {
+      this.errorFields.push('securitySystem');
+    } else {
+      this.errorFields.push(...securitySystemErrorFields);
+    }
+
+    return (
+      isValidSecuritySystem
+    );
+  }
+
   private isValidSensor(): boolean {
     const isValidSensorType: boolean = (this.sensorType !== undefined);
 
@@ -279,20 +302,6 @@ export class AccessoryConfiguration {
     );
   };
 
-  private isValidWindowCovering(): boolean {
-    const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
-    const isValidTransitionDuration: boolean = (this.transitionDuration !== undefined);
-
-    // Store fields failing validation
-    if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
-    if (!isValidTransitionDuration) this.errorFields.push('transitionDuration');
-
-    return (
-      isValidWindowCoveringDefaultState &&
-      isValidTransitionDuration
-    );
-  }
-
   private isValidValve(): boolean {
     const isValidValveType: boolean = (
       (this.valveType !== undefined) &&
@@ -310,6 +319,20 @@ export class AccessoryConfiguration {
     return (
       isValidValveType &&
       isValidValveDuration
+    );
+  }
+
+  private isValidWindowCovering(): boolean {
+    const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
+    const isValidTransitionDuration: boolean = (this.transitionDuration !== undefined);
+
+    // Store fields failing validation
+    if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
+    if (!isValidTransitionDuration) this.errorFields.push('transitionDuration');
+
+    return (
+      isValidWindowCoveringDefaultState &&
+      isValidTransitionDuration
     );
   }
 
