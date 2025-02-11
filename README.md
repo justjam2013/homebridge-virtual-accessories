@@ -40,6 +40,7 @@
     - [Garage Door](#garage-door)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
+    - [Security System](#security-system)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -73,8 +74,9 @@ Currently, these are the implemented virtual accessories:
 -   **Garage Door.** Allows you to create a virtual garage door that will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
--   **Window Covering.** Allows you to create virtual blinds and shades.
+-   **Security System.** Allows you to create a virtual security system.
 -   **Valve.** Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
+-   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Nobody can have too many virtual switches! Allows you to create a number of different types of switches.
     - **Plain old switches.** What it says on the tin.
     - **Normally on/off switches.** Select if you want the default state of the switch to be on or off. This is the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
@@ -244,6 +246,23 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
 ```
 `lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
 
+### Security System
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Security System",
+            "accessoryType": "securitysystem",
+            "securitySystem": {
+                "defaultState": "disarmed"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
 ### Valve
 
 ```json
@@ -252,7 +271,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "devices": [
         {
             "accessoryID": "1234567",
-            "accessoryName": "Test Valve",
+            "accessoryName": "My Valve",
             "accessoryType": "valve",
             "valveType": "waterfaucet",
             "valveDuration": 0
@@ -403,7 +422,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "devices": [
         {
             "accessoryID": "1234567",
-            "accessoryName": "Cron Sensor",
+            "accessoryName": "My Cron Sensor",
             "accessoryType": "sensor",
             "sensorType": "contact",
             "sensorTrigger": "cron",
@@ -427,7 +446,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "devices": [
         {
             "accessoryID": "1234567",
-            "accessoryName": "Cron Sensor",
+            "accessoryName": "My Cron Sensor",
             "accessoryType": "sensor",
             "sensorType": "contact",
             "sensorTrigger": "cron",
@@ -453,7 +472,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
     "devices": [
         {
             "accessoryID": "1234567",
-            "accessoryName": "Sunrise trigger",
+            "accessoryName": "My Sunrise trigger",
             "accessoryType": "sensor",
             "sensorType": "contact",
             "sensorTrigger": "sunevents",
