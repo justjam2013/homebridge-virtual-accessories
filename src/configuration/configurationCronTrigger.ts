@@ -31,7 +31,7 @@ export class CronTriggerConfiguration {
       patternRegex.test(this.pattern)
     );
 
-    const isValidZoneId = this.isValidZoneId(this.zoneId);
+    const isValidZoneId = (this.zoneId === undefined) || this.isValidZoneId(this.zoneId);
 
     const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
     let isValidStartDateTime = (

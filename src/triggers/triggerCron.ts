@@ -35,11 +35,10 @@ export class CronTrigger extends Trigger {
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
     // System settings - date/time formatting - timezone
-    const timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;  // 'America/Los_Angeles'
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting cron timeZone to '${timeZone}'`);
+    const timezone: string = (triggerConfig.zoneId !== undefined) ? triggerConfig.zoneId : Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting timezone to '${timezone}'`);
 
-    // User entered zone id - it is never undefined
-    const zoneId: ZoneId = (triggerConfig.zoneId === undefined) ? ZoneId.SYSTEM : ZoneId.of(triggerConfig.zoneId);
+    const zoneId: ZoneId = ZoneId.of(timezone);
     this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
 
     const cronStart: ZonedDateTime | undefined = this.getZonedDateTime(triggerConfig.startDateTime, zoneId);
@@ -67,7 +66,7 @@ export class CronTrigger extends Trigger {
         name: 'Schedule Cron Job',
         startAt: triggerConfig.startDateTime, 
         stopAt: triggerConfig.endDateTime,
-        timezone: triggerConfig.zoneId,
+        timezone: timezone,
       },
       (async () => {
         if (firstTrigger) {
