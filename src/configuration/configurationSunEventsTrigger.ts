@@ -34,7 +34,7 @@ export class SunEventsTriggerConfiguration {
       longitudeRegex.test(this.longitude)
     );
 
-    const isValidZoneId = this.isValidZoneId(this.zoneId);
+    const isValidZoneId = (this.zoneId === undefined) || this.isValidZoneId(this.zoneId);
 
     if (!isValidEvent) this.errorFields.push('event');
     if (!isValidLatitude) this.errorFields.push('latitude');

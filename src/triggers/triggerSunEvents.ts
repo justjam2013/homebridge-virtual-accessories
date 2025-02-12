@@ -38,7 +38,7 @@ export class SunEventsTrigger extends Trigger {
     // Data retrieval cron job
 
     const pattern: string = '1 0 * * *';    // Every day at 00:01 - one minute after midnight
-    const timezone: string = triggerConfig.zoneId;
+    const timezone: string = (triggerConfig.zoneId !== undefined) ? triggerConfig.zoneId : Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     this.log.debug(`[${this.sensorConfig.accessoryName}] Creating data cron job: pattern ${pattern}; timezone ${timezone}`);
 
