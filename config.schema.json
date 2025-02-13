@@ -166,28 +166,42 @@
                 }
               ]
             },
-            "lockDefaultState": {
-              "title": "Lock Default State *",
-              "description": "Lock default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Locked", "enum": ["locked"] },
-                { "title": "Unlocked", "enum": ["unlocked"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
-              }
-            },
-            "lockHardwareFinish": {
-              "title": "Lock Hardware Finish *",
-              "description": "Color of the virtual HomeKey card in the Wallet app",
-              "type": "string",
-              "oneOf": [
-                { "title": "Tan", "enum": ["tan"] },
-                { "title": "Gold", "enum": ["gold"] },
-                { "title": "Silver", "enum": ["silver"] },
-                { "title": "Black", "enum": ["black"] }
-              ],
+            "lock": {
+              "title": "Lock",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Lock default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Locked", "enum": ["locked"] },
+                    { "title": "Unlocked", "enum": ["unlocked"] }
+                  ]
+                },
+                "hardwareFinish": {
+                  "title": "Hardware Finish *",
+                  "description": "Color of the virtual HomeKey card in the Wallet app",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Tan", "enum": ["tan"] },
+                    { "title": "Gold", "enum": ["gold"] },
+                    { "title": "Silver", "enum": ["silver"] },
+                    { "title": "Black", "enum": ["black"] }
+                  ]
+                },
+                "hasAudioFeedback": {
+                  "title": "Audio Feedback",
+                  "description": "Lock has audio feedback",
+                  "type": "boolean"
+                },
+                "autoSecurityTimeout": {
+                  "title": "Auto Security Timeout *",
+                  "description": "Lock auto-lock time in seconds (0 = off)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
               }
@@ -601,7 +615,12 @@
                 }
               },
               "then": {
-                "required": [ "lockDefaultState", "lockHardwareFinish" ]
+                "required": [ "lock" ],
+                "properties": {
+                  "lock": {
+                    "required": [ "defaultState", "hardwareFinish", "autoSecurityTimeout" ]
+                  }
+                }
               }
             },
             {

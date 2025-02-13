@@ -13,7 +13,12 @@ export class Lock extends Accessory {
   static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
   static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
+  static readonly AUDIO_FEEDBACK_ON: boolean = true;
+  static readonly AUDIO_FEEDBACK_OFF: boolean = false;
+
   private readonly stateStorageKey: string = 'LockState';
+  private readonly audioFeedbackStorageKey: string = 'LockManagementAudioFeedback';
+  private readonly autoSecurityTimeoutStorageKey: string = 'LockManagementAutoSecurityTimeout';
 
   private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -24,6 +29,8 @@ export class Lock extends Accessory {
   private states = {
     LockCurrentState: Lock.SECURED,
     LockTargetState: Lock.SECURED,
+    LockManagementAudioFeedback: Lock.AUDIO_FEEDBACK_OFF,
+    LockManagementAutoSecurityTimeout: 0,
   };
 
   constructor(
@@ -33,17 +40,26 @@ export class Lock extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.lockDefaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
+    this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
+    // eslint-disable-next-line max-len
+    const audioFeedback = (this.accessoryConfiguration.lock.hasAudioFeedback !== undefined) ? this.accessoryConfiguration.lock.hasAudioFeedback : Lock.AUDIO_FEEDBACK_OFF;
+    const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
 
     this.states.LockCurrentState = this.defaultState;
+    this.states.LockManagementAudioFeedback = audioFeedback;
+    this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
+      const cachedAudioFeedback: boolean = accessoryState[this.audioFeedbackStorageKey] as boolean;
+      const cachedAutoSecurityTimeout: number = accessoryState[this.autoSecurityTimeoutStorageKey] as number;
 
-      if (cachedState !== undefined) {
+      if (cachedState !== undefined && cachedAudioFeedback !== undefined && cachedAutoSecurityTimeout !== undefined) {
         this.states.LockCurrentState = cachedState;
+        this.states.LockManagementAudioFeedback = cachedAudioFeedback;
+        this.states.LockManagementAutoSecurityTimeout = cachedAutoSecurityTimeout;
       }
     }
 
@@ -54,7 +70,7 @@ export class Lock extends Accessory {
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
       .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Lock')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
-      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.accessoryConfiguration.lockHardwareFinish);
+      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.accessoryConfiguration.lock.hardwareFinish);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -101,8 +117,28 @@ export class Lock extends Accessory {
       .onGet(this.handleConfigurationStateGet.bind(this));
     nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
       .onSet(this.handleNFCAccessControlPointSet.bind(this));
+    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+      .onGet(this.handleNFCAccessControlPointGet.bind(this));
     nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
       .onGet(this.handleNFCAccessSupportedConfigurationGet.bind(this));
+
+    // Creating Lock Management service
+    const lockManagementServiceName = 'Lock Management';
+    const lockManagementService = this.accessory.getService(lockManagementServiceName)
+      || this.accessory.addService(this.platform.Service.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
+
+    lockManagementService.getCharacteristic(this.platform.Characteristic.LockControlPoint)
+      .onSet(this.handleLockControlPointSet.bind(this));
+    lockManagementService.getCharacteristic(this.platform.Characteristic.Version)
+      .onGet(this.handleVersionGet.bind(this));
+    lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
+      .onSet(this.handleAudioFeedbackSet.bind(this));
+    lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
+      .onGet(this.handleAudioFeedbackGet.bind(this));
+    lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
+      .onSet(this.handleLockManagementAutoSecurityTimeoutSet.bind(this));
+    lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
+      .onGet(this.handleLockManagementAutoSecurityTimeoutGet.bind(this));
   }
 
   /**
@@ -166,6 +202,7 @@ export class Lock extends Accessory {
   }
 
   // NFC Access Service handlers
+
   async handleConfigurationStateGet(): Promise<CharacteristicValue> {
     const configurationState = 0;
 
@@ -180,6 +217,14 @@ export class Lock extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
   }
 
+  async handleNFCAccessControlPointGet(): Promise<CharacteristicValue> {
+    const nfcAccessControlPoint = '';
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
+
+    return nfcAccessControlPoint;
+  }
+
   async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
     const nFCAccessSupportedConfiguration = 'AQEQAgEQ';
 
@@ -188,9 +233,55 @@ export class Lock extends Accessory {
     return nFCAccessSupportedConfiguration;
   }
 
+  // Lock Management Service handlers
+
+  async handleLockControlPointSet(value: CharacteristicValue) {
+    const lockControlPoint = value;
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Control Point: ${lockControlPoint}`);
+  }
+
+  async handleVersionGet(): Promise<CharacteristicValue> {
+    const version = '1.0.0';
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Version: ${version}`);
+
+    return version;
+  }
+
+  async handleAudioFeedbackSet(value: CharacteristicValue) {
+    this.states.LockManagementAudioFeedback = value as boolean;
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAudioFeedback}`);
+  }
+
+  async handleAudioFeedbackGet() {
+    const audioFeedback = this.states.LockManagementAudioFeedback;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${audioFeedback}`);
+
+    return audioFeedback;
+  }
+
+  async handleLockManagementAutoSecurityTimeoutSet(value: CharacteristicValue) {
+    this.states.LockManagementAutoSecurityTimeout = value as number;
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAutoSecurityTimeout}`);
+  }
+
+  async handleLockManagementAutoSecurityTimeoutGet() {
+    const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${lockManagementAutoSecurityTimeout}`);
+
+    return lockManagementAutoSecurityTimeout;
+  }
+
   private getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LockCurrentState,
+      [this.audioFeedbackStorageKey]: this.states.LockManagementAudioFeedback,
+      [this.autoSecurityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
     });
     return json;
   }

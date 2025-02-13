@@ -4,6 +4,7 @@ import { CompanionSensorConfiguration } from './configurationCompanionSensor.js'
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
 import { FanConfiguration } from './configurationFan.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
+import { LockConfiguration } from './configurationLock.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
 import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
 import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
@@ -40,8 +41,8 @@ export class AccessoryConfiguration {
     lightbulb!: LightbulbConfiguration;
 
   // Lock
-  lockDefaultState!: string;
-  lockHardwareFinish!: string;
+  @Type(LockConfiguration)
+    lock!: LockConfiguration;
 
   // SecuritySystem
   @Type(SecuritySystemConfiguration)
@@ -203,16 +204,18 @@ export class AccessoryConfiguration {
   }
 
   private isValidLock(): boolean {
-    const isValidLockDefaultState: boolean = (this.lockDefaultState !== undefined);
-    const isValidLockHardwareFinish: boolean = (this.lockHardwareFinish !== undefined);
-
-    // Store fields failing validation
-    if (!isValidLockDefaultState) this.errorFields.push('lockDefaultState');
-    if (!isValidLockHardwareFinish) this.errorFields.push('lockHardwareFinish');
+    let isValidLock: boolean;
+    let lockErrorFields: string[];
+    // eslint-disable-next-line prefer-const
+    [isValidLock, lockErrorFields] = this.lock.isValid();
+    if (!isValidLock && lockErrorFields.length === 0) {
+      this.errorFields.push('Lock');
+    } else {
+      this.errorFields.push(...lockErrorFields);
+    }
 
     return (
-      isValidLockDefaultState &&
-      isValidLockHardwareFinish
+      isValidLock
     );
   };
 
