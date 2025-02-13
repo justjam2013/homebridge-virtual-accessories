@@ -10,24 +10,46 @@ export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, En
 
 // Power
 
-export type powerState = 'on' | 'off';
+export type PowerState = 'on' | 'off';
 
-export function isPowerState(value: string): value is powerState {
-  return (value as powerState) !== undefined;
+export function isPowerState(value: string): boolean {
+  //return (value as PowerState) !== undefined;
+
+  let isPowerState = false;
+
+  if (value !== undefined && (value === 'on' || value === 'off')) {
+    isPowerState = true;
+  }
+
+  return isPowerState;
 }
 
 // Percentage
 
-export type percentage = Range<0, 100>;
+export type Percentage = Range<0, 100>;
 
-export function isPercentage(value: number): value is percentage {
-  return (value as percentage) !== undefined;
+export function isPercentage(value: number): boolean {
+  let isPercentage = false;
+
+  if (value !== undefined && value >= 0 && value <= 100) {
+    isPercentage = true;
+  }
+
+  return isPercentage;
 }
 
 // Rotation
 
-export type rotation = Range<0, 1>;
+export type Rotation = Range<0, 1>;
 
-export function isRotation(value: number): value is rotation {
-  return (value as rotation) !== undefined;
+export function isRotation(value: number): boolean {
+  // return (value as Rotation) !== undefined;
+
+  let isRotation = false;
+
+  if (value !== undefined && value >= 0 && value <= 1) {
+    isRotation = true;
+  }
+
+  return isRotation;
 }

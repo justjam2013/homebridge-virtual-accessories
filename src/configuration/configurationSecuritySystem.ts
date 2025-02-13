@@ -6,13 +6,15 @@
 export class SecuritySystemConfiguration {
   defaultState!: string;
 
+  static prefix: string = 'securitySystem';
+
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (this.defaultState !== undefined);
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push('securitySystem.defaultState');
+    if (!isValidDefaultState) this.errorFields.push(SecuritySystemConfiguration.prefix + '.defaultState');
 
     return [
       (isValidDefaultState),

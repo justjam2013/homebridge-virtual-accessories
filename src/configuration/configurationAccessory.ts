@@ -2,6 +2,7 @@
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { DoorbellConfiguration } from './configurationDoorbell.js';
 import { FanConfiguration } from './configurationFan.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { LockConfiguration } from './configurationLock.js';
@@ -27,7 +28,8 @@ export class AccessoryConfiguration {
   accessoryHasCompanionSensor: boolean = false;
 
   // Doorbell
-  doorbellVolume!: number;
+  @Type(DoorbellConfiguration)
+    doorbell!: DoorbellConfiguration;
 
   // Fan
   @Type(FanConfiguration)
@@ -147,29 +149,29 @@ export class AccessoryConfiguration {
    */
 
   private isValidDoorbell(): boolean {
-    const isValidDoorbellVolume: boolean = (
-      (this.doorbellVolume !== undefined) &&
-      (this.doorbellVolume >= 0 && this.doorbellVolume <= 100)
-    );
+    let isValidDoorbell: boolean = false;
+    let doorbellErrorFields: string[] = [ DoorbellConfiguration.prefix ];
 
-    // Store fields failing validation
-    if (!isValidDoorbellVolume) this.errorFields.push('doorbellVolume');
+    if (this.doorbell !== undefined) {
+      [isValidDoorbell, doorbellErrorFields] = this.doorbell.isValid();
+    }
+
+    this.errorFields.push(...doorbellErrorFields);
 
     return (
-      isValidDoorbellVolume
+      isValidDoorbell
     );
   };
 
   private isValidFan(): boolean {
-    let isValidFan: boolean;
-    let fanErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidFan, fanErrorFields] = this.fan.isValid();
-    if (!isValidFan && fanErrorFields.length === 0) {
-      this.errorFields.push('Fan');
-    } else {
-      this.errorFields.push(...fanErrorFields);
+    let isValidFan: boolean = false;
+    let fanErrorFields: string[] = [ FanConfiguration.prefix ];
+     
+    if (this.fan !== undefined) {
+      [isValidFan, fanErrorFields] = this.fan.isValid();
     }
+
+    this.errorFields.push(...fanErrorFields);
 
     return (
       isValidFan
@@ -188,15 +190,14 @@ export class AccessoryConfiguration {
   };
 
   private isValidLighbulb(): boolean {
-    let isValidLightbulb: boolean;
-    let lightbulbErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidLightbulb, lightbulbErrorFields] = this.lightbulb.isValid();
-    if (!isValidLightbulb && lightbulbErrorFields.length === 0) {
-      this.errorFields.push('Lightbulb');
-    } else {
-      this.errorFields.push(...lightbulbErrorFields);
+    let isValidLightbulb: boolean = false;
+    let lightbulbErrorFields: string[] = [ LightbulbConfiguration.prefix ];
+
+    if (this.lightbulb !== undefined) {
+      [isValidLightbulb, lightbulbErrorFields] = this.lightbulb.isValid();
     }
+
+    this.errorFields.push(...lightbulbErrorFields);
 
     return (
       isValidLightbulb
@@ -204,15 +205,14 @@ export class AccessoryConfiguration {
   }
 
   private isValidLock(): boolean {
-    let isValidLock: boolean;
-    let lockErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidLock, lockErrorFields] = this.lock.isValid();
-    if (!isValidLock && lockErrorFields.length === 0) {
-      this.errorFields.push('Lock');
-    } else {
-      this.errorFields.push(...lockErrorFields);
+    let isValidLock: boolean = false;
+    let lockErrorFields: string[] = [ LockConfiguration.prefix ];
+     
+    if (this.lock !== undefined) {
+      [isValidLock, lockErrorFields] = this.lock.isValid();
     }
+
+    this.errorFields.push(...lockErrorFields);
 
     return (
       isValidLock
@@ -220,15 +220,14 @@ export class AccessoryConfiguration {
   };
 
   private isValidSecuritySystem(): boolean {
-    let isValidSecuritySystem: boolean;
-    let securitySystemErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
-    if (!isValidSecuritySystem && securitySystemErrorFields.length === 0) {
-      this.errorFields.push('securitySystem');
-    } else {
-      this.errorFields.push(...securitySystemErrorFields);
+    let isValidSecuritySystem: boolean = false;
+    let securitySystemErrorFields: string[] = [ SecuritySystemConfiguration.prefix ];
+     
+    if (this.securitySystem !== undefined) {
+      [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
     }
+
+    this.errorFields.push(...securitySystemErrorFields);
 
     return (
       isValidSecuritySystem

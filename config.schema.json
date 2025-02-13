@@ -57,11 +57,17 @@
               ],
               "default": "switch"
             },
-            "doorbellVolume": {
-              "title": "Doorbell Volume *",
-              "description": "Doorbell volume (0% - 100%)",
-              "type": "integer",
-              "minimum": 0,
+            "doorbell": {
+              "title": "Doorbell",
+              "type": "object",
+              "properties": {
+                "volume": {
+                  "title": "Doorbell Volume *",
+                  "description": "Doorbell volume (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
               }

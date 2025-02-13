@@ -9,6 +9,8 @@ export class LockConfiguration {
   hasAudioFeedback!: boolean;
   autoSecurityTimeout!: number;
 
+  static prefix: string = 'lock';
+
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
@@ -18,9 +20,9 @@ export class LockConfiguration {
     const isValidAutoSecurityTimeout: boolean = (this.autoSecurityTimeout !== undefined);
     
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push('defaultState');
-    if (!isValidHardwareFinish) this.errorFields.push('hardwareFinish');
-    if (!isValidAutoSecurityTimeout) this.errorFields.push('autoSecurityTimeout');
+    if (!isValidDefaultState) this.errorFields.push(LockConfiguration.prefix + '.defaultState');
+    if (!isValidHardwareFinish) this.errorFields.push(LockConfiguration.prefix + '.hardwareFinish');
+    if (!isValidAutoSecurityTimeout) this.errorFields.push(LockConfiguration.prefix + '.autoSecurityTimeout');
 
     return [
       (isValidDefaultState &&
