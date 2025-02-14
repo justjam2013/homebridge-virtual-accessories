@@ -571,7 +571,12 @@
                 }
               },
               "then": {
-                "required": [ "doorbellVolume" ]
+                "required": [ "doorbell" ],
+                "properties": {
+                  "doorbell": {
+                    "required": [ "volume" ]
+                  }
+                }
               }
             },
             {
