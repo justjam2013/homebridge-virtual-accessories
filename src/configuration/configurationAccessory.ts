@@ -4,6 +4,7 @@ import { CompanionSensorConfiguration } from './configurationCompanionSensor.js'
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
 import { DoorbellConfiguration } from './configurationDoorbell.js';
 import { FanConfiguration } from './configurationFan.js';
+import { GarageDoorConfiguration } from './configurationGarageDoor.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { LockConfiguration } from './configurationLock.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
@@ -36,7 +37,8 @@ export class AccessoryConfiguration {
     fan!: FanConfiguration;
 
   // Garage Door
-  garageDoorDefaultState!: string;
+  @Type(GarageDoorConfiguration)
+    garageDoor!: GarageDoorConfiguration;
 
   // Lightbulb
   @Type(LightbulbConfiguration)
@@ -59,13 +61,7 @@ export class AccessoryConfiguration {
 
   // Window Covering
   windowCoveringDefaultState!: string;
-
-  //
   transitionDuration!: number;
-
-  // Sensor
-  sensorType!: string;
-  sensorTrigger!: string;
 
   // Reset timer
   @Type(TimerConfiguration)
@@ -75,7 +71,12 @@ export class AccessoryConfiguration {
   @Type(CompanionSensorConfiguration)
     companionSensor!: CompanionSensorConfiguration;
 
+  // Sensor
+  sensorType!: string;
+  sensorTrigger!: string;
+
   // Triggers
+
   @Type(PingTriggerConfiguration)
     pingTrigger!: PingTriggerConfiguration;
   
@@ -179,13 +180,17 @@ export class AccessoryConfiguration {
   }
 
   private isValidGarageDoor(): boolean {
-    const isValidGarageDoorDefaultState: boolean = (this.garageDoorDefaultState !== undefined);
+    let isValidGarageDoor: boolean = false;
+    let garageDoorErrorFields: string[] = [ GarageDoorConfiguration.prefix ];
 
-    // Store fields failing validation
-    if (!isValidGarageDoorDefaultState) this.errorFields.push('garageDoorDefaultState');
+    if (this.garageDoor !== undefined) {
+      [isValidGarageDoor, garageDoorErrorFields] = this.garageDoor.isValid();
+    }
+
+    this.errorFields.push(...garageDoorErrorFields);
 
     return (
-      isValidGarageDoorDefaultState
+      isValidGarageDoor
     );
   };
 
