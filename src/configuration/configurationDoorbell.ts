@@ -11,16 +11,16 @@ export class DoorbellConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDoorbellVolume: boolean = (
+    const isValidVolume: boolean = (
       (this.volume !== undefined) &&
       (this.volume >= 0 && this.volume <= 100)
     );
 
     // Store fields failing validation
-    if (!isValidDoorbellVolume) this.errorFields.push(DoorbellConfiguration.prefix + '.doorbellVolume');
+    if (!isValidVolume) this.errorFields.push(DoorbellConfiguration.prefix + '.volume');
 
     return [
-      (isValidDoorbellVolume),
+      (isValidVolume),
       this.errorFields,
     ];
   }
