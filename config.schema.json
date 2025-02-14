@@ -607,7 +607,7 @@
                 }
               },
               "then": {
-                "required": [ "garagedoor" ],
+                "required": [ "garageDoor" ],
                 "properties": {
                   "garagedoor": {
                     "required": [ "defaultState" ]
