@@ -14,6 +14,7 @@ import { TimerConfiguration } from './configurationTimer.js';
 
 import { Type } from 'typeserializer';
 import { ValveConfiguration } from './configurationValve.js';
+import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
 
 /**
  * 
@@ -61,8 +62,8 @@ export class AccessoryConfiguration {
     valve!: ValveConfiguration;
 
   // Window Covering
-  windowCoveringDefaultState!: string;
-  transitionDuration!: number;
+  @Type(WindowCoveringConfiguration)
+    windowCovering!: WindowCoveringConfiguration;
 
   // Reset timer
   @Type(TimerConfiguration)
@@ -326,16 +327,19 @@ export class AccessoryConfiguration {
   }
 
   private isValidWindowCovering(): boolean {
-    const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
-    const isValidTransitionDuration: boolean = (this.transitionDuration !== undefined);
+    let isValidWindowCovering: boolean = false;
+    let windowCoveringErrorFields: string[] = [ WindowCoveringConfiguration.prefix ];
+     
+    console.log(`********* Window Covering: ${this.windowCovering}`);
 
-    // Store fields failing validation
-    if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
-    if (!isValidTransitionDuration) this.errorFields.push('transitionDuration');
+    if (this.windowCovering !== undefined) {
+      [isValidWindowCovering, windowCoveringErrorFields] = this.windowCovering.isValid();
+    }
+
+    this.errorFields.push(...windowCoveringErrorFields);
 
     return (
-      isValidWindowCoveringDefaultState &&
-      isValidTransitionDuration
+      isValidWindowCovering
     );
   }
 

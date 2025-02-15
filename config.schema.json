@@ -276,25 +276,28 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
             },
-            "windowCoveringDefaultState": {
-              "title": "Window Covering Default State *",
-              "description": "Window Covering default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Closed", "enum": ["closed"] },
-                { "title": "Open", "enum": ["open"] }
-              ],
+            "windowCovering": {
+              "title": "Window Covering",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Window Covering Default State *",
+                  "description": "Window Covering default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "type": "integer",
+                  "mminimum": 0
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
-              }
-            },
-            "transitionDuration": {
-              "title": "Transition Duration *",
-              "description": "Open & close transition duration in seconds",
-              "type": "integer",
-              "mminimum": 0,
-              "condition": {
-                "functionBody": "return ['windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "accessoryIsStateful": {
@@ -659,6 +662,21 @@
                 "properties": {
                   "valve": {
                     "required": [ "type", "duration" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "windowcovering" }
+                }
+              },
+              "then": {
+                "required": [ "windowCovering" ],
+                "properties": {
+                  "windowCovering": {
+                    "required": [ "defaultState" ]
                   }
                 }
               }

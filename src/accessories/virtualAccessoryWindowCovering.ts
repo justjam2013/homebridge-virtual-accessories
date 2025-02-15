@@ -38,7 +38,7 @@ export class WindowCovering extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.windowCoveringDefaultState === 'open' ? WindowCovering.OPEN : WindowCovering.CLOSED;
+    this.defaultState = this.accessoryConfiguration.windowCovering.defaultState === 'open' ? WindowCovering.OPEN : WindowCovering.CLOSED;
 
     this.states.WindowCoveringCurrentPosition = this.defaultState;
 
@@ -134,7 +134,8 @@ export class WindowCovering extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${this.getPositionName(this.states.WindowCoveringPositionState)}`);
     
     // PositionState STOPPED
-    const transitionDelayMillis: number = this.accessoryConfiguration.transitionDuration * 1000;
+    const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
+    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
     this.transitionTimerId = setTimeout(() => {
       // Reset timer
       clearTimeout(this.transitionTimerId);
