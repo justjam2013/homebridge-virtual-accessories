@@ -13,6 +13,7 @@ import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.j
 import { TimerConfiguration } from './configurationTimer.js';
 
 import { Type } from 'typeserializer';
+import { ValveConfiguration } from './configurationValve.js';
 
 /**
  * 
@@ -56,8 +57,8 @@ export class AccessoryConfiguration {
   switchDefaultState!: string;
 
   // Valve
-  valveType!: string;
-  valveDuration!: number;
+  @Type(ValveConfiguration)
+    valve!: ValveConfiguration;
 
   // Window Covering
   windowCoveringDefaultState!: string;
@@ -310,22 +311,17 @@ export class AccessoryConfiguration {
   };
 
   private isValidValve(): boolean {
-    const isValidValveType: boolean = (
-      (this.valveType !== undefined) &&
-      ['generic', 'irrigation', 'showerhead', 'waterfaucet'].includes(this.valveType)
-    );
-    const isValidValveDuration: boolean = (
-      (this.valveDuration !== undefined) &&
-      (this.valveDuration >= 0 && this.valveDuration <= 3600)
-    );
+    let isValidValve: boolean = false;
+    let valveErrorFields: string[] = [ ValveConfiguration.prefix ];
+     
+    if (this.valve !== undefined) {
+      [isValidValve, valveErrorFields] = this.valve.isValid();
+    }
 
-    // Store fields failing validation
-    if (!isValidValveType) this.errorFields.push('valveType');
-    if (!isValidValveDuration) this.errorFields.push('valveDuration');
+    this.errorFields.push(...valveErrorFields);
 
     return (
-      isValidValveType &&
-      isValidValveDuration
+      isValidValve
     );
   }
 

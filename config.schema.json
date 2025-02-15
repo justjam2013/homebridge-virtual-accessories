@@ -250,25 +250,28 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
               }
             },
-            "valveType": {
-              "title": "Valve Type *",
-              "description": "Valve type",
-              "type": "string",
-              "oneOf": [
-                { "title": "Generic Valve", "enum": ["generic"] },
-                { "title": "Irrigation", "enum": ["irrigation"] },
-                { "title": "Shower Head", "enum": ["showerhead"] },
-                { "title": "Water Faucet", "enum": ["waterfaucet"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
-              }
-            },
-            "valveDuration": {
-              "title": "Valve Runtime *",
-              "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
-              "type": "integer",
-              "maximum": 3600,
+            "valve": {
+              "title": "Valve",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Valve Type *",
+                  "description": "Valve type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Generic Valve", "enum": ["generic"] },
+                    { "title": "Irrigation", "enum": ["irrigation"] },
+                    { "title": "Shower Head", "enum": ["showerhead"] },
+                    { "title": "Water Faucet", "enum": ["waterfaucet"] }
+                  ]
+                },
+                "duration": {
+                  "title": "Valve Runtime *",
+                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
+                  "type": "integer",
+                  "maximum": 3600
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
@@ -652,7 +655,12 @@
                 }
               },
               "then": {
-                "required": [ "valveType", "valveDuration" ]
+                "required": [ "valve" ],
+                "properties": {
+                  "valve": {
+                    "required": [ "type", "duration" ]
+                  }
+                }
               }
             },
             {

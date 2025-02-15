@@ -42,7 +42,7 @@ export class Valve extends Accessory {
   ) {
     super(platform, accessory);
 
-    switch(this.accessoryConfiguration.valveType) {
+    switch(this.accessoryConfiguration.valve.type) {
     case 'generic':
       this.valveType = Valve.GENERIC_VALVE;
       break;
@@ -82,7 +82,7 @@ export class Valve extends Accessory {
       this.accessoryConfiguration.accessoryName,
       this.log,
       timerIsResettable,
-      this.accessoryConfiguration.valveDuration,
+      this.accessoryConfiguration.valve.duration,
       Timer.Units.Seconds,
     );
 
@@ -104,7 +104,7 @@ export class Valve extends Accessory {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${this.getActiveName(this.states.ValveActive)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.states.ValveActive));
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
-    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valveDuration));
+    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
