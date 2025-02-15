@@ -330,8 +330,6 @@ export class AccessoryConfiguration {
     let isValidWindowCovering: boolean = false;
     let windowCoveringErrorFields: string[] = [ WindowCoveringConfiguration.prefix ];
      
-    console.log(`********* Window Covering: ${this.windowCovering}`);
-
     if (this.windowCovering !== undefined) {
       [isValidWindowCovering, windowCoveringErrorFields] = this.windowCovering.isValid();
     }

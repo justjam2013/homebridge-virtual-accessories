@@ -23,7 +23,6 @@ export class WindowCoveringConfiguration {
         (0 <= this.transitionDuration)
     );
 
-
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(WindowCoveringConfiguration.prefix + '.defaultState');
     if (!isValidTransitionDuration) this.errorFields.push(WindowCoveringConfiguration.prefix + '.transitionDuration');

@@ -11,7 +11,11 @@ export class SecuritySystemConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (this.defaultState !== undefined);
+    const isValidDefaultState: boolean = (
+      (this.defaultState !== undefined) &&
+      ['awayarm', 'stayarm', 'nightarm', 'disarmed'].includes(this.defaultState)
+    );
+
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(SecuritySystemConfiguration.prefix + '.defaultState');

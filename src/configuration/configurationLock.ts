@@ -14,9 +14,12 @@ export class LockConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (this.defaultState !== undefined);
-    const isValidHardwareFinish: boolean = (this.hardwareFinish !== undefined);
+    const isValidDefaultState: boolean = (
+      (this.defaultState !== undefined) &&
+      ['locked', 'unlocked'].includes(this.defaultState)
+    );
 
+    const isValidHardwareFinish: boolean = (this.hardwareFinish !== undefined);
     const isValidAutoSecurityTimeout: boolean = (this.autoSecurityTimeout !== undefined);
     
     // Store fields failing validation

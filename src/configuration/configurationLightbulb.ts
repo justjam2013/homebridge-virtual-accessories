@@ -17,7 +17,10 @@ export class LightbulbConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (this.defaultState !== undefined);
+    const isValidDefaultState: boolean = (
+      (this.defaultState !== undefined) &&
+      ['on', 'off'].includes(this.defaultState)
+    );
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
