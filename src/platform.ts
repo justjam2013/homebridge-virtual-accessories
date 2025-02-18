@@ -68,9 +68,9 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
 
     // Patch the cron start date and end date values
     try {
-      Patch.patchCronTriggerDates(this.log, this.api.user.configPath());
+      Patch.patchCronTriggerDates(this.log, this.api.user.configPath(), configuredDevices);
     } catch(error) {
-      // Do nothing
+      this.log.debug(`Error patching cron trigger dates: ${error}`);
     }
 
     const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
@@ -231,6 +231,7 @@ class Patch {
   static patchCronTriggerDates(
     log: Logging,
     configFilePath: string,
+    configuredDevices,
   ): void {
     log.debug('BUG Patch: Patching Cron Trigger dates');
     let saveMods: boolean = false;
@@ -292,6 +293,30 @@ class Patch {
         JSON.stringify(config, null, 4),
         { encoding: 'utf8', flag: 'w' },
       );
+    }
+
+    // Now patch the configuredDevices
+    for (const device of configuredDevices) {
+
+      if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
+        log.debug(`BUG Patch: Configured Device: ${device.accessoryName}, ${device.accessoryType}`);
+
+        const startTimestamp = device.cronTrigger.startDateTime as string;
+        log.debug(`BUG Patch: Configured Device Start Timestamp: ${startTimestamp}`);
+        if (startTimestamp !== undefined && startTimestamp === 'null') {
+          delete device.cronTrigger.startDateTime;
+          saveMods = true;
+          log.debug(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+        }
+
+        const endTimestamp = device.cronTrigger.endDateTime as string;
+        log.debug(`BUG Patch: Configured Device End Timestamp: ${endTimestamp}`);
+        if (endTimestamp !== undefined && endTimestamp === 'null') {
+          delete device.cronTrigger.endDateTime;
+          saveMods = true;
+          log.debug(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+        }
+      }
     }
   }
 }
