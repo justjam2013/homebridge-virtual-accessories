@@ -253,23 +253,35 @@ class Patch {
 
         for (const device of devices) {
 
-          if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
+          if (device.accessoryType === 'sensor' && device.sensor.trigger === 'cron') {
             log.debug(`BUG Patch: Device: ${device.accessoryName}, ${device.accessoryType}`);
 
             const startTimestamp = device.cronTrigger.startDateTime as string;
             log.debug(`BUG Patch: Start Timestamp: ${startTimestamp}`);
-            if (startTimestamp !== undefined && startTimestamp === 'null') {
-              delete device.cronTrigger.startDateTime;
-              saveMods = true;
-              log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+            if (startTimestamp !== undefined) {
+              if (startTimestamp === 'null') {
+                delete device.cronTrigger.startDateTime;
+                saveMods = true;
+                log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+              } else if (startTimestamp.length === 16) {
+                device.cronTrigger.startDateTime = device.cronTrigger.startDateTime + ':00';
+                saveMods = true;
+                log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+              }
             }
 
             const endTimestamp = device.cronTrigger.endDateTime as string;
             log.debug(`BUG Patch: End Timestamp: ${endTimestamp}`);
-            if (endTimestamp !== undefined && endTimestamp === 'null') {
-              delete device.cronTrigger.endDateTime;
-              saveMods = true;
-              log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+            if (endTimestamp !== undefined) {
+              if (endTimestamp === 'null') {
+                delete device.cronTrigger.endDateTime;
+                saveMods = true;
+                log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+              } else if (endTimestamp.length === 16) {
+                device.cronTrigger.endDateTime = device.cronTrigger.endDateTime + ':00';
+                saveMods = true;
+                log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+              }
             }
 
             // eslint-disable-next-line brace-style
@@ -298,23 +310,31 @@ class Patch {
     // Now patch the configuredDevices
     for (const device of configuredDevices) {
 
-      if (device.accessoryType === 'sensor' && device.sensorTrigger === 'cron') {
+      if (device.accessoryType === 'sensor' && device.sensor.trigger === 'cron') {
         log.debug(`BUG Patch: Configured Device: ${device.accessoryName}, ${device.accessoryType}`);
 
         const startTimestamp = device.cronTrigger.startDateTime as string;
         log.debug(`BUG Patch: Configured Device Start Timestamp: ${startTimestamp}`);
-        if (startTimestamp !== undefined && startTimestamp === 'null') {
-          delete device.cronTrigger.startDateTime;
-          saveMods = true;
-          log.debug(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+        if (startTimestamp !== undefined) {
+          if (startTimestamp === 'null') {
+            delete device.cronTrigger.startDateTime;
+            log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+          } else if (startTimestamp.length === 16) {
+            device.cronTrigger.startDateTime = device.cronTrigger.startDateTime + ':00';
+            log.info(`BUG Patch: Correcting Cron Trigger startDateTime: [${device.accessoryName}] ${device.cronTrigger.startDateTime}`);
+          }
         }
 
         const endTimestamp = device.cronTrigger.endDateTime as string;
         log.debug(`BUG Patch: Configured Device End Timestamp: ${endTimestamp}`);
-        if (endTimestamp !== undefined && endTimestamp === 'null') {
-          delete device.cronTrigger.endDateTime;
-          saveMods = true;
-          log.debug(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+        if (endTimestamp !== undefined) {
+          if (endTimestamp === 'null') {
+            delete device.cronTrigger.endDateTime;
+            log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+          } else if (endTimestamp.length === 16) {
+            device.cronTrigger.endDateTime = device.cronTrigger.endDateTime + ':00';
+            log.info(`BUG Patch: Correcting Cron Trigger endDateTime: [${device.accessoryName}] ${device.cronTrigger.endDateTime}`);
+          }
         }
       }
     }
