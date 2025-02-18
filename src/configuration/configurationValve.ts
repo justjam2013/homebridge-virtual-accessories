@@ -14,7 +14,7 @@ export class ValveConfiguration {
   isValid(): [boolean, string[]] {
     const isValidType: boolean = (
       (this.type !== undefined) &&
-      ['generic', 'irrigation', 'showerhead', 'waterfaucet'].includes(this.type)
+      [ 'generic', 'irrigation', 'showerhead', 'waterfaucet' ].includes(this.type)
     );
 
     const isValidDuration: boolean = (

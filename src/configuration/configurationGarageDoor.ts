@@ -13,7 +13,7 @@ export class GarageDoorConfiguration {
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      ['closed', 'open'].includes(this.defaultState)
+      [ 'closed', 'open' ].includes(this.defaultState)
     );
 
     // Store fields failing validation

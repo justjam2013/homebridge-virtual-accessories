@@ -19,12 +19,12 @@ export class LightbulbConfiguration {
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      ['on', 'off'].includes(this.defaultState)
+      [ 'on', 'off' ].includes(this.defaultState)
     );
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
-      ['white', 'ambiance', 'color'].includes(this.type)
+      [ 'white', 'ambiance', 'color' ].includes(this.type)
     );
 
     const isValidBrightness: boolean = (

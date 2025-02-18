@@ -14,7 +14,7 @@ export class WindowCoveringConfiguration {
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      ['closed', 'open'].includes(this.defaultState)
+      [ 'closed', 'open' ].includes(this.defaultState)
     );
 
     const isValidTransitionDuration: boolean = (

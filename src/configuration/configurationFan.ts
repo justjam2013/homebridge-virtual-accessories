@@ -22,7 +22,7 @@ export class FanConfiguration {
 
     const isValidRotationDirection: boolean = (
       (this.rotationDirection !== undefined) &&
-      (['clockwise', 'counterclockwise'].includes(this.rotationDirection))
+      [ 'clockwise', 'counterclockwise' ].includes(this.rotationDirection)
     );
 
     const isValidRotationSpeed: boolean = (

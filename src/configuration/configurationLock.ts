@@ -16,7 +16,7 @@ export class LockConfiguration {
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      ['locked', 'unlocked'].includes(this.defaultState)
+      [ 'locked', 'unlocked' ].includes(this.defaultState)
     );
 
     const isValidHardwareFinish: boolean = (this.hardwareFinish !== undefined);

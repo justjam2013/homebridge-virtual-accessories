@@ -13,7 +13,7 @@ export class SecuritySystemConfiguration {
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      ['awayarm', 'stayarm', 'nightarm', 'disarmed'].includes(this.defaultState)
+      [ 'awayarm', 'stayarm', 'nightarm', 'disarmed' ].includes(this.defaultState)
     );
 
 
