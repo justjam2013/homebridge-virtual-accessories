@@ -96,8 +96,8 @@ export abstract class VirtualSensor extends Accessory {
      */
 
     // Trigger
-    if (this.accessoryConfiguration.sensorTrigger !== undefined) {
-      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensorTrigger, this.accessoryConfiguration.accessoryName + ' Trigger');
+    if (this.accessoryConfiguration.sensor !== undefined && this.accessoryConfiguration.sensor.trigger !== undefined) {
+      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryConfiguration.accessoryName + ' Trigger');
     }
   }
 

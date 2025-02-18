@@ -308,32 +308,35 @@
                 "functionBody": "return ['fan', 'garagedoor', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
               }
             },
-            "sensorType": {
-              "title": "Sensor Type *",
-              "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
-              "type": "string",
-              "oneOf": [
-                { "title": "Contact", "enum": ["contact"] },
-                { "title": "Leak (critical)", "enum": ["leak"] },
-                { "title": "Motion", "enum": ["motion"] },
-                { "title": "Occupancy", "enum": ["occupancy"] },
-                { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                { "title": "Smoke (critical)", "enum": ["smoke"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
-              }
-            },
-            "sensorTrigger": {
-              "title": "Sensor Trigger *",
-              "description": "Sensor trigger source",
-              "type": "string",
-              "oneOf": [
-                { "title": "Ping Host", "enum": ["ping"] },
-                { "title": "Cron Schedule", "enum": ["cron"] },
-                { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] }
-              ],
+            "sensor": {
+              "title": "Sensor",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Sensor Type *",
+                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Contact", "enum": ["contact"] },
+                    { "title": "Leak (critical)", "enum": ["leak"] },
+                    { "title": "Motion", "enum": ["motion"] },
+                    { "title": "Occupancy", "enum": ["occupancy"] },
+                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
+                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
+                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                  ]
+                },
+                "trigger": {
+                  "title": "Sensor Trigger *",
+                  "description": "Sensor trigger source",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Ping Host", "enum": ["ping"] },
+                    { "title": "Cron Schedule", "enum": ["cron"] },
+                    { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] }
+                  ]
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
               }
@@ -475,7 +478,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'ping';"
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'ping';"
               }
             },
             "cronTrigger": {
@@ -519,7 +522,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'cron';"
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'cron';"
               }
             },
             "sunEventsTrigger": {
@@ -561,7 +564,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'sunevents';"
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'sunevents';"
               }
             }
           },
@@ -688,7 +691,12 @@
                 }
               },
               "then": {
-                "required": [ "sensorType" ]
+                "required": [ "sensor" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type", "trigger" ]
+                  }
+                }
               }
             },
             {

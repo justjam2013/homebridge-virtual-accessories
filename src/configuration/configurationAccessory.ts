@@ -15,6 +15,7 @@ import { TimerConfiguration } from './configurationTimer.js';
 import { Type } from 'typeserializer';
 import { ValveConfiguration } from './configurationValve.js';
 import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
+import { SensorConfiguration } from './configurationSensor.js';
 
 /**
  * 
@@ -73,9 +74,8 @@ export class AccessoryConfiguration {
   @Type(CompanionSensorConfiguration)
     companionSensor!: CompanionSensorConfiguration;
 
-  // Sensor
-  sensorType!: string;
-  sensorTrigger!: string;
+  @Type(SensorConfiguration)
+    sensor!: SensorConfiguration;
 
   // Triggers
 
@@ -242,27 +242,28 @@ export class AccessoryConfiguration {
   }
 
   private isValidSensor(): boolean {
-    const isValidSensorType: boolean = (this.sensorType !== undefined);
-
-    // Store fields failing validation
-    if (!isValidSensorType) this.errorFields.push('sensorType');
-
-    // Validate SensorTrigger
-    let isValidSensorTrigger: boolean;
-    let sensorTriggerErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidSensorTrigger, sensorTriggerErrorFields] = this.isValidSensorTrigger();
-    if (!isValidSensorTrigger && sensorTriggerErrorFields.length === 0) {
-      this.errorFields.push(this.sensorTrigger + 'Trigger');
-    } else {
-      this.errorFields.push(...sensorTriggerErrorFields);
+    let isValidSensor: boolean = false;
+    let sensorErrorFields: string[] = [ SensorConfiguration.prefix ];
+     
+    if (this.sensor !== undefined) {
+      [isValidSensor, sensorErrorFields] = this.sensor.isValid();
     }
 
+    this.errorFields.push(...sensorErrorFields);
+
+    // Validate SensorTrigger
+    let isValidTrigger: boolean = false;
+    let triggerErrorFields: string[] = ['xTrigger'];
+
+    if (this.sensor !== undefined) {
+      [isValidTrigger, triggerErrorFields] = this.isValidTrigger();
+    }
+
+    this.errorFields.push(...triggerErrorFields);
+
     return (
-      isValidSensorType &&
-      isValidSensorTrigger
-      //  &&
-      // isValidResetTimer
+      isValidSensor &&
+      isValidTrigger
     );
   };
 
@@ -371,35 +372,35 @@ export class AccessoryConfiguration {
     return [true, []];
   }
 
-  private isValidSensorTrigger(): [boolean, string[]] {
-    if (this.sensorTrigger !== undefined) {
+  private isValidTrigger(): [boolean, string[]] {
+    if (this.sensor.trigger !== undefined) {
       let isValidTrigger: boolean;
       let errorFields: string[];
 
-      switch (this.sensorTrigger) {
+      switch (this.sensor.trigger) {
       case 'cron':
         if (this.cronTrigger === undefined) {
-          return [false, []];
+          return [false, ['cronTrigger']];
         }
 
         [isValidTrigger, errorFields] = this.cronTrigger.isValid();
         break;
       case 'ping':
         if (this.pingTrigger === undefined) {
-          return [false, []];
+          return [false, ['pingTrigger']];
         }
 
         [isValidTrigger, errorFields] = this.pingTrigger.isValid();
         break;
       case 'sunevents':
         if (this.sunEventsTrigger === undefined) {
-          return [false, []];
+          return [false, ['sunEventsTrigger']];
         }
 
         [isValidTrigger, errorFields] = this.sunEventsTrigger.isValid();
         break;
       default:
-        return [false, []];
+        return [false, ['unknownTrigger']];
       }
 
       return [isValidTrigger, errorFields];

@@ -78,7 +78,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = new WindowCovering(platform, accessory);
       break;
     case 'sensor':
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
       platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
