@@ -258,21 +258,11 @@ export class AccessoryConfiguration {
       this.errorFields.push(...sensorTriggerErrorFields);
     }
 
-    // Validate ResetTimer
-    let isValidResetTimer: boolean;
-    let resetTimerErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
-    if (!isValidResetTimer && resetTimerErrorFields.length === 0) {
-      this.errorFields.push('resetTimer');
-    } else {
-      this.errorFields.push(...resetTimerErrorFields);
-    }
-
     return (
       isValidSensorType &&
-      isValidSensorTrigger &&
-      isValidResetTimer
+      isValidSensorTrigger
+      //  &&
+      // isValidResetTimer
     );
   };
 
