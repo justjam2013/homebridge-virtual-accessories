@@ -734,9 +734,14 @@
             {
               "if": {
                 "properties": {
-                  "sensorTrigger": { "const": "ping" }
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "ping" }
+                    },
+                    "required": [ "trigger" ]
+                  }
                 },
-                "required": [ "sensorTrigger" ]
+                "required": [ "sensor" ]
               },
               "then": {
                 "required": [ "pingTrigger" ],
@@ -750,9 +755,14 @@
             {
               "if": {
                 "properties": {
-                  "sensorTrigger": { "const": "cron" }
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "cron" }
+                    },
+                    "required": [ "trigger" ]
+                  }
                 },
-                "required": [ "sensorTrigger" ]
+                "required": [ "sensor" ]
               },
               "then": {
                 "required": [ "cronTrigger" ],
@@ -766,9 +776,14 @@
             {
               "if": {
                 "properties": {
-                  "sensorTrigger": { "const": "sunevents" }
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "sunevents" }
+                    },
+                    "required": [ "trigger" ]
+                  }
                 },
-                "required": [ "sensorTrigger" ]
+                "required": [ "sensor" ]
               },
               "then": {
                 "required": [ "sunEventsTrigger" ],
