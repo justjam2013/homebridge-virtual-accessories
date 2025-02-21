@@ -22,6 +22,11 @@
 
 ## <!-- Thin separator line -->
 
+> [!CAUTION]
+> **Virtual Accessories For Homebridge v2.0.0-beta.1 is a breaking upgrade.** Please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) for details on how to update your configuration.
+
+## <!-- Thin separator line -->
+
 <details>
   <summary>
     
@@ -58,9 +63,6 @@
 
 ## <!-- Thin separator line -->
 <br />
-
-> [!CAUTION]
-> **The upcoming Virtual Accessories For Homebridge v2.0.0 will be a breaking upgrade.** I will update the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) as details become available.
 
 ## About Virtual Accessories For Homebridge
 
