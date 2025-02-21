@@ -544,7 +544,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved it the wrong format os as th string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup. It cleans up the values if needed and you may see entries in the logs. That behavior is expected. Tickets have been opened and, once the issues are resolved, the bug patch will be removed.
+-   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved in the wrong format or as the string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup and cleans up the values, if needed. You may see entries in the logs to that effect. That behavior is expected. Tickets have been opened against the issues and, once they are resolved, the bug patch will be removed.
 
 ## What if I run into a problem?
 
