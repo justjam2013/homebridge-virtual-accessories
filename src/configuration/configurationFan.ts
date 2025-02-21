@@ -10,6 +10,8 @@ export class FanConfiguration {
   rotationDirection!: string;
   rotationSpeed!: number;
 
+  static prefix: string = 'fan';
+
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
@@ -20,7 +22,7 @@ export class FanConfiguration {
 
     const isValidRotationDirection: boolean = (
       (this.rotationDirection !== undefined) &&
-      (['clockwise', 'counterclockwise'].includes(this.rotationDirection))
+      [ 'clockwise', 'counterclockwise' ].includes(this.rotationDirection)
     );
 
     const isValidRotationSpeed: boolean = (
@@ -29,9 +31,9 @@ export class FanConfiguration {
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push('Fsn.defaultState');
-    if (!isValidRotationDirection) this.errorFields.push('Fsn.rotationDirection');
-    if (!isValidRotationSpeed) this.errorFields.push('Fsn.rotationSpeed');
+    if (!isValidDefaultState) this.errorFields.push(FanConfiguration.prefix + '.defaultState');
+    if (!isValidRotationDirection) this.errorFields.push(FanConfiguration.prefix + '.rotationDirection');
+    if (!isValidRotationSpeed) this.errorFields.push(FanConfiguration.prefix + '.rotationSpeed');
 
     return [
       (isValidDefaultState &&

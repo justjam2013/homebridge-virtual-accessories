@@ -64,7 +64,7 @@ export class CronTrigger extends Trigger {
       triggerConfig.pattern,
       {
         name: 'Schedule Cron Job',
-        startAt: triggerConfig.startDateTime, 
+        startAt: triggerConfig.startDateTime,
         stopAt: triggerConfig.endDateTime,
         timezone: timezone,
       },

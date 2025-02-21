@@ -3,22 +3,21 @@
 /**
  * 
  */
-export class SecuritySystemConfiguration {
+export class GarageDoorConfiguration {
   defaultState!: string;
 
-  static prefix: string = 'securitySystem';
+  static prefix: string = 'garageDoor';
 
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
-      [ 'awayarm', 'stayarm', 'nightarm', 'disarmed' ].includes(this.defaultState)
+      [ 'closed', 'open' ].includes(this.defaultState)
     );
 
-
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(SecuritySystemConfiguration.prefix + '.defaultState');
+    if (!isValidDefaultState) this.errorFields.push(GarageDoorConfiguration.prefix + '.defaultState');
 
     return [
       (isValidDefaultState),

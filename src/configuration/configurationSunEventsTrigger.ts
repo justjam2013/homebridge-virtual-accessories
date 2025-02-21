@@ -20,7 +20,10 @@ export class SunEventsTriggerConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidEvent = ['sunrise', 'sunset', 'goldenhour'].includes(this.event);
+    const isValidEvent = (
+      (this.event !== undefined) &&
+      [ 'sunrise', 'sunset', 'goldenhour' ].includes(this.event)
+    );
 
     const latitudeRegex = new RegExp(SunEventsTriggerConfiguration.latitudePattern);
     const isValidLatitude: boolean = (

@@ -12,14 +12,19 @@ export class LightbulbConfiguration {
   // hue!: number;
   // saturation!: number;
 
+  static prefix: string = 'lightbulb';
+
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (this.defaultState !== undefined);
+    const isValidDefaultState: boolean = (
+      (this.defaultState !== undefined) &&
+      [ 'on', 'off' ].includes(this.defaultState)
+    );
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
-      ['white', 'ambiance', 'color'].includes(this.type)
+      [ 'white', 'ambiance', 'color' ].includes(this.type)
     );
 
     const isValidBrightness: boolean = (
@@ -34,10 +39,10 @@ export class LightbulbConfiguration {
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push('lightbulb.defaultState');
-    if (!isValidType) this.errorFields.push('lightbulb.type');
-    if (!isValidBrightness) this.errorFields.push('lightbulb.brightness');
-    if (!isValidColorTemperature) this.errorFields.push('lightbulb.colorTemperature');
+    if (!isValidDefaultState) this.errorFields.push(LightbulbConfiguration.prefix + '.defaultState');
+    if (!isValidType) this.errorFields.push(LightbulbConfiguration.prefix + '.type');
+    if (!isValidBrightness) this.errorFields.push(LightbulbConfiguration.prefix + '.brightness');
+    if (!isValidColorTemperature) this.errorFields.push(LightbulbConfiguration.prefix + '.colorTemperature');
 
     return [
       (isValidDefaultState &&

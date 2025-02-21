@@ -34,7 +34,7 @@ export class Doorbell extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.states.Volume = this.accessoryConfiguration.doorbellVolume;
+    this.states.Volume = this.accessoryConfiguration.doorbell.volume;
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!

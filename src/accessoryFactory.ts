@@ -8,7 +8,7 @@ import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
-import { SecuritySystem } from './accessories/virtualSecuritySystem.js';
+import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
@@ -78,7 +78,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = new WindowCovering(platform, accessory);
       break;
     case 'sensor':
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
       platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);

@@ -52,7 +52,7 @@ export class Switch extends Accessory {
     if (!this.isCompanionSwitch) {
 
       // Setup reset timer first
-      if (this.accessoryConfiguration.accessoryHasResetTimer) {
+      if (this.accessoryConfiguration.switch.hasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
           Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
@@ -67,7 +67,7 @@ export class Switch extends Accessory {
       }
 
       // First configure the device based on the accessory details
-      this.defaultState = this.accessoryConfiguration.switchDefaultState === 'on' ? Switch.ON : Switch.OFF;
+      this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
 
       this.states.SwitchState = this.defaultState;
       this.states.SensorState = this.CLOSED_NORMAL;
@@ -160,7 +160,7 @@ export class Switch extends Accessory {
 
     if (!this.isCompanionSwitch) {
       // Create sensor service
-      if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
+      if (this.accessoryConfiguration.switch.hasCompanionSensor) {
         this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
           this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
@@ -177,7 +177,11 @@ export class Switch extends Accessory {
     // implement your own code to turn your device on/off
     this.states.SwitchState = value as boolean;
 
-    if (this.accessoryConfiguration.accessoryHasResetTimer) {
+    this.log.info(`***** Has reset timer: ${this.accessoryConfiguration.switch.hasResetTimer}`);
+    if (this.accessoryConfiguration.switch.hasResetTimer) {
+      this.log.info(`***** SwitchState: ${this.states.SwitchState}`);
+      this.log.info(`***** defaultState: ${this.defaultState}`);
+
       // switch is reset: turn off timer
       if (this.states.SwitchState === this.defaultState) {
         this.durationTimer!.stop();
@@ -196,7 +200,7 @@ export class Switch extends Accessory {
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
 
-    if (this.accessoryConfiguration.accessoryHasCompanionSensor) {
+    if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
 
       this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
