@@ -62,7 +62,6 @@
 </details>
 
 ## <!-- Thin separator line -->
-<br />
 
 ## About Virtual Accessories For Homebridge
 
