@@ -23,7 +23,7 @@
 ## <!-- Thin separator line -->
 
 > [!CAUTION]
-> **Virtual Accessories For Homebridge v2.0.0-beta.1 is a breaking upgrade.** Please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) for details on how to update your configuration.
+> **Virtual Accessories For Homebridge v2.0.0 is a breaking upgrade.** If you are upgrading from a previous version, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) for details on how to update your configuration.
 
 ## <!-- Thin separator line -->
 
@@ -166,7 +166,9 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Doorbell",
             "accessoryType": "doorbell",
-            "doorbellVolume": 100
+            "doorbell": {
+                "volume": 100
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -203,8 +205,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Garage Door",
             "accessoryType": "garagedoor",
-            "garageDoorDefaultState": "closed",
-            "accessoryIsStateful": false
+            "accessoryIsStateful": false,
+            "garageDoor": {
+                "defaultState": "closed"
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -240,9 +244,13 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Lock",
             "accessoryType": "lock",
-            "lockDefaultState": "unlocked",
             "accessoryIsStateful": false,
-            "lockHardwareFinish": "tan"
+            "lock": {
+                "defaultState": "locked",
+                "hardwareFinish": "silver",
+                "hasAudioFeedback": false,
+                "autoSecurityTimeout": 5
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -277,8 +285,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Valve",
             "accessoryType": "valve",
-            "valveType": "waterfaucet",
-            "valveDuration": 0
+            "valve": {
+                "type": "waterfaucet",
+                "duration": 0
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -295,9 +305,11 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Blinds",
             "accessoryType": "windowcovering",
-            "windowCoveringDefaultState": "closed",
             "accessoryIsStateful": false,
-            "transitionDuration": 3
+            "windowCovering": {
+                "defaultState": "closed",
+                "transitionDuration": 3
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -314,8 +326,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
-            "switchDefaultState": "off",
-            "accessoryIsStateful": false
+            "accessoryIsStateful": false,
+            "switch": {
+                "defaultState": "off",
+            }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
@@ -332,9 +346,11 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
-            "switchDefaultState": "off",
             "accessoryIsStateful": false,
-            "accessoryHasResetTimer": true,
+            "switch": {
+                "defaultState": "off",
+                "hasResetTimer": true,
+            },
             "resetTimer": {
                 "duration": 10,
                 "units": "seconds",
@@ -356,9 +372,11 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
-            "switchDefaultState": "off",
             "accessoryIsStateful": false,
-            "accessoryHasResetTimer": true,
+            "switch": {
+                "defaultState": "off",
+                "hasResetTimer": true,
+            },
             "resetTimer": {
                 "durationIsRandom": true,
                 "durationRandomMin": 5,
@@ -382,9 +400,11 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Switch",
             "accessoryType": "switch",
-            "switchDefaultState": "off",
             "accessoryIsStateful": false,
-            "accessoryHasCompanionSensor": true,
+            "switch": {
+                "defaultState": "off",
+                "hasCompanionSensor": true
+            }
             "companionSensor": {
                 "name": "My Companion Sensor",
                 "type": "contact"
@@ -405,8 +425,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Ping Sensor",
             "accessoryType": "sensor",
-            "sensorType": "contact",
-            "sensorTrigger": "ping",
+            "sensor": {
+                "type": "contact",
+                "trigger": "ping"
+            },
             "pingTrigger": {
                 "host": "192.168.0.200",
                 "failureRetryCount": 3,
@@ -428,8 +450,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Cron Sensor",
             "accessoryType": "sensor",
-            "sensorType": "contact",
-            "sensorTrigger": "cron",
+            "sensor": {
+                "type": "contact",
+                "trigger": "cron"
+            },
             "cronTrigger": {
                 "pattern": "* * * * * *",
                 "zoneId": "America/Los_Angeles",
@@ -452,8 +476,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Cron Sensor",
             "accessoryType": "sensor",
-            "sensorType": "contact",
-            "sensorTrigger": "cron",
+            "sensor": {
+                "type": "contact",
+                "trigger": "cron"
+            },
             "cronTrigger": {
                 "pattern": "* * * * * *",
                 "zoneId": "America/Los_Angeles",
@@ -478,8 +504,10 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryID": "1234567",
             "accessoryName": "My Sunrise trigger",
             "accessoryType": "sensor",
-            "sensorType": "contact",
-            "sensorTrigger": "sunevents",
+            "sensor": {
+                "type": "contact",
+                "trigger": "sunevents"
+            },
             "sunEventsTrigger": {
                 "event": "sunrise",
                 "latitude": "37.226148",
@@ -516,7 +544,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   None.
+-   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved in the wrong format or as the string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup and cleans up the values, if needed. You may see entries in the logs to that effect. That behavior is expected. Tickets have been opened against the issues and, once they are resolved, the bug patch will be removed.
 
 ## What if I run into a problem?
 
