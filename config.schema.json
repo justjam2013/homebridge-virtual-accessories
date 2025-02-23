@@ -579,7 +579,12 @@
                 }
               },
               "then": {
-                "required": [ "switchDefaultState" ]
+                "required": [ "switch" ],
+                "properties": {
+                  "switch": {
+                    "required": [ "defaultState" ]
+                  }
+                }
               }
             },
             {
