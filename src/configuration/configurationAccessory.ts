@@ -2,10 +2,21 @@
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { DoorbellConfiguration } from './configurationDoorbell.js';
+import { FanConfiguration } from './configurationFan.js';
+import { GarageDoorConfiguration } from './configurationGarageDoor.js';
+import { LightbulbConfiguration } from './configurationLightbulb.js';
+import { LockConfiguration } from './configurationLock.js';
 import { PingTriggerConfiguration } from './configurationPingTrigger.js';
+import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
+import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
 import { TimerConfiguration } from './configurationTimer.js';
 
 import { Type } from 'typeserializer';
+import { ValveConfiguration } from './configurationValve.js';
+import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
+import { SensorConfiguration } from './configurationSensor.js';
+import { SwitchConfiguration } from './configurationSwitch.js';
 
 /**
  * 
@@ -18,35 +29,48 @@ export class AccessoryConfiguration {
 
   // Optional
   accessoryIsStateful: boolean = false;
-  accessoryHasResetTimer: boolean = false;
-  accessoryHasCompanionSensor: boolean = false;
-
-  // Switch
-  switchDefaultState!: string;
-
-  // Lock required
-  lockDefaultState!: string;
-  lockHardwareFinish!: string;
-
-  // Garage Door
-  garageDoorDefaultState!: string;
 
   // Doorbell
-  doorbellVolume!: number;
+  @Type(DoorbellConfiguration)
+    doorbell!: DoorbellConfiguration;
 
-  // Valve
-  valveType!: string;
-  valveDuration!: number;
+  // Fan
+  @Type(FanConfiguration)
+    fan!: FanConfiguration;
 
-  // Window Covering
-  windowCoveringDefaultState!: string;
+  // Garage Door
+  @Type(GarageDoorConfiguration)
+    garageDoor!: GarageDoorConfiguration;
 
-  //
-  transitionDuration!: number;
+  // Lightbulb
+  @Type(LightbulbConfiguration)
+    lightbulb!: LightbulbConfiguration;
+
+  // Lock
+  @Type(LockConfiguration)
+    lock!: LockConfiguration;
+
+  // SecuritySystem
+  @Type(SecuritySystemConfiguration)
+    securitySystem!: SecuritySystemConfiguration;
 
   // Sensor
-  sensorType!: string;
-  sensorTrigger!: string;
+  @Type(SensorConfiguration)
+    sensor!: SensorConfiguration;
+
+  // Switch
+  @Type(SwitchConfiguration)
+    switch!: SwitchConfiguration;
+
+  // Valve
+  @Type(ValveConfiguration)
+    valve!: ValveConfiguration;
+
+  // Window Covering
+  @Type(WindowCoveringConfiguration)
+    windowCovering!: WindowCoveringConfiguration;
+
+  // Switch decorations
 
   // Reset timer
   @Type(TimerConfiguration)
@@ -57,10 +81,15 @@ export class AccessoryConfiguration {
     companionSensor!: CompanionSensorConfiguration;
 
   // Triggers
+
   @Type(PingTriggerConfiguration)
     pingTrigger!: PingTriggerConfiguration;
+  
   @Type(CronTriggerConfiguration)
     cronTrigger!: CronTriggerConfiguration;
+
+  @Type(SunEventsTriggerConfiguration)
+    sunEventsTrigger!: SunEventsTriggerConfiguration;
 
   private errorFields: string[] = [];
 
@@ -69,14 +98,10 @@ export class AccessoryConfiguration {
     const isValidAccessoryName: boolean = (this.accessoryName !== undefined);
     const isValidAccessoryType: boolean = (this.accessoryType !== undefined);
 
-    // There can be only one!
-    const isValidAccessoryState: boolean = (!(this.accessoryIsStateful && this.accessoryHasResetTimer));
-
     // Store fields failing validation
     if (!isValidAccessoryID) this.errorFields.push('accessoryID');
     if (!isValidAccessoryName) this.errorFields.push('accessoryName');
     if (!isValidAccessoryType) this.errorFields.push('accessoryType');
-    if (!isValidAccessoryState) this.errorFields.push('accessoryIsStateful', 'accessoryHasResetTimer');
 
     const isValidAccessory: boolean = this.isValidAccessory(isValidAccessoryType);
 
@@ -84,7 +109,6 @@ export class AccessoryConfiguration {
       (isValidAccessoryID &&
         isValidAccessoryName &&
         isValidAccessoryType &&
-        isValidAccessoryState &&
         isValidAccessory),
       this.errorFields,
     ];
@@ -95,10 +119,16 @@ export class AccessoryConfiguration {
       switch (this.accessoryType) {
       case 'doorbell':
         return this.isValidDoorbell();
+      case 'fan':
+        return this.isValidFan();
       case 'garagedoor':
         return this.isValidGarageDoor();
+      case 'lightbulb':
+        return this.isValidLighbulb();
       case 'lock':
         return this.isValidLock();
+      case 'securitysystem':
+        return this.isValidSecuritySystem();
       case 'sensor':
         return this.isValidSensor();
       case 'switch':
@@ -120,155 +150,191 @@ export class AccessoryConfiguration {
    */
 
   private isValidDoorbell(): boolean {
-    const isValidDoorbellVolume: boolean = (
-      (this.doorbellVolume !== undefined) &&
-      (this.doorbellVolume >= 0 && this.doorbellVolume <= 100)
-    );
+    let isValidDoorbell: boolean = false;
+    let doorbellErrorFields: string[] = [ DoorbellConfiguration.prefix ];
 
-    // Store fields failing validation
-    if (!isValidDoorbellVolume) this.errorFields.push('doorbellVolume');
+    if (this.doorbell !== undefined) {
+      [isValidDoorbell, doorbellErrorFields] = this.doorbell.isValid();
+    }
+
+    this.errorFields.push(...doorbellErrorFields);
 
     return (
-      isValidDoorbellVolume
+      isValidDoorbell
     );
   };
+
+  private isValidFan(): boolean {
+    let isValidFan: boolean = false;
+    let fanErrorFields: string[] = [ FanConfiguration.prefix ];
+     
+    if (this.fan !== undefined) {
+      [isValidFan, fanErrorFields] = this.fan.isValid();
+    }
+
+    this.errorFields.push(...fanErrorFields);
+
+    return (
+      isValidFan
+    );
+  }
 
   private isValidGarageDoor(): boolean {
-    const isValidGarageDoorDefaultState: boolean = (this.garageDoorDefaultState !== undefined);
+    let isValidGarageDoor: boolean = false;
+    let garageDoorErrorFields: string[] = [ GarageDoorConfiguration.prefix ];
 
-    // Store fields failing validation
-    if (!isValidGarageDoorDefaultState) this.errorFields.push('garageDoorDefaultState');
+    if (this.garageDoor !== undefined) {
+      [isValidGarageDoor, garageDoorErrorFields] = this.garageDoor.isValid();
+    }
+
+    this.errorFields.push(...garageDoorErrorFields);
 
     return (
-      isValidGarageDoorDefaultState
+      isValidGarageDoor
     );
   };
+
+  private isValidLighbulb(): boolean {
+    let isValidLightbulb: boolean = false;
+    let lightbulbErrorFields: string[] = [ LightbulbConfiguration.prefix ];
+
+    if (this.lightbulb !== undefined) {
+      [isValidLightbulb, lightbulbErrorFields] = this.lightbulb.isValid();
+    }
+
+    this.errorFields.push(...lightbulbErrorFields);
+
+    return (
+      isValidLightbulb
+    );
+  }
 
   private isValidLock(): boolean {
-    const isValidLockDefaultState: boolean = (this.lockDefaultState !== undefined);
-    const isValidLockHardwareFinish: boolean = (this.lockHardwareFinish !== undefined);
+    let isValidLock: boolean = false;
+    let lockErrorFields: string[] = [ LockConfiguration.prefix ];
+     
+    if (this.lock !== undefined) {
+      [isValidLock, lockErrorFields] = this.lock.isValid();
+    }
 
-    // Store fields failing validation
-    if (!isValidLockDefaultState) this.errorFields.push('lockDefaultState');
-    if (!isValidLockHardwareFinish) this.errorFields.push('lockHardwareFinish');
+    this.errorFields.push(...lockErrorFields);
 
     return (
-      isValidLockDefaultState &&
-      isValidLockHardwareFinish
+      isValidLock
     );
   };
 
-  private isValidSensor(): boolean {
-    const isValidSensorType: boolean = (this.sensorType !== undefined);
-
-    // Store fields failing validation
-    if (!isValidSensorType) this.errorFields.push('sensorType');
-
-    // Validate SensorTrigger
-    let isValidSensorTrigger: boolean;
-    let sensorTriggerErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidSensorTrigger, sensorTriggerErrorFields] = this.isValidSensorTrigger();
-    if (!isValidSensorTrigger && sensorTriggerErrorFields.length === 0) {
-      this.errorFields.push(this.sensorTrigger + 'Trigger');
-    } else {
-      this.errorFields.push(...sensorTriggerErrorFields);
+  private isValidSecuritySystem(): boolean {
+    let isValidSecuritySystem: boolean = false;
+    let securitySystemErrorFields: string[] = [ SecuritySystemConfiguration.prefix ];
+     
+    if (this.securitySystem !== undefined) {
+      [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
     }
 
-    // Validate ResetTimer
-    let isValidResetTimer: boolean;
-    let resetTimerErrorFields: string[];
-    // eslint-disable-next-line prefer-const
-    [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
-    if (!isValidResetTimer && resetTimerErrorFields.length === 0) {
-      this.errorFields.push('resetTimer');
-    } else {
-      this.errorFields.push(...resetTimerErrorFields);
-    }
+    this.errorFields.push(...securitySystemErrorFields);
 
     return (
-      isValidSensorType &&
-      isValidSensorTrigger &&
-      isValidResetTimer
+      isValidSecuritySystem
+    );
+  }
+
+  private isValidSensor(): boolean {
+    let isValidSensor: boolean = false;
+    let sensorErrorFields: string[] = [ SensorConfiguration.prefix ];
+     
+    if (this.sensor !== undefined) {
+      [isValidSensor, sensorErrorFields] = this.sensor.isValid();
+    }
+
+    this.errorFields.push(...sensorErrorFields);
+
+    // Validate SensorTrigger
+    let isValidTrigger: boolean = false;
+    let triggerErrorFields: string[] = ['Trigger'];
+
+    if (this.sensor !== undefined) {
+      [isValidTrigger, triggerErrorFields] = this.isValidTrigger();
+    }
+
+    this.errorFields.push(...triggerErrorFields);
+
+    return (
+      isValidSensor &&
+      isValidTrigger
     );
   };
 
   private isValidSwitch(): boolean {
-    const isValidSwitchDefaultState: boolean = (this.switchDefaultState !== undefined);
+    let isValidSwitch: boolean = false;
+    let switchErrorFields: string[] = [ SwitchConfiguration.prefix ];
+     
+    if (this.switch !== undefined) {
+      [isValidSwitch, switchErrorFields] = this.switch.isValid(this.accessoryIsStateful);
+    }
 
-    // Store fields failing validation
-    if (!isValidSwitchDefaultState) this.errorFields.push('switchDefaultState');
+    this.errorFields.push(...switchErrorFields);
 
     // Validate ResetTimer
-    let isValidResetTimer: boolean;
-    let resetTimerErrorFields: string[];
-    // eslint-disable-next-line prefer-const
+    let isValidResetTimer: boolean = false;
+    let resetTimerErrorFields: string[] = ['resetTimer'];
+
     [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
-    if (!isValidResetTimer && resetTimerErrorFields.length === 0) {
-      this.errorFields.push('resetTimer');
-    } else {
-      this.errorFields.push(...resetTimerErrorFields);
-    }
+
+    this.errorFields.push(...resetTimerErrorFields);
 
     // Validate CompanionSensor
-    let isValidCompanionSensor: boolean;
-    let companionSensorErrorFields: string[];
-    // eslint-disable-next-line prefer-const
+    let isValidCompanionSensor: boolean = false;
+    let companionSensorErrorFields: string[] = ['companionSensor'];
+
     [isValidCompanionSensor, companionSensorErrorFields] = this.isValidCompanionSensor();
-    if (!isValidCompanionSensor && companionSensorErrorFields.length === 0) {
-      this.errorFields.push('companionSensor');
-    } else {
-      this.errorFields.push(...companionSensorErrorFields);
-    }
+
+    this.errorFields.push(...companionSensorErrorFields);
 
     return (
-      isValidSwitchDefaultState &&
+      isValidSwitch &&
       isValidResetTimer &&
       isValidCompanionSensor
     );
   };
 
-  private isValidWindowCovering(): boolean {
-    const isValidWindowCoveringDefaultState: boolean = (this.windowCoveringDefaultState !== undefined);
-    const isValidTransitionDuration: boolean = (this.transitionDuration !== undefined);
+  private isValidValve(): boolean {
+    let isValidValve: boolean = false;
+    let valveErrorFields: string[] = [ ValveConfiguration.prefix ];
+     
+    if (this.valve !== undefined) {
+      [isValidValve, valveErrorFields] = this.valve.isValid();
+    }
 
-    // Store fields failing validation
-    if (!isValidWindowCoveringDefaultState) this.errorFields.push('windowCoveringDefaultState');
-    if (!isValidTransitionDuration) this.errorFields.push('transitionDuration');
+    this.errorFields.push(...valveErrorFields);
 
     return (
-      isValidWindowCoveringDefaultState &&
-      isValidTransitionDuration
+      isValidValve
     );
   }
 
-  private isValidValve(): boolean {
-    const isValidValveType: boolean = (
-      (this.valveType !== undefined) &&
-      ['generic', 'irrigation', 'showerhead', 'waterfaucet'].includes(this.valveType)
-    );
-    const isValidValveDuration: boolean = (
-      (this.valveDuration !== undefined) &&
-      (this.valveDuration >= 0 && this.valveDuration <= 3600)
-    );
+  private isValidWindowCovering(): boolean {
+    let isValidWindowCovering: boolean = false;
+    let windowCoveringErrorFields: string[] = [ WindowCoveringConfiguration.prefix ];
+     
+    if (this.windowCovering !== undefined) {
+      [isValidWindowCovering, windowCoveringErrorFields] = this.windowCovering.isValid();
+    }
 
-    // Store fields failing validation
-    if (!isValidValveType) this.errorFields.push('valveType');
-    if (!isValidValveDuration) this.errorFields.push('valveDuration');
+    this.errorFields.push(...windowCoveringErrorFields);
 
     return (
-      isValidValveType &&
-      isValidValveDuration
+      isValidWindowCovering
     );
   }
 
   /**
-   * Adornment validation
+   * Decoration validations
    */
 
   // Validate if accessory has reset timer - default true
   private isValidResetTimer(): [boolean, string[]] {
-    if (this.accessoryHasResetTimer) {
+    if (this.switch !== undefined && this.switch.hasResetTimer) {
       let isValidResetTimer: boolean;
       let errorFields: string[];
 
@@ -286,7 +352,7 @@ export class AccessoryConfiguration {
 
   // Validate if accessory has companion sensor - default true
   private isValidCompanionSensor(): [boolean, string[]] {
-    if (this.accessoryHasCompanionSensor) {
+    if (this.switch !== undefined && this.switch.hasCompanionSensor) {
       let isValidCompanionSensor: boolean;
       let errorFields: string[];
 
@@ -302,28 +368,35 @@ export class AccessoryConfiguration {
     return [true, []];
   }
 
-  private isValidSensorTrigger(): [boolean, string[]] {
-    if (this.sensorTrigger !== undefined) {
+  private isValidTrigger(): [boolean, string[]] {
+    if (this.sensor.trigger !== undefined) {
       let isValidTrigger: boolean;
       let errorFields: string[];
 
-      switch (this.sensorTrigger) {
+      switch (this.sensor.trigger) {
       case 'cron':
         if (this.cronTrigger === undefined) {
-          return [false, []];
+          return [false, ['cronTrigger']];
         }
 
         [isValidTrigger, errorFields] = this.cronTrigger.isValid();
         break;
       case 'ping':
         if (this.pingTrigger === undefined) {
-          return [false, []];
+          return [false, ['pingTrigger']];
         }
 
         [isValidTrigger, errorFields] = this.pingTrigger.isValid();
         break;
+      case 'sunevents':
+        if (this.sunEventsTrigger === undefined) {
+          return [false, ['sunEventsTrigger']];
+        }
+
+        [isValidTrigger, errorFields] = this.sunEventsTrigger.isValid();
+        break;
       default:
-        return [false, []];
+        return [false, ['unknownTrigger']];
       }
 
       return [isValidTrigger, errorFields];

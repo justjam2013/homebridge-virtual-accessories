@@ -11,6 +11,7 @@ export class CronTriggerConfiguration {
   zoneId!: string;
   startDateTime!: string;
   endDateTime!: string;
+  disableTriggerEventLogging: boolean = false;
   isDisabled: boolean = false;
 
   // private static cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';
@@ -18,7 +19,8 @@ export class CronTriggerConfiguration {
   // 6: seconds granularity
   // 7: milliseconds granularity
   private static cronMinutesGranularityPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
-  private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
+  //private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
+  private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d(Z|)$';
 
   private errorFields: string[] = [];
 
@@ -29,15 +31,17 @@ export class CronTriggerConfiguration {
       patternRegex.test(this.pattern)
     );
 
+    const isValidZoneId = (this.zoneId === undefined) || this.isValidZoneId(this.zoneId);
+
     const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
-    const isValidStartDateTime = (
+    let isValidStartDateTime = (
       (this.startDateTime !== undefined) ?
-        isoTimeRegex.test(this.startDateTime) :
+        isoTimeRegex.test(this.startDateTime):
         true
     );
-    const isValidEndDateTime = (
+    let isValidEndDateTime = (
       (this.endDateTime !== undefined) ?
-        isoTimeRegex.test(this.endDateTime) :
+        isoTimeRegex.test(this.endDateTime):
         true
     );
 
@@ -48,13 +52,25 @@ export class CronTriggerConfiguration {
       isValidExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
     }
 
+    // Temporary fix to handle "null" value for "startDateTime" and "endDateTime"
+    if (this.startDateTime === 'null') {
+      isValidStartDateTime = true;
+      isValidExecutionRangeDateTime = true;
+    }
+    if (this.endDateTime === 'null') {
+      isValidEndDateTime = true;
+      isValidExecutionRangeDateTime = true;
+    }
+
     if (!isValidPattern) this.errorFields.push('pattern');
+    if (!isValidZoneId) this.errorFields.push('zoneId');
     if (!isValidStartDateTime) this.errorFields.push('startDateTime');
     if (!isValidEndDateTime) this.errorFields.push('endDateTime');
     if (!isValidExecutionRangeDateTime) this.errorFields.push('startDateTime', 'endDateTime');
 
     return [
       (isValidPattern &&
+        isValidZoneId &&
         isValidStartDateTime &&
         isValidEndDateTime &&
         isValidExecutionRangeDateTime),

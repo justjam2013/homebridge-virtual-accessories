@@ -22,6 +22,11 @@ export class Valve extends Accessory {
   private valveType: number;
   private durationTimer: Timer;
 
+  private readonly stateStorageKey: string = 'ValveActive';
+  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  // private readonly timerDurationStorageKey: string = 'TimerDuration';
+  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
+
   /**
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
@@ -37,7 +42,7 @@ export class Valve extends Accessory {
   ) {
     super(platform, accessory);
 
-    switch(this.accessoryConfiguration.valveType) {
+    switch(this.accessoryConfiguration.valve.type) {
     case 'generic':
       this.valveType = Valve.GENERIC_VALVE;
       break;
@@ -56,7 +61,30 @@ export class Valve extends Accessory {
       break;
     }
 
-    this.durationTimer = new Timer(this.accessoryConfiguration.valveDuration, Timer.Units.Seconds);
+    // First configure the device based on the accessory details
+    this.states.ValveActive = Valve.INACTIVE;
+    this.states.ValveInUse = Valve.NOT_IN_USE;
+
+    // If the accessory is stateful retrieve stored state
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedState: number = accessoryState[this.stateStorageKey] as number;
+    
+      if (cachedState !== undefined) {
+        this.states.ValveActive = cachedState;
+        this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
+      }
+    }
+
+    // Timer is not resettable
+    const timerIsResettable: boolean = false;
+    this.durationTimer = new Timer(
+      this.accessoryConfiguration.accessoryName,
+      this.log,
+      timerIsResettable,
+      this.accessoryConfiguration.valve.duration,
+      Timer.Units.Seconds,
+    );
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -73,10 +101,10 @@ export class Valve extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${this.getActiveName(this.states.ValveActive)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${this.getActiveName(this.states.ValveActive)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.states.ValveActive));
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
-    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valveDuration));
+    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -120,7 +148,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveType = this.valveType;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${this.getValveTypeName(valveType)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${this.getValveTypeName(valveType)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -135,14 +163,23 @@ export class Valve extends Accessory {
     // implement your own code to turn your device on/off
     this.states.ValveActive = value as number;
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${this.getActiveName(this.states.ValveActive)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${this.getActiveName(this.states.ValveActive)}`);
 
     this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
     this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${this.getInUseName(this.states.ValveInUse)}`);
 
-    this.durationTimer.stop();
+    // Store device state if stateful
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      this.saveAccessoryState(this.storagePath, this.getJsonState());
+    }
+
+    // Valve was turned off: turn off timer
+    if (this.states.ValveActive === Valve.INACTIVE) {
+      this.durationTimer.stop();
+    }
+    // Valve was turned on: try to start timer
     if (this.states.ValveActive === Valve.ACTIVE) {
       this.durationTimer.start(
         () => {
@@ -169,7 +206,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveActive = this.states.ValveActive;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${this.getActiveName(valveActive)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${this.getActiveName(valveActive)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -185,7 +222,7 @@ export class Valve extends Accessory {
     // implement your own code to check if the device is on
     const valveInUse = this.states.ValveInUse;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${this.getInUseName(valveInUse)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${this.getInUseName(valveInUse)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -201,13 +238,13 @@ export class Valve extends Accessory {
 
     this.durationTimer.setDuration(duration, Timer.Units.Seconds);
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
   async handleSetDurationGet(): Promise<CharacteristicValue> {
     const duration = this.durationTimer.getDuration();
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
 
     return duration;
   }
@@ -215,9 +252,19 @@ export class Valve extends Accessory {
   async handleRemainingDurationGet(): Promise<CharacteristicValue> {
     const remainingDuration = this.durationTimer.getRemainingDuration();
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
 
     return remainingDuration;
+  }
+
+  private getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.states.ValveActive,
+      // [this.timerStartTimeStorageKey]: this.durationTimer.getStartTime().toString(),
+      // [this.timerDurationStorageKey]: this.durationTimer.getDuration(),
+      // [this.timerIsRunningStorageKey]: this.durationTimer.isTimerRunning(),
+    });
+    return json;
   }
 
   private getValveTypeName(event: number): string {

@@ -20,14 +20,14 @@
         "orderable": false,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": "{{ $index }}",
+          "title": " {{ value.accessoryName || 'New Accessory' }}",
           "type": "object",
           "expandable": true,
-          "expanded": true,
+          "expanded": false,
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (do not modify once assigned)",
+              "description": "Unique ID for the Accessory (https://www.random.org/) Do not modify once assigned!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Fa-f0-9\\-]{5,}$"
@@ -45,161 +45,319 @@
               "required": true,
               "oneOf": [
                 { "title": "Doorbell", "enum": ["doorbell"] },
+                { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
+                { "title": "Security System", "enum": ["securitysystem"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Valve", "enum": ["valve"] },
-                { "title": "Window Covering - Blinds, Shades", "enum": ["windowcovering"] }
+                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
               ],
               "default": "switch"
-            },
-            "doorbellVolume": {
-              "title": "Doorbell Volume *",
-              "description": "Doorbell volume (0 - 100) *",
-              "type": "integer",
-              "minimum": 0,
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
-              }
-            },
-            "garageDoorDefaultState": {
-              "title": "Garage Door Default State *",
-              "description": "Garage Door default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Closed", "enum": ["closed"] },
-                { "title": "Open", "enum": ["open"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
-              }
-            },
-            "lockDefaultState": {
-              "title": "Lock Default State *",
-              "description": "Lock default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Locked", "enum": ["locked"] },
-                { "title": "Unlocked", "enum": ["unlocked"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
-              }
-            },
-            "lockHardwareFinish": {
-              "title": "Lock Hardware Finish *",
-              "description": "Color of the virtual HomeKey card in the Wallet app",
-              "type": "string",
-              "oneOf": [
-                { "title": "Tan", "enum": ["tan"] },
-                { "title": "Gold", "enum": ["gold"] },
-                { "title": "Silver", "enum": ["silver"] },
-                { "title": "Black", "enum": ["black"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
-              }
-            },
-            "switchDefaultState": {
-              "title": "Switch Default State *",
-              "description": "Switch default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Off", "enum": ["off"] },
-                { "title": "On", "enum": ["on"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
-              }
-            },
-            "windowCoveringDefaultState": {
-              "title": "Window Covering Default State *",
-              "description": "Window Covering default state",
-              "type": "string",
-              "oneOf": [
-                { "title": "Closed", "enum": ["closed"] },
-                { "title": "Open", "enum": ["open"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
-              }
-            },
-            "valveType": {
-              "title": "Valve Type *",
-              "description": "Valve type",
-              "type": "string",
-              "oneOf": [
-                { "title": "Generic Valve", "enum": ["generic"] },
-                { "title": "Irrigation", "enum": ["irrigation"] },
-                { "title": "Shower Head", "enum": ["showerhead"] },
-                { "title": "Water Faucet", "enum": ["waterfaucet"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
-              }
-            },
-            "valveDuration": {
-              "title": "Valve Runtime *",
-              "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
-              "type": "integer",
-              "maximum": 3600,
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
-              }
-            },
-            "transitionDuration": {
-              "title": "Transition Duration *",
-              "description": "Open & close transition duration in seconds",
-              "type": "integer",
-              "mminimum": 0,
-              "condition": {
-                "functionBody": "return ['windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
-              }
-            },
-            "sensorType": {
-              "title": "Sensor Type *",
-              "description": "Sensor type (Critical sensor notifications bypass Do Not Disturb)",
-              "type": "string",
-              "oneOf": [
-                { "title": "Contact", "enum": ["contact"] },
-                { "title": "Leak (critical)", "enum": ["leak"] },
-                { "title": "Motion", "enum": ["motion"] },
-                { "title": "Occupancy", "enum": ["occupancy"] },
-                { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                { "title": "Smoke (critical)", "enum": ["smoke"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
-              }
-            },
-            "sensorTrigger": {
-              "title": "Sensor Trigger *",
-              "description": "Sensor trigger source",
-              "type": "string",
-              "oneOf": [
-                { "title": "Ping Host", "enum": ["ping"] },
-                { "title": "Cron Schedule", "enum": ["cron"] }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
-              }
             },
             "accessoryIsStateful": {
               "title": "Accessory Is Stateful",
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['switch', 'lock', 'garagedoor', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
+                "functionBody": "return ['fan', 'garagedoor', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryHasResetTimer);"
               }
             },
-            "accessoryHasResetTimer": {
-              "title": "Accessory Has a Reset Timer",
-              "description": "Accessory resets to default state when timer ends",
-              "type": "boolean",
+            "doorbell": {
+              "title": "Doorbell",
+              "type": "object",
+              "properties": {
+                "volume": {
+                  "title": "Doorbell Volume *",
+                  "description": "Doorbell volume (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
               "condition": {
-                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType) && [undefined, false].includes(model.devices[arrayIndices].accessoryIsStateful);"
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
+            "fan": {
+              "title": "Fan",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Fan default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Off", "enum": ["off"] },
+                    { "title": "On", "enum": ["on"] }
+                  ]
+                },
+                "rotationDirection": {
+                  "title": "Rotation Direction *",
+                  "description": "Fan Rotation Direction",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Clockwise", "enum": ["clockwise"] },
+                    { "title": "Counter Clockwise", "enum": ["counterclockwise"] }
+                  ]
+                },
+                "rotationSpeed": {
+                  "title": "Rotation Speed *",
+                  "description": "Fan Rotation Speed (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'fan';"
+              }
+            },
+            "garageDoor": {
+              "title": "Garage Door",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Garage Door Default State *",
+                  "description": "Garage Door default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
+              }
+            },
+            "lightbulb": {
+              "title": "Lightbulb",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Lightbulb default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Off", "enum": ["off"] },
+                    { "title": "On", "enum": ["on"] }
+                  ]
+                },
+                "brightness": {
+                  "title": "Brightness *",
+                  "description": "Lightbulb Brightness (0% - 100%)",
+                  "type": "integer",
+                  "placeholder": 0
+                },
+                "type": {
+                  "title": "Type *",
+                  "description": "Lightbulb type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "White", "enum": ["white"] },
+                    { "title": "White Ambiance", "enum": ["ambiance"] }
+                  ]
+                },
+                "colorTemperatureKelvin": {
+                  "title": "Color Temperature *",
+                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K) *",
+                  "type": "integer",
+                  "placeholder": 2700,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lightbulb';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "ambiance" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "colorTemperatureKelvin" ]
+                  }
+                }
+              ]
+            },
+            "lock": {
+              "title": "Lock",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Lock default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Locked", "enum": ["locked"] },
+                    { "title": "Unlocked", "enum": ["unlocked"] }
+                  ]
+                },
+                "hardwareFinish": {
+                  "title": "Hardware Finish *",
+                  "description": "Color of the virtual HomeKey card in the Wallet app",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Tan", "enum": ["tan"] },
+                    { "title": "Gold", "enum": ["gold"] },
+                    { "title": "Silver", "enum": ["silver"] },
+                    { "title": "Black", "enum": ["black"] }
+                  ]
+                },
+                "hasAudioFeedback": {
+                  "title": "Audio Feedback",
+                  "description": "Lock has audio feedback",
+                  "type": "boolean"
+                },
+                "autoSecurityTimeout": {
+                  "title": "Auto Security Timeout *",
+                  "description": "Lock auto-lock time in seconds (0 = off)",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "securitySystem": {
+              "title": "Security System",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "description": "Security System default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Armed - Away", "enum": ["awayarm"] },
+                    { "title": "Armed - Home", "enum": ["stayarm"] },
+                    { "title": "Armed - Night", "enum": ["nightarm"] },
+                    { "title": "Disarmed", "enum": ["disarmed"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
+              }
+            },
+            "switch": {
+              "title": "Switch",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Switch Default State *",
+                  "description": "Switch default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Off", "enum": ["off"] },
+                    { "title": "On", "enum": ["on"] }
+                  ]
+                },
+                "hasResetTimer": {
+                  "title": "Has a Reset Timer",
+                  "description": "Switch resets to default state when timer ends",
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "[undefined, false].includes(model.devices[arrayIndices].accessoryIsStateful);"
+                  }
+                },
+                "hasCompanionSensor": {
+                  "title": "Has a Companion Sensor",
+                  "description": "Switch triggers a sensor when its state changes",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
+              }
+            },
+            "valve": {
+              "title": "Valve",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Valve Type *",
+                  "description": "Valve type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Generic Valve", "enum": ["generic"] },
+                    { "title": "Irrigation", "enum": ["irrigation"] },
+                    { "title": "Shower Head", "enum": ["showerhead"] },
+                    { "title": "Water Faucet", "enum": ["waterfaucet"] }
+                  ]
+                },
+                "duration": {
+                  "title": "Valve Runtime *",
+                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
+                  "type": "integer",
+                  "maximum": 3600
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
+              }
+            },
+            "windowCovering": {
+              "title": "Window Covering",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Window Covering Default State *",
+                  "description": "Window Covering default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "type": "integer",
+                  "mminimum": 0
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
+              }
+            },
+            "sensor": {
+              "title": "Sensor",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Sensor Type *",
+                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Contact", "enum": ["contact"] },
+                    { "title": "Leak (critical)", "enum": ["leak"] },
+                    { "title": "Motion", "enum": ["motion"] },
+                    { "title": "Occupancy", "enum": ["occupancy"] },
+                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
+                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
+                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                  ]
+                },
+                "trigger": {
+                  "title": "Sensor Trigger *",
+                  "description": "Sensor trigger source",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Ping Host", "enum": ["ping"] },
+                    { "title": "Cron Schedule", "enum": ["cron"] },
+                    { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
               }
             },
             "resetTimer": {
@@ -253,7 +411,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryHasResetTimer === true;"
+                "functionBody": "return model.devices[arrayIndices].switch && model.devices[arrayIndices].switch.hasResetTimer === true;"
               },
               "allOf": [
                 {
@@ -272,14 +430,6 @@
                 }
               ]
             },
-            "accessoryHasCompanionSensor": {
-              "title": "Accessory Has a Companion Sensor",
-              "description": "Accessory triggers a sensor when its state changes",
-              "type": "boolean",
-              "condition": {
-                "functionBody": "return ['switch'].includes(model.devices[arrayIndices].accessoryType);"
-              }
-            },
             "companionSensor": {
               "title": "Companion Sensor",
               "type": "object",
@@ -291,7 +441,7 @@
                 },
                 "type": {
                   "title": "Sensor Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass Do Not Disturb)",
+                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb')",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
@@ -305,7 +455,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryHasCompanionSensor === true;"
+                "functionBody": "return model.devices[arrayIndices].switch && model.devices[arrayIndices].switch.hasCompanionSensor === true;"
               }
             },
             "pingTrigger": {
@@ -331,7 +481,7 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'ping';"
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'ping';"
               }
             },
             "cronTrigger": {
@@ -340,8 +490,9 @@
               "properties": {
                 "pattern": {
                   "title": "Cron Pattern *",
-                  "description": "Unix cron pattern (* * * * *)",
+                  "description": "Unix cron pattern (minute, hour, day, month, weekday)",
                   "type": "string",
+                  "placeholder": "* * * * *",
                   "pattern": "^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$"
                 },
                 "zoneId": {
@@ -352,15 +503,20 @@
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time",
+                  "description": "Start date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
                   "format": "date-time"
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time",
+                  "description": "End date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
                   "format": "date-time"
+                },
+                "disableTriggerEventLogging": {
+                  "title": "Disable Trigger Event Logging",
+                  "description": "Disable logging for high frequency trigger events",
+                  "type": "boolean"
                 },
                 "isDisabled": {
                   "title": "Disable Cron Trigger",
@@ -369,7 +525,49 @@
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].sensorTrigger === 'cron';"
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'cron';"
+              }
+            },
+            "sunEventsTrigger": {
+              "title": "Sunrise/Sunset Trigger",
+              "type": "object",
+              "properties": {
+                "event": {
+                  "title": "Event *",
+                  "description": "Sun event",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Sunrise", "enum": ["sunrise"] },
+                    { "title": "Sunset", "enum": ["sunset"] },
+                    { "title": "Golden Hour", "enum": ["goldenhour"] }
+                  ]
+                },
+                "latitude": {
+                  "title": "Latitude *",
+                  "description": "Latitude for your location (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
+                },
+                "longitude": {
+                  "title": "Longitude *",
+                  "description": "Longitude for your location (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+                },
+                "zoneId": {
+                  "title": "Zone Id",
+                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "type": "string",
+                  "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
+                },
+                "isDisabled": {
+                  "title": "Disable Sunrise/Sunset Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'sunevents';"
               }
             }
           },
@@ -381,7 +579,12 @@
                 }
               },
               "then": {
-                "required": [ "switchDefaultState" ]
+                "required": [ "switch" ],
+                "properties": {
+                  "switch": {
+                    "required": [ "defaultState" ]
+                  }
+                }
               }
             },
             {
@@ -391,17 +594,27 @@
                 }
               },
               "then": {
-                "required": [ "doorbellVolume" ]
+                "required": [ "doorbell" ],
+                "properties": {
+                  "doorbell": {
+                    "required": [ "volume" ]
+                  }
+                }
               }
             },
             {
               "if": {
                 "properties": {
-                  "accessoryType": { "const": "lock" }
+                  "accessoryType": { "const": "fan" }
                 }
               },
               "then": {
-                "required": [ "lockDefaultState", "lockHardwareFinish" ]
+                "required": [ "fan" ],
+                "properties": {
+                  "fan": {
+                    "required": [ "defaultState", "rotationDirection", "rotationSpeed" ]
+                  }
+                }
               }
             },
             {
@@ -411,7 +624,72 @@
                 }
               },
               "then": {
-                "required": [ "garageDoorDefaultState" ]
+                "required": [ "garageDoor" ],
+                "properties": {
+                  "garagedoor": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lightbulb" }
+                }
+              },
+              "then": {
+                "required": [ "lightbulb" ],
+                "properties": {
+                  "lightbulb": {
+                    "required": [ "defaultState", "brightness", "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lock" }
+                }
+              },
+              "then": {
+                "required": [ "lock" ],
+                "properties": {
+                  "lock": {
+                    "required": [ "defaultState", "hardwareFinish", "autoSecurityTimeout" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "valve" }
+                }
+              },
+              "then": {
+                "required": [ "valve" ],
+                "properties": {
+                  "valve": {
+                    "required": [ "type", "duration" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "windowcovering" }
+                }
+              },
+              "then": {
+                "required": [ "windowCovering" ],
+                "properties": {
+                  "windowCovering": {
+                    "required": [ "defaultState" ]
+                  }
+                }
               }
             },
             {
@@ -421,15 +699,25 @@
                 }
               },
               "then": {
-                "required": [ "sensorType" ]
+                "required": [ "sensor" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type", "trigger" ]
+                  }
+                }
               }
             },
             {
               "if": {
                 "properties": {
-                  "accessoryHasResetTimer": { "const": true }
+                  "switch": {
+                    "properties": {
+                      "hasResetTimer": { "const": true }
+                    },
+                    "required": [ "hasResetTimer" ]
+                  }
                 },
-                "required": [ "accessoryHasResetTimer" ]
+                "required": [ "switch" ]
               },
               "then": {
                 "required": [ "resetTimer" ],
@@ -443,9 +731,14 @@
             {
               "if": {
                 "properties": {
-                  "accessoryHasCompanionSensor": { "const": true }
+                  "switch": {
+                    "properties": {
+                      "hasCompanionSensor": { "const": true }
+                    },
+                    "required": [ "hasCompanionSensor" ]
+                  }
                 },
-                "required": [ "accessoryHasCompanionSensor" ]
+                "required": [ "switch" ]
               },
               "then": {
                 "required": [ "companionSensor" ],
@@ -459,9 +752,14 @@
             {
               "if": {
                 "properties": {
-                  "sensorTrigger": { "const": "ping" }
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "ping" }
+                    },
+                    "required": [ "trigger" ]
+                  }
                 },
-                "required": [ "sensorTrigger" ]
+                "required": [ "sensor" ]
               },
               "then": {
                 "required": [ "pingTrigger" ],
@@ -475,15 +773,41 @@
             {
               "if": {
                 "properties": {
-                  "sensorTrigger": { "const": "cron" }
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "cron" }
+                    },
+                    "required": [ "trigger" ]
+                  }
                 },
-                "required": [ "sensorTrigger" ]
+                "required": [ "sensor" ]
               },
               "then": {
                 "required": [ "cronTrigger" ],
                 "properties": {
                   "cronTrigger": {
                     "required": [ "pattern" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "sunevents" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "sunEventsTrigger" ],
+                "properties": {
+                  "sunEventsTrigger": {
+                    "required": [ "latitude", "longitude" ]
                   }
                 }
               }

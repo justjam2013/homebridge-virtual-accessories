@@ -74,7 +74,7 @@ export abstract class VirtualSensor extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -96,8 +96,8 @@ export abstract class VirtualSensor extends Accessory {
      */
 
     // Trigger
-    if (this.accessoryConfiguration.sensorTrigger !== undefined) {
-      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensorTrigger, this.accessoryConfiguration.accessoryName + ' Trigger');
+    if (this.accessoryConfiguration.sensor !== undefined && this.accessoryConfiguration.sensor.trigger !== undefined) {
+      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryConfiguration.accessoryName + ' Trigger');
     }
   }
 
@@ -107,7 +107,7 @@ export abstract class VirtualSensor extends Accessory {
   async handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -126,13 +126,13 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
   }
 
   /**
    * This method is called by the trigger to toggle the sensor
    */
-  triggerKeySensorState(sensorState: number, trigger: Trigger) {
+  triggerKeySensorState(sensorState: number, trigger: Trigger, isLoggingDisabled: boolean = false) {
     if (trigger.sensorConfig.accessoryID !== this.accessoryConfiguration.accessoryID) {
       throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
     }
@@ -144,7 +144,8 @@ export abstract class VirtualSensor extends Accessory {
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     if (sensorStateChanged) {
-      this.platform.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+      // eslint-disable-next-line max-len
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
 

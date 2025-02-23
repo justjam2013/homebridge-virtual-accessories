@@ -1,3 +1,6 @@
+import { VirtualLogger } from './virtualLogger';
+import { Utils } from './utils.js';
+import { ZonedDateTime } from '@js-joda/core';
 
 export class Timer {
 
@@ -8,20 +11,43 @@ export class Timer {
     Days: 'days',
   };
 
+  private accessoryName: string;
+  private log: VirtualLogger;
+
+  private timerIsResettable: boolean = false;
+
   private timerId: ReturnType<typeof setInterval> | undefined;
   private duration: number = 0;
+  private startTime: ZonedDateTime;
 
   private remainingDuration: number = 0;
+  private timerIsRunning: boolean = false;
 
-  constructor();
   constructor(
+    accessoryName: string,
+    log: VirtualLogger,
+    timerIsResettable: boolean,
+  );
+  constructor(
+    accessoryName: string,
+    log: VirtualLogger,
+    timerIsResettable: boolean,
     duration: number,
     units: string,
   );
   constructor(
+    accessoryName: string,
+    log: VirtualLogger,
+    timerIsResettable: boolean = false,
     duration?: number,
     units?: string,
   ) {
+    this.accessoryName = accessoryName;
+    this.log = log;
+    this.timerIsResettable = timerIsResettable;
+
+    this.startTime = Utils.now();
+
     if (duration !== undefined) {
       this.setDuration(duration, units!);
     }
@@ -40,6 +66,10 @@ export class Timer {
     duration?: number,
     units?: string,
   ): void {
+    if (this.timerIsRunning && !this.timerIsResettable) {
+      return;
+    }
+
     // In case timer is running, stop it
     this.stop();
 
@@ -49,21 +79,37 @@ export class Timer {
 
     if (this.duration > 0) {
       this.remainingDuration = this.duration;
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.duration}`);
 
       this.timerId = setInterval(() => {
         this.remainingDuration--;
+
+        if (this.remainingDuration % 10 === 0) {
+          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
+        }
 
         if (this.remainingDuration === 0) {
           callback();
           this.stop();
         }
       }, 1000);
+
+      this.startTime = Utils.now();
+      this.timerIsRunning = true;
     }
   }
 
   stop(): void {
     clearInterval(this.timerId);
+
+    this.timerIsRunning = false;
     this.remainingDuration = 0;
+
+    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
+  }
+
+  getStartTime(): ZonedDateTime {
+    return this.startTime;
   }
 
   /**
@@ -98,6 +144,8 @@ export class Timer {
     default:
       this.duration = 0;
     }
+
+    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.duration}`);
   }
 
   /**
@@ -105,5 +153,9 @@ export class Timer {
    */
   getRemainingDuration(): number {
     return this.remainingDuration;
+  }
+
+  isTimerRunning(): boolean {
+    return this.timerIsRunning;
   }
 }

@@ -13,6 +13,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    outputs:
+      NPM_PACKAGE_VERSION: ${{ steps.package-version.outputs.current-version }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,16 +34,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Return NPM Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
   post-release-to-discord:
     name: Discord Webhooks
 
     needs: [publish]
 
-    uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    # uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
+    uses: justjam2013/homebridge-virtual-accessories/.github/workflows/discord-webhooks.yml@latest
     with:
       title: Virtual Accessories for Homebridge - Latest Release
       description: |
         Version `${{ github.event.release.tag_name }}`
-      url: 'https://github.com/justjam2013/homebridge-virtual-accessories/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}'
+      color: '0xAFFF8F'
+      url: 'https://github.com/justjam2013/homebridge-virtual-accessories/releases/tag/v${{ needs.publish.outputs.NPM_PACKAGE_VERSION }}'
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}

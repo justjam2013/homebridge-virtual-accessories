@@ -3,10 +3,13 @@ import type { PlatformAccessory } from 'homebridge';
 import { VirtualAccessoryPlatform } from './platform.js';
 
 import { Accessory } from './accessories/virtualAccessory.js';
-import { Switch } from './accessories/virtualAccessorySwitch.js';
-import { Lock } from './accessories/virtualAccessoryLock.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
+import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
+import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
+import { Lock } from './accessories/virtualAccessoryLock.js';
+import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
+import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
@@ -20,8 +23,10 @@ import { VirtualCarbonDioxideSensor } from './sensors/virtualSensorCarbonDioxide
 import { VirtualCarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
 
 import { Trigger } from './triggers/trigger.js';
-import { PingTrigger } from './triggers/triggerPing.js';
 import { CronTrigger } from './triggers/triggerCron.js';
+import { PingTrigger } from './triggers/triggerPing.js';
+import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
+
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
 /**
@@ -45,17 +50,26 @@ export abstract class AccessoryFactory {
     const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
-    case 'switch':
-      virtualAccessory = new Switch(platform, accessory);
+    case 'doorbell':
+      virtualAccessory = new Doorbell(platform, accessory);
+      break;
+    case 'fan':
+      virtualAccessory = new Fan(platform, accessory);
+      break;
+    case 'garagedoor':
+      virtualAccessory = new GarageDoor(platform, accessory);
+      break;
+    case 'lightbulb':
+      virtualAccessory = new Lightbulb(platform, accessory);
       break;
     case 'lock':
       virtualAccessory = new Lock(platform, accessory);
       break;
-    case 'doorbell':
-      virtualAccessory = new Doorbell(platform, accessory);
+    case 'securitysystem':
+      virtualAccessory = new SecuritySystem(platform, accessory);
       break;
-    case 'garagedoor':
-      virtualAccessory = new GarageDoor(platform, accessory);
+    case 'switch':
+      virtualAccessory = new Switch(platform, accessory);
       break;
     case 'valve':
       virtualAccessory = new Valve(platform, accessory);
@@ -64,7 +78,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = new WindowCovering(platform, accessory);
       break;
     case 'sensor':
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensorType);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
       platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
@@ -152,8 +166,11 @@ export abstract class AccessoryFactory {
     case 'cron':
       trigger = new CronTrigger(sensor, name);
       break;
+    case 'sunevents':
+      trigger = new SunEventsTrigger(sensor, name);
+      break;
     default:
-      sensor.platform.log.error('Error creating trigger. Invalid trigger type:', triggerType);
+      sensor.log.error('Error creating trigger. Invalid trigger type:', [triggerType]);
     }
 
     return trigger;

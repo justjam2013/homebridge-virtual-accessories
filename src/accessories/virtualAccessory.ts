@@ -3,8 +3,10 @@ import type { PlatformAccessory, Service } from 'homebridge';
 import { VirtualAccessoryPlatform } from '../platform.js';
 import { VirtualSensor } from '../sensors/virtualSensor.js';
 
-import fs from 'fs';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { VirtualLogger } from '../virtualLogger.js';
+
+import fs from 'fs';
 
 /**
  * Abstract Accessory
@@ -26,6 +28,8 @@ export abstract class Accessory {
 
   protected companionSensor?: VirtualSensor;
 
+  readonly log: VirtualLogger;
+
   constructor(
     platform: VirtualAccessoryPlatform,
     accessory: PlatformAccessory,
@@ -35,24 +39,20 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
+    this.log = new VirtualLogger(this.platform.log);
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
     this.storagePath = accessory.context.storagePath;
 
     if (!this.accessoryConfiguration.accessoryIsStateful) {
-      this.deleteState(this.storagePath);
+      this.deleteAccessoryState(this.storagePath);
     }
   }
 
-  /**
-   * Protected methods
-   */
-
-  protected loadState(
+  protected loadAccessoryState(
     storagePath: string,
-    key: string,
-  ): boolean | number {
+  ): string {
     let contents = '{}';
     if (fs.existsSync(storagePath)) {
       contents = fs.readFileSync(storagePath, 'utf8');
@@ -60,34 +60,39 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Stored state: ${JSON.stringify(json)}`);
-    return json[key];
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Loading state: ${JSON.stringify(json)}`);
+    return json;
   }
 
-  protected saveState(
+  protected saveAccessoryState(
     storagePath: string,
-    key: string,
-    value: boolean | number,
+    stateJson: string,
   ): void {
     // Overwrite the existing persistence file
-    this.platform.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${key} ${value}`);
-    fs.writeFileSync(
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
+    fs.writeFile(
       storagePath,
-      JSON.stringify({
-        [key]: value,
-      }),
+      stateJson,
       { encoding: 'utf8', flag: 'w' },
+      (error) => {
+        if (error !== null) {
+          this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error saving state: ${error}`);
+        } else {
+          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saved state: ${stateJson}`);
+        }
+      },
     );
   }
 
-  protected deleteState(
+  protected deleteAccessoryState(
     storagePath: string,
   ) {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Deleting state file ${storagePath}`);
     if (fs.existsSync(storagePath)) {
       try {
         fs.unlinkSync(storagePath); 
       } catch (err) {
-        // For now ignore
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error deleting state file ${storagePath}`);
       }
     }
   }
