@@ -38,7 +38,7 @@ body:
         * Keep this short. Do not paste in hundreds of lines repeating the same error.
         * Show the logs from the service being restarted until the error occurs.
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: json-config
@@ -51,7 +51,7 @@ body:
         * If you're unsure if the config is relevant, please include it.
         * Be sure to **remove any sensitive information (passwords, tokens, etc.).**
     validations:
-      required: false
+      required: true
 
   - type: input
     id: plugin-version
