@@ -13,8 +13,8 @@ body:
         * Avoid duplicating any existing issues which already track or resolve your problem, search the existing issues first.
         * Aim to find a descriptive and precise title for your bug report.
         
-        **NOTE: Please enter the requested information, as it helps with identifying the issue.
-        If you can't be bothered to enter the information, this ticket will likely get closed**
+        **NOTE: Please enter the requested information, as it helps with identifying and fixing the issue.
+        If you can't be bothered to enter the information, I probably won't be bothered to fix it.**
 
   - type: textarea
     id: describe-the-bug
