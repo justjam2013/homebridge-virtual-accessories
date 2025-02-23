@@ -5,6 +5,7 @@
  */
 export class GarageDoorConfiguration {
   defaultState!: string;
+  transitionDuration!: number;
 
   static prefix: string = 'garageDoor';
 
@@ -16,11 +17,19 @@ export class GarageDoorConfiguration {
       [ 'closed', 'open' ].includes(this.defaultState)
     );
 
+    const isValidTransitionDuration: boolean = (
+      this.transitionDuration === undefined?
+        true :
+        (0 <= this.transitionDuration)
+    );
+
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(GarageDoorConfiguration.prefix + '.defaultState');
+    if (!isValidTransitionDuration) this.errorFields.push(GarageDoorConfiguration.prefix + '.transitionDuration');
 
     return [
-      (isValidDefaultState),
+      (isValidDefaultState &&
+        isValidTransitionDuration),
       this.errorFields,
     ];
   }

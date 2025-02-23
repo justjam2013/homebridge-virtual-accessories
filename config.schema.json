@@ -125,6 +125,12 @@
                     { "title": "Closed", "enum": ["closed"] },
                     { "title": "Open", "enum": ["open"] }
                   ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "type": "integer",
+                  "mminimum": 0
                 }
               },
               "condition": {

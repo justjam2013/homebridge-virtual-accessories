@@ -132,7 +132,8 @@ export class GarageDoor extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
 
     // CurrentDoorState CLOSED/OPEN with 3 second delay
-    const transitionDelayMillis: number = 3 * 1000;
+    const transitionDuration = this.accessoryConfiguration.garageDoor.transitionDuration;
+    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
     this.transitionTimerId = setTimeout(() => {
       // Reset timer
       clearTimeout(this.transitionTimerId);
