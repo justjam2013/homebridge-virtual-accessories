@@ -207,7 +207,8 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "accessoryType": "garagedoor",
             "accessoryIsStateful": false,
             "garageDoor": {
-                "defaultState": "closed"
+                "defaultState": "closed",
+                "transitionDuration": 7
             }
         }
     ],
