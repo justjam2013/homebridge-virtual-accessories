@@ -205,9 +205,9 @@ export class SunEventsTrigger extends Trigger {
         const now = Utils.now().toString();
         this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
-        sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this);
+        sensor.triggerKeySensorState(VirtualSensor.OPEN_TRIGGERED, this);
         await this.delay(resetDelayMillis);
-        sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this);
+        sensor.triggerKeySensorState(VirtualSensor.CLOSED_NORMAL, this);
       }),
     );
 

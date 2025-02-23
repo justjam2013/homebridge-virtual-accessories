@@ -90,7 +90,7 @@ export class Doorbell extends Accessory {
     // implement your own code to check if the device is on
     const pressEvent = Doorbell.SINGLE_PRESS;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${this.getEventName(pressEvent)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(pressEvent)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -170,10 +170,14 @@ export class Doorbell extends Accessory {
 
     this.service!.updateCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent, (event));
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${this.getEventName(event)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${Doorbell.getEventName(event)}`);
   }
 
-  private getEventName(event: number): string {
+  protected getJsonState(): string {
+    return JSON.stringify({});
+  }
+
+  static getEventName(event: number): string {
     let eventName: string;
 
     switch (event) {

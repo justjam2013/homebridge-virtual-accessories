@@ -17,9 +17,6 @@ export abstract class Accessory {
   readonly platform: VirtualAccessoryPlatform;
   readonly accessory: PlatformAccessory;
 
-  readonly CLOSED_NORMAL: number = 0;
-  readonly OPEN_TRIGGERED: number = 1;
-
   readonly accessoryConfiguration: AccessoryConfiguration;
 
   protected defaultState;
@@ -64,7 +61,7 @@ export abstract class Accessory {
     return json;
   }
 
-  protected saveAccessoryState(
+  private saveAccessoryState(
     storagePath: string,
     stateJson: string,
   ): void {
@@ -94,6 +91,15 @@ export abstract class Accessory {
       } catch (err) {
         this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error deleting state file ${storagePath}`);
       }
+    }
+  }
+
+  protected abstract getJsonState(): string;
+
+  // Store device state if stateful
+  protected storeState() {
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
   }
 }

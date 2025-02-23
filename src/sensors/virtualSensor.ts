@@ -16,8 +16,11 @@ export abstract class VirtualSensor extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
-  protected static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
-  protected static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
+  static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
+  static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
+
+  static readonly CLOSED_NORMAL: number = 0;
+  static readonly OPEN_TRIGGERED: number = 1;
 
   private uuidPostfix: string = '-sensor';
 
@@ -32,7 +35,7 @@ export abstract class VirtualSensor extends Accessory {
    * You should implement your own code to track the state of your accessory
    */
   protected states = {
-    SensorState: this.CLOSED_NORMAL,
+    SensorState: VirtualSensor.CLOSED_NORMAL,
   };
 
   constructor(
@@ -74,7 +77,7 @@ export abstract class VirtualSensor extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -107,7 +110,7 @@ export abstract class VirtualSensor extends Accessory {
   async handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${this.getStateName(sensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${VirtualSensor.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -126,7 +129,7 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`);
   }
 
   /**
@@ -145,17 +148,21 @@ export abstract class VirtualSensor extends Accessory {
 
     if (sensorStateChanged) {
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${this.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
 
-  protected getStateName(state: number): string {
+  protected getJsonState(): string {
+    return JSON.stringify({});
+  }
+
+  static getStateName(state: number): string {
     let sensorStateName: string;
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case this.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
-    case this.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
+    case VirtualSensor.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
+    case VirtualSensor.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

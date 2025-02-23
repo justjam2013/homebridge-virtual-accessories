@@ -76,9 +76,9 @@ export class CronTrigger extends Trigger {
 
         this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-        sensor.triggerKeySensorState(this.sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerKeySensorState(VirtualSensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
         await this.delay(resetDelayMillis);
-        sensor.triggerKeySensorState(this.sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerKeySensorState(VirtualSensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
       }),
     );
 

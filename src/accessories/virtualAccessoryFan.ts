@@ -113,9 +113,7 @@ export class Fan extends Accessory {
     // implement your own code to turn your device on/off
     this.states.FanState = value as boolean;
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
   }
@@ -148,9 +146,7 @@ export class Fan extends Accessory {
   async setRotationDirection(value: CharacteristicValue) {
     this.states.FanRotationDirection = value as number;
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}`);
   }
@@ -166,9 +162,7 @@ export class Fan extends Accessory {
   async setRotationSpeed(value: CharacteristicValue) {
     this.states.FanRotationSpeed = value as number;
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.FanRotationSpeed}%`);
   }
@@ -181,7 +175,7 @@ export class Fan extends Accessory {
     return fanRotationSpeed;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.FanState,
       [this.rotatioDirectionStorageKey]: this.states.FanRotationDirection,
