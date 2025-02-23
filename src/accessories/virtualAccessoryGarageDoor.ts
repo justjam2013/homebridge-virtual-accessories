@@ -68,7 +68,7 @@ export class GarageDoor extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${this.getStateName(this.states.GarageDoorCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
     this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorTargetState));
 
@@ -108,7 +108,7 @@ export class GarageDoor extends Accessory {
     // implement your own code to check if the device is on
     const garageDoorCurrentState = this.states.GarageDoorCurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${this.getStateName(garageDoorCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${GarageDoor.getStateName(garageDoorCurrentState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -124,12 +124,12 @@ export class GarageDoor extends Accessory {
     // implement your own code to turn your device on/off
     this.states.GarageDoorTargetState = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${this.getStateName(this.states.GarageDoorTargetState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
 
     // CurrentDoorState CLOSING/OPENING
     this.states.GarageDoorCurrentState = (this.states.GarageDoorTargetState === GarageDoor.OPEN) ? GarageDoor.OPENING : GarageDoor.CLOSING;
     this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Curent Door State: ${this.getStateName(this.states.GarageDoorCurrentState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
 
     // CurrentDoorState CLOSED/OPEN with 3 second delay
     const transitionDelayMillis: number = 3 * 1000;
@@ -139,12 +139,10 @@ export class GarageDoor extends Accessory {
 
       this.states.GarageDoorCurrentState = this.states.GarageDoorTargetState;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${this.getStateName(this.states.GarageDoorCurrentState)}`);
 
-      // Store device state if stateful
-      if (this.accessoryConfiguration.accessoryIsStateful) {
-        this.saveAccessoryState(this.storagePath, this.getJsonState());
-      }
+      this.storeState();
+
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
     }, transitionDelayMillis);
   }
 
@@ -165,7 +163,7 @@ export class GarageDoor extends Accessory {
     // implement your own code to check if the device is on
     const garageDoorTargetState = this.states.GarageDoorTargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${this.getStateName(garageDoorTargetState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${GarageDoor.getStateName(garageDoorTargetState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -188,14 +186,14 @@ export class GarageDoor extends Accessory {
     return obstructionDetected;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.GarageDoorCurrentState,
     });
     return json;
   }
 
-  private getStateName(state: number): string {
+  static getStateName(state: number): string {
     let stateName: string;
 
     switch (state) {

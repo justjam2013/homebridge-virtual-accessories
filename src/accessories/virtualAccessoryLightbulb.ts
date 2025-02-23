@@ -139,9 +139,7 @@ export class Lightbulb extends Accessory {
     // implement your own code to turn your device on/off
     this.states.LightbulbState = value as boolean;
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
@@ -174,9 +172,7 @@ export class Lightbulb extends Accessory {
   async setBrightness(value: CharacteristicValue) {
     this.states.LightbulbBrightness = value as number;
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
@@ -193,9 +189,7 @@ export class Lightbulb extends Accessory {
   async setColorTemperature(miredValue: CharacteristicValue) {
     this.states.LightbulbColorTemperature = this.miredToKelvin(miredValue as number);
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
   }
@@ -209,7 +203,7 @@ export class Lightbulb extends Accessory {
     return miredValue;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LightbulbState,
       [this.brightnessStorageKey]: this.states.LightbulbBrightness,

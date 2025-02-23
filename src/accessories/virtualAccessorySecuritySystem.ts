@@ -75,7 +75,7 @@ export class SecuritySystem extends Accessory {
 
     // Update the initial state of the accessory
     // eslint-disable-next-line max-len
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Security System Current State: ${this.getStateName(this.states.SecuritySystemCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Security System Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
     this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemTargetState, (this.states.SecuritySystemTargetState));
 
@@ -112,7 +112,7 @@ export class SecuritySystem extends Accessory {
     // implement your own code to check if the device is on
     const securitySystemState = this.states.SecuritySystemCurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${this.getStateName(securitySystemState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(securitySystemState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -127,16 +127,15 @@ export class SecuritySystem extends Accessory {
     // implement your own code to turn your device on/off
     this.states.SecuritySystemTargetState = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${this.getStateName(this.states.SecuritySystemTargetState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
 
     this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
     this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${this.getStateName(this.states.SecuritySystemCurrentState)}`);
 
-    // Store device state if stateful
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
+
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
   }
 
   /**
@@ -156,7 +155,7 @@ export class SecuritySystem extends Accessory {
     // implement your own code to check if the device is on
     const securitySystemState = this.states.SecuritySystemTargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${this.getStateName(securitySystemState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${SecuritySystem.getStateName(securitySystemState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -164,14 +163,14 @@ export class SecuritySystem extends Accessory {
     return securitySystemState;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.SecuritySystemCurrentState,
     });
     return json;
   }
 
-  private getStateName(state: number): string {
+  static getStateName(state: number): string {
     let stateName: string;
 
     switch (state) {

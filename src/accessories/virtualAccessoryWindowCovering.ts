@@ -69,7 +69,7 @@ export class WindowCovering extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${this.getStateName(this.states.WindowCoveringCurrentPosition)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${WindowCovering.getStateName(this.states.WindowCoveringCurrentPosition)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringCurrentPosition));
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringTargetPosition));
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
@@ -110,7 +110,7 @@ export class WindowCovering extends Accessory {
     // implement your own code to check if the device is on
     const windowCoveringCurrentPosition = this.states.WindowCoveringCurrentPosition;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${this.getStateName(windowCoveringCurrentPosition)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${WindowCovering.getStateName(windowCoveringCurrentPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -126,12 +126,12 @@ export class WindowCovering extends Accessory {
     // implement your own code to turn your device on/off
     this.states.WindowCoveringTargetPosition = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${this.getStateName(this.states.WindowCoveringTargetPosition)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${WindowCovering.getStateName(this.states.WindowCoveringTargetPosition)}`);
 
     // PositionState DECREASING/INCREASING
     this.states.WindowCoveringPositionState = (this.states.WindowCoveringTargetPosition === WindowCovering.OPEN) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
     this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${this.getPositionName(this.states.WindowCoveringPositionState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${WindowCovering.getPositionName(this.states.WindowCoveringPositionState)}`);
     
     // PositionState STOPPED
     const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
@@ -142,16 +142,14 @@ export class WindowCovering extends Accessory {
 
       this.states.WindowCoveringPositionState = WindowCovering.STOPPED;
       this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${this.getPositionName(this.states.WindowCoveringPositionState)}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${WindowCovering.getPositionName(this.states.WindowCoveringPositionState)}`);
 
       this.states.WindowCoveringCurrentPosition = this.states.WindowCoveringTargetPosition;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.WindowCoveringCurrentPosition));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${this.getStateName(this.states.WindowCoveringCurrentPosition)}`);
 
-      // Store device state if stateful
-      if (this.accessoryConfiguration.accessoryIsStateful) {
-        this.saveAccessoryState(this.storagePath, this.getJsonState());
-      }
+      this.storeState();
+
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${WindowCovering.getStateName(this.states.WindowCoveringCurrentPosition)}`);
     }, transitionDelayMillis);
   }
 
@@ -172,7 +170,7 @@ export class WindowCovering extends Accessory {
     // implement your own code to check if the device is on
     const windowCoveringTargetPosition = this.states.WindowCoveringTargetPosition;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${this.getStateName(windowCoveringTargetPosition)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${WindowCovering.getStateName(windowCoveringTargetPosition)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -187,7 +185,7 @@ export class WindowCovering extends Accessory {
     // implement your own code to check if the device is on
     const windowCoveringPositionState = this.states.WindowCoveringPositionState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${this.getPositionName(windowCoveringPositionState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${WindowCovering.getPositionName(windowCoveringPositionState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -195,14 +193,14 @@ export class WindowCovering extends Accessory {
     return windowCoveringPositionState;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.WindowCoveringCurrentPosition,
     });
     return json;
   }
 
-  private getStateName(position: number): string {
+  static getStateName(position: number): string {
     let positionName: string;
 
     switch (position) {
@@ -219,7 +217,7 @@ export class WindowCovering extends Accessory {
     return positionName;
   }
 
-  private getPositionName(state: number): string {
+  static getPositionName(state: number): string {
     let stateName: string;
 
     switch (state) {

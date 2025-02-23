@@ -81,7 +81,7 @@ export class Lock extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${this.getStateName(this.states.LockCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
     this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockTargetState));
 
@@ -149,7 +149,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockCurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${Lock.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -164,16 +164,14 @@ export class Lock extends Accessory {
     // implement your own code to turn your device on/off
     this.states.LockTargetState = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${this.getStateName(this.states.LockTargetState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${Lock.getStateName(this.states.LockTargetState)}`);
 
     this.states.LockCurrentState = this.states.LockTargetState;
     this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${this.getStateName(this.states.LockCurrentState)}`);
 
-    // Store device state if stateful
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
   }
 
   /**
@@ -193,7 +191,7 @@ export class Lock extends Accessory {
     // implement your own code to check if the device is on
     const lockState = this.states.LockTargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${this.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${Lock.getStateName(lockState)}`);
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
@@ -266,18 +264,19 @@ export class Lock extends Accessory {
   async handleLockManagementAutoSecurityTimeoutSet(value: CharacteristicValue) {
     this.states.LockManagementAutoSecurityTimeout = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAutoSecurityTimeout}`);
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.states.LockManagementAutoSecurityTimeout}`);
   }
 
   async handleLockManagementAutoSecurityTimeoutGet() {
     const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${lockManagementAutoSecurityTimeout}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
 
     return lockManagementAutoSecurityTimeout;
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LockCurrentState,
       [this.audioFeedbackStorageKey]: this.states.LockManagementAudioFeedback,
@@ -286,7 +285,7 @@ export class Lock extends Accessory {
     return json;
   }
 
-  private getStateName(state: number): string {
+  static getStateName(state: number): string {
     let stateName: string;
 
     switch (state) {

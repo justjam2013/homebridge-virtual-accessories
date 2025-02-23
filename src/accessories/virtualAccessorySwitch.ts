@@ -6,6 +6,7 @@ import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
+import { VirtualSensor } from '../sensors/virtualSensor.js';
 // import { Utils } from '../utils.js';
 
 // import { Duration } from '@js-joda/core';
@@ -34,7 +35,7 @@ export class Switch extends Accessory {
    */
   private states = {
     SwitchState: Switch.OFF,
-    SensorState: this.CLOSED_NORMAL,
+    SensorState: VirtualSensor.CLOSED_NORMAL,
   };
 
   constructor(
@@ -70,7 +71,7 @@ export class Switch extends Accessory {
       this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
 
       this.states.SwitchState = this.defaultState;
-      this.states.SensorState = this.CLOSED_NORMAL;
+      this.states.SensorState = VirtualSensor.CLOSED_NORMAL;
 
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -177,11 +178,7 @@ export class Switch extends Accessory {
     // implement your own code to turn your device on/off
     this.states.SwitchState = value as boolean;
 
-    this.log.info(`***** Has reset timer: ${this.accessoryConfiguration.switch.hasResetTimer}`);
     if (this.accessoryConfiguration.switch.hasResetTimer) {
-      this.log.info(`***** SwitchState: ${this.states.SwitchState}`);
-      this.log.info(`***** defaultState: ${this.defaultState}`);
-
       // switch is reset: turn off timer
       if (this.states.SwitchState === this.defaultState) {
         this.durationTimer!.stop();
@@ -194,9 +191,7 @@ export class Switch extends Accessory {
       }
     }
 
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      this.saveAccessoryState(this.storagePath, this.getJsonState());
-    }
+    this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
 
@@ -240,7 +235,7 @@ export class Switch extends Accessory {
     }
   }
 
-  private getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.SwitchState,
     });
@@ -268,9 +263,9 @@ export class Switch extends Accessory {
     let sensorState: number;
 
     if (this.defaultState === Switch.OFF) {
-      sensorState = (this.states.SwitchState === Switch.OFF) ? this.CLOSED_NORMAL : this.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.OFF) ? VirtualSensor.CLOSED_NORMAL : VirtualSensor.OPEN_TRIGGERED;
     } else {
-      sensorState = (this.states.SwitchState === Switch.ON) ? this.CLOSED_NORMAL : this.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.ON) ? VirtualSensor.CLOSED_NORMAL : VirtualSensor.OPEN_TRIGGERED;
     }
 
     return sensorState;
