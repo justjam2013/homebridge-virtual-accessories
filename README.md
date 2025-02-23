@@ -405,7 +405,7 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
             "switch": {
                 "defaultState": "off",
                 "hasCompanionSensor": true
-            }
+            },
             "companionSensor": {
                 "name": "My Companion Sensor",
                 "type": "contact"
