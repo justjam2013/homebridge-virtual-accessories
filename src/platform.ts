@@ -97,8 +97,7 @@ export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
         // this.api.updatePlatformAccessories([existingAccessory]);
-        existingAccessory.displayName = configuredAccessory.accessoryName;
-        existingAccessory._associatedHAPAccessory.displayName = configuredAccessory.accessoryName;
+        existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
         this.api.updatePlatformAccessories([existingAccessory]);
 
         // create the accessory handler for the restored accessory
