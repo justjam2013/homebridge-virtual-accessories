@@ -84,8 +84,8 @@ Currently, these are the implemented virtual accessories:
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
     - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
-    - **Stateful switches.** The state of the switch persists across restarts of Homebridge.
-    - **Timed switches.** The switch will revert back to its default state when the timer expires. Currently a switch can only be stateful or timed, but not both.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. Currently a switch can only be stateful or timed, but not both.
+    - **Timed switches.** The switch will revert back to its default state when the timer expires. This is a way to introduce timers into HomeKit. Currently a switch can only be stateful or timed, but not both.
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
 -   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
