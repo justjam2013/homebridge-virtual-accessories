@@ -73,26 +73,26 @@ The downside to a single plugin is trading ease of maintenance for a single poin
 
 Currently, these are the implemented virtual accessories:
 
--   **Doorbell.** Allows you to use any button as a doorbell and have it play a chime on Home Pods.
+-   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
--   **Garage Door.** Allows you to create a virtual garage door that will display a widget in CarPlay when you approach your home. Generates a HomeKit notification when the accessory's state changes.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
--   **Lock.** This was just low hanging fruit. Generates a HomeKit notification when the accessory's state changes. It also creates a Home Key card in the Wallet app.
+-   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
--   **Valve.** Allows you to create different types of valves: generic, irrigation, shower head, or water faucet.
+-   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
--   **Switch.** Nobody can have too many virtual switches! Allows you to create a number of different types of switches.
-    - **Plain old switches.** What it says on the tin.
-    - **Normally on/off switches.** Select if you want the default state of the switch to be on or off. This is the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
+-   **Switch.** Allows you to create a number of different types of virtual switches.
+    - **Plain old switches.** What it says on the label.
+    - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
     - **Stateful switches.** The state of the switch persists across restarts of Homebridge.
-    - **Timed switches.** The switch will revert back to its default state when the timer expires.
-    - **Switches with companion sensors.** The switch will trigger a compainon sensor when it changes state, sending a HomeKit-native notification to the Home app. Picking a critical sensor type will allow notifications to bypass "Do Not Disturb".
+    - **Timed switches.** The switch will revert back to its default state when the timer expires. Currently a switch can only be stateful or timed, but not both.
+    - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
--   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
+-   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the options are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by a cron expression. The sensor resets after a brief delay.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
-    - **Switch trigger.** To have a switch trigger a sensor, create a virtual switch accessory with a companion sensor. A future version may provide the ability to create this pairing as a sensor with a switch as trigger.
+    - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
 
 ## Installation
 
@@ -103,7 +103,7 @@ npm install -g homebridge-virtual-accessories
 ```
 
 > [!IMPORTANT]
-> Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image provides all the necessary tools out of the box. If you are choosing to install on other platforms, you will require the necessary technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on, but I will try my best to help you get the plugin working. Below are platform specific installation notes, which I will try to update as users of this plugin report issues.
+> Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image and the Homebridge Linux (apt) install, both provide all the necessary tools. If you are choosing to install on other platforms, you will require the appropriate technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on. Below are platform specific installation notes, which I will update as users of this plugin report issues.
 
 > [!IMPORTANT]
 > If you manually update the Node.js version that Homebridge is running on, you will need to ensure that the platform-native library `raw-socket` will also be updated. Run the following commands immediately after the Node.js update:
@@ -113,7 +113,7 @@ npm install -g homebridge-virtual-accessories
 > ```
 
 > [!CAUTION]
-> Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js, if the `raw-socket` module is also not updated (see above), it may cause the plugin to fail to load and Homebridge to delete all of its accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on. This setting is in the `Settings` screen, `Startup & Environment` section:
+> Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js, if the `raw-socket` module is also not updated (see above), it may cause the plugin to fail to load and Homebridge to delete all of the plugin's accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on, at least while performing updates. This setting is in the `Settings` screen, `Startup & Environment` section:
 > 
 > <img src="assets/keepaccessories.png" height="240" />
 
@@ -141,20 +141,20 @@ The [Synology DSM 7.2.2 Developer Guide](https://help.synology.com/developer-gui
 ## Configuration
 
 You can configure the plugin from the Homebridge UI, or by ediiting the JSON configuration directly in the Homebridge JSON Config editor.
-In the UI, required fields will be marked with an asterisk (*).
+In the UI, required fields will be marked with an asterisk (*) and you will not be allowed to save the configuration if the required fields are not filled in.
 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
-In the event that an accessory is misconfigured, you will see error entries in the logs to help you to correct the configuration. The log entries will look something like this:
+The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you to correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
 ```
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Skipping accessory. Configuration is invalid: { "accessoryID": "12345", "accessoryName": "My Switch", ... }
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Invalid fields: [switchDefaultState]
 ```
 
 > [!NOTE]
-> 1. `accessoryID` uniquely identifies an accassory and each accessory must have a different value. If you do assign the same value by mistake, the plugin will skip any accessory that has a duplicate ID and output a message in the logs aterting you to correct the configuration. If you change the value of `accessoryID` after saving the config, Homebridge will handle the change as the accessory having been deleted and a new one created. This will cause the Home app to delete the "old" accessory, which in turn will delete any automations that use the deleted accessory, as well as any scenes that only use the deleted accessory.<p>
-You can use [random.org](https://www.random.org/) to generate unique IDs.
-> 2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is recommended to assign different names to each accessory.
+> 1. `accessoryID` uniquely identifies an accessory and each accessory must have a different value. This is because HomeKit requires a unique and unmodifiable serial number to identify an accessory. The accessory ID acts as a virtual serial number for each accessory that must be unique and unmodifiable. If you do assign the same accessory ID to multiple accessories by mistake, on startup the plugin will skip any accessory that has a duplicate ID and output a message in the logs alerting you to the issue. If you change the value of `accessoryID` after saving the config, HomeKit will interpret the change as the "old" accessory having been deleted and a "new" one added. This will cause the Home app to delete any scenes and automations that use the deleted accessory. Some plugins use the accessory name as the unique ID, which means that you cannot easily change the name. Virtual Accessories For Homebridge uses a dedicated field as the unique ID, allowing you to modify the accessory name, if you so choose to.<p>
+I use [random.org](https://www.random.org/) to generate unique IDs for me. While the plugin only requires 5 digits for the IDs, I use 7-digit values between 1,000,000 and 10,000,000. This gives you a range of 9 million possible IDs, which greatly reduces the chances of a duplicate.
+> 2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, you can change the accessory name, if you so choose to.
 
 ### Doorbell
 
@@ -523,11 +523,11 @@ You can use [random.org](https://www.random.org/) to generate unique IDs.
 ```
 
 > [!NOTE]
-> Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to the particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
+> Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
 
 ## Creative Uses
 
-I started this plugin as a Homebridge 2.0 ready plugin to replace [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), which formed the backbone of my HomeKit automations, along with six other plugins. Then I got some really odd requests, like a window covering. Okay ... what the heck are you going to do with a virtual window covering?? Well, the user who requested it wanted to use "Siri open/close .." to control their trash bin, as opposed to "Siri on/off .." as would be required with switches. Yup, "I use [your plugin] for my trash" is what every plugin developer wants to hear! 🤣 <br/>
+I started this plugin as a Homebridge 2.0 ready plugin to replace [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), which, along with six other plugins, formed the backbone of my HomeKit automations. Then I got some really odd requests, like a window covering. Okay ... what the heck are you going to do with a virtual window covering?? Well, the user who requested it wanted to use "Siri open/close .." to control their trash bin, as opposed to "Siri on/off .." as would be required with switches. Yup, "I use [your plugin] for my trash" is what every plugin developer loves to hear! 🤣 <br/>
 
 So here are creative ways people have used this plugin. Maybe they might inspire others.
 
@@ -545,7 +545,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved in the wrong format or as the string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup and cleans up the values, if needed. You may see entries in the logs to that effect. That behavior is expected. Tickets have been opened against the issues and, once they are resolved, the bug patch will be removed.
+-   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved in the wrong format or as the string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup and cleans up the problem values, if needed. You may see entries in the logs to that effect. That behavior is expected. Tickets have been opened against the issues and, once they are resolved, the bug patch will be removed.
 
 ## What if I run into a problem?
 
