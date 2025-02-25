@@ -1,4 +1,4 @@
-import type { PlatformAccessory, Service } from 'homebridge';
+import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Sensor } from '../sensors/virtualSensor.js';
@@ -26,13 +26,17 @@ export abstract class Accessory {
   protected companionSensor?: Sensor;
 
   readonly log: VirtualAccessoriesLogger;
+  readonly serviceType: WithUUID<typeof Service>;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    serviceType: WithUUID<typeof Service>,
   ) {
     this.accessory = accessory;
     this.platform = platform;
+
+    this.serviceType = serviceType;
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
@@ -101,14 +105,14 @@ export abstract class Accessory {
     }
   }
 
-  protected abstract getAccessoryTypeName(): string;
-
-  protected abstract getJsonState(): string;
-
   // Store device state if stateful
   protected storeState() {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
   }
+
+  protected abstract getAccessoryTypeName(): string;
+
+  protected abstract getJsonState(): string;
 }

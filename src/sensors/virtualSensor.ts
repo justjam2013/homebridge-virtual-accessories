@@ -45,7 +45,7 @@ export abstract class Sensor extends Accessory {
     sensorCharacteristic,
     companionSensorName?: string,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, sensorService);
 
     this.sensorCharacteristic = sensorCharacteristic;
 

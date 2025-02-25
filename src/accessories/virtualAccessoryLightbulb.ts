@@ -39,7 +39,7 @@ export class Lightbulb extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, platform.Service.Lightbulb);
 
     this.type = this.accessoryConfiguration.lightbulb.type;
 

@@ -30,8 +30,7 @@ export class Fan extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory);
-
+    super(platform, accessory, platform.Service.Fan);
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.fan.defaultState === 'on' ? Fan.ON : Fan.OFF;
