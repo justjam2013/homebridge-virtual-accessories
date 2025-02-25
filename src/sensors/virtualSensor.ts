@@ -1,6 +1,6 @@
 import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from '../triggers/trigger.js';
@@ -11,7 +11,7 @@ import { NotCompanionError, AccessoryNotAllowedError, TriggerNotAllowedError } f
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export abstract class VirtualSensor extends Accessory {
+export abstract class Sensor extends Accessory {
 
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
@@ -35,11 +35,11 @@ export abstract class VirtualSensor extends Accessory {
    * You should implement your own code to track the state of your accessory
    */
   protected states = {
-    SensorState: VirtualSensor.CLOSED_NORMAL,
+    SensorState: Sensor.CLOSED_NORMAL,
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     sensorService,
     sensorCharacteristic,
@@ -52,12 +52,6 @@ export abstract class VirtualSensor extends Accessory {
     if (companionSensorName !== undefined) {
       this.isCompanionSensor = true;
     }
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Sensor')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the Switch service if it exists, otherwise create a new Switch service
     // you can create multiple services for each accessory
@@ -77,7 +71,7 @@ export abstract class VirtualSensor extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -110,7 +104,7 @@ export abstract class VirtualSensor extends Accessory {
   async handleSensorStateGet() {
     const sensorState = this.states.SensorState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${VirtualSensor.getStateName(sensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${Sensor.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -129,7 +123,7 @@ export abstract class VirtualSensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
   }
 
   /**
@@ -148,7 +142,7 @@ export abstract class VirtualSensor extends Accessory {
 
     if (sensorStateChanged) {
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${VirtualSensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
 
@@ -161,8 +155,8 @@ export abstract class VirtualSensor extends Accessory {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualSensor.CLOSED_NORMAL: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
-    case VirtualSensor.OPEN_TRIGGERED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
+    case Sensor.CLOSED_NORMAL: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
+    case Sensor.OPEN_TRIGGERED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

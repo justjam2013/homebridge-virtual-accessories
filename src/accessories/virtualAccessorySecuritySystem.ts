@@ -1,13 +1,15 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
  * SecuritySystem - Accessory implementation
  */
 export class SecuritySystem extends Accessory {
-  
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'SecuritySystem';
+
   static readonly STAY_ARM: number = 0;         // Characteristic.CurrentDoorState.OPEN;
   static readonly AWAY_ARM: number = 1;         // Characteristic.CurrentDoorState.CLOSED;
   static readonly NIGHT_ARM: number = 2;        // Characteristic.CurrentDoorState.OPENING;
@@ -22,7 +24,7 @@ export class SecuritySystem extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -58,12 +60,6 @@ export class SecuritySystem extends Accessory {
     }
 
     this.states.SecuritySystemTargetState = this.states.SecuritySystemCurrentState;
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Security System')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -168,6 +164,10 @@ export class SecuritySystem extends Accessory {
       [this.stateStorageKey]: this.states.SecuritySystemCurrentState,
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return SecuritySystem.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(state: number): string {

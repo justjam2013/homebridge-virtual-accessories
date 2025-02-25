@@ -1,12 +1,14 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
  * Lightbulb - Accessory implementation
  */
 export class Lightbulb extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Lightbulb';
 
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
@@ -34,7 +36,7 @@ export class Lightbulb extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -69,12 +71,6 @@ export class Lightbulb extends Accessory {
         this.states.LightbulbColorTemperature = cachedColorTemperature;
       }
     }
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Lightbulb')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -214,6 +210,10 @@ export class Lightbulb extends Accessory {
     }
 
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Lightbulb.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(state: boolean): string {

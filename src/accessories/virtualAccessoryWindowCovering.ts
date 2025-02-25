@@ -2,7 +2,7 @@
 
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
@@ -10,6 +10,8 @@ import { Accessory } from './virtualAccessory.js';
  */
 export class WindowCovering extends Accessory {
   
+  static readonly ACCESSORY_TYPE_NAME: string = 'Window Covering';
+
   static readonly CLOSED: number = 0;   // 0%
   static readonly OPEN: number = 100;   // 100%
 
@@ -32,7 +34,7 @@ export class WindowCovering extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -53,12 +55,6 @@ export class WindowCovering extends Accessory {
     }
 
     this.states.WindowCoveringTargetPosition = this.states.WindowCoveringCurrentPosition;
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Window Covering')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -198,6 +194,10 @@ export class WindowCovering extends Accessory {
       [this.stateStorageKey]: this.states.WindowCoveringCurrentPosition,
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return WindowCovering.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(position: number): string {

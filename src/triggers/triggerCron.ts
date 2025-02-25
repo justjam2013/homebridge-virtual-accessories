@@ -1,6 +1,6 @@
 import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
-import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
@@ -15,7 +15,7 @@ export class CronTrigger extends Trigger {
   private cronJob!: Cron;
 
   constructor(
-    sensor: VirtualSensor,
+    sensor: Sensor,
     name: string,
   ) {
     super(sensor, name);
@@ -76,9 +76,9 @@ export class CronTrigger extends Trigger {
 
         this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-        sensor.triggerKeySensorState(VirtualSensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerKeySensorState(Sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
         await this.delay(resetDelayMillis);
-        sensor.triggerKeySensorState(VirtualSensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerKeySensorState(Sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
       }),
     );
 

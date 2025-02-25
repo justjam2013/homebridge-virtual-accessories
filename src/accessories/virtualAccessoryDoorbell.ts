@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Switch } from './virtualAccessorySwitch.js';
@@ -10,6 +10,8 @@ import { AccessoryNotAllowedError } from '../errors.js';
  * Doorbell - Accessory implementation
  */
 export class Doorbell extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Doorbell';
 
   static readonly SINGLE_PRESS: number = 0;  // Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
   static readonly DOUBLE_PRESS: number = 1;  // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS
@@ -28,19 +30,13 @@ export class Doorbell extends Accessory {
   protected companionSwitch?: Switch;
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
     this.states.Volume = this.accessoryConfiguration.doorbell.volume;
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Doorbell')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -175,6 +171,10 @@ export class Doorbell extends Accessory {
 
   protected getJsonState(): string {
     return JSON.stringify({});
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Doorbell.ACCESSORY_TYPE_NAME;
   }
 
   static getEventName(event: number): string {

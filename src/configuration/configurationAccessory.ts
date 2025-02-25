@@ -1,22 +1,25 @@
 /* eslint-disable curly */
 
+import { Type } from 'typeserializer';
+
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
-import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+
 import { DoorbellConfiguration } from './configurationDoorbell.js';
 import { FanConfiguration } from './configurationFan.js';
 import { GarageDoorConfiguration } from './configurationGarageDoor.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { LockConfiguration } from './configurationLock.js';
-import { PingTriggerConfiguration } from './configurationPingTrigger.js';
 import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
-import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
-import { TimerConfiguration } from './configurationTimer.js';
-
-import { Type } from 'typeserializer';
-import { ValveConfiguration } from './configurationValve.js';
-import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
 import { SensorConfiguration } from './configurationSensor.js';
 import { SwitchConfiguration } from './configurationSwitch.js';
+import { ValveConfiguration } from './configurationValve.js';
+import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
+
+import { CronTriggerConfiguration } from './configurationCronTrigger.js';
+import { PingTriggerConfiguration } from './configurationPingTrigger.js';
+import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
+
+import { TimerConfiguration } from './configurationTimer.js';
 
 /**
  * 

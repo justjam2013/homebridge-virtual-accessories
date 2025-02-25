@@ -13,7 +13,7 @@ import fs from 'fs';
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class VirtualAccessoryPlatform implements DynamicPlatformPlugin {
+export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
 

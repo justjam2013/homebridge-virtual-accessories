@@ -2,7 +2,7 @@
 
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
@@ -10,6 +10,8 @@ import { Accessory } from './virtualAccessory.js';
  */
 export class GarageDoor extends Accessory {
   
+  static readonly ACCESSORY_TYPE_NAME: string = 'GarageDoor';
+
   static readonly OPEN: number = 0;     // Characteristic.CurrentDoorState.OPEN;
   static readonly CLOSED: number = 1;   // Characteristic.CurrentDoorState.CLOSED;
   static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING;
@@ -31,7 +33,7 @@ export class GarageDoor extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -52,12 +54,6 @@ export class GarageDoor extends Accessory {
     }
 
     this.states.GarageDoorTargetState = this.states.GarageDoorCurrentState;
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Garage Door')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -192,6 +188,10 @@ export class GarageDoor extends Accessory {
       [this.stateStorageKey]: this.states.GarageDoorCurrentState,
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return GarageDoor.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(state: number): string {

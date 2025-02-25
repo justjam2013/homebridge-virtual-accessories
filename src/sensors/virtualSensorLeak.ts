@@ -1,20 +1,22 @@
 import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualSensor } from './virtualSensor.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
+import { Sensor } from './virtualSensor.js';
 
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class VirtualLeakSensor extends VirtualSensor {
+export class LeakSensor extends Sensor {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'LeakSensor';
 
   static readonly LEAK_NOT_DETECTED: number = 0;  // Characteristic.LeakDetected.LEAK_NOT_DETECTED;
   static readonly LEAK_DETECTED: number = 1;      // Characteristic.LeakDetected.LEAK_DETECTED;
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     companionSensorName?: string,
   ) {
@@ -26,11 +28,15 @@ export class VirtualLeakSensor extends VirtualSensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case VirtualLeakSensor.LEAK_NOT_DETECTED: { sensorStateName = VirtualSensor.NORMAL_INACTIVE; break; }
-    case VirtualLeakSensor.LEAK_DETECTED: { sensorStateName = VirtualSensor.TRIGGERED_ACTIVE; break; }
+    case LeakSensor.LEAK_NOT_DETECTED: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
+    case LeakSensor.LEAK_DETECTED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 
     return sensorStateName;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return LeakSensor.ACCESSORY_TYPE_NAME;
   }
 }

@@ -2,18 +2,28 @@
 
 import { Logging, LogLevel } from 'homebridge';
 
-export class VirtualLogger {
+export class VirtualAccessoriesLogger {
 
   private platformLogger: Logging;
 
+  private muteInfo: boolean = false;
+
   constructor(
     platformLogger: Logging,
+  );
+  constructor(
+    platformLogger: Logging,
+    muteInfo?: boolean,
   ) {
     this.platformLogger = platformLogger;
+
+    if (muteInfo !== undefined) {
+      this.muteInfo = muteInfo;
+    }
   }
 
   info (message: string, debug: boolean = false, parameters: any[] = []): void {
-    if (debug) {
+    if (debug || this.muteInfo) {
       this.platformLogger.debug(message, ...parameters);
     } else {
       this.platformLogger.info(message, ...parameters);
