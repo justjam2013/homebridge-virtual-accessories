@@ -1,4 +1,4 @@
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { Configuration } from './configuration/configuration.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -97,16 +97,13 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
         // this.api.updatePlatformAccessories([existingAccessory]);
-        if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
-          this.log.info(`Updating display name ${existingAccessory.displayName} to ${configuredAccessory.accessoryName}`);
-          existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
-          this.api.updatePlatformAccessories([existingAccessory]);
-        }
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
-        if (virtualAccessory === undefined) {
+        if (virtualAccessory !== undefined) {
+          this.updateAccessoryName(existingAccessory, configuredAccessory.accessoryName, virtualAccessory.serviceType.UUID);
+        } else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
 
@@ -207,6 +204,36 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
 
     return accessoryConfigurations;
+  }
+
+  private updateAccessoryName(
+    accessory: PlatformAccessory,
+    name: string,
+    virtualAccessoryServiceUUID: string,
+  ): void {
+    if (accessory.displayName !== name) {
+      this.log.info(`Updating display name ${accessory.displayName} to ${name}`);
+
+      accessory.updateDisplayName(name);
+
+      const services: Service[] = accessory._associatedHAPAccessory.services;
+
+      // Update Service.AccessoryInformation.Name
+      const infoService = services.find(s => s.UUID === this.Service.AccessoryInformation.UUID);
+      const infoName = infoService?.characteristics.find(c => c.UUID === this.Characteristic.Name.UUID);
+      this.log.info(`${accessory.displayName} AccessoryInformation.Name: ${JSON.stringify(infoName)}`);
+      // infoName?.setValue(name);
+
+      // Remove Service.<Type>.ConfiguredName
+      const accessoryService: Service | undefined = services.find(s => s.UUID === virtualAccessoryServiceUUID);
+      const characteristics: Characteristic[] | undefined = accessoryService?.characteristics;
+      const configuredName = characteristics?.find(c => c.UUID === this.Characteristic.ConfiguredName.UUID);
+      this.log.info(`${accessory.displayName} <TypeService>.ConfiguredName: ${JSON.stringify(configuredName)}`);
+      // characteristics?.splice(characteristics?.findIndex(c => c.UUID === this.Characteristic.ConfiguredName.toString()), 1);
+
+      this.api.updatePlatformAccessories([accessory]);
+    }
+
   }
 }
 
