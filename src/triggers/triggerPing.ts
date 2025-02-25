@@ -1,5 +1,5 @@
 import { Trigger } from './trigger.js';
-import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { PingTriggerConfiguration } from '../configuration/configurationPingTrigger.js';
 
@@ -33,7 +33,7 @@ export class PingTrigger extends Trigger {
   private failureCount = new Counter(0);
 
   constructor(
-    sensor: VirtualSensor,
+    sensor: Sensor,
     name: string,
   ) {
     super(sensor, name);
@@ -123,13 +123,13 @@ export class PingTrigger extends Trigger {
         if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
           trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
 
-          trigger.sensor.triggerKeySensorState(VirtualSensor.OPEN_TRIGGERED, trigger);
+          trigger.sensor.triggerKeySensorState(Sensor.OPEN_TRIGGERED, trigger);
         }
       } else {
         trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
-        trigger.sensor.triggerKeySensorState(VirtualSensor.CLOSED_NORMAL, trigger);
+        trigger.sensor.triggerKeySensorState(Sensor.CLOSED_NORMAL, trigger);
       }
 
       session.close ();

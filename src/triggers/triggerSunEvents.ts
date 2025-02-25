@@ -1,5 +1,5 @@
 import { SunEventsTriggerConfiguration } from '../configuration/configurationSunEventsTrigger.js';
-import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../utils.js';
 
@@ -20,7 +20,7 @@ export class SunEventsTrigger extends Trigger {
   private timezone: string | undefined;
 
   constructor(
-    sensor: VirtualSensor,
+    sensor: Sensor,
     name: string,
   ) {
     super(sensor, name);
@@ -72,7 +72,7 @@ export class SunEventsTrigger extends Trigger {
 
   private async setupSunEvent(
     triggerConfig: SunEventsTriggerConfiguration,
-    sensor: VirtualSensor,
+    sensor: Sensor,
   ) {
     await this.getSunEventsData(triggerConfig.latitude, triggerConfig.longitude)
       .then(
@@ -164,7 +164,7 @@ export class SunEventsTrigger extends Trigger {
   private async setupTriggerCron(
     event: string,
     dailyDetails: DailyDetails,
-    sensor: VirtualSensor,
+    sensor: Sensor,
   ) {
     let eventTime: string | undefined;
     switch (event) {
@@ -205,9 +205,9 @@ export class SunEventsTrigger extends Trigger {
         const now = Utils.now().toString();
         this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
-        sensor.triggerKeySensorState(VirtualSensor.OPEN_TRIGGERED, this);
+        sensor.triggerKeySensorState(Sensor.OPEN_TRIGGERED, this);
         await this.delay(resetDelayMillis);
-        sensor.triggerKeySensorState(VirtualSensor.CLOSED_NORMAL, this);
+        sensor.triggerKeySensorState(Sensor.CLOSED_NORMAL, this);
       }),
     );
 

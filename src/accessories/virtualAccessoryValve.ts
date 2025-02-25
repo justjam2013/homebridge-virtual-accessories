@@ -2,11 +2,13 @@
 
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { Timer } from '../timer.js';
 
 export class Valve extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Valve';
 
   static readonly GENERIC_VALVE: number = 0;  // Characteristic.ValveType.GENERIC_VALVE
   static readonly IRRIGATION: number = 1;     // Characteristic.ValveType.IRRIGATION
@@ -37,7 +39,7 @@ export class Valve extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -85,12 +87,6 @@ export class Valve extends Accessory {
       this.accessoryConfiguration.valve.duration,
       Timer.Units.Seconds,
     );
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Valve')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -254,7 +250,7 @@ export class Valve extends Accessory {
     return remainingDuration;
   }
 
-  public getJsonState(): string {
+  protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.ValveActive,
       // [this.timerStartTimeStorageKey]: this.durationTimer.getStartTime().toString(),
@@ -262,6 +258,10 @@ export class Valve extends Accessory {
       // [this.timerIsRunningStorageKey]: this.durationTimer.isTimerRunning(),
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Valve.ACCESSORY_TYPE_NAME;
   }
 
   static getValveTypeName(event: number): string {

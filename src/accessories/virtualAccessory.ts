@@ -1,10 +1,10 @@
 import type { PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
-import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { VirtualLogger } from '../virtualLogger.js';
+import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 import fs from 'fs';
 
@@ -14,7 +14,7 @@ import fs from 'fs';
 export abstract class Accessory {
   service?: Service;
 
-  readonly platform: VirtualAccessoryPlatform;
+  readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
 
   readonly accessoryConfiguration: AccessoryConfiguration;
@@ -23,12 +23,12 @@ export abstract class Accessory {
 
   protected storagePath: string;
 
-  protected companionSensor?: VirtualSensor;
+  protected companionSensor?: Sensor;
 
-  readonly log: VirtualLogger;
+  readonly log: VirtualAccessoriesLogger;
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     this.accessory = accessory;
@@ -36,7 +36,7 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
-    this.log = new VirtualLogger(this.platform.log);
+    this.log = new VirtualAccessoriesLogger(this.platform.log);
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
@@ -45,6 +45,13 @@ export abstract class Accessory {
     if (!this.accessoryConfiguration.accessoryIsStateful) {
       this.deleteAccessoryState(this.storagePath);
     }
+
+    // set accessory information
+    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
+      .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
+      .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
   }
 
   protected loadAccessoryState(
@@ -93,6 +100,8 @@ export abstract class Accessory {
       }
     }
   }
+
+  protected abstract getAccessoryTypeName(): string;
 
   protected abstract getJsonState(): string;
 

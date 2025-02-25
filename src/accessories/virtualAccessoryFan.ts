@@ -1,5 +1,5 @@
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { Percentage } from '../customTypes.js';
 
@@ -7,6 +7,8 @@ import { Percentage } from '../customTypes.js';
  * Fan - Accessory implementation
  */
 export class Fan extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Fan';
 
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
@@ -25,7 +27,7 @@ export class Fan extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -53,12 +55,6 @@ export class Fan extends Accessory {
         this.states.FanRotationSpeed = cachedRotationSpeed;
       }
     }
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Fan')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -182,6 +178,10 @@ export class Fan extends Accessory {
       [this.rotatioSpeedStorageKey]: this.states.FanRotationSpeed,
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Fan.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(state: boolean): string {

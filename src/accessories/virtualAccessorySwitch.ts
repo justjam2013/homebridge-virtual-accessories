@@ -1,12 +1,12 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
-import { VirtualSensor } from '../sensors/virtualSensor.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 // import { Utils } from '../utils.js';
 
 // import { Duration } from '@js-joda/core';
@@ -15,6 +15,8 @@ import { VirtualSensor } from '../sensors/virtualSensor.js';
  * Switch - Accessory implementation
  */
 export class Switch extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Switch';
 
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
@@ -35,11 +37,11 @@ export class Switch extends Accessory {
    */
   private states = {
     SwitchState: Switch.OFF,
-    SensorState: VirtualSensor.CLOSED_NORMAL,
+    SensorState: Sensor.CLOSED_NORMAL,
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     companionSwitchName?: string,
   ) {
@@ -71,7 +73,7 @@ export class Switch extends Accessory {
       this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
 
       this.states.SwitchState = this.defaultState;
-      this.states.SensorState = VirtualSensor.CLOSED_NORMAL;
+      this.states.SensorState = Sensor.CLOSED_NORMAL;
 
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -112,12 +114,6 @@ export class Switch extends Accessory {
         // }
       }
     }
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Switch')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID);
 
     // get the Switch service if it exists, otherwise create a new Switch service
     // you can create multiple services for each accessory
@@ -253,6 +249,10 @@ export class Switch extends Accessory {
     return json;
   }
 
+  protected getAccessoryTypeName(): string {
+    return Switch.ACCESSORY_TYPE_NAME;
+  }
+
   // Default switch state Off:
   //     switch turns on -> contact opens
   //     switch turns off -> contact closes
@@ -263,9 +263,9 @@ export class Switch extends Accessory {
     let sensorState: number;
 
     if (this.defaultState === Switch.OFF) {
-      sensorState = (this.states.SwitchState === Switch.OFF) ? VirtualSensor.CLOSED_NORMAL : VirtualSensor.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.OFF) ? Sensor.CLOSED_NORMAL : Sensor.OPEN_TRIGGERED;
     } else {
-      sensorState = (this.states.SwitchState === Switch.ON) ? VirtualSensor.CLOSED_NORMAL : VirtualSensor.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.ON) ? Sensor.CLOSED_NORMAL : Sensor.OPEN_TRIGGERED;
     }
 
     return sensorState;

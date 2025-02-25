@@ -1,12 +1,14 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoryPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 /**
  * Lock - Accessory implementation
  */
 export class Lock extends Accessory {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Lock';
 
   static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED;
   static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED;
@@ -34,7 +36,7 @@ export class Lock extends Accessory {
   };
 
   constructor(
-    platform: VirtualAccessoryPlatform,
+    platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
@@ -67,9 +69,6 @@ export class Lock extends Accessory {
     
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Virtual Accessory - Lock')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
       .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.accessoryConfiguration.lock.hardwareFinish);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
@@ -283,6 +282,10 @@ export class Lock extends Accessory {
       [this.autoSecurityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
     });
     return json;
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Lock.ACCESSORY_TYPE_NAME;
   }
 
   static getStateName(state: number): string {
