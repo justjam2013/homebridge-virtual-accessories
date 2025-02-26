@@ -79,6 +79,10 @@ export class CronTrigger extends Trigger {
         sensor.triggerKeySensorState(Sensor.OPEN_TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
         await this.delay(resetDelayMillis);
         sensor.triggerKeySensorState(Sensor.CLOSED_NORMAL, this, triggerConfig.disableTriggerEventLogging);
+
+        if (!this.cronJob.nextRun()) {
+          this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);
+        }
       }),
     );
 
