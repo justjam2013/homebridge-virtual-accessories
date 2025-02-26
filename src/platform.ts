@@ -7,6 +7,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
 import fs from 'fs';
+import { Accessory } from './accessories/virtualAccessory.js';
 
 /**
  * HomebridgePlatform
@@ -101,8 +102,16 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
+
         if (virtualAccessory !== undefined) {
-          this.updateAccessoryName(existingAccessory, configuredAccessory.accessoryName, virtualAccessory.serviceType.UUID);
+          if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
+            this.log.info(`Updating accessory name from ${existingAccessory.displayName} to ${configuredAccessory.accessoryName}`);
+      
+            virtualAccessory.updateConfiguredName();
+            existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
+      
+            this.api.updatePlatformAccessories([existingAccessory]);
+          }      
         } else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
@@ -204,36 +213,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
 
     return accessoryConfigurations;
-  }
-
-  private updateAccessoryName(
-    accessory: PlatformAccessory,
-    name: string,
-    virtualAccessoryServiceUUID: string,
-  ): void {
-    if (accessory.displayName !== name) {
-      this.log.info(`Updating display name ${accessory.displayName} to ${name}`);
-
-      accessory.updateDisplayName(name);
-
-      const services: Service[] = accessory._associatedHAPAccessory.services;
-
-      // Update Service.AccessoryInformation.Name
-      const infoService = services.find(s => s.UUID === this.Service.AccessoryInformation.UUID);
-      const infoName = infoService?.characteristics.find(c => c.UUID === this.Characteristic.Name.UUID);
-      this.log.info(`${accessory.displayName} AccessoryInformation.Name: ${JSON.stringify(infoName)}`);
-      // infoName?.setValue(name);
-
-      // Remove Service.<Type>.ConfiguredName
-      const accessoryService: Service | undefined = services.find(s => s.UUID === virtualAccessoryServiceUUID);
-      const characteristics: Characteristic[] | undefined = accessoryService?.characteristics;
-      const configuredName = characteristics?.find(c => c.UUID === this.Characteristic.ConfiguredName.UUID);
-      this.log.info(`${accessory.displayName} <TypeService>.ConfiguredName: ${JSON.stringify(configuredName)}`);
-      // characteristics?.splice(characteristics?.findIndex(c => c.UUID === this.Characteristic.ConfiguredName.toString()), 1);
-
-      this.api.updatePlatformAccessories([accessory]);
-    }
-
   }
 }
 

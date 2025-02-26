@@ -58,6 +58,10 @@ export abstract class Accessory {
       .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
   }
 
+  updateConfiguredName() {
+    this.service!.updateCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessoryConfiguration.accessoryName);
+  }
+
   protected loadAccessoryState(
     storagePath: string,
   ): string {
