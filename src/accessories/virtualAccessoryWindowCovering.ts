@@ -37,7 +37,7 @@ export class WindowCovering extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.WindowCovering);
+    super(platform, accessory);
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.windowCovering.defaultState === 'open' ? WindowCovering.OPEN : WindowCovering.CLOSED;

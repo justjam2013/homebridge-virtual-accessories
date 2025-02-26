@@ -27,7 +27,7 @@ export class SecuritySystem extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.SecuritySystem);
+    super(platform, accessory);
 
     // First configure the device based on the accessory details
     switch (this.accessoryConfiguration.securitySystem.defaultState) {

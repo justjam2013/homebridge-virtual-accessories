@@ -46,7 +46,7 @@ export class Valve extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.Valve);
+    super(platform, accessory);
 
     switch(this.accessoryConfiguration.valve.type) {
     case 'generic':

@@ -45,7 +45,7 @@ export class Switch extends Accessory {
     accessory: PlatformAccessory,
     companionSwitchName?: string,
   ) {
-    super(platform, accessory, platform.Service.Switch);
+    super(platform, accessory);
 
     if (companionSwitchName !== undefined) {
       this.isCompanionSwitch = true;

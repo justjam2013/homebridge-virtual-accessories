@@ -33,7 +33,7 @@ export class Doorbell extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.Doorbell);
+    super(platform, accessory);
 
     // First configure the device based on the accessory details
     this.states.Volume = this.accessoryConfiguration.doorbell.volume;

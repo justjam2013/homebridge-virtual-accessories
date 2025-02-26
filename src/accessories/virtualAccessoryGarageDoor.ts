@@ -36,7 +36,7 @@ export class GarageDoor extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.GarageDoorOpener);
+    super(platform, accessory);
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.garageDoor.defaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
