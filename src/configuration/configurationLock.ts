@@ -20,7 +20,11 @@ export class LockConfiguration {
     );
 
     const isValidHardwareFinish: boolean = (this.hardwareFinish !== undefined);
-    const isValidAutoSecurityTimeout: boolean = (this.autoSecurityTimeout !== undefined);
+
+    const isValidAutoSecurityTimeout: boolean = (
+      (this.autoSecurityTimeout !== undefined) &&
+      (this.autoSecurityTimeout >= 0)
+    );
     
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(LockConfiguration.prefix + '.defaultState');

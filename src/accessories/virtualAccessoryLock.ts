@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { Utils } from '../utils.js';
 
 /**
  * Lock - Accessory implementation
@@ -22,7 +23,7 @@ export class Lock extends Accessory {
   private readonly audioFeedbackStorageKey: string = 'LockManagementAudioFeedback';
   private readonly autoSecurityTimeoutStorageKey: string = 'LockManagementAutoSecurityTimeout';
 
-  private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
+  private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
   /**
    * These are just used to create a working example
@@ -171,6 +172,20 @@ export class Lock extends Accessory {
     this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
+
+    if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
+      const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;
+      this.securityTimerId = setTimeout(() => {
+        // Reset timer
+        clearTimeout(this.securityTimerId);
+
+        this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
+  
+      }, securityTimeoutMillis);
+ 
+      const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);
+    }
   }
 
   /**
