@@ -7,7 +7,6 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
 import fs from 'fs';
-import { Accessory } from './accessories/virtualAccessory.js';
 
 /**
  * HomebridgePlatform
