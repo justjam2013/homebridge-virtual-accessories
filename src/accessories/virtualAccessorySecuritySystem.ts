@@ -61,12 +61,8 @@ export class SecuritySystem extends Accessory {
 
     this.states.SecuritySystemTargetState = this.states.SecuritySystemCurrentState;
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
     this.service = this.accessory.getService(this.platform.Service.SecuritySystem) || this.accessory.addService(this.platform.Service.SecuritySystem);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
@@ -75,43 +71,23 @@ export class SecuritySystem extends Accessory {
     this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
     this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemTargetState, (this.states.SecuritySystemTargetState));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
+    // register handlers
 
-    // register handlers for the CurrentDoorState Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState)
-      .onGet(this.handleSecuritySystemCurrentStateGet.bind(this)); // GET - bind to the 'handleSecuritySystemCurrentStateGet` method below
+      .onGet(this.handleSecuritySystemCurrentStateGet.bind(this));
 
-    // register handlers for the TargetDoorState Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemTargetState)
-      .onSet(this.handleSecuritySystemTargetStateSet.bind(this)) // SET - bind to the `handleSecuritySystemTargetStateSet` method below
-      .onGet(this.handleSecuritySystemTargetStateGet.bind(this)); // GET - bind to the `handleSecuritySystemTargetStateGet` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
-
+      .onSet(this.handleSecuritySystemTargetStateSet.bind(this))
+      .onGet(this.handleSecuritySystemTargetStateGet.bind(this));
   }
 
   /**
    * Handle "GET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
    */
   async handleSecuritySystemCurrentStateGet() {
-    // implement your own code to check if the device is on
     const securitySystemState = this.states.SecuritySystemCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(securitySystemState)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return securitySystemState;
   }
@@ -120,7 +96,6 @@ export class SecuritySystem extends Accessory {
    * Handle "SET" requests from HomeKit
    */
   async handleSecuritySystemTargetStateSet(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.states.SecuritySystemTargetState = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
@@ -136,25 +111,11 @@ export class SecuritySystem extends Accessory {
 
   /**
    * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   async handleSecuritySystemTargetStateGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const securitySystemState = this.states.SecuritySystemTargetState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${SecuritySystem.getStateName(securitySystemState)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return securitySystemState;
   }
@@ -185,5 +146,4 @@ export class SecuritySystem extends Accessory {
 
     return stateName;
   }
-
 }

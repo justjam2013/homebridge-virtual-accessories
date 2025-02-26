@@ -87,7 +87,7 @@ export class SunEventsTrigger extends Trigger {
         }),
       );
   }
-  
+
   private async getSunEventsData(
     latitude: string,
     longitude: string,
@@ -119,7 +119,7 @@ export class SunEventsTrigger extends Trigger {
         if (!dataFetchResponse.ok) {
           this.log.error(`[${this.sensorConfig.accessoryName}] Error fetching sunrise/sunset data. Response status: ${dataFetchResponse.status}`);
           attempts++;
-          
+
           const baseErrorMsg: string = `Failed ${attempts} of ${maxAttempts} attempts.`;
 
           if (attempts === maxAttempts) {

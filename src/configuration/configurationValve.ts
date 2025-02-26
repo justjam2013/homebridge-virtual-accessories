@@ -23,7 +23,6 @@ export class ValveConfiguration {
         (0 <= this.duration && this.duration <= 3600)
     );
 
-
     // Store fields failing validation
     if (!isValidType) this.errorFields.push(ValveConfiguration.prefix + '.type');
     if (!isValidDuration) this.errorFields.push(ValveConfiguration.prefix + '.duration');
