@@ -54,6 +54,10 @@ export abstract class Accessory {
       .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
   }
 
+  updateConfiguredName() {
+    this.service!.updateCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessoryConfiguration.accessoryName);
+  }
+
   protected loadAccessoryState(
     storagePath: string,
   ): string {
@@ -101,14 +105,14 @@ export abstract class Accessory {
     }
   }
 
-  protected abstract getAccessoryTypeName(): string;
-
-  protected abstract getJsonState(): string;
-
   // Store device state if stateful
   protected storeState() {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
   }
+
+  protected abstract getAccessoryTypeName(): string;
+
+  protected abstract getJsonState(): string;
 }

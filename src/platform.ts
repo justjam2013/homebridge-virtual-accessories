@@ -1,4 +1,4 @@
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { Configuration } from './configuration/configuration.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -97,16 +97,21 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // existingAccessory.context.device = device;
         // this.api.updatePlatformAccessories([existingAccessory]);
-        if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
-          this.log.info(`Updating display name ${existingAccessory.displayName} to ${configuredAccessory.accessoryName}`);
-          existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
-          this.api.updatePlatformAccessories([existingAccessory]);
-        }
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
-        if (virtualAccessory === undefined) {
+
+        if (virtualAccessory !== undefined) {
+          if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
+            this.log.info(`Updating accessory name from ${existingAccessory.displayName} to ${configuredAccessory.accessoryName}`);
+      
+            virtualAccessory.updateConfiguredName();
+            existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
+      
+            this.api.updatePlatformAccessories([existingAccessory]);
+          }      
+        } else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
 
