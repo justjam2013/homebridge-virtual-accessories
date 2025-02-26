@@ -64,8 +64,8 @@ export class CronTrigger extends Trigger {
       triggerConfig.pattern,
       {
         name: 'Schedule Cron Job',
-        startAt: triggerConfig.startDateTime,
-        stopAt: triggerConfig.endDateTime,
+        startAt: this.includeStartTime(triggerConfig.startDateTime),
+        stopAt: this.includeEndTime(triggerConfig.endDateTime),
         timezone: timezone,
       },
       (async () => {
@@ -113,6 +113,23 @@ export class CronTrigger extends Trigger {
 
     const zonedDateTime: ZonedDateTime = ZonedDateTime.of(LocalDateTime.parse(localDatetime), zoneId);
     return zonedDateTime;
+  }
+
+  // The cron implementation is exclusive of start and end times
+  // To include start time, setting start time to one second earlier
+  // To include end time, setting end time to one second later
+  private includeStartTime(startTime: string): string {
+    return this.adjustTime(startTime, -1);
+  }
+
+  private includeEndTime(endTime: string): string {
+    return this.adjustTime(endTime, 1);
+  }
+
+  private adjustTime(time: string, adjusmentSeconds: number): string {
+    let localDateTime = LocalDateTime.parse(time);
+    localDateTime = localDateTime.plusSeconds(adjusmentSeconds);
+    return localDateTime.format(DateTimeFormatter.ISO_DATE_TIME);
   }
 }
 
