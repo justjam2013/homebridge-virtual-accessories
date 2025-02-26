@@ -1,6 +1,6 @@
  
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
@@ -37,10 +37,6 @@ export class Valve extends Accessory {
     ValveActive: Valve.INACTIVE,
     ValveInUse: Valve.NOT_IN_USE,
   };
-
-  getServiceType(): WithUUID<typeof Service> {
-    return this.platform.Service.Valve;
-  }
 
   constructor(
     platform: VirtualAccessoriesPlatform,
