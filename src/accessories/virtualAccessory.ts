@@ -18,6 +18,7 @@ export abstract class Accessory {
   readonly accessory: PlatformAccessory;
 
   readonly accessoryConfiguration: AccessoryConfiguration;
+  readonly log: VirtualAccessoriesLogger;
 
   protected defaultState;
 
@@ -25,7 +26,7 @@ export abstract class Accessory {
 
   protected companionSensor?: Sensor;
 
-  readonly log: VirtualAccessoriesLogger;
+  private accessoryInformationService?: Service;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -47,7 +48,8 @@ export abstract class Accessory {
     }
 
     // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+    this.accessoryInformationService = this.accessory.getService(this.platform.Service.AccessoryInformation);
+    this.accessoryInformationService!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
       .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
@@ -55,7 +57,10 @@ export abstract class Accessory {
   }
 
   updateConfiguredName() {
-    this.service!.updateCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessoryConfiguration.accessoryName);
+    const configuredName = this.accessoryInformationService!.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+    if (configuredName !== undefined) {
+      this.accessoryInformationService!.removeCharacteristic(configuredName);
+    }
   }
 
   protected loadAccessoryState(

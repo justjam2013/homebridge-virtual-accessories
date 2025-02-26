@@ -105,10 +105,10 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         if (virtualAccessory !== undefined) {
           if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
             this.log.info(`Updating accessory name from ${existingAccessory.displayName} to ${configuredAccessory.accessoryName}`);
-      
+
             virtualAccessory.updateConfiguredName();
             existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
-      
+
             this.api.updatePlatformAccessories([existingAccessory]);
           }      
         } else {
@@ -306,7 +306,7 @@ class Patch {
         }
       }
     }
-    
+
     if (saveMods) {
       log.info('Saving patched configuration');
 
