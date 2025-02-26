@@ -19,10 +19,6 @@ export class Doorbell extends Accessory {
 
   private companionSensorResetTimerId: ReturnType<typeof setTimeout> | undefined;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   private states = {
     Volume: 100,
   };
@@ -38,18 +34,10 @@ export class Doorbell extends Accessory {
     // First configure the device based on the accessory details
     this.states.Volume = this.accessoryConfiguration.doorbell.volume;
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
     this.service = this.accessory.getService(this.platform.Service.Doorbell) || this.accessory.addService(this.platform.Service.Doorbell);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
-
-    // register handlers for the ProgrammableSwitchEvent Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent)
       .onGet(this.handleProgrammableSwitchEventGet.bind(this)); // GET - bind to the 'handleProgrammableSwitchEventGet` method below
 
@@ -80,7 +68,6 @@ export class Doorbell extends Accessory {
 
   /**
    * Handle "GET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
    */
   async handleProgrammableSwitchEventGet(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
@@ -88,16 +75,12 @@ export class Doorbell extends Accessory {
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(pressEvent)}`);
 
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-
     return pressEvent;
   }
   /**
    * Handle "SET" requests from HomeKit
    */
   async handleVolumeSet(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.states.Volume = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
@@ -105,35 +88,19 @@ export class Doorbell extends Accessory {
 
   /**
    * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   async handleVolumeGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const volume = this.states.Volume;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return volume;
   }
 
   /**
    * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   async companionSwitchSetOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     const newState = value as boolean;
     this.companionSwitch!.setCompanionSwitchState(newState);
 

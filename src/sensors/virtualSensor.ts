@@ -30,10 +30,6 @@ export abstract class Sensor extends Accessory {
 
   private trigger: Trigger | undefined;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   protected states = {
     SensorState: Sensor.CLOSED_NORMAL,
   };
@@ -53,8 +49,6 @@ export abstract class Sensor extends Accessory {
       this.isCompanionSensor = true;
     }
 
-    // get the Switch service if it exists, otherwise create a new Switch service
-    // you can create multiple services for each accessory
     if (!this.isCompanionSensor) {
       this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService);
     } else {
@@ -62,8 +56,6 @@ export abstract class Sensor extends Accessory {
                      this.accessory.addService(sensorService, companionSensorName, accessory.UUID + this.uuidPostfix);
     }
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     if (!this.isCompanionSensor) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
@@ -74,10 +66,8 @@ export abstract class Sensor extends Accessory {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
+    // register handlers
 
-    // register handlers for the On/Off Characteristic
     this.service.getCharacteristic(this.sensorCharacteristic)
       .onGet(this.handleSensorStateGet.bind(this)); // GET - bind to the `handleSensorStateGet` method below
 

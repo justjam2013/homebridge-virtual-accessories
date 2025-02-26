@@ -16,7 +16,6 @@ export class SecuritySystemConfiguration {
       [ 'awayarm', 'stayarm', 'nightarm', 'disarmed' ].includes(this.defaultState)
     );
 
-
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(SecuritySystemConfiguration.prefix + '.defaultState');
 

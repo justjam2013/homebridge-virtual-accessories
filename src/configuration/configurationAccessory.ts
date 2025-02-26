@@ -87,7 +87,7 @@ export class AccessoryConfiguration {
 
   @Type(PingTriggerConfiguration)
     pingTrigger!: PingTriggerConfiguration;
-  
+
   @Type(CronTriggerConfiguration)
     cronTrigger!: CronTriggerConfiguration;
 
@@ -230,7 +230,7 @@ export class AccessoryConfiguration {
   private isValidSecuritySystem(): boolean {
     let isValidSecuritySystem: boolean = false;
     let securitySystemErrorFields: string[] = [ SecuritySystemConfiguration.prefix ];
-     
+
     if (this.securitySystem !== undefined) {
       [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
     }
@@ -271,7 +271,7 @@ export class AccessoryConfiguration {
   private isValidSwitch(): boolean {
     let isValidSwitch: boolean = false;
     let switchErrorFields: string[] = [ SwitchConfiguration.prefix ];
-     
+
     if (this.switch !== undefined) {
       [isValidSwitch, switchErrorFields] = this.switch.isValid(this.accessoryIsStateful);
     }
@@ -304,7 +304,7 @@ export class AccessoryConfiguration {
   private isValidValve(): boolean {
     let isValidValve: boolean = false;
     let valveErrorFields: string[] = [ ValveConfiguration.prefix ];
-     
+
     if (this.valve !== undefined) {
       [isValidValve, valveErrorFields] = this.valve.isValid();
     }
@@ -319,7 +319,7 @@ export class AccessoryConfiguration {
   private isValidWindowCovering(): boolean {
     let isValidWindowCovering: boolean = false;
     let windowCoveringErrorFields: string[] = [ WindowCoveringConfiguration.prefix ];
-     
+
     if (this.windowCovering !== undefined) {
       [isValidWindowCovering, windowCoveringErrorFields] = this.windowCovering.isValid();
     }

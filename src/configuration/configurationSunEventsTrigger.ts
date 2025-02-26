@@ -16,7 +16,6 @@ export class SunEventsTriggerConfiguration {
   private static latitudePattern = '^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$';
   private static longitudePattern = '^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$';
 
-
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {

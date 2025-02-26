@@ -49,5 +49,4 @@ export class VirtualAccessoriesLogger {
   log(level: LogLevel, message: string, parameters: any[] = []): void {
     this.platformLogger.log(level, message, ...parameters);
   }
-
 }

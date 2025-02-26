@@ -25,7 +25,7 @@ export class LockConfiguration {
       (this.autoSecurityTimeout !== undefined) &&
       (this.autoSecurityTimeout >= 0)
     );
-    
+
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(LockConfiguration.prefix + '.defaultState');
     if (!isValidHardwareFinish) this.errorFields.push(LockConfiguration.prefix + '.hardwareFinish');

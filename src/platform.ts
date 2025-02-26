@@ -10,8 +10,6 @@ import fs from 'fs';
 
 /**
  * HomebridgePlatform
- * This class is the main constructor for your plugin, this is where you should
- * parse the user config and discover/register accessories with Homebridge.
  */
 export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
@@ -53,7 +51,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   }
 
   /**
-   * This is an example method showing how to register discovered accessories.
    * Accessories must only be registered once, previously created accessories
    * must not be registered again to prevent "duplicate UUID" errors.
    */
@@ -114,11 +111,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         } else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
-
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
       } else {
         // the accessory does not yet exist, so we need to create it
         this.log.info(`Adding new accessory: ${configuredAccessory.accessoryName}`);

@@ -1,5 +1,3 @@
- 
-
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -29,10 +27,6 @@ export class Valve extends Accessory {
   // private readonly timerDurationStorageKey: string = 'TimerDuration';
   // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   private states = {
     ValveActive: Valve.INACTIVE,
     ValveInUse: Valve.NOT_IN_USE,
@@ -71,7 +65,7 @@ export class Valve extends Accessory {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
-    
+
       if (cachedState !== undefined) {
         this.states.ValveActive = cachedState;
         this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
@@ -88,12 +82,8 @@ export class Valve extends Accessory {
       Timer.Units.Seconds,
     );
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
     this.service = this.accessory.getService(this.platform.Service.Valve) || this.accessory.addService(this.platform.Service.Valve);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
@@ -102,16 +92,14 @@ export class Valve extends Accessory {
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
     this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
+    // register handlers
 
-    // register handlers for the ValveType Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.ValveType)
       .onGet(this.handleValveTypeGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Active)
-      .onSet(this.handleActiveSet.bind(this)) // SET - bind to the 'handleVolumeSet` method below
-      .onGet(this.handleActiveGet.bind(this)); // GET - bind to the 'handleActiveGet` method below
+      .onSet(this.handleActiveSet.bind(this))
+      .onGet(this.handleActiveGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.InUse)
       .onGet(this.handleInUseGet.bind(this));
@@ -122,32 +110,15 @@ export class Valve extends Accessory {
 
     this.service.getCharacteristic(this.platform.Characteristic.RemainingDuration)
       .onGet(this.handleRemainingDurationGet.bind(this));
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
-
   }
 
   /**
    * Handle "GET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
    */
   async handleValveTypeGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const valveType = this.valveType;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${Valve.getValveTypeName(valveType)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return valveType;
   }
@@ -156,7 +127,6 @@ export class Valve extends Accessory {
    * Handle "SET" requests from HomeKit
    */
   async handleActiveSet(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.states.ValveActive = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${Valve.getActiveName(this.states.ValveActive)}`);
@@ -184,48 +154,26 @@ export class Valve extends Accessory {
 
   /**
    * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   async handleActiveGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const valveActive = this.states.ValveActive;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${Valve.getActiveName(valveActive)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return valveActive;
   }
 
   /**
    * Handle "GET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
    */
   async handleInUseGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const valveInUse = this.states.ValveInUse;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${Valve.getInUseName(valveInUse)}`);
 
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-
     return valveInUse;
   }
 
-  /**
-   * Duration
-   */
   async handleSetDurationSet(value: CharacteristicValue) {
     const duration = value as number;
 

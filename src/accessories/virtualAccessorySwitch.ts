@@ -31,10 +31,6 @@ export class Switch extends Accessory {
 
   private companionSwitchPostfix: string = '-switch';
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   private states = {
     SwitchState: Switch.OFF,
     SensorState: Sensor.CLOSED_NORMAL,
@@ -79,7 +75,7 @@ export class Switch extends Accessory {
       if (this.accessoryConfiguration.accessoryIsStateful) {
         const accessoryState = this.loadAccessoryState(this.storagePath);
         const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
-  
+
         if (cachedState !== undefined) {
           this.states.SwitchState = cachedState;
           this.states.SensorState = this.determineSensorState();
@@ -115,8 +111,6 @@ export class Switch extends Accessory {
       }
     }
 
-    // get the Switch service if it exists, otherwise create a new Switch service
-    // you can create multiple services for each accessory
     if (!this.isCompanionSwitch) {
       this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
     } else {
@@ -124,8 +118,6 @@ export class Switch extends Accessory {
                      this.accessory.addService(this.platform.Service.Switch, companionSwitchName, accessory.UUID + this.companionSwitchPostfix);
     }
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     if (!this.isCompanionSwitch) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
@@ -136,10 +128,8 @@ export class Switch extends Accessory {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Switch Current State: ${Switch.getStateName(this.states.SwitchState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.SwitchState));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
+    // register handlers
 
-    // register handlers for the On/Off Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this)) // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this)); // GET - bind to the `getOn` method below
@@ -168,10 +158,8 @@ export class Switch extends Accessory {
 
   /**
    * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.states.SwitchState = value as boolean;
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
@@ -200,25 +188,11 @@ export class Switch extends Accessory {
 
   /**
    * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   async getOn(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const switchState = this.states.SwitchState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Switch.getStateName(switchState)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return switchState;
   }

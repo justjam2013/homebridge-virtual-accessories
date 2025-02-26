@@ -9,7 +9,7 @@ import { Accessory } from './virtualAccessory.js';
  * WindowCovering - Accessory implementation
  */
 export class WindowCovering extends Accessory {
-  
+
   static readonly ACCESSORY_TYPE_NAME: string = 'Window Covering';
 
   static readonly CLOSED: number = 0;   // 0%
@@ -23,10 +23,6 @@ export class WindowCovering extends Accessory {
 
   private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   private states = {
     WindowCoveringTargetPosition: WindowCovering.CLOSED,
     WindowCoveringCurrentPosition: WindowCovering.CLOSED,
@@ -56,12 +52,8 @@ export class WindowCovering extends Accessory {
 
     this.states.WindowCoveringTargetPosition = this.states.WindowCoveringCurrentPosition;
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
     this.service = this.accessory.getService(this.platform.Service.WindowCovering) || this.accessory.addService(this.platform.Service.WindowCovering);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
@@ -70,56 +62,34 @@ export class WindowCovering extends Accessory {
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.WindowCoveringTargetPosition));
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
 
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
+    // register handlers
 
-    // register handlers for the CurrentDoorState Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
-      .onGet(this.handleCurrentPositionGet.bind(this)); // GET - bind to the 'handleCurrentPositionGet` method below
+      .onGet(this.handleCurrentPositionGet.bind(this));
 
-    // register handlers for the TargetDoorState Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.TargetPosition)
-      .onSet(this.handleTargetPositionSet.bind(this)) // SET - bind to the `handleTargetPositionSet` method below
-      .onGet(this.handleTargetPositionGet.bind(this)); // GET - bind to the `handleTargetPositionGet` method below
+      .onSet(this.handleTargetPositionSet.bind(this))
+      .onGet(this.handleTargetPositionGet.bind(this));
 
-    // register handlers for the ObstructionDetected Characteristic
     this.service.getCharacteristic(this.platform.Characteristic.PositionState)
-      .onGet(this.handlePositionStateGet.bind(this)); // GET - bind to the 'handlePositionStateGet` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
-
+      .onGet(this.handlePositionStateGet.bind(this));
   }
 
   /**
    * Handle "GET" requests from HomeKit
    */
   async handleCurrentPositionGet() {
-    // implement your own code to check if the device is on
     const windowCoveringCurrentPosition = this.states.WindowCoveringCurrentPosition;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${WindowCovering.getStateName(windowCoveringCurrentPosition)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return windowCoveringCurrentPosition;
   }
 
   /**
    * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   async handleTargetPositionSet(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.states.WindowCoveringTargetPosition = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${WindowCovering.getStateName(this.states.WindowCoveringTargetPosition)}`);
@@ -128,7 +98,7 @@ export class WindowCovering extends Accessory {
     this.states.WindowCoveringPositionState = (this.states.WindowCoveringTargetPosition === WindowCovering.OPEN) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
     this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${WindowCovering.getPositionName(this.states.WindowCoveringPositionState)}`);
-    
+
     // PositionState STOPPED
     const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
     const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
@@ -151,25 +121,11 @@ export class WindowCovering extends Accessory {
 
   /**
    * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
    */
   async handleTargetPositionGet(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const windowCoveringTargetPosition = this.states.WindowCoveringTargetPosition;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${WindowCovering.getStateName(windowCoveringTargetPosition)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return windowCoveringTargetPosition;
   }
@@ -178,13 +134,9 @@ export class WindowCovering extends Accessory {
    * Handle "GET" requests from HomeKit
    */
   async handlePositionStateGet() {
-    // implement your own code to check if the device is on
     const windowCoveringPositionState = this.states.WindowCoveringPositionState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${WindowCovering.getPositionName(windowCoveringPositionState)}`);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return windowCoveringPositionState;
   }
