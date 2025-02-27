@@ -76,7 +76,7 @@ export class GarageDoor extends Accessory {
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleCurrentDoorStateGet() {
+  async handleCurrentDoorStateGet(): Promise<CharacteristicValue> {
     const garageDoorCurrentState = this.states.GarageDoorCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${GarageDoor.getStateName(garageDoorCurrentState)}`);
@@ -127,7 +127,7 @@ export class GarageDoor extends Accessory {
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleObstructionDetectedGet() {
+  async handleObstructionDetectedGet(): Promise<CharacteristicValue> {
     const obstructionDetected = this.states.ObstructionDetected;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);

@@ -84,7 +84,7 @@ export class SecuritySystem extends Accessory {
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleSecuritySystemCurrentStateGet() {
+  async handleSecuritySystemCurrentStateGet(): Promise<CharacteristicValue> {
     const securitySystemState = this.states.SecuritySystemCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(securitySystemState)}`);
