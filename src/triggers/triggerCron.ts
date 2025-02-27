@@ -122,16 +122,20 @@ export class CronTrigger extends Trigger {
   // The cron implementation is exclusive of start and end times
   // To include start time, setting start time to one second earlier
   // To include end time, setting end time to one second later
-  private includeStartTime(startTime: string): string {
+  private includeStartTime(startTime: string): string | undefined {
     return this.adjustTime(startTime, -1);
   }
 
-  private includeEndTime(endTime: string): string {
+  private includeEndTime(endTime: string): string | undefined {
     return this.adjustTime(endTime, 1);
   }
 
-  private adjustTime(time: string, adjusmentSeconds: number): string {
-    let localDateTime = LocalDateTime.parse(time);
+  private adjustTime(datetime: string, adjusmentSeconds: number): string | undefined {
+    if (datetime === undefined) {
+      return undefined;
+    }
+
+    let localDateTime = LocalDateTime.parse(datetime);
     localDateTime = localDateTime.plusSeconds(adjusmentSeconds);
     return localDateTime.format(DateTimeFormatter.ISO_DATE_TIME);
   }
