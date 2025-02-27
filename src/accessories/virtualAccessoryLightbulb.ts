@@ -144,16 +144,16 @@ export class Lightbulb extends Accessory {
   }
 
   // Receive value in mireds
-  async setColorTemperature(miredValue: CharacteristicValue) {
-    this.states.LightbulbColorTemperature = this.miredToKelvin(miredValue as number);
+  async setColorTemperature(value: CharacteristicValue) {
+    this.states.LightbulbColorTemperature = this.miredToKelvin(value as number);
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${value} Mired)`);
   }
 
   // Return value in mireds
-  async getColorTemperature() {
+  async getColorTemperature(): Promise<CharacteristicValue> {
     const miredValue = this.kelvinToMired(this.states.LightbulbColorTemperature);
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);

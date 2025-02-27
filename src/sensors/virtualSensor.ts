@@ -1,4 +1,4 @@
-import type { PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
@@ -91,7 +91,7 @@ export abstract class Sensor extends Accessory {
   /**
    * Handle requests to get the current value of the "Sensor State" characteristic
    */
-  async handleSensorStateGet() {
+  async handleSensorStateGet(): Promise<CharacteristicValue> {
     const sensorState = this.states.SensorState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${Sensor.getStateName(sensorState)}`);

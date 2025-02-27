@@ -137,7 +137,7 @@ export class Lock extends Accessory {
   /**
    * Handle "GET" requests from HomeKit
    */
-  async handleLockCurrentStateGet() {
+  async handleLockCurrentStateGet(): Promise<CharacteristicValue> {
     const lockState = this.states.LockCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${Lock.getStateName(lockState)}`);
@@ -240,7 +240,7 @@ export class Lock extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAudioFeedback}`);
   }
 
-  async handleAudioFeedbackGet() {
+  async handleAudioFeedbackGet(): Promise<CharacteristicValue> {
     const audioFeedback = this.states.LockManagementAudioFeedback;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${audioFeedback}`);
@@ -255,7 +255,7 @@ export class Lock extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.states.LockManagementAutoSecurityTimeout}`);
   }
 
-  async handleLockManagementAutoSecurityTimeoutGet() {
+  async handleLockManagementAutoSecurityTimeoutGet(): Promise<CharacteristicValue> {
     const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
