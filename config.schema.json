@@ -47,6 +47,7 @@
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Security System", "enum": ["securitysystem"] },
@@ -62,7 +63,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && !(model.devices[arrayIndices].accessoryType === 'switch' && model.devices[arrayIndices].switch.hasResetTimer === true);"
+                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && !(model.devices[arrayIndices].accessoryType === 'switch' && model.devices[arrayIndices].switch.hasResetTimer === true);"
               }
             },
             "doorbell": {
@@ -136,6 +137,78 @@
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
+            },
+            "humidifierDehumidifier": {
+              "title": "Humidifier/Dehumidifier",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Type *",
+                  "description": "Device type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Humidifier", "enum": ["humidifier"] },
+                    { "title": "Dehumidifier", "enum": ["dehumidifier"] },
+                    { "title": "Humidifier and Dehumidifier", "enum": ["auto"] }
+                  ]
+                },
+                "humidifierThreshold": {
+                  "title": "Humidifier Threshold *",
+                  "description": "Humidity level below which the humidifier turns on (0% - 100%)",
+                  "type": "integer",
+                  "placeholder": 0,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['humidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
+                "dehumidifierThreshold": {
+                  "title": "Dehumidifier Threshold *",
+                  "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
+                  "type": "integer",
+                  "placeholder": 0,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['dehumidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'humidifierdehumidifier';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "humidifier" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "humidifierThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "dehumidifier" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "dehumidifierThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "humidifierThreshold", "dehumidifierThreshold" ]
+                  }
+                }
+              ]
             },
             "lightbulb": {
               "title": "Lightbulb",
@@ -632,8 +705,23 @@
               "then": {
                 "required": [ "garageDoor" ],
                 "properties": {
-                  "garagedoor": {
+                  "garageDoor": {
                     "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "humidifierdehumidifier" }
+                }
+              },
+              "then": {
+                "required": [ "humidifierDehumidifier" ],
+                "properties": {
+                  "humidifierDehumidifier": {
+                    "required": [ "type" ]
                   }
                 }
               }

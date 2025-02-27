@@ -7,6 +7,7 @@ import { CompanionSensorConfiguration } from './configurationCompanionSensor.js'
 import { DoorbellConfiguration } from './configurationDoorbell.js';
 import { FanConfiguration } from './configurationFan.js';
 import { GarageDoorConfiguration } from './configurationGarageDoor.js';
+import { HumidifierDehumidifierConfiguration } from './configurationHumidifierDehumidifier.js';
 import { LightbulbConfiguration } from './configurationLightbulb.js';
 import { LockConfiguration } from './configurationLock.js';
 import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
@@ -44,6 +45,10 @@ export class AccessoryConfiguration {
   // Garage Door
   @Type(GarageDoorConfiguration)
     garageDoor!: GarageDoorConfiguration;
+
+  // HumidifierDehumidifier
+  @Type(HumidifierDehumidifierConfiguration)
+    humidifierDehumidifier!: HumidifierDehumidifierConfiguration;
 
   // Lightbulb
   @Type(LightbulbConfiguration)
@@ -126,6 +131,8 @@ export class AccessoryConfiguration {
         return this.isValidFan();
       case 'garagedoor':
         return this.isValidGarageDoor();
+      case 'humidifierdehumidifier':
+        return this.isValidHumidifierDehumidifier();
       case 'lightbulb':
         return this.isValidLighbulb();
       case 'lock':
@@ -194,6 +201,21 @@ export class AccessoryConfiguration {
 
     return (
       isValidGarageDoor
+    );
+  };
+
+  private isValidHumidifierDehumidifier(): boolean {
+    let isValidHumidifierDehumidifier: boolean = false;
+    let humidifierDehumidifierErrorFields: string[] = [ HumidifierDehumidifierConfiguration.prefix ];
+
+    if (this.humidifierDehumidifier !== undefined) {
+      [isValidHumidifierDehumidifier, humidifierDehumidifierErrorFields] = this.humidifierDehumidifier.isValid();
+    }
+
+    this.errorFields.push(...humidifierDehumidifierErrorFields);
+
+    return (
+      isValidHumidifierDehumidifier
     );
   };
 
