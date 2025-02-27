@@ -91,6 +91,8 @@ export class HumidifierDehumidifier extends Accessory {
       }
     }
 
+    this.setDeviceOperationalCondition();
+
     // get the HumidifierDehumidifier service if it exists, otherwise create a new LightBulb service
     this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
 
@@ -139,6 +141,8 @@ export class HumidifierDehumidifier extends Accessory {
   async handleActiveSet(value: CharacteristicValue) {
     this.states.HumidifierDehumidifierActive = value as number;
 
+    this.setDeviceOperationalCondition();
+
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${HumidifierDehumidifier.getActiveName(this.states.HumidifierDehumidifierActive)}`);
   }
 
@@ -172,18 +176,8 @@ export class HumidifierDehumidifier extends Accessory {
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(this.states.HumidifierDehumidifierTargetState)}`);
 
-    switch (this.states.HumidifierDehumidifierTargetState) {
-    case HumidifierDehumidifier.AUTO:
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.IDLE;
-      break;
-    case HumidifierDehumidifier.HUMIDIFIER:
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.HUMIDIFYING;
-      break;
-    case HumidifierDehumidifier.DEHUMIDIFIER:
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.DEHUMIDIFYING;
-      break;
-    }
-    this.service!.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
+    this.setDeviceOperationalCondition();
+
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
   }
 
@@ -212,11 +206,9 @@ export class HumidifierDehumidifier extends Accessory {
   async handleRelativeHumidityDehumidifierThresholdSet(value: CharacteristicValue) {
     this.states.DehumidifierThreshold = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.DehumidifierThreshold)}`);
+    this.setDeviceOperationalCondition();
 
-    // If CurrentRelativeHumidity > DehumidifierThreshold
-    // If HumidifierDehumidifierActive ACTIVE
-    // Set  
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.DehumidifierThreshold)}`);
   }
 
   async handleRelativeHumidityDehumidifierThresholdGet(): Promise<CharacteristicValue>  {
@@ -230,9 +222,9 @@ export class HumidifierDehumidifier extends Accessory {
   async handleRelativeHumidityHumidifierThresholdSet(value: CharacteristicValue) {
     this.states.HumidifierThreshold = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.HumidifierThreshold)}`);
+    this.setDeviceOperationalCondition();
 
-    // TODO
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.HumidifierThreshold)}`);
   }
 
   async handleRelativeHumidityHumidifierThresholdGet(): Promise<CharacteristicValue> {
@@ -271,6 +263,26 @@ export class HumidifierDehumidifier extends Accessory {
 
   private deviceDehumidifies(): boolean {
     return ['auto', 'dehumidifier'].includes(this.deviceType);
+  }
+
+  private setDeviceOperationalCondition() {
+    if (this.states.HumidifierDehumidifierActive === HumidifierDehumidifier.ACTIVE) {
+      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.IDLE;
+
+      if (this.states.CurrentRelativeHumidity < this.states.HumidifierThreshold) {
+        if (this.deviceHumidifies()) {
+          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.HUMIDIFYING;
+        }
+      }
+      else if (this.states.CurrentRelativeHumidity > this.states.DehumidifierThreshold) {
+        if (this.deviceDehumidifies()) {
+          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.DEHUMIDIFYING;
+        }
+      }
+    }
+    else {
+      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.INACTIVE;
+    }
   }
 
   static getActiveName(event: number): string {
