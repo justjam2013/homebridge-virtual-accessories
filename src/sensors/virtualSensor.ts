@@ -19,8 +19,8 @@ export abstract class Sensor extends Accessory {
   static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
   static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
 
-  static readonly CLOSED_NORMAL: number = 0;
-  static readonly OPEN_TRIGGERED: number = 1;
+  static readonly NORMAL: number = 0;
+  static readonly TRIGGERED: number = 1;
 
   private uuidPostfix: string = '-sensor';
 
@@ -31,7 +31,7 @@ export abstract class Sensor extends Accessory {
   private trigger: Trigger | undefined;
 
   protected states = {
-    SensorState: Sensor.CLOSED_NORMAL,
+    SensorState: Sensor.NORMAL,
   };
 
   constructor(
@@ -145,8 +145,8 @@ export abstract class Sensor extends Accessory {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case Sensor.CLOSED_NORMAL: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case Sensor.OPEN_TRIGGERED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case Sensor.NORMAL: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
+    case Sensor.TRIGGERED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

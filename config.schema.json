@@ -338,7 +338,7 @@
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Sensor Type *",
+                  "title": "Type *",
                   "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
                   "type": "string",
                   "oneOf": [
@@ -352,7 +352,7 @@
                   ]
                 },
                 "trigger": {
-                  "title": "Sensor Trigger *",
+                  "title": "Trigger *",
                   "description": "Sensor trigger source",
                   "type": "string",
                   "oneOf": [
@@ -481,7 +481,7 @@
                   "minimum": 0
                 },
                 "isDisabled": {
-                  "title": "Disable Ping Trigger",
+                  "title": "Disable Trigger",
                   "description": "Turn off/on trigger",
                   "type": "boolean"
                 }
@@ -525,7 +525,7 @@
                   "type": "boolean"
                 },
                 "isDisabled": {
-                  "title": "Disable Cron Trigger",
+                  "title": "Disable Trigger",
                   "description": "Turn off/on trigger",
                   "type": "boolean"
                 }
@@ -573,7 +573,7 @@
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "isDisabled": {
-                  "title": "Disable Sunrise/Sunset Trigger",
+                  "title": "Disable Trigger",
                   "description": "Turn off/on trigger",
                   "type": "boolean"
                 }
