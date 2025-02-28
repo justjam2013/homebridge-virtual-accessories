@@ -33,7 +33,7 @@ export class Switch extends Accessory {
 
   private states = {
     SwitchState: Switch.OFF,
-    SensorState: Sensor.CLOSED_NORMAL,
+    SensorState: Sensor.NORMAL,
   };
 
   constructor(
@@ -69,7 +69,7 @@ export class Switch extends Accessory {
       this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
 
       this.states.SwitchState = this.defaultState;
-      this.states.SensorState = Sensor.CLOSED_NORMAL;
+      this.states.SensorState = Sensor.NORMAL;
 
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -237,9 +237,9 @@ export class Switch extends Accessory {
     let sensorState: number;
 
     if (this.defaultState === Switch.OFF) {
-      sensorState = (this.states.SwitchState === Switch.OFF) ? Sensor.CLOSED_NORMAL : Sensor.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.OFF) ? Sensor.NORMAL : Sensor.TRIGGERED;
     } else {
-      sensorState = (this.states.SwitchState === Switch.ON) ? Sensor.CLOSED_NORMAL : Sensor.OPEN_TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.ON) ? Sensor.NORMAL : Sensor.TRIGGERED;
     }
 
     return sensorState;
