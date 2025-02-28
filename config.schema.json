@@ -548,6 +548,12 @@
                     { "title": "Golden Hour", "enum": ["goldenhour"] }
                   ]
                 },
+                "offset": {
+                  "title": "Time Offset",
+                  "description": "Minutes before (-) or after (+) the event",
+                  "type": "number",
+                  "placeholder": 0
+                },
                 "latitude": {
                   "title": "Latitude *",
                   "description": "Latitude for your location (https://www.latlong.net/)",

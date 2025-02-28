@@ -8,6 +8,7 @@ import '@js-joda/timezone';
  */
 export class SunEventsTriggerConfiguration {
   event!: string;
+  offset: number = 0;
   latitude!: string;
   longitude!: string;
   zoneId!: string;
