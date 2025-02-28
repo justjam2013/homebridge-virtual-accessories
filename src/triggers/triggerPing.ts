@@ -123,13 +123,13 @@ export class PingTrigger extends Trigger {
         if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
           trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
 
-          trigger.sensor.triggerKeySensorState(Sensor.OPEN_TRIGGERED, trigger);
+          trigger.sensor.triggerKeySensorState(Sensor.TRIGGERED, trigger);
         }
       } else {
         trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
-        trigger.sensor.triggerKeySensorState(Sensor.CLOSED_NORMAL, trigger);
+        trigger.sensor.triggerKeySensorState(Sensor.NORMAL, trigger);
       }
 
       session.close ();
