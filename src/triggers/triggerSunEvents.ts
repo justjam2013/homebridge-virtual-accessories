@@ -6,6 +6,7 @@ import { Utils } from '../utils.js';
 import { Cron } from 'croner';
 import { Type, deserialize } from 'typeserializer';
 import 'reflect-metadata';
+import { DateTimeFormatter, LocalDateTime } from '@js-joda/core';
 
 /**
  * SunEventsTrigger - Trigger implementation
@@ -81,7 +82,7 @@ export class SunEventsTrigger extends Trigger {
             if (response.status !== SunEventsResponse.OK) {
               this.log.error(`[${this.sensorConfig.accessoryName}] Sunrise/sunset server returned error response: ${response.status}`);
             } else {
-              await this.setupTriggerCron(triggerConfig.event, response.results, sensor);
+              await this.setupTriggerCron(triggerConfig.event, triggerConfig.offset, response.results, sensor);
             }
           }
         }),
@@ -163,6 +164,7 @@ export class SunEventsTrigger extends Trigger {
 
   private async setupTriggerCron(
     event: string,
+    offset: number,
     dailyDetails: DailyDetails,
     sensor: Sensor,
   ) {
@@ -182,9 +184,13 @@ export class SunEventsTrigger extends Trigger {
       return;
     }
 
-    const cronRunTimestamp: string = `${dailyDetails.date}T${this.militaryTime(eventTime)}`;
+    let cronRunTimestamp: string = `${dailyDetails.date}T${this.militaryTime(eventTime)}`;
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Cron run timestamp: ${cronRunTimestamp}; offset: ${offset} minutes`);
+    if (offset !== 0) {
+      cronRunTimestamp = this.addOffset(cronRunTimestamp, offset);
+    }
     const runTimezone: string = dailyDetails.timezone;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating cron for: event ${event}; timestamp ${cronRunTimestamp}; timezone ${runTimezone}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating cron for: event ${event}; timestamp: ${cronRunTimestamp}; timezone: ${runTimezone}`);
 
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
@@ -216,6 +222,11 @@ export class SunEventsTrigger extends Trigger {
 
   private delay(millis: number) {
     return new Promise(resolve => setTimeout(resolve, millis));
+  }
+
+  private addOffset(datetime: string, offset: number): string {
+    const offsetDateTime: string = LocalDateTime.parse(datetime).plusMinutes(offset).format(DateTimeFormatter.ISO_DATE_TIME);
+    return offsetDateTime;
   }
 
   private militaryTime(
