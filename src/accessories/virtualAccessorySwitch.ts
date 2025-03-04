@@ -7,9 +7,9 @@ import { Timer } from '../timer.js';
 import { NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Sensor } from '../sensors/virtualSensor.js';
-// import { Utils } from '../utils.js';
+import { Utils } from '../utils.js';
 
-// import { Duration } from '@js-joda/core';
+import { Duration } from '@js-joda/core';
 
 /**
  * Switch - Accessory implementation
@@ -22,9 +22,9 @@ export class Switch extends Accessory {
   static readonly OFF: boolean = false;
 
   private readonly stateStorageKey: string = 'SwitchState';
-  // private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
-  // private readonly timerDurationStorageKey: string = 'TimerDuration';
-  // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
+  private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
+  private readonly timerDurationStorageKey: string = 'TimerDuration';
+  private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
   private durationTimer?: Timer;
   private isCompanionSwitch: boolean = false;
@@ -50,7 +50,12 @@ export class Switch extends Accessory {
     // If this is a companion switch to a doorbell, it will be a plain Switch
     if (!this.isCompanionSwitch) {
 
-      // Setup reset timer first
+      // First configure the device based on the accessory details
+      this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
+
+      this.states.SwitchState = this.defaultState;
+      this.states.SensorState = Sensor.NORMAL;
+
       if (this.accessoryConfiguration.switch.hasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
@@ -65,14 +70,10 @@ export class Switch extends Accessory {
         );
       }
 
-      // First configure the device based on the accessory details
-      this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
-
-      this.states.SwitchState = this.defaultState;
-      this.states.SensorState = Sensor.NORMAL;
-
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch is stateful`);
+
         const accessoryState = this.loadAccessoryState(this.storagePath);
         const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
 
@@ -81,46 +82,57 @@ export class Switch extends Accessory {
           this.states.SensorState = this.determineSensorState();
         }
 
-        // if (this.accessoryConfiguration.accessoryHasResetTimer) {
-        //   const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
-        //   const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
-        //   const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
+        if (this.accessoryConfiguration.switch.hasResetTimer) {
+          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
 
-        //   // If the timer was running, calculate elapsed time and set timer for remaining duration
-        //   if (cachedTimerIsRunning) {
-        //     const elapsedTime: number = Duration.between(Utils.now(), Utils.zonedDateTime(cachedTimerStartTime)).toMillis() / 1000;
-        //     // If the timer is expired, set timer to 1 second to trigger switch off
-        //     const timerExpired = cachedTimerDuration <= elapsedTime;
-        //     const remainingTimerDuration: number = (timerExpired) ? 1 : (cachedTimerDuration - elapsedTime);
+          const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
+          const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
+          const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+          const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
 
-        //     if (timerExpired) {
-        //       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Triggering switch`);
-        //     } else {
-        //       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
-        //     }
+          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
+          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
+          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
 
-        //     this.durationTimer!.start(
-        //       () => {
-        //         this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-        //       },
-        //       remainingTimerDuration,
-        //       Timer.Units.Seconds,
-        //     );
-        //   }
-        // }
+          // If the timer was running, calculate elapsed time and set timer for remaining duration
+          if (cachedTimerIsRunning) {
+            // eslint-disable-next-line max-len
+            const elapsedTimeSinceTimerStart: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedTimerStartTime), Utils.now()).toMillis() / 1000); // seconds
+            const timeDifferential: number = (cachedTimerDuration - elapsedTimeSinceTimerStart);
+
+            this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Elapsed Time Since Timer Start: ${elapsedTimeSinceTimerStart}`);
+            this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Time Differential: ${timeDifferential}`);
+  
+            // If the timer is expired, set timer to 1 second to issue trigger switch off
+            const remainingTimerDuration: number = (timeDifferential <= 0) ? 1 : timeDifferential;
+
+            if (remainingTimerDuration === 1) {
+              this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
+            } else {
+              this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+            }
+
+            this.durationTimer!.debugCountdown();
+            this.durationTimer!.start(
+              () => {
+                this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+              },
+              remainingTimerDuration,
+              timerConfig.units,
+            );
+          }
+        }
       }
     }
 
     if (!this.isCompanionSwitch) {
       this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+
+      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
       this.service = this.accessory.getService(companionSwitchName!) ||
                      this.accessory.addService(this.platform.Service.Switch, companionSwitchName, accessory.UUID + this.companionSwitchPostfix);
-    }
 
-    if (!this.isCompanionSwitch) {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-    } else {
       this.service.setCharacteristic(this.platform.Characteristic.Name, companionSwitchName!);
     }
 
@@ -206,19 +218,21 @@ export class Switch extends Accessory {
   }
 
   protected getJsonState(): string {
-    const json = JSON.stringify({
+    const jsonState = {
       [this.stateStorageKey]: this.states.SwitchState,
-    });
+    };
 
-    // if (this.accessoryConfiguration.accessoryHasResetTimer) {
-    //   const timerStartTime: string = this.durationTimer!.getStartTime().toString();
-    //   const timerDuration: number = this.durationTimer!.getDuration();
-    //   const timerIsRunning: boolean = this.durationTimer!.isTimerRunning();
+    if (this.accessoryConfiguration.switch.hasResetTimer) {
+      const timerStartTime: string = this.durationTimer!.getStartTime().toString();
+      const timerDuration: number = this.durationTimer!.getDuration();
+      const timerIsRunning: boolean = this.durationTimer!.isTimerRunning();
 
-    //   Object.assign(json, { [this.timerStartTimeStorageKey]: timerStartTime });
-    //   Object.assign(json, { [this.timerDurationStorageKey]: timerDuration });
-    //   Object.assign(json, { [this.timerIsRunningStorageKey]: timerIsRunning });
-    // }
+      Object.assign(jsonState, { [this.timerStartTimeStorageKey]: timerStartTime });
+      Object.assign(jsonState, { [this.timerDurationStorageKey]: timerDuration });
+      Object.assign(jsonState, { [this.timerIsRunningStorageKey]: timerIsRunning });
+    }
+
+    const json = JSON.stringify(jsonState);
 
     return json;
   }
@@ -227,12 +241,6 @@ export class Switch extends Accessory {
     return Switch.ACCESSORY_TYPE_NAME;
   }
 
-  // Default switch state Off:
-  //     switch turns on -> contact opens
-  //     switch turns off -> contact closes
-  // Default state state On:
-  //     switch turns off -> contact opens
-  //     switch turns on -> contact closes
   private determineSensorState(): number {
     let sensorState: number;
 

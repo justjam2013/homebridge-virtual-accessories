@@ -17,11 +17,13 @@ export class Timer {
   private timerIsResettable: boolean = false;
 
   private timerId: ReturnType<typeof setInterval> | undefined;
-  private duration: number = 0;
+  private initiDuration: number = 0;
   private startTime: ZonedDateTime;
 
   private remainingDuration: number = 0;
   private timerIsRunning: boolean = false;
+
+  private logDebugCountdown: boolean = false;
 
   constructor(
     accessoryName: string,
@@ -77,14 +79,17 @@ export class Timer {
       this.setDuration(duration, units!);
     }
 
-    if (this.duration > 0) {
-      this.remainingDuration = this.duration;
-      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.duration}`);
+    const runtime = (duration === undefined) ? this.initiDuration : this.getSeconds(duration, units!);
+
+    if (runtime > 0) {
+      this.remainingDuration = runtime;
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${runtime}`);
 
       this.timerId = setInterval(() => {
         this.remainingDuration--;
 
-        if (this.remainingDuration % 10 === 0) {
+        // We don't want this floodin the debug logs
+        if (this.logDebugCountdown && this.remainingDuration % 10 === 0) {
           this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
         }
 
@@ -105,6 +110,8 @@ export class Timer {
     this.timerIsRunning = false;
     this.remainingDuration = 0;
 
+    this.logDebugCountdown = false;
+
     this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
   }
 
@@ -116,7 +123,7 @@ export class Timer {
    * Returns duration in seconds
    */
   getDuration(): number {
-    return this.duration;
+    return this.initiDuration;
   }
 
   /**
@@ -126,26 +133,35 @@ export class Timer {
     duration: number,
     units: string,
   ) {
-    this.duration = duration;
+    this.initiDuration = this.getSeconds(duration, units);
+
+    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.initiDuration}`);
+  }
+
+  private getSeconds(
+    duration: number,
+    units: string,
+  ) {
+    let seconds = duration;
 
     switch (units) {
     case Timer.Units.Days:
-      this.duration *= 24;
+      seconds *= 24;
       // falls through
     case Timer.Units.Hours:
-      this.duration *= 60;
+      seconds *= 60;
       // falls through
     case Timer.Units.Minutes:
-      this.duration *= 60;
+      seconds *= 60;
       // falls through
     case Timer.Units.Seconds:
-      this.duration *= 1;
+      seconds *= 1;
       break;
     default:
-      this.duration = 0;
+      seconds = 0;
     }
 
-    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.duration}`);
+    return seconds;
   }
 
   /**
@@ -157,5 +173,9 @@ export class Timer {
 
   isTimerRunning(): boolean {
     return this.timerIsRunning;
+  }
+
+  debugCountdown() {
+    this.logDebugCountdown = true;
   }
 }

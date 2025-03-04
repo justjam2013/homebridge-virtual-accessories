@@ -273,7 +273,7 @@ export class AccessoryConfiguration {
     let switchErrorFields: string[] = [ SwitchConfiguration.prefix ];
 
     if (this.switch !== undefined) {
-      [isValidSwitch, switchErrorFields] = this.switch.isValid(this.accessoryIsStateful);
+      [isValidSwitch, switchErrorFields] = this.switch.isValid();
     }
 
     this.errorFields.push(...switchErrorFields);
