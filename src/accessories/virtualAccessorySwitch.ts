@@ -50,7 +50,12 @@ export class Switch extends Accessory {
     // If this is a companion switch to a doorbell, it will be a plain Switch
     if (!this.isCompanionSwitch) {
 
-      // Setup reset timer first
+      // First configure the device based on the accessory details
+      this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
+
+      this.states.SwitchState = this.defaultState;
+      this.states.SensorState = Sensor.NORMAL;
+
       if (this.accessoryConfiguration.switch.hasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
@@ -64,12 +69,6 @@ export class Switch extends Accessory {
           timerConfig.units,
         );
       }
-
-      // First configure the device based on the accessory details
-      this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
-
-      this.states.SwitchState = this.defaultState;
-      this.states.SensorState = Sensor.NORMAL;
 
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -100,6 +99,7 @@ export class Switch extends Accessory {
               this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
             }
 
+            this.durationTimer!.debugCountdown();
             this.durationTimer!.start(
               () => {
                 this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
@@ -114,14 +114,12 @@ export class Switch extends Accessory {
 
     if (!this.isCompanionSwitch) {
       this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+
+      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
       this.service = this.accessory.getService(companionSwitchName!) ||
                      this.accessory.addService(this.platform.Service.Switch, companionSwitchName, accessory.UUID + this.companionSwitchPostfix);
-    }
 
-    if (!this.isCompanionSwitch) {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-    } else {
       this.service.setCharacteristic(this.platform.Characteristic.Name, companionSwitchName!);
     }
 

@@ -23,6 +23,8 @@ export class Timer {
   private remainingDuration: number = 0;
   private timerIsRunning: boolean = false;
 
+  private logDebugCountdown: boolean = false;
+
   constructor(
     accessoryName: string,
     log: VirtualAccessoriesLogger,
@@ -84,7 +86,8 @@ export class Timer {
       this.timerId = setInterval(() => {
         this.remainingDuration--;
 
-        if (this.remainingDuration % 10 === 0) {
+        // We don't want this floodin the debug logs
+        if (this.logDebugCountdown && this.remainingDuration % 10 === 0) {
           this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
         }
 
@@ -104,6 +107,8 @@ export class Timer {
 
     this.timerIsRunning = false;
     this.remainingDuration = 0;
+
+    this.logDebugCountdown = false;
 
     this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
   }
@@ -157,5 +162,9 @@ export class Timer {
 
   isTimerRunning(): boolean {
     return this.timerIsRunning;
+  }
+
+  debugCountdown() {
+    this.logDebugCountdown = true;
   }
 }
