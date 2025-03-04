@@ -12,23 +12,17 @@ export class SwitchConfiguration {
 
   private errorFields: string[] = [];
 
-  isValid(
-    accessoryIsStateful: boolean | undefined, 
-  ): [boolean, string[]] {  
+  isValid(): [boolean, string[]] {  
     const isValidDefaultState: boolean = (
       (this.defaultState !== undefined) &&
       [ 'on', 'off' ].includes(this.defaultState)
     );
 
-    const isValidHasResetTimer: boolean = (!(accessoryIsStateful && this.hasResetTimer));
-
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(SwitchConfiguration.prefix + '.defaultState');
-    if (!isValidHasResetTimer) this.errorFields.push('accessoryIsStateful', SwitchConfiguration.prefix + 'hasResetTimer');
 
     return [
-      (isValidDefaultState &&
-        isValidHasResetTimer),
+      (isValidDefaultState),
       this.errorFields,
     ];
   }

@@ -63,7 +63,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) && !(model.devices[arrayIndices].accessoryType === 'switch' && model.devices[arrayIndices].switch.hasResetTimer === true);"
+                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "doorbell": {
@@ -341,10 +341,7 @@
                 "hasResetTimer": {
                   "title": "Has a Reset Timer",
                   "description": "Switch resets to default state when timer ends",
-                  "type": "boolean",
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].accessoryIsStateful !== true;"
-                  }
+                  "type": "boolean"
                 },
                 "hasCompanionSensor": {
                   "title": "Has a Companion Sensor",
