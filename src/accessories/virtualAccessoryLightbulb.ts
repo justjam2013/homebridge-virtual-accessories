@@ -162,14 +162,16 @@ export class Lightbulb extends Accessory {
   }
 
   protected getJsonState(): string {
-    const json = JSON.stringify({
+    const jsonState = {
       [this.stateStorageKey]: this.states.LightbulbState,
       [this.brightnessStorageKey]: this.states.LightbulbBrightness,
-    });
+    };
 
     if (this.type === Lightbulb.AMBIANCE) {
-      Object.assign(json, { [this.colorTemperatureStorageKey]: this.states.LightbulbColorTemperature });
+      Object.assign(jsonState, { [this.colorTemperatureStorageKey]: this.states.LightbulbColorTemperature });
     }
+
+    const json = JSON.stringify(jsonState);
 
     return json;
   }
