@@ -508,14 +508,19 @@
                   "title": "Start Date-Time",
                   "description": "Start date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
-                  "format": "date-time"
+                  "format": "date-time",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
                   "description": "End date and time (BUG: ok to leave empty even if marked in red)",
                   "type": "string",
-                  "format": "date-time"
-                },
+                  "format": "date-time",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }                },
                 "disableTriggerEventLogging": {
                   "title": "Disable Trigger Event Logging",
                   "description": "Disable logging for high frequency trigger events",
