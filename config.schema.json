@@ -73,7 +73,8 @@
                   "title": "Doorbell Volume *",
                   "description": "Doorbell volume (0% - 100%)",
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "maximum": 100
                 }
               },
               "condition": {
@@ -106,7 +107,8 @@
                   "title": "Rotation Speed *",
                   "description": "Fan Rotation Speed (0% - 100%)",
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "maximum": 100
                 }
               },
               "condition": {
@@ -130,7 +132,8 @@
                   "title": "Transition Duration",
                   "description": "Open & close transition duration in seconds (default: 3 seconds",
                   "type": "integer",
-                  "mminimum": 0
+                  "mminimum": 0,
+                  "placeholder": 3
                 }
               },
               "condition": {
@@ -154,7 +157,8 @@
                   "title": "Brightness *",
                   "description": "Lightbulb Brightness (0% - 100%)",
                   "type": "integer",
-                  "placeholder": 0
+                  "minimum": 0,
+                  "maximum": 100
                 },
                 "type": {
                   "title": "Type *",
@@ -167,8 +171,10 @@
                 },
                 "colorTemperatureKelvin": {
                   "title": "Color Temperature *",
-                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K) *",
+                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K)",
                   "type": "integer",
+                  "minimum": 2203,
+                  "maximum": 6536,
                   "placeholder": 2700,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
@@ -299,6 +305,7 @@
                   "title": "Valve Runtime *",
                   "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
                   "type": "integer",
+                  "minimum": 0,
                   "maximum": 3600
                 }
               },
@@ -323,7 +330,8 @@
                   "title": "Transition Duration",
                   "description": "Open & close transition duration in seconds (default: 3 seconds",
                   "type": "integer",
-                  "mminimum": 0
+                  "mminimum": 0,
+                  "placeholder": 3
                 }
               },
               "condition": {
@@ -376,6 +384,7 @@
                   "title": "Timer Duration *",
                   "description": "Set timer duration for accessory reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
@@ -384,6 +393,7 @@
                   "title": "Timer Min Duration *",
                   "description": "Set minimum timer duration for accessory reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -392,6 +402,7 @@
                   "title": "Timer Max Duration *",
                   "description": "Set maximum timer duration for accessory reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -467,14 +478,15 @@
               "properties": {
                 "host": {
                   "title": "Host *",
-                  "description": "IP address of host to ping (ex: 156.27.86.172)",
+                  "description": "IP address of host to ping",
+                  "placeholder": "192.168.0.1",
                   "type": "string",
                   "pattern": "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
                 },
                 "failureRetryCount": {
                   "title": "Retries Before Failure *",
                   "description": "Failed ping count before triggering the sensor",
-                  "type": "number",
+                  "type": "integer",
                   "minimum": 0
                 },
                 "isDisabled": {
@@ -500,13 +512,14 @@
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time (BUG: ok to leave empty even if marked in red)",
+                  "description": "Start date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
@@ -515,7 +528,7 @@
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time (BUG: ok to leave empty even if marked in red)",
+                  "description": "End date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
@@ -553,7 +566,7 @@
                 "offset": {
                   "title": "Time Offset",
                   "description": "Minutes before (-) or after (+) the event",
-                  "type": "number",
+                  "type": "integer",
                   "placeholder": 0
                 },
                 "latitude": {
@@ -570,7 +583,8 @@
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
