@@ -679,6 +679,21 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "securitysystem" }
+                }
+              },
+              "then": {
+                "required": [ "securitySystem" ],
+                "properties": {
+                  "securitySystem": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryType": { "const": "valve" }
                 }
               },
