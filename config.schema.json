@@ -27,7 +27,7 @@
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (https://www.random.org/) Do not modify once assigned!",
+              "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Fa-f0-9\\-]{5,}$"
@@ -96,7 +96,7 @@
                 },
                 "rotationDirection": {
                   "title": "Rotation Direction *",
-                  "description": "Fan Rotation Direction",
+                  "description": "Fan rotation direction",
                   "type": "string",
                   "oneOf": [
                     { "title": "Clockwise", "enum": ["clockwise"] },
@@ -105,7 +105,7 @@
                 },
                 "rotationSpeed": {
                   "title": "Rotation Speed *",
-                  "description": "Fan Rotation Speed (0% - 100%)",
+                  "description": "Fan rotation speed (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -130,7 +130,7 @@
                 },
                 "transitionDuration": {
                   "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
                   "type": "integer",
                   "mminimum": 0,
                   "placeholder": 3
@@ -155,7 +155,7 @@
                 },
                 "brightness": {
                   "title": "Brightness *",
-                  "description": "Lightbulb Brightness (0% - 100%)",
+                  "description": "Lightbulb brightness (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -328,7 +328,7 @@
                 },
                 "transitionDuration": {
                   "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
                   "type": "integer",
                   "mminimum": 0,
                   "placeholder": 3
@@ -344,7 +344,7 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
@@ -382,7 +382,7 @@
                 },
                 "duration": {
                   "title": "Timer Duration *",
-                  "description": "Set timer duration for accessory reset to default state",
+                  "description": "Set timer duration for the accessory to reset to default state",
                   "type": "integer",
                   "minimum": 0,
                   "condition": {
@@ -391,7 +391,7 @@
                 },
                 "durationRandomMin": {
                   "title": "Timer Min Duration *",
-                  "description": "Set minimum timer duration for accessory reset to default state",
+                  "description": "Set minimum timer duration for the accessory to reset to default state",
                   "type": "integer",
                   "minimum": 0,
                   "condition": {
@@ -400,7 +400,7 @@
                 },
                 "durationRandomMax": {
                   "title": "Timer Max Duration *",
-                  "description": "Set maximum timer duration for accessory reset to default state",
+                  "description": "Set maximum timer duration for the accessory to reset to default state",
                   "type": "integer",
                   "minimum": 0,
                   "condition": {
@@ -420,7 +420,7 @@
                 },
                 "isResettable": {
                   "title": "Timer is Resettable",
-                  "description": "The timer is reset every time the accessory is triggered, even if the accessory's state doesn't change",
+                  "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
                   "type": "boolean"
                 }
               },
@@ -455,7 +455,7 @@
                 },
                 "type": {
                   "title": "Sensor Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
