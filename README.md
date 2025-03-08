@@ -545,7 +545,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   Due to issues in one of the underlying frameworks used by Homebridge UI, dates for Cron Trigger may be saved in the wrong format or as the string "null'. There is currently a "bug patch" in place that checks the configuration on Homebridge startup and cleans up the problem values, if needed. You may see entries in the logs to that effect. That behavior is expected. Tickets have been opened against the issues and, once they are resolved, the bug patch will be removed.
+-   The upcoming Humidifier/Dehumidifier accessory is currently in blocked state becasue the Homebrige UI does not correctly differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories. This means that it cannot be fully tested in Homebridge before releasing a usable version.
 
 ## What if I run into a problem?
 
