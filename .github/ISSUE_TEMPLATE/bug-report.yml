@@ -9,7 +9,8 @@ body:
         Thanks for taking the time to fill out this bug report!
         
         Before you start, be sure you are aware of the following points:
-        
+
+        * Review the README for any changes to the plugin. In the event of breaking changes, there will be documentation to help you manually update your configuration.
         * Avoid duplicating any existing issues which already track or resolve your problem, search the existing issues first.
         * Aim to find a descriptive and precise title for your bug report.
         

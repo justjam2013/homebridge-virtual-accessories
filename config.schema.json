@@ -27,7 +27,7 @@
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (https://www.random.org/) Do not modify once assigned!",
+              "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Fa-f0-9\\-]{5,}$"
@@ -74,7 +74,8 @@
                   "title": "Doorbell Volume *",
                   "description": "Doorbell volume (0% - 100%)",
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "maximum": 100
                 }
               },
               "condition": {
@@ -96,7 +97,7 @@
                 },
                 "rotationDirection": {
                   "title": "Rotation Direction *",
-                  "description": "Fan Rotation Direction",
+                  "description": "Fan rotation direction",
                   "type": "string",
                   "oneOf": [
                     { "title": "Clockwise", "enum": ["clockwise"] },
@@ -105,9 +106,10 @@
                 },
                 "rotationSpeed": {
                   "title": "Rotation Speed *",
-                  "description": "Fan Rotation Speed (0% - 100%)",
+                  "description": "Fan rotation speed (0% - 100%)",
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "maximum": 100
                 }
               },
               "condition": {
@@ -129,9 +131,10 @@
                 },
                 "transitionDuration": {
                   "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
                   "type": "integer",
-                  "mminimum": 0
+                  "mminimum": 0,
+                  "placeholder": 3
                 }
               },
               "condition": {
@@ -225,9 +228,10 @@
                 },
                 "brightness": {
                   "title": "Brightness *",
-                  "description": "Lightbulb Brightness (0% - 100%)",
+                  "description": "Lightbulb brightness (0% - 100%)",
                   "type": "integer",
-                  "placeholder": 0
+                  "minimum": 0,
+                  "maximum": 100
                 },
                 "type": {
                   "title": "Type *",
@@ -240,8 +244,10 @@
                 },
                 "colorTemperatureKelvin": {
                   "title": "Color Temperature *",
-                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K) *",
+                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K)",
                   "type": "integer",
+                  "minimum": 2203,
+                  "maximum": 6536,
                   "placeholder": 2700,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
@@ -372,6 +378,7 @@
                   "title": "Valve Runtime *",
                   "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
                   "type": "integer",
+                  "minimum": 0,
                   "maximum": 3600
                 }
               },
@@ -394,9 +401,10 @@
                 },
                 "transitionDuration": {
                   "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
                   "type": "integer",
-                  "mminimum": 0
+                  "mminimum": 0,
+                  "placeholder": 3
                 }
               },
               "condition": {
@@ -409,7 +417,7 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
@@ -447,24 +455,27 @@
                 },
                 "duration": {
                   "title": "Timer Duration *",
-                  "description": "Set timer duration for accessory reset to default state",
+                  "description": "Set timer duration for the accessory to reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
                   "title": "Timer Min Duration *",
-                  "description": "Set minimum timer duration for accessory reset to default state",
+                  "description": "Set minimum timer duration for the accessory to reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
                   "title": "Timer Max Duration *",
-                  "description": "Set maximum timer duration for accessory reset to default state",
+                  "description": "Set maximum timer duration for the accessory to reset to default state",
                   "type": "integer",
+                  "minimum": 0,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -482,7 +493,7 @@
                 },
                 "isResettable": {
                   "title": "Timer is Resettable",
-                  "description": "The timer is reset every time the accessory is triggered, even if the accessory's state doesn't change",
+                  "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
                   "type": "boolean"
                 }
               },
@@ -517,7 +528,7 @@
                 },
                 "type": {
                   "title": "Sensor Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb')",
+                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
@@ -540,14 +551,15 @@
               "properties": {
                 "host": {
                   "title": "Host *",
-                  "description": "IP address of host to ping (ex: 156.27.86.172)",
+                  "description": "IP address of host to ping",
+                  "placeholder": "192.168.0.1",
                   "type": "string",
                   "pattern": "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
                 },
                 "failureRetryCount": {
                   "title": "Retries Before Failure *",
                   "description": "Failed ping count before triggering the sensor",
-                  "type": "number",
+                  "type": "integer",
                   "minimum": 0
                 },
                 "isDisabled": {
@@ -573,22 +585,28 @@
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time (BUG: ok to leave empty even if marked in red)",
+                  "description": "Start date and time",
                   "type": "string",
-                  "format": "date-time"
+                  "format": "date-time",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time (BUG: ok to leave empty even if marked in red)",
+                  "description": "End date and time",
                   "type": "string",
-                  "format": "date-time"
-                },
+                  "format": "date-time",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }                },
                 "disableTriggerEventLogging": {
                   "title": "Disable Trigger Event Logging",
                   "description": "Disable logging for high frequency trigger events",
@@ -621,7 +639,7 @@
                 "offset": {
                   "title": "Time Offset",
                   "description": "Minutes before (-) or after (+) the event",
-                  "type": "number",
+                  "type": "integer",
                   "placeholder": 0
                 },
                 "latitude": {
@@ -638,7 +656,8 @@
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id. Ex: 'America/Los_Angeles'. Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
@@ -755,6 +774,21 @@
                 "properties": {
                   "lock": {
                     "required": [ "defaultState", "hardwareFinish", "autoSecurityTimeout" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "securitysystem" }
+                }
+              },
+              "then": {
+                "required": [ "securitySystem" ],
+                "properties": {
+                  "securitySystem": {
+                    "required": [ "defaultState" ]
                   }
                 }
               }

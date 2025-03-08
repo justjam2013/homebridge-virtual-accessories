@@ -1,6 +1,6 @@
 /* eslint-disable curly */
 
-import { ZoneId } from '@js-joda/core';
+import { LocalDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
 /**
@@ -20,7 +20,7 @@ export class CronTriggerConfiguration {
   // 7: milliseconds granularity
   private static cronMinutesGranularityPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
   //private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
-  private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d(Z|)$';
+  private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d|)$';
 
   private errorFields: string[] = [];
 
@@ -34,12 +34,12 @@ export class CronTriggerConfiguration {
     const isValidZoneId = (this.zoneId === undefined) || this.isValidZoneId(this.zoneId);
 
     const isoTimeRegex = new RegExp(CronTriggerConfiguration.isoTimeNoMillisPattern);
-    let isValidStartDateTime = (
+    const isValidStartDateTime = (
       (this.startDateTime !== undefined) ?
         isoTimeRegex.test(this.startDateTime):
         true
     );
-    let isValidEndDateTime = (
+    const isValidEndDateTime = (
       (this.endDateTime !== undefined) ?
         isoTimeRegex.test(this.endDateTime):
         true
@@ -47,19 +47,9 @@ export class CronTriggerConfiguration {
 
     let isValidExecutionRangeDateTime = true;
     if (this.startDateTime !== undefined && this.endDateTime !== undefined) {
-      const startDate = new Date(this.startDateTime);
-      const endDate = new Date(this.endDateTime);
-      isValidExecutionRangeDateTime = endDate.getTime() > startDate.getTime();
-    }
-
-    // Temporary fix to handle "null" value for "startDateTime" and "endDateTime"
-    if (this.startDateTime === 'null') {
-      isValidStartDateTime = true;
-      isValidExecutionRangeDateTime = true;
-    }
-    if (this.endDateTime === 'null') {
-      isValidEndDateTime = true;
-      isValidExecutionRangeDateTime = true;
+      const startDate = LocalDateTime.parse(this.startDateTime);
+      const endDate = LocalDateTime.parse(this.endDateTime);
+      isValidExecutionRangeDateTime = endDate.isAfter(startDate);
     }
 
     if (!isValidPattern) this.errorFields.push('pattern');
