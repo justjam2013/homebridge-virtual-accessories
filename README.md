@@ -494,6 +494,11 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+Note: A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
+```
+"startDateTime": "2024-11-14T19:41:00",
+"startDateTime": "2024-11-14T19:41",
+```
 
 ### Sensor with sun events trigger
 
