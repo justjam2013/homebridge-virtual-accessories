@@ -7,7 +7,7 @@
 export class HumidifierDehumidifierConfiguration {
   type!: string;
   humidifierThreshold: number = 0;
-  dehumidifierThreshold: number = 0;
+  dehumidifierThreshold: number = 100;
 
   static prefix: string = 'humidifierDehumidifier';
 
@@ -29,15 +29,26 @@ export class HumidifierDehumidifierConfiguration {
       (this.dehumidifierThreshold >= 0 && this.dehumidifierThreshold <= 100)
     );
 
+    const isValidThresholdWindow: boolean = (
+      (this.humidifierThreshold !== undefined) &&
+      (this.dehumidifierThreshold !== undefined) &&
+      (this.dehumidifierThreshold > this.humidifierThreshold)
+    );
+
     // Store fields failing validation
     if (!isValidType) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.type');
     if (!isValidHumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold');
     if (!isValidDehumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
+    if (!isValidThresholdWindow) {
+      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold');
+      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
+    }
 
     return [
       (isValidType &&
         isValidHumidifierThreshold &&
-        isValidDehumidifierThreshold),
+        isValidDehumidifierThreshold &&
+        isValidThresholdWindow),
       this.errorFields,
     ];
   }

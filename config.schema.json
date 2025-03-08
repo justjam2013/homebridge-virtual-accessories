@@ -159,7 +159,8 @@
                   "title": "Humidifier Threshold *",
                   "description": "Humidity level below which the humidifier turns on (0% - 100%)",
                   "type": "integer",
-                  "placeholder": 0,
+                  "minimum": 0,
+                  "maximum": 100,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['humidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
                   }
@@ -168,9 +169,18 @@
                   "title": "Dehumidifier Threshold *",
                   "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
                   "type": "integer",
-                  "placeholder": 0,
+                  "minimum": 0,
+                  "maximum": 100,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['dehumidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
+                "": {
+                  "description": "Note: The dehumidifier threshold value must be greater than the humidifier threshold value",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && model.devices[arrayIndices].humidifierDehumidifier.type === 'auto';"
                   }
                 }
               },
