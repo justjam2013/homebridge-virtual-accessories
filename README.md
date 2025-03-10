@@ -76,6 +76,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
+-   **Humidifier/Dehumidifier.** Beta feature. Documentation will be added once it is fully tested and out of beta.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
@@ -550,7 +551,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   The upcoming Humidifier/Dehumidifier accessory is currently in blocked state becasue the Homebrige UI does not correctly differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories. This means that it cannot be fully tested in Homebridge before releasing a usable version.
+-   The Humidifier/Dehumidifier accessory is currently available as a beta feature as its functionality is being tested in HomeKit. If you choose to use it, YMMV. As the Homebrige UI does not correctly differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, it was not possible to fully test it in Homebridge before releasing it. 
 
 ## What if I run into a problem?
 
