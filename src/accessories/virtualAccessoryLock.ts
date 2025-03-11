@@ -1,3 +1,5 @@
+// https://github.com/KhaosT/HAP-NodeJS/commit/80cdb1535f5bee874cc06657ef283ee91f258815
+
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -16,6 +18,13 @@ export class Lock extends Accessory {
   static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
   static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
+  // https://github.com/kupa22/apple-homekey?tab=readme-ov-file#characteristic-hardware-finish
+  static readonly TAN_FINISH: string = 'AQTO1doA';
+  static readonly GOLD_FINISH: string = 'AQSq1uwA';
+  static readonly SILVER_FINISH: string = 'AQTj4+MA';
+  static readonly BLACK_FINISH: string = 'AQQAAAAA';
+  static readonly DEFAULT_FINISH: string = Lock.TAN_FINISH;
+
   static readonly AUDIO_FEEDBACK_ON: boolean = true;
   static readonly AUDIO_FEEDBACK_OFF: boolean = false;
 
@@ -23,7 +32,13 @@ export class Lock extends Accessory {
   private readonly audioFeedbackStorageKey: string = 'LockAudioFeedback';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
 
+  // https://github.com/kupa22/apple-homekey?tab=readme-ov-file#characteristic-nfc-access-supported-configuration
+  private readonly nFCAccessSupportedConfiguration = 'AQEQAgEQ';
+
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private nfcAccessControlPoint: any = '';
 
   private states = {
     LockCurrentState: Lock.SECURED,
@@ -70,7 +85,7 @@ export class Lock extends Accessory {
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.accessoryConfiguration.lock.hardwareFinish);
+      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.getHardwareFinish(this.accessoryConfiguration.lock.hardwareFinish));
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
 
@@ -197,25 +212,21 @@ export class Lock extends Accessory {
   }
 
   async handleNFCAccessControlPointSet(value: CharacteristicValue) {
-    const nfcAccessControlPoint = value;
+    this.nfcAccessControlPoint = value;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${this.nfcAccessControlPoint}`);
   }
 
   async handleNFCAccessControlPointGet(): Promise<CharacteristicValue> {
-    const nfcAccessControlPoint = '';
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${this.nfcAccessControlPoint}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
-
-    return nfcAccessControlPoint;
+    return this.nfcAccessControlPoint;
   }
 
   async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
-    const nFCAccessSupportedConfiguration = 'AQEQAgEQ';
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${this.nFCAccessSupportedConfiguration}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nFCAccessSupportedConfiguration}`);
-
-    return nFCAccessSupportedConfiguration;
+    return this.nFCAccessSupportedConfiguration;
   }
 
   // Lock Management Service handlers
@@ -274,6 +285,21 @@ export class Lock extends Accessory {
 
   protected getAccessoryTypeName(): string {
     return Lock.ACCESSORY_TYPE_NAME;
+  }
+
+  private getHardwareFinish(color: string) {
+    let finish: string;
+
+    switch (color) {
+    case undefined: { finish = Lock.DEFAULT_FINISH; break; }
+    case 'tan': { finish = Lock.TAN_FINISH; break; }
+    case 'gold': { finish = Lock.GOLD_FINISH; break; }
+    case 'silver': { finish = Lock.SILVER_FINISH; break; }
+    case 'black': { finish = Lock.BLACK_FINISH; break; }
+    default: { finish = Lock.DEFAULT_FINISH; }
+    }
+
+    return finish;
   }
 
   static getStateName(state: number): string {
