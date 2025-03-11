@@ -19,7 +19,10 @@ export class LockConfiguration {
       [ 'locked', 'unlocked' ].includes(this.defaultState)
     );
 
-    const isValidHardwareFinish: boolean = (this.hardwareFinish !== undefined);
+    const isValidHardwareFinish: boolean = (
+      (this.hardwareFinish !== undefined) &&
+      ([ 'tan', 'gold', 'silver', 'black' ].includes(this.hardwareFinish))
+    );
 
     const isValidAutoSecurityTimeout: boolean = (
       (this.autoSecurityTimeout !== undefined) &&
