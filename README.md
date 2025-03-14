@@ -155,7 +155,12 @@ The configuration is validated on startup, so if an accessory is misconfigured, 
 > [!NOTE]
 > 1. `accessoryID` uniquely identifies an accessory and each accessory must have a different value. This is because HomeKit requires a unique and unmodifiable serial number to identify an accessory. The accessory ID acts as a virtual serial number for each accessory that must be unique and unmodifiable. If you do assign the same accessory ID to multiple accessories by mistake, on startup the plugin will skip any accessory that has a duplicate ID and output a message in the logs alerting you to the issue. If you change the value of `accessoryID` after saving the config, HomeKit will interpret the change as the "old" accessory having been deleted and a "new" one added. This will cause the Home app to delete any scenes and automations that use the deleted accessory. Some plugins use the accessory name as the unique ID, which means that you cannot easily change the name. Virtual Accessories For Homebridge uses a dedicated field as the unique ID, allowing you to modify the accessory name, if you so choose to.<p>
 I use [random.org](https://www.random.org/) to generate unique IDs. While the plugin only requires 5 digits for the IDs, I use 7-digit values between 1,000,000 and 10,000,000. This provides a range of 9 million possible IDs, which greatly reduces the chances of a duplicate.
-> 2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, you can change the accessory name, if you so choose to.
+> 2. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to.
+
+> [!NOTE]
+> You can rearrange the order of the accessories by dragging and dropping them in the configuration popup. Grouping accessories together by accessory type or by area might make it easier to find and manage the accessories. This will update the order in which they appear the json configuration, but has no effect on the layouts in Homebridge or Homekit.
+> 
+> <img src="assets/changeorder.png" height="340" />
 
 ### Doorbell
 
