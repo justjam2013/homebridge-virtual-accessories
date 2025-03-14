@@ -12,10 +12,10 @@ export class HumidifierDehumidifier extends Accessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
 
-  //static readonly INACTIVE: number = 0;     // Characteristic.CurrentHumidifierDehumidifierState.INACTIVE
-  static readonly IDLE: number = 1;           // Characteristic.CurrentHumidifierDehumidifierState.IDLE
-  static readonly HUMIDIFYING: number = 2;    // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
-  static readonly DEHUMIDIFYING: number = 3;  // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
+  static readonly CURRENTLY_INACTIVE: number = 0;       // Characteristic.CurrentHumidifierDehumidifierState.INACTIVE
+  static readonly CURRENTLY_IDLE: number = 1;           // Characteristic.CurrentHumidifierDehumidifierState.IDLE
+  static readonly CURRENTLY_HUMIDIFYING: number = 2;    // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
+  static readonly CURRENTLY_DEHUMIDIFYING: number = 3;  // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
 
   static readonly AUTO: number = 0;                        // Characteristic.TargetHumidifierDehumidifierState.AUTO 
   static readonly HUMIDIFIER_OR_DEHUMIDIFIER: number = 0;  // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER
@@ -34,7 +34,7 @@ export class HumidifierDehumidifier extends Accessory {
 
   private states = {
     HumidifierDehumidifierActive: HumidifierDehumidifier.INACTIVE,
-    HumidifierDehumidifierCurrentState: HumidifierDehumidifier.INACTIVE,
+    HumidifierDehumidifierCurrentState: HumidifierDehumidifier.CURRENTLY_INACTIVE,
     HumidifierDehumidifierTargetState: HumidifierDehumidifier.AUTO,
     HumidifierThreshold: 30,
     DehumidifierThreshold: 60,
@@ -49,7 +49,7 @@ export class HumidifierDehumidifier extends Accessory {
 
     // First configure the device based on the accessory details
     this.states.HumidifierDehumidifierActive = HumidifierDehumidifier.INACTIVE;
-    this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.INACTIVE;
+    this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
     this.states.HumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.humidifierThreshold;
     this.states.DehumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.dehumidifierThreshold;
 
@@ -267,22 +267,24 @@ export class HumidifierDehumidifier extends Accessory {
 
   private setDeviceOperationalCondition() {
     if (this.states.HumidifierDehumidifierActive === HumidifierDehumidifier.ACTIVE) {
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.IDLE;
+      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_IDLE;
 
       if (this.states.CurrentRelativeHumidity < this.states.HumidifierThreshold) {
         if (this.deviceHumidifies()) {
-          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.HUMIDIFYING;
+          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
         }
       }
       else if (this.states.CurrentRelativeHumidity > this.states.DehumidifierThreshold) {
         if (this.deviceDehumidifies()) {
-          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.DEHUMIDIFYING;
+          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
         }
       }
     }
     else {
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.INACTIVE;
+      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
     }
+
+    this.service!.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
   }
 
   static getActiveName(event: number): string {
@@ -303,10 +305,10 @@ export class HumidifierDehumidifier extends Accessory {
 
     switch (state) {
     case undefined: { stateName = 'undefined'; break; }
-    case HumidifierDehumidifier.INACTIVE: { stateName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.IDLE: { stateName = 'IDLE'; break; }
-    case HumidifierDehumidifier.HUMIDIFYING: { stateName = 'HUMIDIFYING'; break; }
-    case HumidifierDehumidifier.DEHUMIDIFYING: { stateName = 'DEHUMIDIFYING'; break; }
+    case HumidifierDehumidifier.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_HUMIDIFYING: { stateName = 'HUMIDIFYING'; break; }
+    case HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING: { stateName = 'DEHUMIDIFYING'; break; }
     default: { stateName = state.toString(); }
     }
 
