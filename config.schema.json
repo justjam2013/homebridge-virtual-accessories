@@ -17,7 +17,7 @@
       "devices": {
         "title": "Accessories",
         "type": "array",
-        "orderable": false,
+        "orderable": true,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
           "title": " {{ value.accessoryName || 'New Accessory' }}",
