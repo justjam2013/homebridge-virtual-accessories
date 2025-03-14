@@ -235,7 +235,7 @@ If you choose to manually create or modify the accessory JSON configurations, th
     "devices": [
         {
             "accessoryID": "1234567",
-            "accessoryName": "Test Humidifier",
+            "accessoryName": "My Humidifier",
             "accessoryType": "humidifierdehumidifier",
             "humidifierDehumidifier": {
                 "type": "humidifier",
