@@ -40,7 +40,7 @@
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
-  - [Reference JSON Configurations](reference-json-configurations)
+  - [Reference JSON Configurations](#reference-json-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
