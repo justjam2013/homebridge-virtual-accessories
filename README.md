@@ -40,6 +40,7 @@
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
+  - [Reference Accessory Configurations](reference-accessory-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -161,6 +162,10 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > 2. You can rearrange the order of the accessories by dragging and dropping them in the configuration popup. Grouping accessories together by accessory type or by area might make it easier to find and manage the accessories. This will update the order in which they appear in the json configuration, but has no effect on the accessory layouts in Homebridge or Homekit.
 > 
 > <img src="assets/changeorder.png" height="340" />
+
+## Reference Accessory Configurations
+
+If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
 
 ### Doorbell
 
