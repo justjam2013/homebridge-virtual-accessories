@@ -40,7 +40,7 @@
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
-  - [Reference Accessory Configurations](reference-accessory-configurations)
+  - [Reference JSON Configurations](reference-json-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -163,7 +163,7 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > 
 > <img src="assets/changeorder.png" height="340" />
 
-## Reference Accessory Configurations
+## Reference JSON Configurations
 
 If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
 
