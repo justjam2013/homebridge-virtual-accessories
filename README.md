@@ -44,6 +44,7 @@
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
+    - [Humidifier/Dehumidifier](#humidifierdehumidifier)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
     - [Security System](#security-system)
@@ -77,7 +78,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
--   **Humidifier/Dehumidifier.** Beta feature. Documentation will be updated once it is fully tested and out of beta.
+-   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
@@ -225,6 +226,24 @@ If you choose to manually create or modify the accessory JSON configurations, th
     ],
     "platform": "VirtualAccessoriesForHomebridge"
 }
+```
+
+### Humidifier/Dehumidifier
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "Test Humidifier",
+            "accessoryType": "humidifierdehumidifier",
+            "humidifierDehumidifier": {
+                "type": "humidifier",
+                "humidifierThreshold": 50
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 ```
 
 ### Lightbulb
@@ -561,7 +580,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 ## Known Issues
 
--   The Humidifier/Dehumidifier accessory is currently available as a beta feature as its functionality is being tested in HomeKit. If you choose to use it, YMMV. As the Homebrige UI does not correctly differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, it was not possible to fully test it in Homebridge before releasing it. 
+-   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
 
 ## What if I run into a problem?
 
