@@ -363,6 +363,11 @@
                   "title": "Has a Companion Sensor",
                   "description": "Switch triggers a sensor when its state changes",
                   "type": "boolean"
+                },
+                "muteLogging" : {
+                  "title": "Mute Logging",
+                  "description": "Log information will only be visible when runninhg in debug mode",
+                  "type": "boolean"
                 }
               },
               "condition": {

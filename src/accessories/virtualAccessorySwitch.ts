@@ -189,7 +189,8 @@ export class Switch extends Accessory {
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`);
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`, this.accessoryConfiguration.switch.muteLogging);
 
     if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
