@@ -102,7 +102,7 @@ export abstract class Sensor extends Accessory {
   /**
    * This method is called by the accessory that has this sensor as a companion
    */
-  async triggerCompanionSensorState(sensorState: number, accessory: Accessory) {
+  async triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean = false) {
     if (!this.isCompanionSensor) {
       throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
     } else if (accessory.accessory.UUID !== this.accessory.UUID) {
@@ -113,7 +113,8 @@ export abstract class Sensor extends Accessory {
 
     this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
   }
 
   /**
