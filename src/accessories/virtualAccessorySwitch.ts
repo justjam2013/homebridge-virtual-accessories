@@ -163,7 +163,7 @@ export class Switch extends Accessory {
         this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
           this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
-        this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
+        this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
       }
     }
   }
@@ -195,7 +195,7 @@ export class Switch extends Accessory {
     if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
 
-      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this);
+      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
     }
   }
 
