@@ -360,6 +360,7 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryIsStateful": false,
             "switch": {
                 "defaultState": "off",
+                "muteLogging": false
             }
         }
     ],
@@ -380,7 +381,7 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryIsStateful": false,
             "switch": {
                 "defaultState": "off",
-                "hasResetTimer": true,
+                "hasResetTimer": true
             },
             "resetTimer": {
                 "duration": 10,
@@ -406,7 +407,7 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryIsStateful": false,
             "switch": {
                 "defaultState": "off",
-                "hasResetTimer": true,
+                "hasResetTimer": true
             },
             "resetTimer": {
                 "durationIsRandom": true,
