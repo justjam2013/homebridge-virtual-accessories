@@ -124,8 +124,7 @@ export class Lock extends Accessory {
     nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
       .onGet(this.handleConfigurationStateGet.bind(this));
     nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
-      .onSet(this.handleNFCAccessControlPointSet.bind(this));
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+      .onSet(this.handleNFCAccessControlPointSet.bind(this))
       .onGet(this.handleNFCAccessControlPointGet.bind(this));
     nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
       .onGet(this.handleNFCAccessSupportedConfigurationGet.bind(this));
@@ -140,12 +139,10 @@ export class Lock extends Accessory {
     lockManagementService.getCharacteristic(this.platform.Characteristic.Version)
       .onGet(this.handleVersionGet.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
-      .onSet(this.handleAudioFeedbackSet.bind(this));
-    lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
+      .onSet(this.handleAudioFeedbackSet.bind(this))
       .onGet(this.handleAudioFeedbackGet.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
-      .onSet(this.handleLockManagementAutoSecurityTimeoutSet.bind(this));
-    lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
+      .onSet(this.handleLockManagementAutoSecurityTimeoutSet.bind(this))
       .onGet(this.handleLockManagementAutoSecurityTimeoutGet.bind(this));
   }
 
