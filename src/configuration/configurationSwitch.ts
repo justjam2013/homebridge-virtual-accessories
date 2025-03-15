@@ -7,6 +7,7 @@ export class SwitchConfiguration {
   defaultState!: string;
   hasResetTimer: boolean = false;
   hasCompanionSensor: boolean = false;
+  muteLogging: boolean = false;
 
   static prefix: string = 'switch';
 
