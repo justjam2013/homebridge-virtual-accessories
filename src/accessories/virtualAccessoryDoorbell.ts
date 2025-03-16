@@ -102,7 +102,7 @@ export class Doorbell extends Accessory {
    */
   async companionSwitchSetOn(value: CharacteristicValue) {
     const newState = value as boolean;
-    this.companionSwitch!.setCompanionSwitchState(newState);
+    this.companionSwitch!.setCompanionSwitchState(newState, this);
 
     if (newState === Switch.ON) {
       // this.service!.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent).updateValue(this.state);
