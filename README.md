@@ -159,7 +159,7 @@ The configuration is validated on startup, so if an accessory is misconfigured, 
 I use [random.org](https://www.random.org/) to generate unique IDs. While the plugin only requires 5 digits for the IDs, I use 7-digit values between 1,000,000 and 10,000,000. This provides a range of 9 million possible IDs, which greatly reduces the chances of a duplicate.
 
 > [!NOTE]
-> `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to.
+> `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
 ## Reference JSON Configurations
 
