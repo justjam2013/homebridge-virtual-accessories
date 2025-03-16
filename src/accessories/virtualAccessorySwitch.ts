@@ -4,7 +4,7 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
-import { NotCompanionError } from '../errors.js';
+import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
@@ -210,12 +210,14 @@ export class Switch extends Accessory {
     return switchState;
   }
 
-  setCompanionSwitchState(value: boolean) {
-    if (this.isCompanionSwitch) {
-      this.states.SwitchState = value;
-    } else {
+  setCompanionSwitchState(value: boolean, accessory: Accessory) {
+    if (!this.isCompanionSwitch) {
       throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion switch`);
+    } else if (accessory.accessory.UUID !== this.accessory.UUID) {
+      throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to change the state of this switch`);
     }
+
+    this.states.SwitchState = value;
   }
 
   protected getJsonState(): string {
