@@ -30,7 +30,7 @@
               "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
               "type": "string",
               "required": true,
-              "pattern": "^[A-Fa-f0-9\\-]{5,}$"
+              "pattern": "^[A-Za-z0-9\\-]{5,}$"
             },
             "accessoryName": {
               "title": "Accessory Name",

@@ -102,54 +102,65 @@ export class AccessoryConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidAccessoryID: boolean = (this.accessoryID !== undefined);
+    const isValidAccessoryID: boolean = (
+      (this.accessoryID !== undefined) &&
+      this.isValidId()
+    );
     const isValidAccessoryName: boolean = (this.accessoryName !== undefined);
-    const isValidAccessoryType: boolean = (this.accessoryType !== undefined);
+    const isValidAccessoryType: boolean = (
+      (this.accessoryType !== undefined) &&
+      this.isValidAccessory()
+    );
 
     // Store fields failing validation
     if (!isValidAccessoryID) this.errorFields.push('accessoryID');
     if (!isValidAccessoryName) this.errorFields.push('accessoryName');
     if (!isValidAccessoryType) this.errorFields.push('accessoryType');
 
-    const isValidAccessory: boolean = this.isValidAccessory(isValidAccessoryType);
-
     return [
       (isValidAccessoryID &&
         isValidAccessoryName &&
-        isValidAccessoryType &&
-        isValidAccessory),
+        isValidAccessoryType),
       this.errorFields,
     ];
   }
 
-  private isValidAccessory(isValidAccessoryType: boolean): boolean {
-    if (isValidAccessoryType) {
-      switch (this.accessoryType) {
-      case 'doorbell':
-        return this.isValidDoorbell();
-      case 'fan':
-        return this.isValidFan();
-      case 'garagedoor':
-        return this.isValidGarageDoor();
-      case 'humidifierdehumidifier':
-        return this.isValidHumidifierDehumidifier();
-      case 'lightbulb':
-        return this.isValidLighbulb();
-      case 'lock':
-        return this.isValidLock();
-      case 'securitysystem':
-        return this.isValidSecuritySystem();
-      case 'sensor':
-        return this.isValidSensor();
-      case 'switch':
-        return this.isValidSwitch();
-      case 'valve':
-        return this.isValidValve();
-      case 'windowcovering':
-        return this.isValidWindowCovering();
-      default:
-        return false;
-      }
+  private isValidId(): boolean {
+    const accessoryIdPattern = '^[A-Za-z0-9\\-]{5,}$';
+
+    const patternRegex = new RegExp(accessoryIdPattern);
+    const isValidId: boolean = (
+      (this.accessoryID !== undefined) &&
+        patternRegex.test(this.accessoryID)
+    );
+
+    return isValidId;
+  }
+
+  private isValidAccessory(): boolean {
+    switch (this.accessoryType) {
+    case 'doorbell':
+      return this.isValidDoorbell();
+    case 'fan':
+      return this.isValidFan();
+    case 'garagedoor':
+      return this.isValidGarageDoor();
+    case 'humidifierdehumidifier':
+      return this.isValidHumidifierDehumidifier();
+    case 'lightbulb':
+      return this.isValidLighbulb();
+    case 'lock':
+      return this.isValidLock();
+    case 'securitysystem':
+      return this.isValidSecuritySystem();
+    case 'sensor':
+      return this.isValidSensor();
+    case 'switch':
+      return this.isValidSwitch();
+    case 'valve':
+      return this.isValidValve();
+    case 'windowcovering':
+      return this.isValidWindowCovering();
     }
 
     return false;
