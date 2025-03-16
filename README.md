@@ -159,10 +159,7 @@ The configuration is validated on startup, so if an accessory is misconfigured, 
 I use [random.org](https://www.random.org/) to generate unique IDs. While the plugin only requires 5 digits for the IDs, I use 7-digit values between 1,000,000 and 10,000,000. This provides a range of 9 million possible IDs, which greatly reduces the chances of a duplicate.
 
 > [!NOTE]
-> 1. `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to.
-> 2. You can rearrange the order of the accessories by dragging and dropping them in the configuration popup. Grouping accessories together by accessory type or by area might make it easier to find and manage the accessories. This will update the order in which they appear in the json configuration, but has no effect on the accessory layouts in Homebridge or Homekit.
-> 
-> <img src="assets/changeorder.png" height="340" />
+> `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to.
 
 ## Reference JSON Configurations
 
