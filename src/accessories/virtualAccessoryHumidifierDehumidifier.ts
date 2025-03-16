@@ -8,7 +8,7 @@ import { Accessory } from './virtualAccessory.js';
 /**
  * HumidifierDehumidifier - Accessory implementation
  */
-export class HumidifierDehumidifier extends Accessory {
+export class HumidifierDehumidifier extends Accessory implements UpdatableSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
 
@@ -398,5 +398,12 @@ export class HumidifierDehumidifier extends Accessory {
     });
 
     return labels;
+  }
+
+  // Updatable Sensor
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateSensor(value: number, accessoryId: string) {
+    
   }
 }
