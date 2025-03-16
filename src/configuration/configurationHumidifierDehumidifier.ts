@@ -40,8 +40,8 @@ export class HumidifierDehumidifierConfiguration {
     if (!isValidHumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold');
     if (!isValidDehumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
     if (!isValidThresholdWindow) {
-      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold');
-      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
+      // eslint-disable-next-line max-len
+      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold <= ' + HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
     }
 
     return [

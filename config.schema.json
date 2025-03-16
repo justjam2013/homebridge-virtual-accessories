@@ -176,7 +176,7 @@
                   }
                 },
                 "": {
-                  "description": "Note: The dehumidifier threshold value must be greater than the humidifier threshold value",
+                  "title": "Note: The dehumidifier threshold value **must be greater** than the humidifier threshold value",
                   "type": "object",
                   "properties": {},
                   "condition": {
