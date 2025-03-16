@@ -400,10 +400,17 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     return labels;
   }
 
-  // Updatable Sensor
+  // Updatable Sensor interface
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateSensor(value: number, accessoryId: string) {
-    
+  updateSensor(value: boolean | number, accessoryId: string) {
+    if (typeof value !== 'number') {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Humidifier/Dehumidifier sensor`);
+    }
+    else {
+      this.states.CurrentRelativeHumidity = value;
+
+      this.setDeviceOperationalCondition();
+    }
   }
 }
