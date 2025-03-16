@@ -579,6 +579,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 ## Known Issues
 
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
+-   The ability to order the accessories has been rolled back, as there is an issue with dragging the number slider,for example to set the Doorbell volume between 0%-100%. A bug report has been opened.
 
 ## What if I run into a problem?
 
