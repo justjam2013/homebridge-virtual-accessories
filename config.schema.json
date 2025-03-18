@@ -325,6 +325,21 @@
               "title": "Security System",
               "type": "object",
               "properties": {
+                "armedModes": {
+                  "title": "Armed States *",
+                  "description": "Security System available armed states",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Away",
+                      "Home",
+                      "Night"
+                    ]
+                  }
+                },
                 "defaultState": {
                   "title": "Default State *",
                   "description": "Security System default state",
@@ -335,6 +350,11 @@
                     { "title": "Armed - Night", "enum": ["nightarm"] },
                     { "title": "Disarmed", "enum": ["disarmed"] }
                   ]
+                },
+                "": {
+                  "title": "Note: The default state **must be** one of the selected armed states",
+                  "type": "object",
+                  "properties": {}
                 }
               },
               "condition": {
@@ -803,7 +823,7 @@
                 "required": [ "securitySystem" ],
                 "properties": {
                   "securitySystem": {
-                    "required": [ "defaultState" ]
+                    "required": [ "armedModes", "defaultState" ]
                   }
                 }
               }
