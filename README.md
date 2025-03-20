@@ -62,6 +62,7 @@
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
+  - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
@@ -572,12 +573,20 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 <figure>
     <figcaption>:bulb: Tutorial: How to add a "fake" Thermostat for each of your HomePods</figcaption>
     <p></p>
-    <a href="https://www.reddit.com/r/homebridge/comments/1i3xk9w/tutorial_how_to_add_a_fake_thermostat_for_each_of/"">
+    <a href="https://www.reddit.com/r/homebridge/comments/1i3xk9w/tutorial_how_to_add_a_fake_thermostat_for_each_of/">
         <img src="assets/creative-ideas/HowToAddAFakeThermostat.png" height="240">
     </a>
 </figure>
 
-#
+## Mentions
+
+People using Virtual Accessories For Homebridge!
+
+The content creator on the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+
+<a href="[https://www.reddit.com/r/homebridge/comments/1i3xk9w/tutorial_how_to_add_a_fake_thermostat_for_each_of/"](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s)">
+    <img src="assets/mentions/youtube-video.png" height="240">
+</a>
 
 ## Known Issues
 
