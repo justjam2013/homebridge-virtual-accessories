@@ -5,6 +5,7 @@ import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { UpdatableSensor } from '../updatableSensor.js';
+import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 
 /**
  * HumidifierDehumidifier - Accessory implementation
@@ -403,19 +404,20 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
   // Updatable Sensor interface
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateSensor(value: boolean | number, accessoryId: string) {
-    let returnValue = false;
+    if (accessoryId !== this.accessoryConfiguration.accessoryID) {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
-    if (typeof value !== 'number') {
+      throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
+    }
+    else if (typeof value !== 'number') {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Humidifier/Dehumidifier sensor`);
+
+      throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
       this.states.CurrentRelativeHumidity = value;
       this.setDeviceOperationalCondition();
-      returnValue = true;
     }
-
-    return returnValue;
   }
 }
