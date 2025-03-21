@@ -1,16 +1,15 @@
-import { Logging } from 'homebridge';
-
 import { AccessoryConfiguration } from './configurationAccessory.js';
 
 import { deserialize } from 'typeserializer';
 import 'reflect-metadata';
+import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 export class Configuration {
 
-  private log: Logging;
+  private log: VirtualAccessoriesLogger;
 
   constructor(
-    log: Logging,
+    log: VirtualAccessoriesLogger,
   ) {
     this.log = log;
   }

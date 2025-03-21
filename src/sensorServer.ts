@@ -9,7 +9,7 @@ import { SensorValueUpdateNotAllowed } from './errors.js';
 /**
  * Create server to accept sensor events
  */
-export class SensorServer {
+export class SensorUpdateServer {
 
   private static accessoryIdPattern = '^[A-Za-z0-9\\-]{5,}$';
 
@@ -17,19 +17,20 @@ export class SensorServer {
   private readonly log: VirtualAccessoriesLogger;
 
   private server: Express = express();
-  private readonly port: number = 9076;
+  readonly port: number = 9076;
 
   constructor(
-    accessories: Accessory[],
     log: VirtualAccessoriesLogger,
+  );
+  constructor(
+    log: VirtualAccessoriesLogger,
+    accessories?: Accessory[],
   ) {
     this.log = log;
 
-    accessories.forEach((accessory) => {
-      if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-        this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      }
-    });
+    if (accessories) {
+      this.addAccessories(accessories);
+    }
 
     // Routes
 
@@ -51,22 +52,28 @@ export class SensorServer {
       }
     });
 
+  }
+
+  start() {
     this.server.listen(this.port, () => {
       this.log.info(`Sensor Server running on port ${this.port}`);
     });
   }
 
+  addAccessories(
+    accessories: Accessory[],
+  ) {
+    accessories.forEach((accessory) => {
+      if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
+        this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      }
+    });
+  }
+
   addAccessory(
     accessory: Accessory,
-  ): boolean {
-    let added = false;
-
-    if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      added = true;
-    }
-
-    return added;
+  ) {
+    this.addAccessories([ accessory ]);
   }
 
   removeAccessory(
@@ -85,7 +92,7 @@ export class SensorServer {
     accessoryId: string,
     response: Response,
   ): boolean {
-    const patternRegex = new RegExp(SensorServer.accessoryIdPattern);
+    const patternRegex = new RegExp(SensorUpdateServer.accessoryIdPattern);
     const isValidAccessoryId: boolean = (
       (accessoryId !== undefined) &&
       patternRegex.test(accessoryId)
