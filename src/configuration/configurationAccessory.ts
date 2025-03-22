@@ -12,6 +12,7 @@ import { LightbulbConfiguration } from './accessories/configurationLightbulb.js'
 import { LockConfiguration } from './accessories/configurationLock.js';
 import { SecuritySystemConfiguration } from './accessories/configurationSecuritySystem.js';
 import { SensorConfiguration } from './configurationSensor.js';
+import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
@@ -65,6 +66,10 @@ export class AccessoryConfiguration {
   // Sensor
   @Type(SensorConfiguration)
     sensor!: SensorConfiguration;
+
+  // Speaker
+  @Type(SpeakerConfiguration)
+    speaker!: SpeakerConfiguration;
 
   // Switch
   @Type(SwitchConfiguration)
@@ -155,6 +160,8 @@ export class AccessoryConfiguration {
       return this.isValidSecuritySystem();
     case 'sensor':
       return this.isValidSensor();
+    case 'speaker':
+      return this.isValidSpeaker();
     case 'switch':
       return this.isValidSwitch();
     case 'valve':
@@ -298,6 +305,21 @@ export class AccessoryConfiguration {
     return (
       isValidSensor &&
       isValidTrigger
+    );
+  };
+
+  private isValidSpeaker(): boolean {
+    let isValidSpeaker: boolean = false;
+    let speakerErrorFields: string[] = [ SpeakerConfiguration.prefix ];
+
+    if (this.speaker !== undefined) {
+      [isValidSpeaker, speakerErrorFields] = this.speaker.isValid();
+    }
+
+    this.errorFields.push(...speakerErrorFields);
+
+    return (
+      isValidSpeaker
     );
   };
 
