@@ -37,6 +37,12 @@
 
   </summary>
 
+- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
+    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
+  - [](#)
+  - [](#-1)
+  - [📝 Table Of Contents](#-table-of-contents)
+  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -51,6 +57,7 @@
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
     - [Security System](#security-system)
+    - [Speaker](#speaker)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -62,6 +69,7 @@
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
+- [](#-3)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
@@ -86,6 +94,7 @@ Currently, these are the implemented virtual accessories:
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
+-   **Speaker.** Allows you to create a virtual speaker.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
@@ -305,6 +314,22 @@ If you choose to manually create or modify the accessory JSON configurations, th
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
+```
+
+### Speaker
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Speaker",
+            "accessoryType": "speaker",
+            "speaker": {
+                "volume": 40
+            }
+        }
+    ],
 ```
 
 ### Valve
@@ -591,6 +616,7 @@ The content creator on the [Make Smart Matter](https://www.youtube.com/@MakeSmar
 ## Known Issues
 
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
+-   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
 -   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume between 0%-100%. A bug report has been opened. Once the bug is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
 
 ## What if I run into a problem?
