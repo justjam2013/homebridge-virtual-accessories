@@ -22,6 +22,7 @@ import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
 import { TimerConfiguration } from './configurationTimer.js';
+import { Categories } from 'homebridge';
 
 /**
  * 
@@ -34,6 +35,8 @@ export class AccessoryConfiguration {
 
   // Optional
   accessoryIsStateful: boolean = false;
+
+  category?: Categories;
 
   // Doorbell
   @Type(DoorbellConfiguration)
@@ -161,6 +164,7 @@ export class AccessoryConfiguration {
     case 'sensor':
       return this.isValidSensor();
     case 'speaker':
+      this.category = Categories.SPEAKER;
       return this.isValidSpeaker();
     case 'switch':
       return this.isValidSwitch();

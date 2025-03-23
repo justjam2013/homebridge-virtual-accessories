@@ -1,4 +1,4 @@
-import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Categories, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { Configuration } from './configuration/configuration.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -109,7 +109,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.info(`Adding new accessory: ${configuredAccessory.accessoryName}`);
 
         // create a new accessory
-        const accessory = new this.api.platformAccessory(configuredAccessory.accessoryName, uuid);
+        const accessory = new this.api.platformAccessory(configuredAccessory.accessoryName, uuid, configuredAccessory.category);
 
         // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
@@ -124,6 +124,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
+        } else if (configuredAccessory.category === Categories.SPEAKER) {
+          this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
         } else {
           // link the accessory to your platform
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
