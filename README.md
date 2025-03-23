@@ -37,12 +37,6 @@
 
   </summary>
 
-- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
-    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
-  - [](#)
-  - [](#-1)
-  - [📝 Table Of Contents](#-table-of-contents)
-  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -69,7 +63,6 @@
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
-- [](#-3)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
