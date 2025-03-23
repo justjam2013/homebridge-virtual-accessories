@@ -52,7 +52,7 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
-      - [Pairing a Speaker accessory](#adding-a-speaker-accessory-in-the-home-app)
+      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
