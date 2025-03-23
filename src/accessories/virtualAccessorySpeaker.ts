@@ -1,4 +1,4 @@
-import { Categories, CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
@@ -31,8 +31,6 @@ export class Speaker extends Accessory {
     accessory: PlatformAccessory,
   ) {
     super(platform, accessory);
-
-    accessory.category = Categories.SPEAKER;
 
     // First configure the device based on the accessory details
     const mute = (this.accessoryConfiguration.speaker.mute !== undefined) ? this.accessoryConfiguration.speaker.mute : Speaker.UNMUTED;
