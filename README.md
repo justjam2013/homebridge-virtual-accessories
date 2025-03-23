@@ -52,6 +52,7 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
+      - [Pairing a Speaker accessory](#pairing-a-speaker-accessory)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -327,6 +328,15 @@ If you choose to manually create or modify the accessory JSON configurations, th
 **Note:** After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
 
 `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+#### Pairing a Speaker accessory
+
+To setup the the speaker accessory follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select "Add accessory"
+2. In the "Add Accessory" popup, tap "More options..."
+3. You should see the speaker accessory you created listed in the "NEARBY" section
+4. Tap the speaker accessory you created, tap "Add anyway", and then enter the code provided in the Homebridge logs (see above)
+5. Finally, tap "Done"
 
 ### Valve
 
