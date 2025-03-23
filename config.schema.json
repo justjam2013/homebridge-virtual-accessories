@@ -83,6 +83,7 @@
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Security System", "enum": ["securitysystem"] },
                 { "title": "Sensor", "enum": ["sensor"] },
+                { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Valve", "enum": ["valve"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
@@ -94,7 +95,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "doorbell": {
@@ -152,7 +153,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Garage Door Default State *",
+                  "title": "Default State *",
                   "description": "Garage Door default state",
                   "type": "string",
                   "oneOf": [
@@ -370,6 +371,27 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
+              }
+            },
+            "speaker": {
+              "title": "Speaker",
+              "type": "object",
+              "properties": {
+                "mute": {
+                  "title": "Mute",
+                  "description": "Speaker is muted",
+                  "type": "boolean"
+                },
+                "volume": {
+                  "title": "Volume *",
+                  "description": "Speaker volume (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
               }
             },
             "switch": {
@@ -821,6 +843,21 @@
                 "properties": {
                   "securitySystem": {
                     "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "speaker" }
+                }
+              },
+              "then": {
+                "required": [ "speaker" ],
+                "properties": {
+                  "speaker": {
+                    "required": [ "volume" ]
                   }
                 }
               }

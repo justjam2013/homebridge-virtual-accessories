@@ -23,7 +23,10 @@
 ## <!-- Thin separator line -->
 
 > [!CAUTION]
-> **Virtual Accessories For Homebridge v2.0.0 is a breaking upgrade.** If you are upgrading from a previous version, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0) for details on how to update your configuration.
+> **The upcoming Virtual Accessories For Homebridge v3.0.0 will be a breaking upgrade.** To get a preview of the coming changes, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.0.0-breaking-update). You do not have to do anything right now. When v3.0.0 is released this documantion will be updated.
+
+> [!WARNING]
+> **Virtual Accessories For Homebridge v2.0.0 is a breaking upgrade.** If you are upgrading from a previous version, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0-breaking-update) for details on how to update your configuration.
 
 ## <!-- Thin separator line -->
 
@@ -34,6 +37,12 @@
 
   </summary>
 
+- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
+    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
+  - [](#)
+  - [](#-1)
+  - [📝 Table Of Contents](#-table-of-contents)
+  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -48,6 +57,7 @@
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
     - [Security System](#security-system)
+    - [Speaker](#speaker)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -59,6 +69,8 @@
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
+- [](#-3)
+  - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
@@ -82,6 +94,7 @@ Currently, these are the implemented virtual accessories:
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
+-   **Speaker.** Allows you to create a virtual speaker.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
@@ -159,7 +172,7 @@ The configuration is validated on startup, so if an accessory is misconfigured, 
 I use [random.org](https://www.random.org/) to generate unique IDs. While the plugin only requires 5 digits for the IDs, I use 7-digit values between 1,000,000 and 10,000,000. This provides a range of 9 million possible IDs, which greatly reduces the chances of a duplicate.
 
 > [!NOTE]
-> `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. Due to using `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
+> `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
 ## Reference JSON Configurations
 
@@ -302,6 +315,24 @@ If you choose to manually create or modify the accessory JSON configurations, th
     ],
     "platform": "VirtualAccessoriesForHomebridge"
 ```
+
+### Speaker
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Speaker",
+            "accessoryType": "speaker",
+            "speaker": {
+                "volume": 40
+            }
+        }
+    ],
+```
+After restarting Homebridge, you should see a similar message to pair the speaker accessory in the Home app:
+`Please add [Ext. Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
 
 ### Valve
 
@@ -569,16 +600,25 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 <figure>
     <figcaption>:bulb: Tutorial: How to add a "fake" Thermostat for each of your HomePods</figcaption>
     <p></p>
-    <a href="https://www.reddit.com/r/homebridge/comments/1i3xk9w/tutorial_how_to_add_a_fake_thermostat_for_each_of/"">
+    <a href="https://www.reddit.com/r/homebridge/comments/1i3xk9w/tutorial_how_to_add_a_fake_thermostat_for_each_of/">
         <img src="assets/creative-ideas/HowToAddAFakeThermostat.png" height="240">
     </a>
 </figure>
 
-#
+## Mentions
+
+People using Virtual Accessories For Homebridge!
+
+The content creator on the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+
+<a href="https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s">
+    <img src="assets/mentions/youtube-video.png" height="240">
+</a>
 
 ## Known Issues
 
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
+-   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
 -   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume between 0%-100%. A bug report has been opened. Once the bug is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
 
 ## What if I run into a problem?
