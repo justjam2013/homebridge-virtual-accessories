@@ -331,8 +331,9 @@ If you choose to manually create or modify the accessory JSON configurations, th
         }
     ],
 ```
-After restarting Homebridge, you should see a similar message to pair the speaker accessory in the Home app:
-`Please add [Ext. Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+**Note:** After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+
+`Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
 
 ### Valve
 
