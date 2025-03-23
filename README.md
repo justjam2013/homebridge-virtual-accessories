@@ -332,12 +332,12 @@ If you choose to manually create or modify the accessory JSON configurations, th
 #### Adding a Speaker accessory in the Home app
 
 To add the speaker accessory in the Home app follow these steps:
-1. In the Home app, tap the + simbol in the upper left and select "Add accessory"
-2. In the "Add Accessory" popup, tap "More options...", and you should see the speaker accessory you created listed in the "NEARBY" section
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
 3. Tap the speaker accessory you created
-4. In the modal dialog tap "Add anyway"
-5. Enter the setup code provided in the Homebridge logs (see above)
-6. Finally, tap "Done"
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
 
 ### Valve
 
