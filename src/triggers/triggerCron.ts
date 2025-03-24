@@ -1,4 +1,4 @@
-import { CronTriggerConfiguration } from '../configuration/configurationCronTrigger.js';
+import { CronTriggerConfiguration } from '../configuration/triggers/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';

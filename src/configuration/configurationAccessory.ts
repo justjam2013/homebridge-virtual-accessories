@@ -4,23 +4,25 @@ import { Type } from 'typeserializer';
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 
-import { DoorbellConfiguration } from './configurationDoorbell.js';
-import { FanConfiguration } from './configurationFan.js';
-import { GarageDoorConfiguration } from './configurationGarageDoor.js';
-import { HumidifierDehumidifierConfiguration } from './configurationHumidifierDehumidifier.js';
-import { LightbulbConfiguration } from './configurationLightbulb.js';
-import { LockConfiguration } from './configurationLock.js';
-import { SecuritySystemConfiguration } from './configurationSecuritySystem.js';
+import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
+import { FanConfiguration } from './accessories/configurationFan.js';
+import { GarageDoorConfiguration } from './accessories/configurationGarageDoor.js';
+import { HumidifierDehumidifierConfiguration } from './accessories/configurationHumidifierDehumidifier.js';
+import { LightbulbConfiguration } from './accessories/configurationLightbulb.js';
+import { LockConfiguration } from './accessories/configurationLock.js';
+import { SecuritySystemConfiguration } from './accessories/configurationSecuritySystem.js';
 import { SensorConfiguration } from './configurationSensor.js';
-import { SwitchConfiguration } from './configurationSwitch.js';
-import { ValveConfiguration } from './configurationValve.js';
-import { WindowCoveringConfiguration } from './configurationWindowCovering.js';
+import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
+import { SwitchConfiguration } from './accessories/configurationSwitch.js';
+import { ValveConfiguration } from './accessories/configurationValve.js';
+import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
 
-import { CronTriggerConfiguration } from './configurationCronTrigger.js';
-import { PingTriggerConfiguration } from './configurationPingTrigger.js';
-import { SunEventsTriggerConfiguration } from './configurationSunEventsTrigger.js';
+import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
+import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
+import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
 import { TimerConfiguration } from './configurationTimer.js';
+import { Categories } from 'homebridge';
 
 /**
  * 
@@ -33,6 +35,8 @@ export class AccessoryConfiguration {
 
   // Optional
   accessoryIsStateful: boolean = false;
+
+  category?: Categories;
 
   // Doorbell
   @Type(DoorbellConfiguration)
@@ -65,6 +69,10 @@ export class AccessoryConfiguration {
   // Sensor
   @Type(SensorConfiguration)
     sensor!: SensorConfiguration;
+
+  // Speaker
+  @Type(SpeakerConfiguration)
+    speaker!: SpeakerConfiguration;
 
   // Switch
   @Type(SwitchConfiguration)
@@ -155,6 +163,9 @@ export class AccessoryConfiguration {
       return this.isValidSecuritySystem();
     case 'sensor':
       return this.isValidSensor();
+    case 'speaker':
+      this.category = Categories.SPEAKER;
+      return this.isValidSpeaker();
     case 'switch':
       return this.isValidSwitch();
     case 'valve':
@@ -298,6 +309,21 @@ export class AccessoryConfiguration {
     return (
       isValidSensor &&
       isValidTrigger
+    );
+  };
+
+  private isValidSpeaker(): boolean {
+    let isValidSpeaker: boolean = false;
+    let speakerErrorFields: string[] = [ SpeakerConfiguration.prefix ];
+
+    if (this.speaker !== undefined) {
+      [isValidSpeaker, speakerErrorFields] = this.speaker.isValid();
+    }
+
+    this.errorFields.push(...speakerErrorFields);
+
+    return (
+      isValidSpeaker
     );
   };
 

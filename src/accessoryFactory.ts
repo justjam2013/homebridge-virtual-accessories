@@ -29,6 +29,7 @@ import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 
 /**
  * Virtual Accessory Factory
@@ -71,6 +72,9 @@ export abstract class AccessoryFactory {
       break;
     case 'securitysystem':
       virtualAccessory = new SecuritySystem(platform, accessory);
+      break;
+    case 'speaker':
+      virtualAccessory = new Speaker(platform, accessory);
       break;
     case 'switch':
       virtualAccessory = new Switch(platform, accessory);
