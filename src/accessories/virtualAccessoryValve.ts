@@ -79,7 +79,6 @@ export class Valve extends Accessory {
       this.log,
       timerIsResettable,
       this.accessoryConfiguration.valve.duration,
-      Timer.Units.Seconds,
     );
 
     this.service = this.accessory.getService(this.platform.Service.Valve) || this.accessory.addService(this.platform.Service.Valve);
@@ -177,7 +176,7 @@ export class Valve extends Accessory {
   async handleSetDurationSet(value: CharacteristicValue) {
     const duration = value as number;
 
-    this.durationTimer.setDuration(duration, Timer.Units.Seconds);
+    this.durationTimer.setDuration(duration);
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }

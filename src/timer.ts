@@ -4,13 +4,6 @@ import { ZonedDateTime } from '@js-joda/core';
 
 export class Timer {
 
-  static Units = {
-    Seconds: 'seconds',
-    Minutes: 'minutes',
-    Hours: 'hours',
-    Days: 'days',
-  };
-
   private accessoryName: string;
   private log: VirtualAccessoriesLogger;
 
@@ -35,14 +28,12 @@ export class Timer {
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean,
     duration: number,
-    units: string,
   );
   constructor(
     accessoryName: string,
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean = false,
     duration?: number,
-    units?: string,
   ) {
     this.accessoryName = accessoryName;
     this.log = log;
@@ -51,7 +42,7 @@ export class Timer {
     this.startTime = Utils.now();
 
     if (duration !== undefined) {
-      this.setDuration(duration, units!);
+      this.setDuration(duration);
     }
   }
 
@@ -61,12 +52,10 @@ export class Timer {
   start(
     callback: () => void,
     duration: number,
-    units: string,
   ): void;
   start(
     callback: () => void,
     duration?: number,
-    units?: string,
   ): void {
     if (this.timerIsRunning && !this.timerIsResettable) {
       return;
@@ -76,10 +65,10 @@ export class Timer {
     this.stop();
 
     if (duration !== undefined) {
-      this.setDuration(duration, units!);
+      this.setDuration(duration);
     }
 
-    const runtime = (duration === undefined) ? this.initiDuration : this.getSeconds(duration, units!);
+    const runtime = (duration === undefined) ? this.initiDuration : duration;
 
     if (runtime > 0) {
       this.remainingDuration = runtime;
@@ -127,41 +116,14 @@ export class Timer {
   }
 
   /**
-   * Set duration in seconds/minutes/hours/days
+   * Set duration in seconds
    */
   setDuration(
     duration: number,
-    units: string,
   ) {
-    this.initiDuration = this.getSeconds(duration, units);
+    this.initiDuration = duration;
 
     this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.initiDuration}`);
-  }
-
-  private getSeconds(
-    duration: number,
-    units: string,
-  ) {
-    let seconds = duration;
-
-    switch (units) {
-    case Timer.Units.Days:
-      seconds *= 24;
-      // falls through
-    case Timer.Units.Hours:
-      seconds *= 60;
-      // falls through
-    case Timer.Units.Minutes:
-      seconds *= 60;
-      // falls through
-    case Timer.Units.Seconds:
-      seconds *= 1;
-      break;
-    default:
-      seconds = 0;
-    }
-
-    return seconds;
   }
 
   /**
@@ -177,5 +139,16 @@ export class Timer {
 
   debugCountdown() {
     this.logDebugCountdown = true;
+  }
+
+  static getSeconds(
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number,
+  ) {
+    const durationSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
+
+    return durationSeconds;
   }
 }

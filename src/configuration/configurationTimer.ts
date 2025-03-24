@@ -1,63 +1,98 @@
-/* eslint-disable curly */
+/* eslint-disable brace-style */
+
+import { Type } from 'typeserializer';
+
+import { DurationConfiguration } from './configurationDuration';
 
 /**
  * 
  */
 export class TimerConfiguration {
   durationIsRandom: boolean = false;
-  duration!: number;
-  durationRandomMin!: number;
-  durationRandomMax!: number;
-  units!: string;
+  @Type(DurationConfiguration)
+    duration!: DurationConfiguration;
+  @Type(DurationConfiguration)
+    durationRandomMin!: DurationConfiguration;
+  @Type(DurationConfiguration)
+    durationRandomMax!: DurationConfiguration;
   isResettable: boolean = false;
+
+  static prefix: string = 'resetTimer';
 
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDuration: boolean = (
-      this.durationIsRandom === false ? (
-        (this.duration !== undefined) &&
-        (this.duration >= 0)
-      ) :
-        true
-    );
+    const durationFieldName: string = 'duration';
+    const durationRandomMinFieldName: string = 'durationRandomMin';
+    const durationRandomMaxFieldName: string = 'durationRandomMax';
 
-    const isValidDurationRandomMin: boolean = (
-      this.durationIsRandom === true ? (
-        (this.durationRandomMin !== undefined) &&
-        (this.durationRandomMin >= 0)
-      ) :
-        true
-    );
-    const isValidDurationRandomMax: boolean = (
-      this.durationIsRandom === true ? (
-        (this.durationRandomMax !== undefined) &&
-        (this.durationRandomMax >= 0)
-      ) :
-        true
-    );
+    let isValidDuration: boolean = true;
+    let durationErrorFields: string[] = [];
+    if (this.durationIsRandom === false) {
+      if (this.duration !== undefined) {
+        [isValidDuration, durationErrorFields] = this.duration.isValid(durationFieldName);
+      } 
+      else {
+        [isValidDuration, durationErrorFields] = [false, [ durationFieldName ]];
+      }
+    }
+
+    let isValidDurationRandomMin: boolean = true;
+    let durationRandomMinErrorFields: string[] = [];
+    if (this.durationIsRandom === true) {
+      if (this.durationRandomMin !== undefined) {
+        [isValidDurationRandomMin, durationRandomMinErrorFields] = this.durationRandomMin.isValid(durationRandomMinFieldName);
+      }
+      else {
+        [isValidDurationRandomMin, durationRandomMinErrorFields] = [false, [ durationRandomMinFieldName ]];
+      }
+    }
+
+    let isValidDurationRandomMax: boolean = true;
+    let durationRandomMaxErrorFields: string[] = [];
+    if (this.durationIsRandom === true) {
+      if (this.durationRandomMax !== undefined) {
+        [isValidDurationRandomMax, durationRandomMaxErrorFields] = this.durationRandomMax.isValid(durationRandomMaxFieldName);
+      }
+      else {
+        [isValidDurationRandomMax, durationRandomMaxErrorFields] = [false, [ durationRandomMaxFieldName ]];
+      }
+    }
 
     const isValidDurationRandomRange: boolean = (
-      this.durationIsRandom === true ? (
-        this.durationRandomMin < this.durationRandomMax
-      ) :
+      (this.durationIsRandom === true &&
+        this.durationRandomMin !== undefined &&
+        this.durationRandomMax !== undefined) ? (
+          this.durationRandomMin.getDurationSeconds() < this.durationRandomMax.getDurationSeconds()
+        ) :
         true
     );
 
-    const isValidUnits: boolean = (this.units !== undefined);
-
-    if (!isValidDuration) this.errorFields.push('duration');
-    if (!isValidDurationRandomMin) this.errorFields.push('durationRandomMin');
-    if (!isValidDurationRandomMax) this.errorFields.push('durationRandomMax');
-    if (!isValidDurationRandomRange) this.errorFields.push('durationRandomMin', 'durationRandomMax');
-    if (!isValidUnits) this.errorFields.push('units');
+    if (!isValidDuration) {
+      durationErrorFields.forEach( (errorField) => {
+        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+      });
+    }
+    if (!isValidDurationRandomMin) {
+      durationRandomMinErrorFields.forEach( (errorField) => {
+        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+      });
+    }
+    if (!isValidDurationRandomMax) {
+      durationRandomMaxErrorFields.forEach( (errorField) => {
+        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+      });
+    }
+    if (!isValidDurationRandomRange) {this.errorFields.push(
+      TimerConfiguration.prefix + '.' + durationRandomMinFieldName,
+      TimerConfiguration.prefix + '.' + durationRandomMaxFieldName);
+    }
 
     return [
       (isValidDuration && 
         isValidDurationRandomMin &&
         isValidDurationRandomMax &&
-        isValidDurationRandomRange &&
-        isValidUnits),
+        isValidDurationRandomRange),
       this.errorFields,
     ];
   }

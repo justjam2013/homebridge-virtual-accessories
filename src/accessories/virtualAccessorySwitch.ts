@@ -59,14 +59,16 @@ export class Switch extends Accessory {
       if (this.accessoryConfiguration.switch.hasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
-          Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
-          timerConfig.duration;
+          Math.floor(
+            Math.random() * (timerConfig.durationRandomMax.getDurationSeconds() + 1 - timerConfig.durationRandomMin.getDurationSeconds()) +
+            timerConfig.durationRandomMin.getDurationSeconds(),
+          ):
+          timerConfig.duration.getDurationSeconds();
         this.durationTimer = new Timer(
           this.accessoryConfiguration.accessoryName,
           this.log,
           this.accessoryConfiguration.resetTimer.isResettable,
           duration,
-          timerConfig.units,
         );
       }
 
@@ -85,7 +87,6 @@ export class Switch extends Accessory {
         if (this.accessoryConfiguration.switch.hasResetTimer) {
           this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
 
-          const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
           const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
@@ -118,7 +119,6 @@ export class Switch extends Accessory {
                 this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
               },
               remainingTimerDuration,
-              timerConfig.units,
             );
           }
         }
