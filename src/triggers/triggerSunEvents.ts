@@ -1,4 +1,4 @@
-import { SunEventsTriggerConfiguration } from '../configuration/configurationSunEventsTrigger.js';
+import { SunEventsTriggerConfiguration } from '../configuration/triggers/configurationSunEventsTrigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../utils.js';
