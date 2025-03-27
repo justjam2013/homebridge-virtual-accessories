@@ -13,8 +13,8 @@ export class Speaker extends Accessory {
   static readonly INACTIVE: number = 0;
   static readonly ACTIVE: number = 1;
 
-  static readonly MUTED: boolean = true;
-  static readonly UNMUTED: boolean = false;
+  static readonly MUTED: boolean = true;      // 1
+  static readonly UNMUTED: boolean = false;   // 0
 
   private readonly stateStorageKey: string = 'SpeakerState';
   private readonly muteStorageKey: string = 'SpeakerMuteState';
