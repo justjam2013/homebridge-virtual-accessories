@@ -172,7 +172,7 @@ export class SensorUpdateServer {
       try {
         (<UpdatableSensor><unknown>accessory).updateSensor(value, accessoryId);
 
-        this.log.error(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
+        this.log.debug(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
         response.status(HttpResponse.Ok).send(`Set accessory with id: ${accessoryId} to value: ${value}`);
       }
       catch (error) {
