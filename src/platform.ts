@@ -10,6 +10,7 @@ import fs from 'fs';
 import { Accessory } from './accessories/virtualAccessory.js';
 import { SensorUpdateServer } from './sensorServer.js';
 import { VirtualAccessoriesLogger } from './virtualLogger.js';
+import { SensorServerConfiguration } from './configuration/configurationSensorServer.js';
 
 /**
  * HomebridgePlatform
@@ -20,7 +21,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   public readonly log: VirtualAccessoriesLogger;
 
-  private readonly sensorUpdateServer: SensorUpdateServer;
+  private readonly sensorUpdateServer?: SensorUpdateServer;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -36,7 +37,10 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     this.log = new VirtualAccessoriesLogger(log);
 
     // Create sensor server
-    this.sensorUpdateServer = new SensorUpdateServer(this.log);
+    const sensorServerConfig: SensorServerConfiguration | undefined = new Configuration(this.log).deserializeSensorServerConfig(this.config.sensorServer);
+    if (sensorServerConfig?.enabled) {
+      this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+    }
     
     this.log.debug('Finished initializing platform');
 
@@ -183,8 +187,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     // TODO: check configuration
 
-    this.sensorUpdateServer.addAccessories(virtualAccessories);
-    this.sensorUpdateServer.start();
+    this.sensorUpdateServer?.addAccessories(virtualAccessories);
+    this.sensorUpdateServer?.start();
   }
 
   private deserializeConfiguredAccessories(
@@ -196,7 +200,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     for (const configuredDevice of configuredDevices) {
       // Deserialize accessory configuration
       const configuration: Configuration = new Configuration(this.log);
-      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeConfig(configuredDevice);
+      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
 
       // Skip accessory if the configuration is invalid
       if (accessoryConfiguration === undefined) {

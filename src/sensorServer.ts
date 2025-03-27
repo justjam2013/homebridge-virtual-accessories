@@ -19,16 +19,19 @@ export class SensorUpdateServer {
   private readonly serverName: string = 'Sensor Server';
 
   private server: Express = express();
-  readonly port: number = 9076;
+  readonly port: number;
 
   constructor(
     log: VirtualAccessoriesLogger,
+    port: number
   );
   constructor(
     log: VirtualAccessoriesLogger,
+    port: number,
     accessories?: Accessory[],
   ) {
     this.log = log;
+    this.port = port;
 
     // parse application/x-www-form-urlencoded
     this.server.use(express.urlencoded());
