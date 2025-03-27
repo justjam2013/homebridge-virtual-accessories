@@ -43,7 +43,7 @@
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
-  - [Reference JSON Configurations](#reference-json-configurations)
+  - [Accessory Configurations](#accessory-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -63,6 +63,7 @@
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Webhook Configuration](#webhook-configuration)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -84,7 +85,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
--   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo.
+-   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, if that state is supported.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
@@ -168,7 +169,7 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > [!NOTE]
 > `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
-## Reference JSON Configurations
+## Accessory Configurations
 
 If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
 
@@ -593,6 +594,57 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
+
+## Webhook Configuration
+
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. Currently, the following accessory sensors are supported:
+- Humidifier/Dehumidifier humidity sensor
+
+Updating the sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values.
+
+For example, a humidifier-dehumidifier or humidifier-only will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold.
+
+### Enabled webhook service
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true
+    },
+}
+```
+
+### Enabled webhook service with port specified
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true,
+        "port": "60221"
+    },
+}
+```
+Note: The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
+
+### Updating a Humidifier/Dehumidifier humidity sensor
+
+To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL will look similar to this:
+
+```
+http://localhost:60221/humidity
+```
+
+The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+```json
+{
+    "id": "1234567",
+    "value": 35
+}
+```
 
 ## Creative Uses
 
