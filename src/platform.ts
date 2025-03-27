@@ -184,10 +184,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     // TODO: check configuration
 
     this.sensorUpdateServer.addAccessories(virtualAccessories);
-    const sensorAccessories: Accessory[] = this.sensorUpdateServer.getAccessories();
-    sensorAccessories.forEach((accessory) => {
-      this.log.info(`Updatable sensor: ${accessory.accessoryConfiguration.accessoryName}`);
-    });
     this.sensorUpdateServer.start();
   }
 
