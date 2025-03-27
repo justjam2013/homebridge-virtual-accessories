@@ -37,12 +37,6 @@
 
   </summary>
 
-- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
-    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
-  - [](#)
-  - [](#-1)
-  - [📝 Table Of Contents](#-table-of-contents)
-  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -58,6 +52,7 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
+      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -69,7 +64,6 @@
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
   - [Creative Uses](#creative-uses)
-- [](#-3)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
@@ -100,8 +94,8 @@ Currently, these are the implemented virtual accessories:
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
     - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
-    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. Currently a switch can only be stateful or timed, but not both.
-    - **Timed switches.** The switch will revert back to its default state when the timer expires. This is a way to introduce timers into HomeKit. Currently a switch can only be stateful or timed, but not both.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. This includes timed switches.
+    - **Timed switches.** This is a way to introduce timers into HomeKit. The switch will revert back to its default state when the timer expires. If the switch is stateful, the timer will be restored after a restart of Homebridge. While care is taken to restore the timer with the appropriate time correction, **absolute accuracy is not guaranteed and should not be expected**. The accuracy of the restored timer will be affected, among other things, by the hardware and software Homebridge is running on, the number of plugins installed, the order with which the plugins are restored, etc.
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
 -   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
@@ -331,8 +325,19 @@ If you choose to manually create or modify the accessory JSON configurations, th
         }
     ],
 ```
-After restarting Homebridge, you should see a similar message to pair the speaker accessory in the Home app:
-`Please add [Ext. Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+**Note:** After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+
+`Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+#### Adding a Speaker accessory in the Home app
+
+To add the speaker accessory in the Home app follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
+3. Tap the speaker accessory you created
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
 
 ### Valve
 

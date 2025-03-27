@@ -13,8 +13,8 @@ export class Speaker extends Accessory {
   static readonly INACTIVE: number = 0;
   static readonly ACTIVE: number = 1;
 
-  static readonly MUTED: boolean = true;
-  static readonly UNMUTED: boolean = false;
+  static readonly MUTED: boolean = true;      // 1
+  static readonly UNMUTED: boolean = false;   // 0
 
   private readonly stateStorageKey: string = 'SpeakerState';
   private readonly muteStorageKey: string = 'SpeakerMuteState';
@@ -100,7 +100,7 @@ export class Speaker extends Accessory {
     return speakerState;
   }
 
-  async setMute(value: CharacteristicValue) {
+  async setVolume(value: CharacteristicValue) {
     this.states.SpeakerVolume = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.SpeakerVolume}`);
@@ -114,7 +114,7 @@ export class Speaker extends Accessory {
     return volume;
   }
 
-  async setVolume(value: CharacteristicValue) {
+  async setMute(value: CharacteristicValue) {
     this.states.SpeakerMuteState = value as boolean;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${this.states.SpeakerMuteState}`);
