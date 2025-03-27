@@ -89,7 +89,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
-      platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
+      platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
     }
 
     return virtualAccessory;
@@ -154,7 +154,7 @@ export abstract class AccessoryFactory {
       virtualSensor = new SmokeSensor(platform, accessory, companionSensorName);
       break;
     default:
-      platform.log.error('Error creating sensor. Invalid sensor type:', sensorType);
+      platform.log.error(`Error creating sensor. Invalid sensor type: ${sensorType}`);
     }
 
     return virtualSensor;

@@ -7,6 +7,10 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 import * as path from 'path';
 import fs from 'fs';
+import { Accessory } from './accessories/virtualAccessory.js';
+import { SensorUpdateServer } from './sensorServer.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
+import { SensorServerConfiguration } from './configuration/configurationSensorServer.js';
 
 /**
  * HomebridgePlatform
@@ -15,17 +19,29 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
 
+  public readonly log: VirtualAccessoriesLogger;
+
+  private readonly sensorUpdateServer?: SensorUpdateServer;
+
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
   constructor(
-    public readonly log: Logging,
+    log: Logging,
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
+    this.log = new VirtualAccessoriesLogger(log);
+
+    // Create sensor server
+    const sensorServerConfig: SensorServerConfiguration | undefined = new Configuration(this.log).deserializeSensorServerConfig(this.config.sensorServer);
+    if (sensorServerConfig?.enabled) {
+      this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+    }
+    
     this.log.debug('Finished initializing platform');
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -66,6 +82,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
     this.log.debug(`Deserialized accessories: ${JSON.stringify(configuredAccessories)}`);
 
+    const virtualAccessories: Accessory[] = [];
+
     // loop over the discovered devices and register each one if it has not already been registered
     for (const configuredAccessory of configuredAccessories) {
       // generate a unique id for the accessory this should be generated from
@@ -90,7 +108,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
+        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, existingAccessory, configuredAccessory.accessoryType);
 
         if (virtualAccessory !== undefined) {
           if (existingAccessory.displayName !== configuredAccessory.accessoryName) {
@@ -100,7 +118,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
             existingAccessory.updateDisplayName(configuredAccessory.accessoryName);
 
             this.api.updatePlatformAccessories([existingAccessory]);
-          }      
+          }
+
+          virtualAccessories.push(virtualAccessory);
         } else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
@@ -115,13 +135,13 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // the `context` property can be used to store any data about the accessory you may need
         accessory.context.deviceConfiguration = configuredAccessory;
 
-        const storagePath = path.join(this.api.user.persistPath(), `VA4HB_${configuredAccessory.accessoryID}.json`);
+        const storagePath: string = path.join(this.api.user.persistPath(), `VA4HB_${configuredAccessory.accessoryID}.json`);
         accessory.context.storagePath = storagePath;
         this.log.debug(`Storage path if stateful accessory: ${storagePath}`);
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
+        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
         } else if (configuredAccessory.category === Categories.SPEAKER) {
@@ -129,6 +149,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         } else {
           // link the accessory to your platform
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+
+          virtualAccessories.push(virtualAccessory);
         }
       }
 
@@ -160,6 +182,13 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         }
       }
     }
+
+    // Start sensor server
+
+    // TODO: check configuration
+
+    this.sensorUpdateServer?.addAccessories(virtualAccessories);
+    this.sensorUpdateServer?.start();
   }
 
   private deserializeConfiguredAccessories(
@@ -171,7 +200,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     for (const configuredDevice of configuredDevices) {
       // Deserialize accessory configuration
       const configuration: Configuration = new Configuration(this.log);
-      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeConfig(configuredDevice);
+      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
 
       // Skip accessory if the configuration is invalid
       if (accessoryConfiguration === undefined) {
