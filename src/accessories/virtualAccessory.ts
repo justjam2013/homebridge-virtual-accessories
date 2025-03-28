@@ -83,11 +83,17 @@ export abstract class Accessory {
   ): void {
     // Overwrite the existing persistence file
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
-    fs.writeFileSync(
-      storagePath,
-      stateJson,
-      { encoding: 'utf8', flag: 'w' },
-    );
+    try {
+      fs.writeFileSync(
+        storagePath,
+        stateJson,
+        { encoding: 'utf8', flag: 'w' },
+      );
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saved state: ${stateJson}`);
+    } catch (error) {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error saving state: ${error}`);
+    }
   }
 
   protected deleteAccessoryState(
