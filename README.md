@@ -63,10 +63,10 @@
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
-  - [Webhook Configuration](#webhook-configuration)
-    - [Enabled webhook service](#enabled-webhook-service)
-    - [Enabled webhook service with port specified](#enabled-webhook-service-with-port-specified)
-    - [Updating a Humidifier/Dehumidifier humidity sensor](#updating-a-humidifierdehumidifier-humidity-sensor)
+  - [Webhook Service Configuration](#webhook-service-configuration)
+    - [Enable webhook service](#enable-webhook-service)
+    - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
+    - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -598,12 +598,12 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
 
-## Webhook Configuration
+## Webhook Service Configuration
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
-### Enabled webhook service
+### Enable webhook service
 
 ```json
 {
@@ -614,7 +614,7 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
 }
 ```
 
-### Enabled webhook service with port specified
+### Enable webhook service with custom port
 
 ```json
 {
@@ -627,9 +627,7 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
 ```
 Note: The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
 
-### Updating a Humidifier/Dehumidifier humidity sensor
-
-A humidifier-dehumidifier or humidifier-only accessory will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only accessory will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold. When the humidity sensor is updated to a humidity percentage value within the threshold, the accesory will switch operating state to `idle`.
+### Update Humidifier/Dehumidifier humidity sensor
 
 To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
 
