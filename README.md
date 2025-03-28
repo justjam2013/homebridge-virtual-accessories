@@ -600,12 +600,10 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 
 ## Webhook Configuration
 
-Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. Currently, the following accessory sensors are supported:
-- Humidifier/Dehumidifier humidity sensor
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no configuration changes required to individual accessories. Simply enabling the webhook service will automatically make all supported virtual sensors available for updating. Curently supported accessory sensors are:
+- **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
-Updating the sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values.
-
-For example, a humidifier-dehumidifier or humidifier-only will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold. And when the humidity sensor is updated to a humidity percentage value within the threshold, the accesory will switch back to `idle`. This could be used along with a humidity sensor to automate a dumb humidifier-dehumidifier.
+For example, a humidifier-dehumidifier or humidifier-only accessory will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only accessory will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold. When the humidity sensor is updated to a humidity percentage value within the threshold, the accesory will switch operating state to `idle`.
 
 ### Enabled webhook service
 
