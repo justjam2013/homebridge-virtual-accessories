@@ -31,11 +31,15 @@ export class Configuration {
   deserializeSensorServerConfig(config: string | object): SensorServerConfiguration | undefined {
     let sensorServerConfig: SensorServerConfiguration | undefined;
 
-    const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
-    try {
-      sensorServerConfig = deserialize(json, SensorServerConfiguration);
-    } catch (error) {
-      this.log.error(`[Configuration] SensorServer configuration error: ${JSON.stringify(error)}`);
+    if (config !== undefined) {
+      const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
+      try {
+        sensorServerConfig = deserialize(json, SensorServerConfiguration);
+      } catch (error) {
+        this.log.error(`[Configuration] SensorServer configuration error: ${JSON.stringify(error)}`);
+      }
+    } else {
+      this.log.debug('[Configuration] No SensorServer configuration. Skipping');
     }
 
     return sensorServerConfig;
