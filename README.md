@@ -37,19 +37,13 @@
 
   </summary>
 
-- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
-    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
-  - [](#)
-  - [](#-1)
-  - [📝 Table Of Contents](#-table-of-contents)
-  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
-  - [Reference JSON Configurations](#reference-json-configurations)
+  - [Accessory Configurations](#accessory-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -58,6 +52,7 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
+      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -68,8 +63,11 @@
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Webhook Configuration](#webhook-configuration)
+    - [Enabled webhook service](#enabled-webhook-service)
+    - [Enabled webhook service with port specified](#enabled-webhook-service-with-port-specified)
+    - [Updating a Humidifier/Dehumidifier humidity sensor](#updating-a-humidifierdehumidifier-humidity-sensor)
   - [Creative Uses](#creative-uses)
-- [](#-3)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
@@ -90,7 +88,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
--   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo.
+-   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, if that state is supported.
 -   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
 -   **Security System.** Allows you to create a virtual security system.
@@ -100,8 +98,8 @@ Currently, these are the implemented virtual accessories:
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
     - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
-    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. Currently a switch can only be stateful or timed, but not both.
-    - **Timed switches.** The switch will revert back to its default state when the timer expires. This is a way to introduce timers into HomeKit. Currently a switch can only be stateful or timed, but not both.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. This includes timed switches.
+    - **Timed switches.** This is a way to introduce timers into HomeKit. The switch will revert back to its default state when the timer expires. If the switch is stateful, the timer will be restored after a restart of Homebridge. While care is taken to restore the timer with the appropriate time correction, **absolute accuracy is not guaranteed and should not be expected**. The accuracy of the restored timer will be affected, among other things, by the hardware and software Homebridge is running on, the number of plugins installed, the order with which the plugins are restored, etc.
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
 -   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
@@ -174,7 +172,7 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > [!NOTE]
 > `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
-## Reference JSON Configurations
+## Accessory Configurations
 
 If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
 
@@ -331,8 +329,19 @@ If you choose to manually create or modify the accessory JSON configurations, th
         }
     ],
 ```
-After restarting Homebridge, you should see a similar message to pair the speaker accessory in the Home app:
-`Please add [Ext. Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+**Note:** After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+
+`Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+#### Adding a Speaker accessory in the Home app
+
+To add the speaker accessory in the Home app follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
+3. Tap the speaker accessory you created
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
 
 ### Valve
 
@@ -588,6 +597,57 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
+
+## Webhook Configuration
+
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. Currently, the following accessory sensors are supported:
+- Humidifier/Dehumidifier humidity sensor
+
+Updating the sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values.
+
+For example, a humidifier-dehumidifier or humidifier-only will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold.
+
+### Enabled webhook service
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true
+    },
+}
+```
+
+### Enabled webhook service with port specified
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true,
+        "port": "60221"
+    },
+}
+```
+Note: The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
+
+### Updating a Humidifier/Dehumidifier humidity sensor
+
+To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL will look similar to this:
+
+```
+http://localhost:60221/humidity
+```
+
+The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+```json
+{
+    "id": "1234567",
+    "value": 35
+}
+```
 
 ## Creative Uses
 

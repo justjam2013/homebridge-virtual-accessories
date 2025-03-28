@@ -37,7 +37,7 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
-    this.log = new VirtualAccessoriesLogger(this.platform.log);
+    this.log = this.platform.log;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
@@ -83,18 +83,17 @@ export abstract class Accessory {
   ): void {
     // Overwrite the existing persistence file
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
-    fs.writeFile(
-      storagePath,
-      stateJson,
-      { encoding: 'utf8', flag: 'w' },
-      (error) => {
-        if (error !== null) {
-          this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error saving state: ${error}`);
-        } else {
-          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saved state: ${stateJson}`);
-        }
-      },
-    );
+    try {
+      fs.writeFileSync(
+        storagePath,
+        stateJson,
+        { encoding: 'utf8', flag: 'w' },
+      );
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saved state: ${stateJson}`);
+    } catch (error) {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error saving state: ${error}`);
+    }
   }
 
   protected deleteAccessoryState(

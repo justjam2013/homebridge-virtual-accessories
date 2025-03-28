@@ -4,11 +4,13 @@ import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { UpdatableSensor } from '../updatableSensor.js';
+import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 
 /**
  * HumidifierDehumidifier - Accessory implementation
  */
-export class HumidifierDehumidifier extends Accessory {
+export class HumidifierDehumidifier extends Accessory implements UpdatableSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
 
@@ -283,6 +285,7 @@ export class HumidifierDehumidifier extends Accessory {
     else {
       this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
     }
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Humidifier current state: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
 
     this.service?.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
   }
@@ -398,5 +401,26 @@ export class HumidifierDehumidifier extends Accessory {
     });
 
     return labels;
+  }
+
+  // Updatable Sensor interface
+
+  updateSensor(value: boolean | number, accessoryId: string) {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating humidity sensor to ${value}%`);
+
+    if (accessoryId !== this.accessoryConfiguration.accessoryID) {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+
+      throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
+    }
+    else if (typeof value !== 'number') {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Humidifier/Dehumidifier sensor`);
+
+      throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
+    }
+    else {
+      this.states.CurrentRelativeHumidity = value;
+      this.setDeviceOperationalCondition();
+    }
   }
 }
