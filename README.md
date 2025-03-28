@@ -600,8 +600,8 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 
 ## Webhook Configuration
 
-Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no configuration changes required to individual accessories. Simply enabling the webhook service will automatically make all supported virtual sensors available for updating. Curently supported accessory sensors are:
-- **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+- **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
 ### Enabled webhook service
 
