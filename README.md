@@ -603,8 +603,6 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no configuration changes required to individual accessories. Simply enabling the webhook service will automatically make all supported virtual sensors available for updating. Curently supported accessory sensors are:
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
-For example, a humidifier-dehumidifier or humidifier-only accessory will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only accessory will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold. When the humidity sensor is updated to a humidity percentage value within the threshold, the accesory will switch operating state to `idle`.
-
 ### Enabled webhook service
 
 ```json
@@ -631,9 +629,11 @@ Note: The default port value is `60221`, if no value is specified in the configu
 
 ### Updating a Humidifier/Dehumidifier humidity sensor
 
+A humidifier-dehumidifier or humidifier-only accessory will switch operating state to `humidifying` if its humidity sensor is updated to a humidity percentage value below the humidifying threshold. Similarly, a humidifier-dehumidifier or dehumidifier-only accessory will switch operating state to `dehumidifying` if its humidity sensor is updated to a humidity percentage value above the dehumidifying threshold. When the humidity sensor is updated to a humidity percentage value within the threshold, the accesory will switch operating state to `idle`.
+
 To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
 
-The target URL will look similar to this:
+The target URL (replace hostname and port per your setup) will specify the `humidity` path:
 
 ```
 http://localhost:60221/humidity
