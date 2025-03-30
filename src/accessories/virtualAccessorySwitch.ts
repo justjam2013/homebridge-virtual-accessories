@@ -6,11 +6,11 @@ import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
+import { DurationConfiguration } from '../configuration/configurationDuration.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
 import { Duration } from '@js-joda/core';
-import { DurationConfiguration } from '../configuration/configurationDuration.js';
 
 /**
  * Switch - Accessory implementation

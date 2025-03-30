@@ -1,4 +1,4 @@
-import { VirtualAccessoriesLogger } from './virtualLogger';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
 import { Utils } from './utils.js';
 import { ZonedDateTime } from '@js-joda/core';
 

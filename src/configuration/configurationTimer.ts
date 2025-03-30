@@ -2,8 +2,8 @@
 
 import { Type } from 'typeserializer';
 
-import { DurationConfiguration } from './configurationDuration';
-import { Utils } from '../utils';
+import { DurationConfiguration } from './configurationDuration.js';
+import { Utils } from '../utils.js';
 
 /**
  * 
