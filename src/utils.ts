@@ -32,4 +32,33 @@ export class Utils {
 
     return hhmmss;
   }
+
+  static daysHoursMinutesSecondsToSeconds(
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number,
+  ) {
+    const convertedSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
+
+    return convertedSeconds;
+  }
+
+  static secondsToDaysHoursMinutesSeconds(
+    seconds: number,
+  ): [number, number, number, number] {
+    if (seconds === 0) {
+      return [0, 0, 0, 0];
+    }
+
+    const convertedDays = Math.trunc(((seconds / 60) / 60) / 24);
+    seconds = seconds - convertedDays * 24 * 60 * 60;
+    const convertedHours = Math.trunc((seconds / 60) / 60);
+    seconds = seconds - convertedHours * 60 * 60;
+    const convertedMinutes = Math.trunc((seconds / 60));
+    seconds = seconds - convertedMinutes * 60;
+    const convertedSeconds = seconds;
+
+    return [convertedDays, convertedHours, convertedMinutes, convertedSeconds];
+  }
 }

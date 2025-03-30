@@ -6,6 +6,37 @@
   "strictValidation": true,
   "schema": {
     "type": "object",
+    "definitions": {
+      "duration": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "hours": {
+            "title": "Hours",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "minutes": {
+            "title": "Minutes",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          }
+        }
+      }
+    },
     "properties": {
       "name": {
         "title": "Platform Name",
@@ -496,8 +527,7 @@
                 "duration": {
                   "title": "Timer Duration *",
                   "description": "Set timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
@@ -505,8 +535,7 @@
                 "durationRandomMin": {
                   "title": "Timer Min Duration *",
                   "description": "Set minimum timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -514,22 +543,10 @@
                 "durationRandomMax": {
                   "title": "Timer Max Duration *",
                   "description": "Set maximum timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
-                },
-                "units": {
-                  "title": "Timer Units *",
-                  "description": "Reset timer units",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Seconds", "enum": ["seconds"] },
-                    { "title": "Minutes", "enum": ["minutes"] },
-                    { "title": "Hours", "enum": ["hours"] },
-                    { "title": "Days", "enum": ["days"] }
-                  ]
                 },
                 "isResettable": {
                   "title": "Timer is Resettable",
@@ -549,10 +566,23 @@
                     "required": [ "durationIsRandom" ]
                   },
                   "then": {
-                    "required": [ "durationRandomMin", "durationRandomMax" ]
+                    "required": [ "durationRandomMin", "durationRandomMax" ],
+                    "properties": {
+                      "durationRandomMin": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      },
+                      "durationRandomMax": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   },
                   "else": {
-                    "required": [ "duration" ]
+                    "required": [ "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   }
                 }
               ]
@@ -906,12 +936,7 @@
                 "required": [ "switch" ]
               },
               "then": {
-                "required": [ "resetTimer" ],
-                "properties": {
-                  "resetTimer": {
-                    "required": [ "units" ]
-                  }
-                }
+                "required": [ "resetTimer" ]
               }
             },
             {

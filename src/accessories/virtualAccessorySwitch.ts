@@ -6,6 +6,7 @@ import { AccessoryFactory } from '../accessoryFactory.js';
 import { Timer } from '../timer.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
+import { DurationConfiguration } from '../configuration/configurationDuration.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
@@ -59,14 +60,17 @@ export class Switch extends Accessory {
       if (this.accessoryConfiguration.switch.hasResetTimer) {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
-          Math.floor(Math.random() * (timerConfig.durationRandomMax + 1 - timerConfig.durationRandomMin) + timerConfig.durationRandomMin) :
-          timerConfig.duration;
+          Math.floor(
+            Math.random() *
+            (this.convertDurationToSeconds(timerConfig.durationRandomMax) + 1 - this.convertDurationToSeconds(timerConfig.durationRandomMin)) +
+            this.convertDurationToSeconds(timerConfig.durationRandomMin),
+          ):
+          this.convertDurationToSeconds(timerConfig.duration);
         this.durationTimer = new Timer(
           this.accessoryConfiguration.accessoryName,
           this.log,
           this.accessoryConfiguration.resetTimer.isResettable,
           duration,
-          timerConfig.units,
         );
       }
 
@@ -85,7 +89,6 @@ export class Switch extends Accessory {
         if (this.accessoryConfiguration.switch.hasResetTimer) {
           this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
 
-          const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
           const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
@@ -118,7 +121,6 @@ export class Switch extends Accessory {
                 this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
               },
               remainingTimerDuration,
-              timerConfig.units,
             );
           }
         }
@@ -254,6 +256,11 @@ export class Switch extends Accessory {
     }
 
     return sensorState;
+  }
+
+  private convertDurationToSeconds(duration: DurationConfiguration): number {
+    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(duration.days, duration.hours, duration.minutes, duration.seconds);
+    return seconds;
   }
 
   static getStateName(state: boolean): string {
