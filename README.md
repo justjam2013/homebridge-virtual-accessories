@@ -89,7 +89,7 @@ Currently, these are the implemented virtual accessories:
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, if that state is supported.
--   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
+-   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system.
 -   **Speaker.** Allows you to create a virtual speaker.
@@ -174,7 +174,7 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 
 ## Accessory Configurations
 
-If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
+It is recommended to use the Homebridge UI to configure this plugin, as the requirements may vary based on the property value selections. If you choose to manually create or modify the accessory JSON configurations, the following are references and do not cover all of the different value permutations. Please adjust for your requirements.
 
 ### Doorbell
 
