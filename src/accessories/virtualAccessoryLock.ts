@@ -32,9 +32,6 @@ export class Lock extends Accessory {
   private readonly audioFeedbackStorageKey: string = 'LockAudioFeedback';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
 
-  // https://github.com/kupa22/apple-homekey?tab=readme-ov-file#characteristic-nfc-access-supported-configuration
-  private readonly nFCAccessSupportedConfiguration = 'AQEQAgEQ';
-
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,8 +52,8 @@ export class Lock extends Accessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
-    // eslint-disable-next-line max-len
-    const audioFeedback = (this.accessoryConfiguration.lock.hasAudioFeedback !== undefined) ? this.accessoryConfiguration.lock.hasAudioFeedback : Lock.AUDIO_FEEDBACK_OFF;
+     
+    const audioFeedback = Lock.AUDIO_FEEDBACK_OFF;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
 
     this.states.LockCurrentState = this.defaultState;
@@ -99,11 +96,11 @@ export class Lock extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState)
-      .onGet(this.handleLockCurrentStateGet.bind(this)); // GET - bind to the 'handleLockCurrentStateGet` method below
+      .onGet(this.getLockCurrentState.bind(this)); // GET - bind to the 'handleLockCurrentStateGet` method below
 
     this.service.getCharacteristic(this.platform.Characteristic.LockTargetState)
-      .onSet(this.handleLockTargetStateSet.bind(this)) // SET - bind to the `handleLockTargetStateSet` method below
-      .onGet(this.handleLockTargetStateGet.bind(this)); // GET - bind to the `handleLockTargetStateGet` method below
+      .onSet(this.setLockTargetState.bind(this)) // SET - bind to the `handleLockTargetStateSet` method below
+      .onGet(this.getLockTargetState.bind(this)); // GET - bind to the `handleLockTargetStateGet` method below
 
     /**
      * Creating multiple services of the same type.
@@ -116,40 +113,26 @@ export class Lock extends Accessory {
      * can use the same subtype id.)
      */
 
-    // Creating Homekey service
-    const nfcAccessServiceName = 'NFC Access';
-    const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
-      || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
-
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
-      .onGet(this.handleConfigurationStateGet.bind(this));
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
-      .onSet(this.handleNFCAccessControlPointSet.bind(this))
-      .onGet(this.handleNFCAccessControlPointGet.bind(this));
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
-      .onGet(this.handleNFCAccessSupportedConfigurationGet.bind(this));
-
     // Creating Lock Management service
     const lockManagementServiceName = 'Lock Management';
     const lockManagementService = this.accessory.getService(lockManagementServiceName)
       || this.accessory.addService(this.platform.Service.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
 
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockControlPoint)
-      .onSet(this.handleLockControlPointSet.bind(this));
+      .onSet(this.setLockControlPoint.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.Version)
-      .onGet(this.handleVersionGet.bind(this));
+      .onGet(this.getVersion.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
-      .onSet(this.handleAudioFeedbackSet.bind(this))
-      .onGet(this.handleAudioFeedbackGet.bind(this));
+      .onSet(this.setAudioFeedback.bind(this))
+      .onGet(this.getAudioFeedback.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
-      .onSet(this.handleLockManagementAutoSecurityTimeoutSet.bind(this))
-      .onGet(this.handleLockManagementAutoSecurityTimeoutGet.bind(this));
+      .onSet(this.setLockManagementAutoSecurityTimeout.bind(this))
+      .onGet(this.getLockManagementAutoSecurityTimeout.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleLockCurrentStateGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getLockCurrentState(): Promise<CharacteristicValue> {
     const lockState = this.states.LockCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${Lock.getStateName(lockState)}`);
@@ -157,10 +140,7 @@ export class Lock extends Accessory {
     return lockState;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleLockTargetStateSet(value: CharacteristicValue) {
+  async setLockTargetState(value: CharacteristicValue) {
     this.states.LockTargetState = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${Lock.getStateName(this.states.LockTargetState)}`);
@@ -187,10 +167,7 @@ export class Lock extends Accessory {
     }
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleLockTargetStateGet(): Promise<CharacteristicValue> {
+  async getLockTargetState(): Promise<CharacteristicValue> {
     const lockState = this.states.LockTargetState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${Lock.getStateName(lockState)}`);
@@ -198,43 +175,15 @@ export class Lock extends Accessory {
     return lockState;
   }
 
-  // NFC Access Service handlers
-
-  async handleConfigurationStateGet(): Promise<CharacteristicValue> {
-    const configurationState = 0;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configuration State: ${configurationState}`);
-
-    return configurationState;
-  }
-
-  async handleNFCAccessControlPointSet(value: CharacteristicValue) {
-    this.nfcAccessControlPoint = value;
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${this.nfcAccessControlPoint}`);
-  }
-
-  async handleNFCAccessControlPointGet(): Promise<CharacteristicValue> {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${this.nfcAccessControlPoint}`);
-
-    return this.nfcAccessControlPoint;
-  }
-
-  async handleNFCAccessSupportedConfigurationGet(): Promise<CharacteristicValue> {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${this.nFCAccessSupportedConfiguration}`);
-
-    return this.nFCAccessSupportedConfiguration;
-  }
-
   // Lock Management Service handlers
 
-  async handleLockControlPointSet(value: CharacteristicValue) {
+  async setLockControlPoint(value: CharacteristicValue) {
     const lockControlPoint = value;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Control Point: ${lockControlPoint}`);
   }
 
-  async handleVersionGet(): Promise<CharacteristicValue> {
+  async getVersion(): Promise<CharacteristicValue> {
     const version = '1.0.0';
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Version: ${version}`);
@@ -242,13 +191,13 @@ export class Lock extends Accessory {
     return version;
   }
 
-  async handleAudioFeedbackSet(value: CharacteristicValue) {
+  async setAudioFeedback(value: CharacteristicValue) {
     this.states.LockManagementAudioFeedback = value as boolean;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAudioFeedback}`);
   }
 
-  async handleAudioFeedbackGet(): Promise<CharacteristicValue> {
+  async getAudioFeedback(): Promise<CharacteristicValue> {
     const audioFeedback = this.states.LockManagementAudioFeedback;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${audioFeedback}`);
@@ -256,14 +205,14 @@ export class Lock extends Accessory {
     return audioFeedback;
   }
 
-  async handleLockManagementAutoSecurityTimeoutSet(value: CharacteristicValue) {
+  async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
     this.states.LockManagementAutoSecurityTimeout = value as number;
 
     // eslint-disable-next-line max-len
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.states.LockManagementAutoSecurityTimeout}`);
   }
 
-  async handleLockManagementAutoSecurityTimeoutGet(): Promise<CharacteristicValue> {
+  async getLockManagementAutoSecurityTimeout(): Promise<CharacteristicValue> {
     const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
