@@ -52,8 +52,8 @@ export class Lock extends Accessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
-     
-    const audioFeedback = Lock.AUDIO_FEEDBACK_OFF;
+    // eslint-disable-next-line max-len
+    const audioFeedback = (this.accessoryConfiguration.lock.hasAudioFeedback !== undefined) ? this.accessoryConfiguration.lock.hasAudioFeedback : Lock.AUDIO_FEEDBACK_OFF;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
 
     this.states.LockCurrentState = this.defaultState;
