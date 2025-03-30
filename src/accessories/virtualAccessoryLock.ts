@@ -18,18 +18,7 @@ export class Lock extends Accessory {
   static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
   static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
-  // https://github.com/kupa22/apple-homekey?tab=readme-ov-file#characteristic-hardware-finish
-  static readonly TAN_FINISH: string = 'AQTO1doA';
-  static readonly GOLD_FINISH: string = 'AQSq1uwA';
-  static readonly SILVER_FINISH: string = 'AQTj4+MA';
-  static readonly BLACK_FINISH: string = 'AQQAAAAA';
-  static readonly DEFAULT_FINISH: string = Lock.TAN_FINISH;
-
-  static readonly AUDIO_FEEDBACK_ON: boolean = true;
-  static readonly AUDIO_FEEDBACK_OFF: boolean = false;
-
   private readonly stateStorageKey: string = 'LockState';
-  private readonly audioFeedbackStorageKey: string = 'LockAudioFeedback';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -40,7 +29,6 @@ export class Lock extends Accessory {
   private states = {
     LockCurrentState: Lock.SECURED,
     LockTargetState: Lock.SECURED,
-    LockManagementAudioFeedback: Lock.AUDIO_FEEDBACK_OFF,
     LockManagementAutoSecurityTimeout: 0,
   };
 
@@ -52,26 +40,19 @@ export class Lock extends Accessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
-    // eslint-disable-next-line max-len
-    const audioFeedback = (this.accessoryConfiguration.lock.hasAudioFeedback !== undefined) ? this.accessoryConfiguration.lock.hasAudioFeedback : Lock.AUDIO_FEEDBACK_OFF;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
 
     this.states.LockCurrentState = this.defaultState;
-    this.states.LockManagementAudioFeedback = audioFeedback;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
-      const cachedAudioFeedback: boolean = accessoryState[this.audioFeedbackStorageKey] as boolean;
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
-      }
-      if (cachedAudioFeedback !== undefined) {
-        this.states.LockManagementAudioFeedback = cachedAudioFeedback;
       }
       if (cachedSecurityTimeout !== undefined) {
         this.states.LockManagementAutoSecurityTimeout = cachedSecurityTimeout;
@@ -79,10 +60,6 @@ export class Lock extends Accessory {
     }
 
     this.states.LockTargetState = this.states.LockCurrentState;
-
-    // set accessory information
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.HardwareFinish, this.getHardwareFinish(this.accessoryConfiguration.lock.hardwareFinish));
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
 
@@ -122,9 +99,6 @@ export class Lock extends Accessory {
       .onSet(this.setLockControlPoint.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.Version)
       .onGet(this.getVersion.bind(this));
-    lockManagementService.getCharacteristic(this.platform.Characteristic.AudioFeedback)
-      .onSet(this.setAudioFeedback.bind(this))
-      .onGet(this.getAudioFeedback.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
       .onSet(this.setLockManagementAutoSecurityTimeout.bind(this))
       .onGet(this.getLockManagementAutoSecurityTimeout.bind(this));
@@ -191,20 +165,6 @@ export class Lock extends Accessory {
     return version;
   }
 
-  async setAudioFeedback(value: CharacteristicValue) {
-    this.states.LockManagementAudioFeedback = value as boolean;
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Audio Feedback: ${this.states.LockManagementAudioFeedback}`);
-  }
-
-  async getAudioFeedback(): Promise<CharacteristicValue> {
-    const audioFeedback = this.states.LockManagementAudioFeedback;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Audio Feedback: ${audioFeedback}`);
-
-    return audioFeedback;
-  }
-
   async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
     this.states.LockManagementAutoSecurityTimeout = value as number;
 
@@ -223,7 +183,6 @@ export class Lock extends Accessory {
   protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LockCurrentState,
-      [this.audioFeedbackStorageKey]: this.states.LockManagementAudioFeedback,
       [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
     });
     return json;
@@ -231,21 +190,6 @@ export class Lock extends Accessory {
 
   protected getAccessoryTypeName(): string {
     return Lock.ACCESSORY_TYPE_NAME;
-  }
-
-  private getHardwareFinish(color: string) {
-    let finish: string;
-
-    switch (color) {
-    case undefined: { finish = Lock.DEFAULT_FINISH; break; }
-    case 'tan': { finish = Lock.TAN_FINISH; break; }
-    case 'gold': { finish = Lock.GOLD_FINISH; break; }
-    case 'silver': { finish = Lock.SILVER_FINISH; break; }
-    case 'black': { finish = Lock.BLACK_FINISH; break; }
-    default: { finish = Lock.DEFAULT_FINISH; }
-    }
-
-    return finish;
   }
 
   static getStateName(state: number): string {
