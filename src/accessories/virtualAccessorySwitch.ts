@@ -10,6 +10,7 @@ import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
 import { Duration } from '@js-joda/core';
+import { DurationConfiguration } from '../configuration/configurationDuration.js';
 
 /**
  * Switch - Accessory implementation
@@ -60,10 +61,11 @@ export class Switch extends Accessory {
         const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
         const duration: number = timerConfig.durationIsRandom ?
           Math.floor(
-            Math.random() * (timerConfig.durationRandomMax.getDurationSeconds() + 1 - timerConfig.durationRandomMin.getDurationSeconds()) +
-            timerConfig.durationRandomMin.getDurationSeconds(),
+            Math.random() *
+            (this.convertDurationToSeconds(timerConfig.durationRandomMax) + 1 - this.convertDurationToSeconds(timerConfig.durationRandomMin)) +
+            this.convertDurationToSeconds(timerConfig.durationRandomMin),
           ):
-          timerConfig.duration.getDurationSeconds();
+          this.convertDurationToSeconds(timerConfig.duration);
         this.durationTimer = new Timer(
           this.accessoryConfiguration.accessoryName,
           this.log,
@@ -254,6 +256,11 @@ export class Switch extends Accessory {
     }
 
     return sensorState;
+  }
+
+  private convertDurationToSeconds(duration: DurationConfiguration): number {
+    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(duration.days, duration.hours, duration.minutes, duration.seconds);
+    return seconds;
   }
 
   static getStateName(state: boolean): string {

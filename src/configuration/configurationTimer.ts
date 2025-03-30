@@ -3,6 +3,7 @@
 import { Type } from 'typeserializer';
 
 import { DurationConfiguration } from './configurationDuration';
+import { Utils } from '../utils';
 
 /**
  * 
@@ -63,7 +64,7 @@ export class TimerConfiguration {
       (this.durationIsRandom === true &&
         this.durationRandomMin !== undefined &&
         this.durationRandomMax !== undefined) ? (
-          this.durationRandomMin.getDurationSeconds() < this.durationRandomMax.getDurationSeconds()
+          this.convertDurationToSeconds(this.durationRandomMin) < this.convertDurationToSeconds(this.durationRandomMax)
         ) :
         true
     );
@@ -95,5 +96,10 @@ export class TimerConfiguration {
         isValidDurationRandomRange),
       this.errorFields,
     ];
+  }
+
+  private convertDurationToSeconds(duration: DurationConfiguration): number {
+    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(duration.days, duration.hours, duration.minutes, duration.seconds);
+    return seconds;
   }
 }

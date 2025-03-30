@@ -140,15 +140,4 @@ export class Timer {
   debugCountdown() {
     this.logDebugCountdown = true;
   }
-
-  static getSeconds(
-    days: number,
-    hours: number,
-    minutes: number,
-    seconds: number,
-  ) {
-    const durationSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
-
-    return durationSeconds;
-  }
 }
