@@ -33,9 +33,13 @@ export class LightbulbConfiguration {
     );
 
     const isValidColorTemperature: boolean = (
-      this.colorTemperatureKelvin === undefined?
+      (this.type !== 'ambiance') ?
         true :
-        (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536)
+        (
+          (this.colorTemperatureKelvin !== undefined) ?
+            (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536) :
+            false
+        )
     );
 
     // Store fields failing validation

@@ -345,22 +345,6 @@
                     { "title": "Unlocked", "enum": ["unlocked"] }
                   ]
                 },
-                "hardwareFinish": {
-                  "title": "Hardware Finish *",
-                  "description": "Color of the virtual HomeKey card in the Wallet app",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Tan", "enum": ["tan"] },
-                    { "title": "Gold", "enum": ["gold"] },
-                    { "title": "Silver", "enum": ["silver"] },
-                    { "title": "Black", "enum": ["black"] }
-                  ]
-                },
-                "hasAudioFeedback": {
-                  "title": "Audio Feedback",
-                  "description": "Lock has audio feedback",
-                  "type": "boolean"
-                },
                 "autoSecurityTimeout": {
                   "title": "Auto Security Timeout *",
                   "description": "Lock auto-lock time in seconds (0 = off)",
@@ -846,7 +830,7 @@
                 "required": [ "lock" ],
                 "properties": {
                   "lock": {
-                    "required": [ "defaultState", "hardwareFinish", "autoSecurityTimeout" ]
+                    "required": [ "defaultState", "autoSecurityTimeout" ]
                   }
                 }
               }
