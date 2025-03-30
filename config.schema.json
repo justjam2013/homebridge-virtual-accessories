@@ -20,19 +20,19 @@
             "title": "Hours",
             "type": "integer",
             "minimum": 0,
-            "maximum": 24
+            "maximum": 23
           },
           "minutes": {
             "title": "Minutes",
             "type": "integer",
             "minimum": 0,
-            "maximum": 60
+            "maximum": 59
           },
           "seconds": {
             "title": "Seconds",
             "type": "integer",
             "minimum": 0,
-            "maximum": 60
+            "maximum": 59
           }
         }
       }

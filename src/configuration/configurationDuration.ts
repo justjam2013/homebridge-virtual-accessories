@@ -19,17 +19,17 @@ export class DurationConfiguration {
 
     const isValidHours: boolean = (
       (this.hours !== undefined) &&
-      (this.hours >= 0 && this.hours <= 24)
+      (this.hours >= 0 && this.hours <= 23)
     );
 
     const isValidMinutes: boolean = (
       (this.minutes !== undefined) &&
-      (this.minutes >= 0 && this.minutes <= 60)
+      (this.minutes >= 0 && this.minutes <= 59)
     );
 
     const isValidSeconds: boolean = (
       (this.seconds !== undefined) &&
-      (this.seconds >= 0 && this.seconds <= 60)
+      (this.seconds >= 0 && this.seconds <= 59)
     );
 
     if (!isValidDays) this.errorFields.push(prefix + '.days');
@@ -44,11 +44,5 @@ export class DurationConfiguration {
         isValidSeconds),
       this.errorFields,
     ];
-  }
-
-  getDurationSeconds(): number {
-    const durationSeconds: number = (((this.days * 24) + this.hours) * 60 + this.minutes) * 60 + this.seconds;
-
-    return durationSeconds;
   }
 }
