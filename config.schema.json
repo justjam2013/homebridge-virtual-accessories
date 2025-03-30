@@ -566,10 +566,23 @@
                     "required": [ "durationIsRandom" ]
                   },
                   "then": {
-                    "required": [ "durationRandomMin", "durationRandomMax" ]
+                    "required": [ "durationRandomMin", "durationRandomMax" ],
+                    "properties": {
+                      "durationRandomMin": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      },
+                      "durationRandomMax": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   },
                   "else": {
-                    "required": [ "duration" ]
+                    "required": [ "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   }
                 }
               ]
@@ -923,12 +936,7 @@
                 "required": [ "switch" ]
               },
               "then": {
-                "required": [ "resetTimer" ],
-                "properties": {
-                  "resetTimer": {
-                    "required": [ "units" ]
-                  }
-                }
+                "required": [ "resetTimer" ]
               }
             },
             {
