@@ -110,7 +110,7 @@ Currently, these are the implemented virtual accessories:
 
 ## Installation
 
-You can install this plugin via the Homebridge UI or from the command line, by typing:
+You can install this plugin via the Homebridge UI or from the command line by typing:
 
 ```
 npm install -g homebridge-virtual-accessories
