@@ -286,8 +286,6 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryIsStateful": false,
             "lock": {
                 "defaultState": "locked",
-                "hardwareFinish": "silver",
-                "hasAudioFeedback": false,
                 "autoSecurityTimeout": 5
             }
         }
@@ -295,7 +293,6 @@ If you choose to manually create or modify the accessory JSON configurations, th
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
-`lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
 
 ### Security System
 
