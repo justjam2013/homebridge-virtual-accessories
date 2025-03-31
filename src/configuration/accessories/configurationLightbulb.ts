@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -17,20 +19,14 @@ export class LightbulbConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      [ 'on', 'off' ].includes(this.defaultState)
-    );
+    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
       [ 'white', 'ambiance', 'color' ].includes(this.type)
     );
 
-    const isValidBrightness: boolean = (
-      (this.brightness !== undefined) &&
-      (this.brightness >= 0 && this.brightness <= 100)
-    );
+    const isValidBrightness: boolean = Utils.isPercentage(this.brightness);
 
     const isValidColorTemperature: boolean = (
       (this.type !== 'ambiance') ?

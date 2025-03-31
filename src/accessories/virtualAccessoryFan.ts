@@ -1,7 +1,6 @@
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
-import { Percentage } from '../customTypes.js';
 
 /**
  * Fan - Accessory implementation
@@ -35,7 +34,7 @@ export class Fan extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.fan.defaultState === 'on' ? Fan.ON : Fan.OFF;
     const rotationDirection: number = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
-    const rotationSpeed: Percentage = this.accessoryConfiguration.fan.rotationSpeed as Percentage;
+    const rotationSpeed: number = this.accessoryConfiguration.fan.rotationSpeed as number;
 
     this.states.FanState = this.defaultState;
     this.states.FanRotationDirection = rotationDirection;

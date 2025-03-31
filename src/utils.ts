@@ -61,4 +61,57 @@ export class Utils {
 
     return [convertedDays, convertedHours, convertedMinutes, convertedSeconds];
   }
+
+
+  static isPoweredState(value: string): boolean {
+    let isPowerState = false;
+
+    if ((value !== undefined) &&
+        [ 'on', 'off' ].includes(value)
+    ) {
+      isPowerState = true;
+    }
+
+    return isPowerState;
+  }
+
+  static isPercentage(value: number): boolean {
+    let isPercentage = false;
+
+    if ((value !== undefined) &&
+        (value >= 0 && value <= 100)
+    ) {
+      isPercentage = true;
+    }
+
+    return isPercentage;
+  }
+
+  static isRotationDirection(value: string): boolean {
+    let isRotation = false;
+
+    if ((value !== undefined) &&
+        [ 'clockwise', 'counterclockwise' ].includes(value)
+    ) {
+      isRotation = true;
+    }
+
+    return isRotation;
+  }
+
+  static isTransitionDuration(value: number): boolean {
+    let isTransitionDuration = false;
+
+    if ((value !== undefined) &&
+        (value >= 0)
+    ) {
+      isTransitionDuration = true;
+    }
+
+    return isTransitionDuration;
+  }
+
+  static isTimeout(value: number): boolean {
+    return Utils.isTransitionDuration(value);
+  }
 }
