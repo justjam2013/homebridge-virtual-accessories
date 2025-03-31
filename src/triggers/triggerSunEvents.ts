@@ -35,15 +35,13 @@ export class SunEventsTrigger extends Trigger {
     }
     const timezone: string = (triggerConfig.zoneId !== undefined) ? triggerConfig.zoneId : Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // TODO: This could create race condition if it runs at 00:01
     this.setupSunEvent(triggerConfig, timezone, sensor);
 
     // Data retrieval cron job
 
     const pattern: string = '1 0 * * *';    // Every day at 00:01 - one minute after midnight
 
-    // debug
-    this.log.info(`[${this.sensorConfig.accessoryName}] Creating data cron job: pattern ${pattern}; timezone ${timezone}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating data cron job: pattern ${pattern}; timezone ${timezone}`);
 
     this.dataCronJob = new Cron(
       pattern,
@@ -52,8 +50,7 @@ export class SunEventsTrigger extends Trigger {
         timezone: timezone,
       },
       (async () => {
-        // debug
-        this.log.info(`[${this.sensorConfig.accessoryName}] Matched data cron job pattern '${pattern}'. Triggering sensor`);
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Matched data cron job pattern '${pattern}'. Triggering sensor`);
 
         this.setupSunEvent(triggerConfig, timezone, sensor);
 
@@ -71,8 +68,7 @@ export class SunEventsTrigger extends Trigger {
     const nextRunTimestamp = (nextRun === null) ?
       'None scheduled' :
       `${nextRun.toString().split('.')[0]}; max count: ${cronJob.options.maxRuns}`;
-    // debug
-    this.log.info(`[${this.sensorConfig.accessoryName}] Next "${cronJob.name}" run: ${nextRunTimestamp}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Next "${cronJob.name}" run: ${nextRunTimestamp}`);
   }
 
   private async setupSunEvent(
@@ -106,8 +102,7 @@ export class SunEventsTrigger extends Trigger {
     let response: SunEventsResponse | undefined;
 
     const request = new Request(this.SunTimesURL(latitude, longitude, timezone, date), { method: 'GET' });
-    // debug
-    this.log.info(`[${this.sensorConfig.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
 
     const maxAttempts: number = 5;
     const millis: number = 60 * 1000;
@@ -147,8 +142,7 @@ export class SunEventsTrigger extends Trigger {
 
       if (!gaveUp) {
         dataResponse = await dataFetchResponse.text();
-        // debug
-        this.log.info(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
 
         response = this.desrializeSunEventsResponse(dataResponse);
       }
@@ -168,8 +162,7 @@ export class SunEventsTrigger extends Trigger {
       response = deserialize(dataResponse, SunEventsResponse);
     } catch (error) {
       this.log.error(`[${this.sensorConfig.accessoryName}] Error deserializing response data: ${JSON.stringify(error)}`);
-      // debug
-      this.log.info(`[${this.sensorConfig.accessoryName}] Response data: ${response}`);
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Response data: ${response}`);
     }
 
     return response;
@@ -198,14 +191,12 @@ export class SunEventsTrigger extends Trigger {
     }
 
     let cronRunTimestamp: string = `${dailyDetails.date}T${eventTime}`;
-    // debug
-    this.log.info(`[${this.sensorConfig.accessoryName}] Cron run timestamp: ${cronRunTimestamp}; offset: ${offset} minutes`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Cron run timestamp: ${cronRunTimestamp}; offset: ${offset} minutes`);
     if (offset !== 0) {
       cronRunTimestamp = this.addOffset(cronRunTimestamp, offset);
     }
     const runTimezone: string = dailyDetails.timezone;
-    // debug
-    this.log.info(`[${this.sensorConfig.accessoryName}] Creating cron for: event ${event}; timestamp: ${cronRunTimestamp}; timezone: ${runTimezone}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating cron for: event ${event}; timestamp: ${cronRunTimestamp}; timezone: ${runTimezone}`);
 
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
@@ -224,8 +215,7 @@ export class SunEventsTrigger extends Trigger {
       },
       (async () => {
         const now = Utils.now().toString();
-        // debug
-        this.log.info(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
+        this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
         sensor.triggerKeySensorState(Sensor.TRIGGERED, this);
         await this.delay(resetDelayMillis);
