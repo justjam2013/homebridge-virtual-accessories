@@ -1,16 +1,17 @@
-import { API, Categories, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { Categories } from 'homebridge';
 
-import { Configuration } from './configuration/configuration.js';
+import { Accessory } from './accessories/virtualAccessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 import { AccessoryFactory } from './accessoryFactory.js';
+import { Configuration } from './configuration/configuration.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+import { SensorServerConfiguration } from './configuration/configurationSensorServer.js';
+import { SensorUpdateServer } from './sensorServer.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
 
 import * as path from 'path';
 import fs from 'fs';
-import { Accessory } from './accessories/virtualAccessory.js';
-import { SensorUpdateServer } from './sensorServer.js';
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
-import { SensorServerConfiguration } from './configuration/configurationSensorServer.js';
 
 /**
  * HomebridgePlatform

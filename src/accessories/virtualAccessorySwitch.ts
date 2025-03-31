@@ -2,12 +2,13 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { Timer } from '../timer.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
-import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';
 import { Sensor } from '../sensors/virtualSensor.js';
+import { Timer } from '../timer.js';
+import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Utils } from '../utils.js';
 
 import { Duration } from '@js-joda/core';
@@ -145,8 +146,8 @@ export class Switch extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this)) // SET - bind to the `setOn` method below
-      .onGet(this.getOn.bind(this)); // GET - bind to the `getOn` method below
+      .onSet(this.setOn.bind(this))
+      .onGet(this.getOn.bind(this));
 
     /**
      * Creating multiple services of the same type.
@@ -170,9 +171,8 @@ export class Switch extends Accessory {
     }
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setOn(value: CharacteristicValue) {
     this.states.SwitchState = value as boolean;
 
@@ -201,9 +201,6 @@ export class Switch extends Accessory {
     }
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getOn(): Promise<CharacteristicValue> {
     const switchState = this.states.SwitchState;
 

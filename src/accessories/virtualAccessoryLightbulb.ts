@@ -105,9 +105,8 @@ export class Lightbulb extends Accessory {
     }
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setOn(value: CharacteristicValue) {
     this.states.LightbulbState = value as boolean;
 
@@ -116,9 +115,6 @@ export class Lightbulb extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getOn(): Promise<CharacteristicValue> {
     const lightbulbState = this.states.LightbulbState;
 
@@ -143,16 +139,14 @@ export class Lightbulb extends Accessory {
     return lightbulbBrightness;
   }
 
-  // Receive value in mireds
-  async setColorTemperature(value: CharacteristicValue) {
-    this.states.LightbulbColorTemperature = this.miredToKelvin(value as number);
+  async setColorTemperature(miredValue: CharacteristicValue) {
+    this.states.LightbulbColorTemperature = this.miredToKelvin(miredValue as number);
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${value} Mired)`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
   }
 
-  // Return value in mireds
   async getColorTemperature(): Promise<CharacteristicValue> {
     const miredValue = this.kelvinToMired(this.states.LightbulbColorTemperature);
 

@@ -1,9 +1,8 @@
 /* eslint-disable curly */
 
-import { Type } from 'typeserializer';
+import { Categories } from 'homebridge';
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
-
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
 import { GarageDoorConfiguration } from './accessories/configurationGarageDoor.js';
@@ -14,6 +13,7 @@ import { SecuritySystemConfiguration } from './accessories/configurationSecurity
 import { SensorConfiguration } from './configurationSensor.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
+import { TimerConfiguration } from './configurationTimer.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
 
@@ -21,8 +21,7 @@ import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
-import { TimerConfiguration } from './configurationTimer.js';
-import { Categories } from 'homebridge';
+import { Type } from 'typeserializer';
 
 /**
  * 

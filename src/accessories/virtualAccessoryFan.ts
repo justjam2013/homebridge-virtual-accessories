@@ -1,4 +1,5 @@
-import { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
@@ -79,9 +80,8 @@ export class Fan extends Accessory {
       .onGet(this.getRotationSpeed.bind(this));
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setOn(value: CharacteristicValue) {
     this.states.FanState = value as boolean;
 
@@ -90,9 +90,6 @@ export class Fan extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getOn(): Promise<CharacteristicValue> {
     const fanState = this.states.FanState;
 

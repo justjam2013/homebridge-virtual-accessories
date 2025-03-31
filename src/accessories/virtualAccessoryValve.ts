@@ -2,8 +2,12 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+
 import { Timer } from '../timer.js';
 
+/**
+ * Valve - Accessory implementation
+ */
 export class Valve extends Accessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Valve';
@@ -94,27 +98,26 @@ export class Valve extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.ValveType)
-      .onGet(this.handleValveTypeGet.bind(this));
+      .onGet(this.getValveType.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Active)
-      .onSet(this.handleActiveSet.bind(this))
-      .onGet(this.handleActiveGet.bind(this));
+      .onSet(this.setActive.bind(this))
+      .onGet(this.getActive.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.InUse)
-      .onGet(this.handleInUseGet.bind(this));
+      .onGet(this.getInUse.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.SetDuration)
-      .onSet(this.handleSetDurationSet.bind(this))
-      .onGet(this.handleSetDurationGet.bind(this));
+      .onSet(this.setSetDuration.bind(this))
+      .onGet(this.getSetDuration.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.RemainingDuration)
-      .onGet(this.handleRemainingDurationGet.bind(this));
+      .onGet(this.getRemainingDuration.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleValveTypeGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getValveType(): Promise<CharacteristicValue> {
     const valveType = this.valveType;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${Valve.getValveTypeName(valveType)}`);
@@ -122,10 +125,7 @@ export class Valve extends Accessory {
     return valveType;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleActiveSet(value: CharacteristicValue) {
+  async setActive(value: CharacteristicValue) {
     this.states.ValveActive = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${Valve.getActiveName(this.states.ValveActive)}`);
@@ -151,10 +151,7 @@ export class Valve extends Accessory {
     }
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleActiveGet(): Promise<CharacteristicValue> {
+  async getActive(): Promise<CharacteristicValue> {
     const valveActive = this.states.ValveActive;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${Valve.getActiveName(valveActive)}`);
@@ -162,10 +159,7 @@ export class Valve extends Accessory {
     return valveActive;
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleInUseGet(): Promise<CharacteristicValue> {
+  async getInUse(): Promise<CharacteristicValue> {
     const valveInUse = this.states.ValveInUse;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${Valve.getInUseName(valveInUse)}`);
@@ -173,7 +167,7 @@ export class Valve extends Accessory {
     return valveInUse;
   }
 
-  async handleSetDurationSet(value: CharacteristicValue) {
+  async setSetDuration(value: CharacteristicValue) {
     const duration = value as number;
 
     this.durationTimer.setDuration(duration);
@@ -181,7 +175,7 @@ export class Valve extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
-  async handleSetDurationGet(): Promise<CharacteristicValue> {
+  async getSetDuration(): Promise<CharacteristicValue> {
     const duration = this.durationTimer.getDuration();
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
@@ -189,7 +183,7 @@ export class Valve extends Accessory {
     return duration;
   }
 
-  async handleRemainingDurationGet(): Promise<CharacteristicValue> {
+  async getRemainingDuration(): Promise<CharacteristicValue> {
     const remainingDuration = this.durationTimer.getRemainingDuration();
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);

@@ -65,20 +65,19 @@ export class WindowCovering extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
-      .onGet(this.handleCurrentPositionGet.bind(this));
+      .onGet(this.getCurrentPosition.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetPosition)
-      .onSet(this.handleTargetPositionSet.bind(this))
-      .onGet(this.handleTargetPositionGet.bind(this));
+      .onSet(this.setTargetPosition.bind(this))
+      .onGet(this.getTargetPosition.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.PositionState)
-      .onGet(this.handlePositionStateGet.bind(this));
+      .onGet(this.getPositionState.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleCurrentPositionGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getCurrentPosition(): Promise<CharacteristicValue> {
     const windowCoveringCurrentPosition = this.states.WindowCoveringCurrentPosition;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${WindowCovering.getStateName(windowCoveringCurrentPosition)}`);
@@ -86,10 +85,7 @@ export class WindowCovering extends Accessory {
     return windowCoveringCurrentPosition;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleTargetPositionSet(value: CharacteristicValue) {
+  async setTargetPosition(value: CharacteristicValue) {
     this.states.WindowCoveringTargetPosition = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${WindowCovering.getStateName(this.states.WindowCoveringTargetPosition)}`);
@@ -119,10 +115,7 @@ export class WindowCovering extends Accessory {
     }, transitionDelayMillis);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleTargetPositionGet(): Promise<CharacteristicValue> {
+  async getTargetPosition(): Promise<CharacteristicValue> {
     const windowCoveringTargetPosition = this.states.WindowCoveringTargetPosition;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${WindowCovering.getStateName(windowCoveringTargetPosition)}`);
@@ -130,10 +123,7 @@ export class WindowCovering extends Accessory {
     return windowCoveringTargetPosition;
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handlePositionStateGet(): Promise<CharacteristicValue> {
+  async getPositionState(): Promise<CharacteristicValue> {
     const windowCoveringPositionState = this.states.WindowCoveringPositionState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${WindowCovering.getPositionName(windowCoveringPositionState)}`);

@@ -1,5 +1,6 @@
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
 import { Utils } from './utils.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
+
 import { ZonedDateTime } from '@js-joda/core';
 
 export class Timer {
