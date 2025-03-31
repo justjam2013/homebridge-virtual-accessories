@@ -1,5 +1,5 @@
-import { Sensor } from '../sensors/virtualSensor.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 /**

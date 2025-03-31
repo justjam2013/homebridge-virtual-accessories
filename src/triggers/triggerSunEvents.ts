@@ -1,12 +1,12 @@
-import { SunEventsTriggerConfiguration } from '../configuration/triggers/configurationSunEventsTrigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
+import { SunEventsTriggerConfiguration } from '../configuration/triggers/configurationSunEventsTrigger.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../utils.js';
 
 import { Cron } from 'croner';
+import { DateTimeFormatter, LocalDate, LocalDateTime } from '@js-joda/core';
 import { Type, deserialize } from 'typeserializer';
 import 'reflect-metadata';
-import { DateTimeFormatter, LocalDate, LocalDateTime } from '@js-joda/core';
 
 /**
  * SunEventsTrigger - Trigger implementation
@@ -77,7 +77,7 @@ export class SunEventsTrigger extends Trigger {
     sensor: Sensor,
   ) {
     const today: string = LocalDate.now().toString();
-    this.log.info(`[${this.sensorConfig.accessoryName}] Today: ${today}`);
+    this.log.debug(`[${this.sensorConfig.accessoryName}] Today: ${today}`);
 
     await this.getSunEventsData(triggerConfig.latitude, triggerConfig.longitude, timezone, today)
       .then(

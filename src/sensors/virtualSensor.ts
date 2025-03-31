@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
+
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from '../triggers/trigger.js';
 import { NotCompanionError, AccessoryNotAllowedError, TriggerNotAllowedError } from '../errors.js';

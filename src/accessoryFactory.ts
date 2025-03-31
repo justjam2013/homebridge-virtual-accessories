@@ -10,6 +10,7 @@ import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifier
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
+import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
@@ -29,7 +30,6 @@ import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
-import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 
 /**
  * Virtual Accessory Factory

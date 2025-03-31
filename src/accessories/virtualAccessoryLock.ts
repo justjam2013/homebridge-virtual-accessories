@@ -1,9 +1,8 @@
-// https://github.com/KhaosT/HAP-NodeJS/commit/80cdb1535f5bee874cc06657ef283ee91f258815
-
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+
 import { Utils } from '../utils.js';
 
 /**
@@ -22,9 +21,6 @@ export class Lock extends Accessory {
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private nfcAccessControlPoint: any = '';
 
   private states = {
     LockCurrentState: Lock.SECURED,

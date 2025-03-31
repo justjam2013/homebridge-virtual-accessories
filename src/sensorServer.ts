@@ -1,10 +1,11 @@
 /* eslint-disable brace-style */
-import express, { Express, Request, Response } from 'express';
 
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
 import { Accessory } from './accessories/virtualAccessory.js';
-import { UpdatableSensor } from './updatableSensor.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
+import { UpdatableSensor } from './updatableSensor.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
+
+import express, { Express, Request, Response } from 'express';
 
 /**
  * Create server to accept sensor events

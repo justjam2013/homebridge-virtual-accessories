@@ -1,9 +1,9 @@
 import { AccessoryConfiguration } from './configurationAccessory.js';
+import { SensorServerConfiguration } from './configurationSensorServer.js';
+import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 import { deserialize } from 'typeserializer';
 import 'reflect-metadata';
-import { VirtualAccessoriesLogger } from '../virtualLogger.js';
-import { SensorServerConfiguration } from './configurationSensorServer.js';
 
 export class Configuration {
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Logging, LogLevel } from 'homebridge';
+import type { Logging, LogLevel } from 'homebridge';
 
 export class VirtualAccessoriesLogger {
 

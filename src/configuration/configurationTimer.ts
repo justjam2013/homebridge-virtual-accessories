@@ -1,9 +1,9 @@
 /* eslint-disable brace-style */
 
-import { Type } from 'typeserializer';
-
 import { DurationConfiguration } from './configurationDuration.js';
 import { Utils } from '../utils.js';
+
+import { Type } from 'typeserializer';
 
 /**
  * 

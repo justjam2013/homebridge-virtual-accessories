@@ -3,9 +3,9 @@ import { Trigger } from './trigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
+import { Cron } from 'croner';
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
-import { Cron } from 'croner';
 
 /**
  * CronTrigger - Trigger implementation

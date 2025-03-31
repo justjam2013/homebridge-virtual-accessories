@@ -1,4 +1,4 @@
-import { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
@@ -78,9 +78,8 @@ export class Speaker extends Accessory {
       .onGet(this.getVolume.bind(this));
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setActive(value: CharacteristicValue) {
     this.states.SpeakerState = value as number;
 
@@ -89,9 +88,6 @@ export class Speaker extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Speaker.getStateName(this.states.SpeakerState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getActive(): Promise<CharacteristicValue> {
     const speakerState = this.states.SpeakerState;
 

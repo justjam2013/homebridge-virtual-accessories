@@ -1,7 +1,7 @@
-import { Trigger } from './trigger.js';
-import { Sensor } from '../sensors/virtualSensor.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { PingTriggerConfiguration } from '../configuration/triggers/configurationPingTrigger.js';
+import { Trigger } from './trigger.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 
 // import dns from 'dns';
 import net from 'net';
