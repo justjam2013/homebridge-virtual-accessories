@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -14,10 +16,7 @@ export class SwitchConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {  
-    const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      [ 'on', 'off' ].includes(this.defaultState)
-    );
+    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(SwitchConfiguration.prefix + '.defaultState');

@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -17,10 +19,7 @@ export class LockConfiguration {
       [ 'locked', 'unlocked' ].includes(this.defaultState)
     );
 
-    const isValidAutoSecurityTimeout: boolean = (
-      (this.autoSecurityTimeout !== undefined) &&
-      (this.autoSecurityTimeout >= 0)
-    );
+    const isValidAutoSecurityTimeout: boolean = Utils.isTimeout(this.autoSecurityTimeout);
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(LockConfiguration.prefix + '.defaultState');

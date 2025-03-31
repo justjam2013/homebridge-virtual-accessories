@@ -1,6 +1,6 @@
 /* eslint-disable curly */
 
-import { isPowerState, isPercentage } from '../../customTypes.js';
+import { Utils } from '../../utils.js';
 
 /**
  * 
@@ -15,20 +15,11 @@ export class FanConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      isPowerState(this.defaultState)
-    );
+    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
 
-    const isValidRotationDirection: boolean = (
-      (this.rotationDirection !== undefined) &&
-      [ 'clockwise', 'counterclockwise' ].includes(this.rotationDirection)
-    );
+    const isValidRotationDirection: boolean = Utils.isRotationDirection(this.rotationDirection);
 
-    const isValidRotationSpeed: boolean = (
-      (this.rotationSpeed !== undefined) &&
-      isPercentage(this.rotationSpeed)
-    );
+    const isValidRotationSpeed: boolean = Utils.isPercentage(this.rotationSpeed);
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(FanConfiguration.prefix + '.defaultState');

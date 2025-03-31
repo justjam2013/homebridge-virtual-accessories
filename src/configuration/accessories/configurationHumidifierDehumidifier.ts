@@ -1,4 +1,7 @@
 /* eslint-disable curly */
+
+import { Utils } from '../../utils.js';
+
  
 
 /**
@@ -19,15 +22,9 @@ export class HumidifierDehumidifierConfiguration {
       [ 'auto', 'humidifier', 'dehumidifier' ].includes(this.type)
     );
 
-    const isValidHumidifierThreshold: boolean = (
-      (this.humidifierThreshold !== undefined) &&
-      (this.humidifierThreshold >= 0 && this.humidifierThreshold <= 100)
-    );
+    const isValidHumidifierThreshold: boolean = Utils.isPercentage(this.humidifierThreshold);
 
-    const isValidDehumidifierThreshold: boolean = (
-      (this.dehumidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold >= 0 && this.dehumidifierThreshold <= 100)
-    );
+    const isValidDehumidifierThreshold: boolean = Utils.isPercentage(this.dehumidifierThreshold);
 
     const isValidThresholdWindow: boolean = (
       (this.humidifierThreshold !== undefined) &&
