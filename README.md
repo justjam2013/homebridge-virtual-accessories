@@ -662,7 +662,7 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 People using Virtual Accessories For Homebridge!
 
-Patrick Hunt, the content creator on the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
 
 <a href="https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s">
     <img src="assets/mentions/youtube-video.png" height="240">
