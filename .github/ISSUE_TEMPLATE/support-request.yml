@@ -20,7 +20,7 @@ body:
         Please A clear and concise description of your current problem. Be sure to include:
 
         * What is happening?
-        * What you expect to happen?
+        * What do you expect to happen?
         * Clear steps explaining how to reproduce the problem.
       placeholder: |
         Tip: You can attach images or files by clicking this area to highlight it and then dragging files in.
