@@ -23,10 +23,7 @@
 ## <!-- Thin separator line -->
 
 > [!CAUTION]
-> **Virtual Accessories For Homebridge v3.0.0 (including beta releases) is a breaking upgrade.** If you are upgrading from a previous version, please read the [Wiki page for v3.0.0](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.0.0-breaking-update) for details on how to update your configuration.
-
-> [!WARNING]
-> **Virtual Accessories For Homebridge v2.0.0 is a breaking upgrade.** If you are upgrading to any v2.x.x version from a previous version, please read the [Wiki page for v2.0.0](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0-breaking-update) for details on how to update your configuration.
+> **Virtual Accessories For Homebridge v3.0.0 is a breaking upgrade.** If you are upgrading from a 2.x.x version, please read the [Wiki page for v3.0.0](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.0.0-breaking-update) for details on how to manually update your configuration.
 
 ## <!-- Thin separator line -->
 
