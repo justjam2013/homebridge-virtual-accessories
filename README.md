@@ -415,8 +415,12 @@ To add the speaker accessory in the Home app follow these steps:
                 "hasResetTimer": true
             },
             "resetTimer": {
-                "duration": 10,
-                "units": "seconds",
+                "duration": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 10
+                },
                 "isResettable": true
             }
         }
@@ -442,9 +446,18 @@ To add the speaker accessory in the Home app follow these steps:
             },
             "resetTimer": {
                 "durationIsRandom": true,
-                "durationRandomMin": 5,
-                "durationRandomMax": 20,
-                "units": "seconds",
+                "durationRandomMin": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 5,
+                    "seconds": 0
+                },
+                "durationRandomMax": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 20,
+                    "seconds": 0
+                },
                 "isResettable": true
             }
         }
