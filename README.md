@@ -531,7 +531,7 @@ To add the speaker accessory in the Home app follow these steps:
                 "trigger": "cron"
             },
             "cronTrigger": {
-                "pattern": "* * * * * *",
+                "pattern": "* * * * *",
                 "zoneId": "America/Los_Angeles",
                 "disableTriggerEventLogging": false,
                 "isDisabled": false
@@ -557,7 +557,7 @@ To add the speaker accessory in the Home app follow these steps:
                 "trigger": "cron"
             },
             "cronTrigger": {
-                "pattern": "* * * * * *",
+                "pattern": "* * * * *",
                 "zoneId": "America/Los_Angeles",
                 "startDateTime": "2024-11-14T19:41:00",
                 "endDateTime": "2024-11-30T19:41:00",
