@@ -651,7 +651,7 @@ The raw json payload will contain the accessory id of the humidifier/dehumidifie
     "value": 35
 }
 ```
-Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up the link between the real sensor and the virtual sensor.
+Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
 
 ## Creative Uses
 
