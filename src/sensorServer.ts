@@ -35,7 +35,7 @@ export class SensorUpdateServer {
     this.port = port;
 
     // parse application/x-www-form-urlencoded
-    this.server.use(express.urlencoded());
+    this.server.use(express.urlencoded({ extended: true }));
 
     // parse application/json
     this.server.use(express.json());
