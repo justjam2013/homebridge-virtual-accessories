@@ -273,7 +273,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       }
     }
 
-    this.service!.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
+    this.service?.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
 
     this.storeState();
 
