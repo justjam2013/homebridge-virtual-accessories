@@ -6,6 +6,7 @@ import { CompanionSensorConfiguration } from './configurationCompanionSensor.js'
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
 import { GarageDoorConfiguration } from './accessories/configurationGarageDoor.js';
+import { HeaterCoolerConfiguration } from './accessories/configurationHeaterCooler.js';
 import { HumidifierDehumidifierConfiguration } from './accessories/configurationHumidifierDehumidifier.js';
 import { LightbulbConfiguration } from './accessories/configurationLightbulb.js';
 import { LockConfiguration } from './accessories/configurationLock.js';
@@ -48,6 +49,10 @@ export class AccessoryConfiguration {
   // Garage Door
   @Type(GarageDoorConfiguration)
     garageDoor!: GarageDoorConfiguration;
+
+  // HeaterCooler
+  @Type(HeaterCoolerConfiguration)
+    heaterCooler!: HeaterCoolerConfiguration;
 
   // HumidifierDehumidifier
   @Type(HumidifierDehumidifierConfiguration)
@@ -152,6 +157,8 @@ export class AccessoryConfiguration {
       return this.isValidFan();
     case 'garagedoor':
       return this.isValidGarageDoor();
+    case 'heaterCooler':
+      return this.isValidHeaterCooler();
     case 'humidifierdehumidifier':
       return this.isValidHumidifierDehumidifier();
     case 'lightbulb':
@@ -222,6 +229,21 @@ export class AccessoryConfiguration {
 
     return (
       isValidGarageDoor
+    );
+  };
+
+  private isValidHeaterCooler(): boolean {
+    let isValidHeaterCooler: boolean = false;
+    let heaterCoolerErrorFields: string[] = [ HeaterCoolerConfiguration.prefix ];
+
+    if (this.heaterCooler !== undefined) {
+      [isValidHeaterCooler, heaterCoolerErrorFields] = this.heaterCooler.isValid();
+    }
+
+    this.errorFields.push(...heaterCoolerErrorFields);
+
+    return (
+      isValidHeaterCooler
     );
   };
 
