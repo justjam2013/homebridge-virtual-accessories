@@ -243,8 +243,9 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryName": "My Humidifier",
             "accessoryType": "humidifierdehumidifier",
             "humidifierDehumidifier": {
-                "type": "humidifier",
-                "humidifierThreshold": 50
+                "type": "auto",
+                "humidifierThreshold": 40,
+                "dehumidifierThreshold": 55
             }
         }
     ],
