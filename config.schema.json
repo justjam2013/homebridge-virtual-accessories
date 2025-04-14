@@ -97,6 +97,7 @@
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Heater/Cooler (AC)", "enum": ["heatercooler"] },
                 { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
@@ -192,6 +193,97 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
+            "heaterCooler": {
+              "title": "Heater/Cooler",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Type *",
+                  "description": "Device type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Heater", "enum": ["heater"] },
+                    { "title": "Cooler (AC)", "enum": ["cooler"] },
+                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
+                  ]
+                },
+                "heatingThreshold": {
+                  "title": "Heating Threshold *",
+                  "description": "Temperature level below which the heater turns on",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThreshold": {
+                  "title": "Cooling Threshold *",
+                  "description": "Temperature level above which the cooler (AC) turns on",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "temperatureDisplayUnits": {
+                  "title": "Temperature Display Units *",
+                  "description": "Temperature display units",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ]
+                },
+                "": {
+                  "title": "Note: The heating threshold value **must be lower** than the cooling threshold value",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.type === 'auto';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'heatercooler';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThreshold", "coolingThreshold" ]
+                  }
+                }
+              ]
+            },
             "humidifierDehumidifier": {
               "title": "Humidifier/Dehumidifier",
               "type": "object",
@@ -227,7 +319,7 @@
                   }
                 },
                 "": {
-                  "title": "Note: The dehumidifier threshold value **must be greater** than the humidifier threshold value",
+                  "title": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -799,6 +891,21 @@
                 "properties": {
                   "garageDoor": {
                     "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "heatercooler" }
+                }
+              },
+              "then": {
+                "required": [ "heaterCooler" ],
+                "properties": {
+                  "heaterCooler": {
+                    "required": [ "type", "temperatureDisplayUnits" ]
                   }
                 }
               }
