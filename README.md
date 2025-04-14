@@ -680,7 +680,7 @@ Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor 
 
 ### Update Heater/Cooler temperature sensor
 
-The process to update a Humidifier/Dehumidifier humidity sensor is the same as for updating a Humidifier/Dehumidifier humidity sensor.
+The process to update a Heater/Cooler temperature sensor is the same as for updating a Humidifier/Dehumidifier humidity sensor.
 
 The target URL (replace hostname and port per your setup) will specify the `temperature` path:
 
