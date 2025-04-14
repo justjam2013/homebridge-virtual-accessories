@@ -44,6 +44,7 @@
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
+    - [Heater/Cooler](#heatercooler)
     - [Humidifier/Dehumidifier](#humidifierdehumidifier)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
@@ -64,6 +65,7 @@
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
+    - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -85,7 +87,8 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
--   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, if that state is supported.
+-   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can sekect heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
+-   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system.
@@ -231,6 +234,26 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
     ],
     "platform": "VirtualAccessoriesForHomebridge"
 }
+```
+
+### Heater/Cooler
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Heater",
+            "accessoryType": "heatercooler",
+            "heatercooler": {
+                "type": "auto",
+                "heatingThreshold": 20,
+                "coolingThreshold": 28,
+                "temperatureDisplayUnits": "celsius"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
 ```
 
 ### Humidifier/Dehumidifier
@@ -610,6 +633,7 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+- **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
 ### Enable webhook service
 
@@ -653,6 +677,25 @@ The raw json payload will contain the accessory id of the humidifier/dehumidifie
 }
 ```
 Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
+
+### Update Heater/Cooler temperature sensor
+
+The process to update a Humidifier/Dehumidifier humidity sensor is the same as for updating a Humidifier/Dehumidifier humidity sensor.
+
+The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+
+```
+http://localhost:60221/temperature
+```
+
+The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+```json
+{
+    "id": "1234567",
+    "value": 35
+}
+```
+The temperature value will be specified in the same temperature units (celsius or fahrenheit) as specified by the accessory's configuration.
 
 ## Creative Uses
 
