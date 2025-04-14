@@ -21,8 +21,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
   static readonly CURRENTLY_HUMIDIFYING: number = 2;    // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
   static readonly CURRENTLY_DEHUMIDIFYING: number = 3;  // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
 
-  static readonly AUTOMATIC: number = 0;                      // Characteristic.TargetHumidifierDehumidifierState.AUTO 
-  // static readonly HUMIDIFIER_OR_DEHUMIDIFIER: number = 0;  // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER
+  static readonly AUTOMATIC: number = 0;                      // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER 
   static readonly HUMIDIFY: number = 1;                       // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER
   static readonly DEHUMIDIFY: number = 2;                     // Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER
 
@@ -333,9 +332,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.IDLE);
       currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING);
 
-      // TODO:
-      // targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.AUTO);
-      // targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFY);
+      // AUTOMATIC and HUMIDIFY
       targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
       targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER);
 
@@ -346,9 +343,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.IDLE);
       currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING);
 
-      // TODO:
-      // targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.AUTO);
-      // targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFY);
+      // AUTOMATIC and DEHUMIDIFY
       targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
       targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER);
 
