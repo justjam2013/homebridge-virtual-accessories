@@ -156,7 +156,7 @@ In the UI, required fields will be marked with an asterisk (*) and you will not 
 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
-The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you to correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
+The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
 ```
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Skipping accessory. Configuration is invalid: { "accessoryID": "12345", "accessoryName": "My Switch", ... }
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Invalid fields: [switchDefaultState]
