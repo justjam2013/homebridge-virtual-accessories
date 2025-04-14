@@ -1,5 +1,6 @@
 /* eslint-disable brace-style */
 
+import { Server } from 'http';
 import { Accessory } from './accessories/virtualAccessory.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
 import { UpdatableSensor } from './updatableSensor.js';
@@ -20,6 +21,7 @@ export class SensorUpdateServer {
   private readonly serverName: string = 'Sensor Server';
 
   private server: Express = express();
+  private httpServer?: Server;
   readonly port: number;
 
   constructor(
@@ -75,8 +77,15 @@ export class SensorUpdateServer {
 
   start() {
     this.log.info(`[${this.serverName}] Starting Sensor Server`);
-    this.server.listen(this.port, () => {
+    this.httpServer = this.server.listen(this.port, () => {
       this.log.info(`[${this.serverName}] Sensor Server running on port ${this.port}`);
+    });
+  }
+
+  stop() {
+    this.log.info(`[${this.serverName}] Stopping Sensor Server`);
+    this.httpServer?.close(() => {
+      this.log.info(`[${this.serverName}] Sensor Server terminated`);
     });
   }
 
