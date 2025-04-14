@@ -695,7 +695,7 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
     "value": 35
 }
 ```
-The temperature value will be specified in the same temperature units (celsius or fahrenheit) as specified by the accessory's configuration.
+Note: The temperature value must be specified in the same temperature units (celsius or fahrenheit) as specified by the accessory's configuration.
 
 ## Creative Uses
 
