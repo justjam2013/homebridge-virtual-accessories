@@ -16,17 +16,17 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
 
-  static readonly CURRENTLY_INACTIVE: number = 0;       // Characteristic.CurrentHumidifierDehumidifierState.INACTIVE
-  static readonly CURRENTLY_IDLE: number = 1;           // Characteristic.CurrentHumidifierDehumidifierState.IDLE
-  static readonly CURRENTLY_HUMIDIFYING: number = 2;    // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
-  static readonly CURRENTLY_DEHUMIDIFYING: number = 3;  // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
+  static readonly CURRENTLY_INACTIVE: number = 0;             // Characteristic.CurrentHumidifierDehumidifierState.INACTIVE
+  static readonly CURRENTLY_IDLE: number = 1;                 // Characteristic.CurrentHumidifierDehumidifierState.IDLE
+  static readonly CURRENTLY_HUMIDIFYING: number = 2;          // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
+  static readonly CURRENTLY_DEHUMIDIFYING: number = 3;        // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
 
   static readonly AUTOMATIC: number = 0;                      // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER 
   static readonly HUMIDIFY: number = 1;                       // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER
   static readonly DEHUMIDIFY: number = 2;                     // Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER
 
-  static readonly INACTIVE: number = 0;  // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;    // Characteristic.Active.ACTIVE
+  static readonly INACTIVE: number = 0;                       // Characteristic.Active.INACTIVE
+  static readonly ACTIVE: number = 1;                         // Characteristic.Active.ACTIVE
 
   private readonly stateStorageKey: string = 'HumidifierDehumidifierActive';
   private readonly targetStateStorageKey: string = 'HumidifierDehumidifierTargetState';
@@ -65,7 +65,6 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedTargetState: number = accessoryState[this.targetStateStorageKey] as number;
-      const cachedHumidifierThreshold: number = accessoryState[this.humidifierThresholdStorageKey] as number;
 
       if (cachedState !== undefined) {
         this.states.HumidifierDehumidifierActive = cachedState;
@@ -80,6 +79,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
         }
       }
       if (this.deviceHumidifies()) {
+        const cachedHumidifierThreshold: number = accessoryState[this.humidifierThresholdStorageKey] as number;
         if (cachedHumidifierThreshold !== undefined) {
           this.states.HumidifierThreshold = cachedHumidifierThreshold;
         }
@@ -187,7 +187,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.DehumidifierThreshold)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${this.states.DehumidifierThreshold}`);
   }
 
   async getRelativeHumidityDehumidifierThreshold(): Promise<CharacteristicValue>  {
@@ -203,7 +203,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${HumidifierDehumidifier.getTargetStateName(this.states.HumidifierThreshold)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${this.states.HumidifierThreshold}`);
   }
 
   async getRelativeHumidityHumidifierThreshold(): Promise<CharacteristicValue> {
@@ -280,16 +280,16 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
   }
 
   static getActiveName(event: number): string {
-    let eventName: string;
+    let activeName: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case HumidifierDehumidifier.INACTIVE: { eventName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.ACTIVE: { eventName = 'ACTIVE'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { activeName = 'undefined'; break; }
+    case HumidifierDehumidifier.INACTIVE: { activeName = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.ACTIVE: { activeName = 'ACTIVE'; break; }
+    default: { activeName = event.toString(); }
     }
 
-    return eventName;
+    return activeName;
   }
 
   static getCurrentStateName(state: number): string {
