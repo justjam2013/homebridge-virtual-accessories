@@ -177,7 +177,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
   async getCurrentRelativeHumidity(): Promise<CharacteristicValue> {
     const currentRelativeHumidity = this.states.CurrentRelativeHumidity;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Relative Humidity: ${currentRelativeHumidity}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Relative Humidity: ${currentRelativeHumidity}%`);
 
     return currentRelativeHumidity;
   }
@@ -187,13 +187,13 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${this.states.DehumidifierThreshold}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${this.states.DehumidifierThreshold}%`);
   }
 
   async getRelativeHumidityDehumidifierThreshold(): Promise<CharacteristicValue>  {
     const dehumidifierThreshold = this.states.DehumidifierThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Dehumidifier Threshold: ${dehumidifierThreshold}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Dehumidifier Threshold: ${dehumidifierThreshold}%`);
 
     return dehumidifierThreshold;
   }
@@ -203,13 +203,13 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${this.states.HumidifierThreshold}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${this.states.HumidifierThreshold}%`);
   }
 
   async getRelativeHumidityHumidifierThreshold(): Promise<CharacteristicValue> {
     const humidifierThreshold = this.states.HumidifierThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Humidifier Threshold: ${humidifierThreshold}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Humidifier Threshold: ${humidifierThreshold}%`);
 
     return humidifierThreshold;
   }
@@ -276,17 +276,17 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Humidifier current state: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Humidifier/Dehumidifier current state: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
   }
 
-  static getActiveName(event: number): string {
+  static getActiveName(status: number): string {
     let activeName: string;
 
-    switch (event) {
+    switch (status) {
     case undefined: { activeName = 'undefined'; break; }
     case HumidifierDehumidifier.INACTIVE: { activeName = 'INACTIVE'; break; }
     case HumidifierDehumidifier.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = event.toString(); }
+    default: { activeName = status.toString(); }
     }
 
     return activeName;
@@ -398,7 +398,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
   // Updatable Sensor interface
 
   updateSensor(value: boolean | number, accessoryId: string) {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating humidity sensor to ${value}%`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}%`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
@@ -411,6 +411,8 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating humidity sensor to ${value}%`);
+
       this.states.CurrentRelativeHumidity = value;
       this.setDeviceOperationalCondition();
     }

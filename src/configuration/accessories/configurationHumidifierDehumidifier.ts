@@ -7,8 +7,8 @@ import { Utils } from '../../utils.js';
  */
 export class HumidifierDehumidifierConfiguration {
   type!: string;
-  humidifierThreshold: number = 0;
-  dehumidifierThreshold: number = 100;
+  humidifierThreshold!: number;
+  dehumidifierThreshold!: number;
 
   static prefix: string = 'humidifierDehumidifier';
 
