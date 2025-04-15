@@ -207,26 +207,6 @@
                     { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
                   ]
                 },
-                "heatingThreshold": {
-                  "title": "Heating Threshold *",
-                  "description": "Temperature level below which the heater turns on",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 120,
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
-                  }
-                },
-                "coolingThreshold": {
-                  "title": "Cooling Threshold *",
-                  "description": "Temperature level above which the cooler (AC) turns on",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 120,
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
-                  }
-                },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
                   "description": "Temperature display units",
@@ -235,6 +215,46 @@
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
                     { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
                   ]
+                },
+                "heatingThresholdCelsius": {
+                  "title": "Heating Threshold ºC *",
+                  "description": "Temperature level below which the heater turns on (0ºC - 25ºC)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 25,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdCelsius": {
+                  "title": "Cooling Threshold ºC *",
+                  "description": "Temperature level above which the cooler (AC) turns on (10ºC - 35ºC)",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 35,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "heatingThresholdFahrenheit": {
+                  "title": "Heating Threshold ºF *",
+                  "description": "Temperature level below which the heater turns on (32ºF - 77ºF)",
+                  "type": "integer",
+                  "minimum": 32,
+                  "maximum": 77,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdFahrenheit": {
+                  "title": "Cooling Threshold ºF *",
+                  "description": "Temperature level above which the cooler (AC) turns on (50ºF - 95ºF)",
+                  "type": "integer",
+                  "minimum": 50,
+                  "maximum": 95,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
                 },
                 "": {
                   "title": "Note: The heating threshold value **must be lower** than the cooling threshold value",
@@ -252,34 +272,73 @@
                 {
                   "if": {
                     "properties": {
-                      "type": { "const": "heater" }
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
                     },
-                    "required": [ "type" ]
+                    "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThreshold" ]
+                    "required": [ "heatingThresholdCelsius" ]
                   }
                 },
                 {
                   "if": {
                     "properties": {
-                      "type": { "const": "cooler" }
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
                     },
-                    "required": [ "type" ]
+                    "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "coolingThreshold" ]
+                    "required": [ "coolingThresholdCelsius" ]
                   }
                 },
                 {
                   "if": {
                     "properties": {
-                      "type": { "const": "auto" }
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
                     },
-                    "required": [ "type" ]
+                    "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThreshold", "coolingThreshold" ]
+                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
                   }
                 }
               ]

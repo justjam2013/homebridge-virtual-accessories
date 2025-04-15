@@ -157,7 +157,7 @@ export class AccessoryConfiguration {
       return this.isValidFan();
     case 'garagedoor':
       return this.isValidGarageDoor();
-    case 'heaterCooler':
+    case 'heatercooler':
       return this.isValidHeaterCooler();
     case 'humidifierdehumidifier':
       return this.isValidHumidifierDehumidifier();
