@@ -277,7 +277,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
     "platform": "VirtualAccessoriesForHomebridge"
 ```
 > [!NOTE]
-> Internally HomeKit stores temperature values in Celsius and converts to Fahrenheit on the fly, so even when entering values like 70ºF, you may see values like 70.1ºF or 69.9ºF due to conversions between temperature scales. This is unavoidable.
+> Internally HomeKit stores temperature values in Celsius and converts to Fahrenheit on the fly, so when values like 70ºF, you may see values displayed like 70.1ºF or 69.9ºF due to conversions between temperature scales. This is unavoidable.
 
 ### Humidifier/Dehumidifier
 
