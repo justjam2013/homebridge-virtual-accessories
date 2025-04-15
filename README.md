@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> **Virtual Accessories For Homebridge v3.0.0 is a breaking upgrade.** If you are upgrading from a v2.x.x version, please read the [Wiki page for v3.0.0](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.0.0-breaking-update) for details on how to update your configuration.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
