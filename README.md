@@ -133,20 +133,26 @@ npm install -g homebridge-virtual-accessories
 > <img src="assets/keepaccessories.png" height="240" />
 
 ### Docker
+
 If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
+
 ```
 npm uninstall raw-socket
 npm install raw-socket
 ```
+
 This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
 
 ### MacOS
+
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
+
 ```
 xcode-select --install
 ```
 
 ### Synology
+
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology DSM, you will need to ensure that a build toolchain is installed.
 
 This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
@@ -161,6 +167,7 @@ In the UI, required fields will be marked with an asterisk (*) and you will not 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
 The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
+
 ```
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Skipping accessory. Configuration is invalid: { "accessoryID": "12345", "accessoryName": "My Switch", ... }
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Invalid fields: [switchDefaultState]
@@ -195,6 +202,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
 ### Fan
 
 ```json
@@ -276,6 +284,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
     ],
     "platform": "VirtualAccessoriesForHomebridge"
 ```
+
 > [!NOTE]
 > Internally HomeKit stores temperature values in Celsius and converts to Fahrenheit on the fly, so when values like 70ºF, you may see values displayed like 70.1ºF or 69.9ºF due to conversions between temperature scales. This is unavoidable.
 
@@ -370,9 +379,9 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
         }
     ],
 ```
+
 > [!NOTE]
 > After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
->
 > `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
 
 #### Adding a Speaker accessory in the Home app
@@ -617,6 +626,7 @@ To add the speaker accessory in the Home app follow these steps:
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
 > [!NOTE]
 > A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
 > ```
@@ -657,6 +667,7 @@ To add the speaker accessory in the Home app follow these steps:
 ## Webhook Service Configuration
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 - **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 
@@ -682,6 +693,7 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
     },
 }
 ```
+
 > [!NOTE]
 > The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
 
@@ -696,12 +708,14 @@ http://localhost:60221/humidity
 ```
 
 The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+
 ```json
 {
     "id": "1234567",
     "value": 35
 }
 ```
+
 Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
 
 ### Update Heater/Cooler temperature sensor
@@ -715,12 +729,14 @@ http://localhost:60221/temperature
 ```
 
 The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+
 ```json
 {
     "id": "1234567",
     "value": 35
 }
 ```
+
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
 
