@@ -44,7 +44,8 @@
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
-    - [Heater/Cooler](#heatercooler)
+    - [Heater/Cooler (Celsius)](#heatercooler-celsius)
+    - [Heater/Cooler (Fahrenheit)](#heatercooler-fahrenheit)
     - [Humidifier/Dehumidifier](#humidifierdehumidifier)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
@@ -236,7 +237,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 }
 ```
 
-### Heater/Cooler
+### Heater/Cooler (Celsius)
 
 ```json
     "name": "Virtual Accessories Platform",
@@ -247,9 +248,29 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryType": "heatercooler",
             "heatercooler": {
                 "type": "auto",
-                "heatingThreshold": 20,
-                "coolingThreshold": 28,
                 "temperatureDisplayUnits": "celsius"
+                "heatingThresholdCelsius": 20,
+                "coolingThresholdCelsius": 25,
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
+### Heater/Cooler (Fahrenheit)
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Heater",
+            "accessoryType": "heatercooler",
+            "heatercooler": {
+                "type": "auto",
+                "temperatureDisplayUnits": "fahrenheit"
+                "heatingThresholdFahrenheit": 68,
+                "coolingThresholdFahrenheit": 77,
             }
         }
     ],
