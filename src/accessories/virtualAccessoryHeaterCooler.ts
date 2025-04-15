@@ -29,7 +29,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
   static readonly ACTIVE: number = 1;                   // Characteristic.Active.ACTIVE
 
   static readonly CELSIUS: number = 0;                  // Characteristic.TemperatureDisplayUnits.CELSIUS
-  static readonly FAHRENHEIT: number = 0;               // Characteristic.TemperatureDisplayUnits.FAHRENHEIT
+  static readonly FAHRENHEIT: number = 1;               // Characteristic.TemperatureDisplayUnits.FAHRENHEIT
 
   private readonly stateStorageKey: string = 'HeaterCoolerActive';
   private readonly targetStateStorageKey: string = 'HeaterCoolerTargetState';
@@ -43,6 +43,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     HeaterCoolerActive: HeaterCooler.INACTIVE,
     HeaterCoolerCurrentState: HeaterCooler.CURRENTLY_INACTIVE,
     HeaterCoolerTargetState: HeaterCooler.AUTO,
+    // HomeKit units are in celsius
     HeatingThreshold: 18,           // 18ºC considered a minimum for health and safety
     CoolingThreshold: 27,           // 27ºC
     CurrentTemperature: 22,         // This value comes from sensor, set to 22ºC for now - room temperature
@@ -58,9 +59,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     // First configure the device based on the accessory details
     this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
     this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
-    this.states.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold;
-    this.states.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold;
     this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === 'celsius' ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
+    this.states.HeatingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getHeatingThreshold());
+    this.states.CoolingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getCoolingThreshold());
 
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
@@ -191,7 +192,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
   async getCurrentTemperature(): Promise<CharacteristicValue> {
     const currentTemperature = this.states.CurrentTemperature;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${currentTemperature}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${currentTemperature}${this.getDegreeUnits()}`);
 
     return currentTemperature;
   }
@@ -201,13 +202,13 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Cooling Threshold Temperature: ${this.states.CoolingThreshold}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Cooling Threshold Temperature: ${this.states.CoolingThreshold}${this.getDegreeUnits()}`);
   }
 
   async getCoolingThresholdTemperature(): Promise<CharacteristicValue>  {
     const coolingThreshold = this.states.CoolingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Cooling Threshold Temperature: ${coolingThreshold}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Cooling Threshold Temperature: ${coolingThreshold}${this.getDegreeUnits()}`);
 
     return coolingThreshold;
   }
@@ -217,13 +218,13 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${this.states.CoolingThreshold}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.states.CoolingThreshold}${this.getDegreeUnits()}`);
   }
 
   async getHeatingThresholdTemperature(): Promise<CharacteristicValue> {
     const heatingThreshold = this.states.HeatingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Humidifier Threshold: ${heatingThreshold}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Heating Threshold Temperature: ${heatingThreshold}${this.getDegreeUnits()}`);
 
     return heatingThreshold;
   }
@@ -307,17 +308,17 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Humidifier current state: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Heater/Cooler current state: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
   }
 
-  static getActiveName(event: number): string {
+  static getActiveName(status: number): string {
     let activeName: string;
 
-    switch (event) {
+    switch (status) {
     case undefined: { activeName = 'undefined'; break; }
     case HeaterCooler.INACTIVE: { activeName = 'INACTIVE'; break; }
     case HeaterCooler.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = event.toString(); }
+    default: { activeName = status.toString(); }
     }
 
     return activeName;
@@ -353,16 +354,16 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
   }
 
   static getTemperatureDisplayUnitsName(state: number): string {
-    let stateName: string;
+    let unitsName: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HeaterCooler.CELSIUS: { stateName = 'CELSIUS'; break; }
-    case HeaterCooler.FAHRENHEIT: { stateName = 'FAHRENHEIT'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { unitsName = 'undefined'; break; }
+    case HeaterCooler.CELSIUS: { unitsName = 'CELSIUS'; break; }
+    case HeaterCooler.FAHRENHEIT: { unitsName = 'FAHRENHEIT'; break; }
+    default: { unitsName = state.toString(); }
     }
 
-    return stateName;
+    return unitsName;
   }
 
   private setHeaterCoolerServiceProperties(
@@ -439,10 +440,29 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     return labels;
   }
 
+  private toCelsius(temperature: number): number {
+    const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
+
+    return Math.round(temperatureCelsius * 10) / 10;
+  }
+
+  private getDegreeUnits(): string {
+    let units: string;
+
+    switch (this.states.TemperatureDisplayUnits) {
+    case undefined: { units = 'º'; break; }
+    case HeaterCooler.CELSIUS: { units = 'ºC'; break; }
+    case HeaterCooler.FAHRENHEIT: { units = 'ºF'; break; }
+    default: { units = 'º'; }
+    }
+
+    return units;
+  }
+
   // Updatable Sensor interface
 
   updateSensor(value: boolean | number, accessoryId: string) {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating temperature sensor to ${value}%`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
@@ -455,7 +475,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
-      this.states.CurrentTemperature = value;
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating temperature sensor to ${value}${this.getDegreeUnits()}`);
+
+      this.states.CurrentTemperature = this.toCelsius(value);
       this.setDeviceOperationalCondition();
     }
   }

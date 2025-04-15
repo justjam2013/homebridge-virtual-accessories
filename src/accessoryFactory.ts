@@ -6,6 +6,7 @@ import { Accessory } from './accessories/virtualAccessory.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
+import { HeaterCooler } from './accessories/virtualAccessoryHeaterCooler.js';
 import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifierDehumidifier.js';
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
@@ -60,6 +61,9 @@ export abstract class AccessoryFactory {
       break;
     case 'garagedoor':
       virtualAccessory = new GarageDoor(platform, accessory);
+      break;
+    case 'heatercooler':
+      virtualAccessory = new HeaterCooler(platform, accessory);
       break;
     case 'humidifierdehumidifier':
       virtualAccessory = new HumidifierDehumidifier(platform, accessory);
