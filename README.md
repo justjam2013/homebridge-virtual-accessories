@@ -370,9 +370,10 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
         }
     ],
 ```
-**Note:** After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
-
-`Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+> [!NOTE]
+> After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+>
+> `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
 
 #### Adding a Speaker accessory in the Home app
 
@@ -616,11 +617,12 @@ To add the speaker accessory in the Home app follow these steps:
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
-Note: A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
-```
-"startDateTime": "2024-11-14T19:41:00",
-"startDateTime": "2024-11-14T19:41",
-```
+> [!NOTE]
+> A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
+> ```
+> "startDateTime": "2024-11-14T19:41:00",
+> "startDateTime": "2024-11-14T19:41",
+> ```
 
 ### Sensor with sun events trigger
 
@@ -720,7 +722,7 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 }
 ```
 > [!NOTE]
-> The temperature value must be specified in the same temperature units (celsius or fahrenheit) as specified by the accessory's configuration.
+> The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
 
 ## Creative Uses
 
