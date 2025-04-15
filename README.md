@@ -720,7 +720,7 @@ Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor 
 
 ### Update Heater/Cooler temperature sensor
 
-The process to update a Heater/Cooler temperature sensor is the same as for updating a Humidifier/Dehumidifier humidity sensor.
+To update a Heater/Cooler temperature sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
 
 The target URL (replace hostname and port per your setup) will specify the `temperature` path:
 
@@ -733,7 +733,7 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 ```json
 {
     "id": "1234567",
-    "value": 35
+    "value": 50
 }
 ```
 
@@ -769,6 +769,7 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 ## Known Issues
 
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
+-   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
 -   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
 -   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume between 0%-100%. A bug report has been opened. Once the bug is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
 
