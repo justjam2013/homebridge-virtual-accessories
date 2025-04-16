@@ -74,7 +74,7 @@
 
 This plugin is inspired by Nick Farina's most excellent 🎸 [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. This plugin is Homebridge Verified and is ready for Homebridge 2.0.
 
-The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became frustrating trying to figure out which plugin provided what functionality or managed which accessory, each time I wanted to make a change.
+The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became annoying having to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change.
 
 The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be publishing bug fixes and improvements. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
@@ -766,10 +766,10 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
 -   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
 -   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
--   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume between 0%-100%. A bug report has been opened. Once the bug is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+-   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
 
 ## What if I run into a problem?
 
-If you encounter a problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open an issue on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose). Please attach any log output to the issue, making sure to remove any sensitive information such as passwords, tokens, etc.
+If you encounter a problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open an issue here on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose). Please attach log outputs and configuration details to the issue, making sure to remove any sensitive information such as passwords, tokens, etc. The more information you provide, the better I can investigate the issues.
 
 Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open.
