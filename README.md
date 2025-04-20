@@ -22,6 +22,11 @@
 
 ## <!-- Thin separator line -->
 
+> [!NOTE]
+> Make sure to check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki) for updates.
+
+## <!-- Thin separator line -->
+
 <details>
   <summary>
     
