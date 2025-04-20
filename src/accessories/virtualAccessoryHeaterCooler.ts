@@ -63,6 +63,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     this.states.HeatingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getHeatingThreshold());
     this.states.CoolingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getCoolingThreshold());
 
+    // set to 22ºC or 71ºF
+    this.states.CurrentTemperature = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? 22 : this.toCelsius(71);
+
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
     this.states.HeaterCoolerTargetState = HeaterCooler.AUTO;
@@ -192,7 +195,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
   async getCurrentTemperature(): Promise<CharacteristicValue> {
     const currentTemperature = this.states.CurrentTemperature;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${currentTemperature}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${this.displayTemperature(currentTemperature)}${this.getDegreeUnits()}`);
 
     return currentTemperature;
   }
@@ -202,13 +205,13 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Cooling Threshold Temperature: ${this.states.CoolingThreshold}${this.getDegreeUnits()}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Cooling Threshold Temperature: ${this.displayTemperature(this.states.CoolingThreshold)}${this.getDegreeUnits()}`);
   }
 
   async getCoolingThresholdTemperature(): Promise<CharacteristicValue>  {
     const coolingThreshold = this.states.CoolingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Cooling Threshold Temperature: ${coolingThreshold}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Cooling Threshold Temperature: ${this.displayTemperature(coolingThreshold)}${this.getDegreeUnits()}`);
 
     return coolingThreshold;
   }
@@ -218,13 +221,13 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.states.CoolingThreshold}${this.getDegreeUnits()}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(this.states.CoolingThreshold)}${this.getDegreeUnits()}`);
   }
 
   async getHeatingThresholdTemperature(): Promise<CharacteristicValue> {
     const heatingThreshold = this.states.HeatingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Heating Threshold Temperature: ${heatingThreshold}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Heating Threshold Temperature: ${this.displayTemperature(heatingThreshold)}${this.getDegreeUnits()}`);
 
     return heatingThreshold;
   }
@@ -444,6 +447,12 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
 
     return Math.round(temperatureCelsius * 10) / 10;
+  }
+
+  private displayTemperature(temperature: number): number {
+    const displayTemperature = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature * 9/5) + 32;
+
+    return Math.round(displayTemperature * 10) / 10;
   }
 
   private getDegreeUnits(): string {
