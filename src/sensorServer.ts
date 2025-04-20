@@ -104,14 +104,14 @@ export class SensorUpdateServer {
   ) {
     this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
 
-    this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName}`);
+    this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
   }
 
   removeAccessory(
     accessory: Accessory,
   ): boolean {
     const found: boolean = this.accessories.delete(accessory.accessoryConfiguration.accessoryID);
-    this.log.info(`[${this.serverName}] Removed accessory ${accessory.accessoryConfiguration.accessoryName}`);
+    this.log.info(`[${this.serverName}] Removed accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
 
     return found;
   }

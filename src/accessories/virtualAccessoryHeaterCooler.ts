@@ -461,7 +461,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
   // Updatable Sensor interface
 
-  updateSensor(value: boolean | number, accessoryId: string) {
+  updateSensor(value: boolean | number, accessoryId: string): void {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
