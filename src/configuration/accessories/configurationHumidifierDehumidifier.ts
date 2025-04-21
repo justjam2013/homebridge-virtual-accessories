@@ -20,14 +20,22 @@ export class HumidifierDehumidifierConfiguration {
       [ 'auto', 'humidifier', 'dehumidifier' ].includes(this.type)
     );
 
-    const isValidHumidifierThreshold: boolean = Utils.isPercentage(this.humidifierThreshold);
+    const isValidHumidifierThreshold: boolean = (
+      (this.humidifierThreshold !== undefined) ?
+        Utils.isPercentage(this.humidifierThreshold) :
+        true
+    );
 
-    const isValidDehumidifierThreshold: boolean = Utils.isPercentage(this.dehumidifierThreshold);
+    const isValidDehumidifierThreshold: boolean = (
+      (this.dehumidifierThreshold !== undefined) ?
+        Utils.isPercentage(this.dehumidifierThreshold) :
+        true
+    );
 
     const isValidThresholdWindow: boolean = (
-      (this.humidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold > this.humidifierThreshold)
+      (this.humidifierThreshold !== undefined) && (this.dehumidifierThreshold !== undefined) ?
+        (this.dehumidifierThreshold > this.humidifierThreshold) :
+        true
     );
 
     // Store fields failing validation
