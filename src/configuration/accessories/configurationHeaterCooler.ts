@@ -77,7 +77,7 @@ export class HeaterCoolerConfiguration {
   }
 
   getCoolingThreshold() {
-    return (this.temperatureDisplayUnits === 'celsius') ? this.heatingThresholdFahrenheit : this.coolingThresholdFahrenheit;
+    return (this.temperatureDisplayUnits === 'celsius') ? this.coolingThresholdCelsius : this.coolingThresholdFahrenheit;
   }
 
   private capitalize(value: string) {

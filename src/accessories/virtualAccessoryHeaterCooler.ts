@@ -221,7 +221,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(this.states.CoolingThreshold)}${this.getDegreeUnits()}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(this.states.HeatingThreshold)}${this.getDegreeUnits()}`);
   }
 
   async getHeatingThresholdTemperature(): Promise<CharacteristicValue> {
