@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
@@ -63,7 +64,9 @@ export class Utils {
   }
 
 
-  static isPoweredState(value: string): boolean {
+  static isPoweredState(
+    value: string,
+  ): boolean {
     let isPowerState = false;
 
     if ((value !== undefined) &&
@@ -75,7 +78,9 @@ export class Utils {
     return isPowerState;
   }
 
-  static isPercentage(value: number): boolean {
+  static isPercentage(
+    value: number,
+  ): boolean {
     let isPercentage = false;
 
     if ((value !== undefined) &&
@@ -87,7 +92,9 @@ export class Utils {
     return isPercentage;
   }
 
-  static isRotationDirection(value: string): boolean {
+  static isRotationDirection(
+    value: string,
+  ): boolean {
     let isRotation = false;
 
     if ((value !== undefined) &&
@@ -99,7 +106,9 @@ export class Utils {
     return isRotation;
   }
 
-  static isTransitionDuration(value: number): boolean {
+  static isTransitionDuration(
+    value: number,
+  ): boolean {
     let isTransitionDuration = false;
 
     if ((value !== undefined) &&
@@ -111,7 +120,26 @@ export class Utils {
     return isTransitionDuration;
   }
 
-  static isTimeout(value: number): boolean {
+  static isTimeout(
+    value: number,
+  ): boolean {
     return Utils.isTransitionDuration(value);
+  }
+
+  static debounceMillis: number = 300;
+
+  static debounce<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number = Utils.debounceMillis,
+  ): (...args: any[]) => void {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return function(this: any, ...args: any[]) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const context = this;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(context, args);
+      }, delay);
+    };
   }
 }

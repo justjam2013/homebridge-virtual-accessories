@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { Utils } from '../utils.js';
 
 /**
  * Lightbulb - Accessory implementation
@@ -86,14 +87,14 @@ export class Lightbulb extends Accessory {
       .onGet(this.getOn.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this))
+      .onSet(Utils.debounce(this.setBrightness.bind(this)))
       .onGet(this.getBrightness.bind(this));
 
     switch(this.type) {
     case Lightbulb.AMBIANCE:
       // register handlers for the ColorTemperature Characteristic
       this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature)
-        .onSet(this.setColorTemperature.bind(this))
+        .onSet(Utils.debounce(this.setColorTemperature.bind(this)))
         .onGet(this.getColorTemperature.bind(this));
       break;
     case Lightbulb.COLOR:
@@ -128,7 +129,7 @@ export class Lightbulb extends Accessory {
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
