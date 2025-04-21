@@ -28,17 +28,25 @@ export class HeaterCoolerConfiguration {
       [ 'celsius', 'fahrenheit' ].includes(this.temperatureDisplayUnits)
     );
 
-    const heatingThreshold: number = this.getHeatingThreshold();
-    const coolingThreshold: number = this.getCoolingThreshold();
+    const heatingThreshold: number | undefined = this.getHeatingThreshold();
+    const coolingThreshold: number | undefined = this.getCoolingThreshold();
 
-    const isValidHeatingThreshold: boolean = Utils.isPercentage(heatingThreshold);
+    const isValidHeatingThreshold: boolean = (
+      (heatingThreshold !== undefined) ?
+        Utils.isPercentage(heatingThreshold) :
+        true
+    );
 
-    const isValidCoolingThreshold: boolean = Utils.isPercentage(coolingThreshold);
+    const isValidCoolingThreshold: boolean = (
+      (coolingThreshold !== undefined) ?
+        Utils.isPercentage(coolingThreshold):
+        true
+    );
 
     const isValidThresholdWindow: boolean = (
-      (heatingThreshold !== undefined) &&
-      (coolingThreshold !== undefined) &&
-      (coolingThreshold > heatingThreshold)
+      (heatingThreshold !== undefined) && (coolingThreshold !== undefined) ?
+        (coolingThreshold > heatingThreshold) :
+        true
     );
 
     // Store fields failing validation
