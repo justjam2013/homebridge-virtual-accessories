@@ -85,7 +85,7 @@ The downside to a single plugin is trading ease of accessory maintenance for a s
 
 Currently, these are the implemented virtual accessories:
 
--   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
+-   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
