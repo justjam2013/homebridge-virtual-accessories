@@ -90,9 +90,9 @@ Currently, these are the implemented virtual accessories:
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
--   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
+-   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and color temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
--   **Security System.** Allows you to create a virtual security system.
+-   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes.
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
