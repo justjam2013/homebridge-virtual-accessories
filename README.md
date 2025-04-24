@@ -787,7 +787,7 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 > [!NOTE]
 > I considered creating a virtual Video Doorbell accessory, but, due to the amount of work required, I ruled it out. Also, this functionality can be easily implemented using the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
 > 
-> You have to options:
+> You have two options:
 > - Configure it without setting a valid `source` and setting `stillImageSource` to the URL of a still image (so you get an image in the Home app instead of a black rectangle).
 > - Configure it by setting `source` to `"-loop 1 -i http://192.168.4.63:8086/image"` (where `http://192.168.4.63:8086/image` is the URL to a still image) and setting `maxFPS` to `1`.
 >
