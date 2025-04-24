@@ -1,7 +1,6 @@
 import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Sensor } from '../sensors/virtualSensor.js';
 
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { VirtualAccessoriesLogger } from '../virtualLogger.js';
@@ -23,8 +22,6 @@ export abstract class Accessory {
   protected defaultState;
 
   protected storagePath: string;
-
-  protected companionSensor?: Sensor;
 
   private accessoryInformationService?: Service;
 

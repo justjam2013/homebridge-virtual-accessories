@@ -170,13 +170,13 @@ export class Valve extends Accessory {
   async setSetDuration(value: CharacteristicValue) {
     const duration = value as number;
 
-    this.durationTimer.setDuration(duration);
+    this.durationTimer.setDefaultDuration(duration);
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
   async getSetDuration(): Promise<CharacteristicValue> {
-    const duration = this.durationTimer.getDuration();
+    const duration = this.durationTimer.getDefaultDuration();
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
 

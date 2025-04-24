@@ -6,6 +6,7 @@ import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';
+import { Lightbulb } from './virtualAccessoryLightbulb.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
@@ -28,9 +29,20 @@ export class Switch extends Accessory {
   private readonly timerDurationStorageKey: string = 'TimerDuration';
   private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
-  private durationTimer?: Timer;
-  private isCompanionSwitch: boolean = false;
+  private readonly timerSliderSecondsStorageKey: string = 'TimerSliderSeconds';
+  private readonly timerSliderMinutesStorageKey: string = 'TimerSliderMinutes';
+  private readonly timerSliderHoursStorageKey: string = 'TimerSliderHours';
+  private readonly timerSliderDaysStorageKey: string = 'TimerSliderDays';
 
+  private durationTimer?: Timer;
+  private timerSecondsSlider?: Lightbulb;
+  private timerMinutesSlider?: Lightbulb;
+  private timerHoursSlider?: Lightbulb;
+  private timerDaysSlider?: Lightbulb;
+
+  private companionSensor?: Sensor;
+
+  private isCompanionSwitch: boolean = false;
   private companionSwitchPostfix: string = '-switch';
 
   private states = {
@@ -59,27 +71,14 @@ export class Switch extends Accessory {
       this.states.SensorState = Sensor.NORMAL;
 
       if (this.accessoryConfiguration.switch.hasResetTimer) {
-        const timerConfig: TimerConfiguration = this.accessoryConfiguration.resetTimer;
-        const duration: number = timerConfig.durationIsRandom ?
-          Math.floor(
-            Math.random() *
-            (this.convertDurationToSeconds(timerConfig.durationRandomMax) + 1 - this.convertDurationToSeconds(timerConfig.durationRandomMin)) +
-            this.convertDurationToSeconds(timerConfig.durationRandomMin),
-          ):
-          this.convertDurationToSeconds(timerConfig.duration);
-        this.durationTimer = new Timer(
-          this.accessoryConfiguration.accessoryName,
-          this.log,
-          this.accessoryConfiguration.resetTimer.isResettable,
-          duration,
-        );
+        this.setupResetTimer(this.accessoryConfiguration.resetTimer);
       }
 
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
         this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch is stateful`);
 
-        const accessoryState = this.loadAccessoryState(this.storagePath);
+        const accessoryState: string = this.loadAccessoryState(this.storagePath);
         const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
 
         if (cachedState !== undefined) {
@@ -89,6 +88,10 @@ export class Switch extends Accessory {
 
         if (this.accessoryConfiguration.switch.hasResetTimer) {
           this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
+
+          if (this.accessoryConfiguration.resetTimer.isDynamic) {
+            this.restoreTimerSliders(accessoryState);
+          }    
 
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
@@ -100,29 +103,7 @@ export class Switch extends Accessory {
 
           // If the timer was running, calculate elapsed time and set timer for remaining duration
           if (cachedTimerIsRunning) {
-            // eslint-disable-next-line max-len
-            const elapsedTimeSinceTimerStart: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedTimerStartTime), Utils.now()).toMillis() / 1000); // seconds
-            const timeDifferential: number = (cachedTimerDuration - elapsedTimeSinceTimerStart);
-
-            this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Elapsed Time Since Timer Start: ${elapsedTimeSinceTimerStart}`);
-            this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Time Differential: ${timeDifferential}`);
-  
-            // If the timer is expired, set timer to 1 second to issue trigger switch off
-            const remainingTimerDuration: number = (timeDifferential <= 0) ? 1 : timeDifferential;
-
-            if (remainingTimerDuration === 1) {
-              this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
-            } else {
-              this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
-            }
-
-            this.durationTimer!.debugCountdown();
-            this.durationTimer!.start(
-              () => {
-                this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-              },
-              remainingTimerDuration,
-            );
+            this.restoreRunningTimer(cachedTimerStartTime, cachedTimerDuration);
           }
         }
       }
@@ -161,12 +142,13 @@ export class Switch extends Accessory {
      */
 
     if (!this.isCompanionSwitch) {
+      if (this.accessoryConfiguration.switch.hasResetTimer && this.accessoryConfiguration.resetTimer.isDynamic) {
+        this.setupResetTimerSliders();
+      }
+
       // Create sensor service
       if (this.accessoryConfiguration.switch.hasCompanionSensor) {
-        this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
-          this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
-
-        this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
+        this.setupCompanionSensor();
       }
     }
   }
@@ -209,7 +191,7 @@ export class Switch extends Accessory {
     return switchState;
   }
 
-  setCompanionSwitchState(value: boolean, accessory: Accessory) {
+  public setCompanionSwitchState(value: boolean, accessory: Accessory) {
     if (!this.isCompanionSwitch) {
       throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion switch`);
     } else if (accessory.accessory.UUID !== this.accessory.UUID) {
@@ -226,12 +208,19 @@ export class Switch extends Accessory {
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
       const timerStartTime: string = this.durationTimer!.getStartTime().toString();
-      const timerDuration: number = this.durationTimer!.getDuration();
+      const timerDuration: number = (this.durationTimer!.getRuntime() > 0) ? this.durationTimer!.getRuntime() : this.durationTimer!.getDefaultDuration();
       const timerIsRunning: boolean = this.durationTimer!.isTimerRunning();
 
       Object.assign(jsonState, { [this.timerStartTimeStorageKey]: timerStartTime });
       Object.assign(jsonState, { [this.timerDurationStorageKey]: timerDuration });
       Object.assign(jsonState, { [this.timerIsRunningStorageKey]: timerIsRunning });
+
+      if (this.accessoryConfiguration.resetTimer.isDynamic) {
+        Object.assign(jsonState, { [this.timerSliderSecondsStorageKey]: this.timerSecondsSlider?.getBrightness() });
+        Object.assign(jsonState, { [this.timerSliderMinutesStorageKey]: this.timerMinutesSlider?.getBrightness() });
+        Object.assign(jsonState, { [this.timerSliderHoursStorageKey]: this.timerHoursSlider?.getBrightness() });
+        Object.assign(jsonState, { [this.timerSliderDaysStorageKey]: this.timerDaysSlider?.getBrightness() });
+      }
     }
 
     const json = JSON.stringify(jsonState);
@@ -271,5 +260,115 @@ export class Switch extends Accessory {
     }
 
     return stateName;
+  }
+
+  // Setup stuff
+
+  private setupResetTimer(timerConfig: TimerConfiguration): void {
+    const duration: number = timerConfig.durationIsRandom ?
+      Math.floor(
+        Math.random() *
+        (this.convertDurationToSeconds(timerConfig.durationRandomMax) + 1 - this.convertDurationToSeconds(timerConfig.durationRandomMin)) +
+        this.convertDurationToSeconds(timerConfig.durationRandomMin),
+      ):
+      this.convertDurationToSeconds(timerConfig.duration);
+    this.durationTimer = new Timer(
+      this.accessoryConfiguration.accessoryName,
+      this.log,
+      this.accessoryConfiguration.resetTimer.isResettable,
+      duration,
+    );
+  }
+
+  private setupCompanionSensor(): void {
+    this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
+      this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
+
+    this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
+  }
+
+  private setupResetTimerSliders(): void {
+    this.timerSecondsSlider = this.createSlider('Seconds', this.accessoryConfiguration.resetTimer.duration.seconds);
+    this.timerMinutesSlider = this.createSlider('Minutes', this.accessoryConfiguration.resetTimer.duration.minutes);
+    this.timerHoursSlider = this.createSlider('Hours', this.accessoryConfiguration.resetTimer.duration.hours);
+    this.timerDaysSlider = this.createSlider('Days', this.accessoryConfiguration.resetTimer.duration.days);
+  }
+
+  private createSlider(
+    companionName: string,
+    value: number,
+  ): Lightbulb | undefined {
+    const slider: Lightbulb | undefined = AccessoryFactory.createVirtualCompanionLightbulb(
+      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName);
+
+    slider?.setOn(Lightbulb.ON);
+    slider?.setBrightness(value);
+
+    slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
+      .onSet(Utils.debounce(async (value: number) => {
+        // call original handler
+        slider.setBrightness(value);
+
+        this.storeState();
+
+        // recalculate duration
+        const duration = new DurationConfiguration();
+        duration.seconds = (await this.timerSecondsSlider?.getBrightness())! as number;
+        duration.minutes = (await this.timerMinutesSlider?.getBrightness())! as number;
+        duration.hours = (await this.timerHoursSlider?.getBrightness())! as number;
+        duration.days = (await this.timerDaysSlider?.getBrightness())! as number;
+
+        this.durationTimer?.setDefaultDuration(this.convertDurationToSeconds(duration));
+      }));
+
+    return slider;
+  }
+
+  private restoreTimerSliders(
+    accessoryState: string,
+  ): void {
+    const cachedTimerSliderSeconds = accessoryState[this.timerSliderSecondsStorageKey] as number;
+    const cachedTimerSliderMinutes = accessoryState[this.timerSliderMinutesStorageKey] as number;
+    const cachedTimerSliderHours = accessoryState[this.timerSliderHoursStorageKey] as number;
+    const cachedTimerSliderDays = accessoryState[this.timerSliderDaysStorageKey] as number;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Seconds: ${cachedTimerSliderSeconds}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Minutes: ${cachedTimerSliderMinutes}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Hours: ${cachedTimerSliderHours}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Days: ${cachedTimerSliderDays}`);
+
+    this.timerSecondsSlider?.setBrightness(cachedTimerSliderSeconds);
+    this.timerMinutesSlider?.setBrightness(cachedTimerSliderMinutes);
+    this.timerHoursSlider?.setBrightness(cachedTimerSliderHours);
+    this.timerDaysSlider?.setBrightness(cachedTimerSliderDays);
+  }
+
+  private restoreRunningTimer(
+    cachedTimerStartTime: string,
+    cachedTimerDuration: number,
+  ): void {
+    // eslint-disable-next-line max-len
+    const elapsedTimeSinceTimerStart: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedTimerStartTime), Utils.now()).toMillis() / 1000); // seconds
+    const timeDifferential: number = (cachedTimerDuration - elapsedTimeSinceTimerStart);
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Elapsed Time Since Timer Start: ${elapsedTimeSinceTimerStart}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Time Differential: ${timeDifferential}`);
+  
+    // If the timer is expired, set timer to 1 second to issue trigger switch off
+    const remainingTimerDuration: number = (timeDifferential <= 0) ? 1 : timeDifferential;
+
+    if (remainingTimerDuration === 1) {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
+    } else {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+    }
+
+    this.durationTimer!.debugCountdown();
+    this.durationTimer!.start(
+      () => {
+        this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
+      },
+      remainingTimerDuration,
+    );
   }
 }

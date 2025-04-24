@@ -24,7 +24,7 @@ export class Doorbell extends Accessory {
     Volume: 100,
   };
 
-  protected companionSwitch?: Switch;
+  private companionSwitch?: Switch;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -46,17 +46,6 @@ export class Doorbell extends Accessory {
     this.service.getCharacteristic(this.platform.Characteristic.Volume)
       .onSet(this.setVolume.bind(this))
       .onGet(this.getVolume.bind(this));
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
 
     // Create switch service
     this.companionSwitch = AccessoryFactory.createVirtualCompanionSwitch(

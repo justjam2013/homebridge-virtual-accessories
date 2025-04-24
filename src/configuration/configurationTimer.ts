@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 /* eslint-disable brace-style */
 
 import { DurationConfiguration } from './configurationDuration.js';
@@ -17,6 +18,7 @@ export class TimerConfiguration {
   @Type(DurationConfiguration)
     durationRandomMax!: DurationConfiguration;
   isResettable: boolean = false;
+  isDynamic: boolean = false;
 
   static prefix: string = 'resetTimer';
 
@@ -69,6 +71,10 @@ export class TimerConfiguration {
         true
     );
 
+    const isValidIsDynamic: boolean = (
+      (this.durationIsRandom === true && this.isDynamic === true) ? false : true
+    );
+
     if (!isValidDuration) {
       durationErrorFields.forEach( (errorField) => {
         this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
@@ -89,11 +95,14 @@ export class TimerConfiguration {
       TimerConfiguration.prefix + '.' + durationRandomMaxFieldName);
     }
 
+    if (!isValidIsDynamic) this.errorFields.push(TimerConfiguration.prefix + '.isDynamic');
+
     return [
       (isValidDuration && 
         isValidDurationRandomMin &&
         isValidDurationRandomMax &&
-        isValidDurationRandomRange),
+        isValidDurationRandomRange &&
+        isValidIsDynamic),
       this.errorFields,
     ];
   }
