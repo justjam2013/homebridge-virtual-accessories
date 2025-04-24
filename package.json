@@ -66,6 +66,7 @@
     "stateful switch",
     "delay",
     "timer",
+    "dynamic timer",
     "sensor",
     "virtual sensor",
     "ping",
