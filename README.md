@@ -782,7 +782,16 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 
 #### Issues with HomeKit:
 
--   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not displayed it. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there. The companion switch which you see in the Home app allows you to interact with the Doorbell. The Doorbell then gets HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. However, while you can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), it will not affect the HomePod volume.
+-   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there. The companion switch which you see in the Home app allows you to interact with the Doorbell. The Doorbell then gets HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. However, while you can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), it will not affect the HomePod volume.
+
+> [!NOTE]
+> I considered creating a virtual Video Doorbell accessory, but, due to the amount of work required, I ruled it out. Also, this functionality can be easily implemented using the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
+> 
+> You have to options:
+> - Configure it without setting a valid `source` and setting `stillImageSource` to the URL of a still image (so you get an image in the Home app instead of a black rectangle).
+> - Configure it by setting `source` to `"-loop 1 -i http://192.168.4.63:8086/image"` (where `http://192.168.4.63:8086/image` is the URL to a still image) and setting `maxFPS` to `1`.
+>
+> I have not done this myself, so please refer to the plugin documentation.
 
 ## What if I run into a problem?
 
