@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!NOTE]
-> Make sure to check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki) for updates.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
@@ -779,6 +774,8 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 
 ## What if I run into a problem?
 
-If you encounter a problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open an issue here on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please include log outputs and configuration details to the issue, making sure to remove any sensitive information such as passwords, tokens, etc. The more information you provide, the better I can investigate the issues.
+Check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki). Here you will find entries with instructions in the event of breaking updates. I will also post detailed  instructions for using certain functionalities, like the webhook service.
 
-Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open.
+If the Wiki entries do not provide answers to your problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open a bug report or a support request here on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please include log outputs and configuration details to the issue, making sure to remove any sensitive information such as passwords, tokens, etc. The more information you provide, the better I can investigate the issues.
+
+Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open. If the enhancement suggestion fits within the scope of the plugin, I will consider adding it in a future release.
