@@ -4,6 +4,12 @@
  * 
  */
 export class DurationConfiguration {
+
+  static readonly SECONDS_MAX_VALUE: number = 59;
+  static readonly MINUTES_MAX_VALUE: number = 59;
+  static readonly HOURS_MAX_VALUE: number = 23;
+  static readonly DAYS_MAX_VALUE: number = 7;
+
   days!: number;
   hours!: number;
   minutes!: number;

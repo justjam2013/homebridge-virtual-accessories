@@ -288,26 +288,34 @@ export class Switch extends Accessory {
   }
 
   private setupResetTimerSliders(): void {
-    this.timerSecondsSlider = this.createSlider('Seconds', this.accessoryConfiguration.resetTimer.duration.seconds);
-    this.timerMinutesSlider = this.createSlider('Minutes', this.accessoryConfiguration.resetTimer.duration.minutes);
-    this.timerHoursSlider = this.createSlider('Hours', this.accessoryConfiguration.resetTimer.duration.hours);
-    this.timerDaysSlider = this.createSlider('Days', this.accessoryConfiguration.resetTimer.duration.days);
+    this.timerSecondsSlider = this.createSlider('Seconds', DurationConfiguration.SECONDS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.seconds);
+    this.timerMinutesSlider = this.createSlider('Minutes', DurationConfiguration.MINUTES_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.minutes);
+    this.timerHoursSlider = this.createSlider('Hours', DurationConfiguration.HOURS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.hours);
+    this.timerDaysSlider = this.createSlider('Days', DurationConfiguration.DAYS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.days);
   }
 
   private createSlider(
     companionName: string,
+    maximumValue: number,
     value: number,
   ): Lightbulb | undefined {
     const slider: Lightbulb | undefined = AccessoryFactory.createVirtualCompanionLightbulb(
-      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName);
-
-    slider?.setOn(Lightbulb.ON);
-    slider?.setBrightness(value);
+      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName, Lightbulb.ON, value);
 
     slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
+      .setProps({
+        minValue: 0,
+        maxValue: maximumValue,
+        minStep: 1,
+        unit: null,
+      })
       .onSet(Utils.debounce(async (value: number) => {
+        const maxValue: number | undefined = slider.service?.getCharacteristic(this.platform.Characteristic.Brightness).props.maxValue;
+        
+        const brightness = (maxValue !== undefined && value > maxValue) ? maxValue : value;
+
         // call original handler
-        slider.setBrightness(value);
+        slider.setBrightness(brightness);
 
         this.storeState();
 

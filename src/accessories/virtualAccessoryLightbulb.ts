@@ -30,7 +30,7 @@ export class Lightbulb extends Accessory {
 
   private states = {
     LightbulbState: Lightbulb.OFF,
-    LightbulbBrightness: 100,
+    LightbulbBrightness: 0,
     LightbulbColorTemperature: 2700,  // Kelvin
     // TODO: Add Brightness, Hue, Saturation
   };
@@ -39,11 +39,16 @@ export class Lightbulb extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     companionLightbulbName?: string,
+    companionLightbulbOn?: boolean,
+    companionLightbulbBrightness?: number,
   ) {
     super(platform, accessory);
 
     if (companionLightbulbName !== undefined) {
+      this.accessoryName = companionLightbulbName;
       this.isCompanionLightbulb = true;
+      this.states.LightbulbState = (companionLightbulbOn !== undefined) ? companionLightbulbOn : this.states.LightbulbState;
+      this.states.LightbulbBrightness = (companionLightbulbBrightness !== undefined) ? companionLightbulbBrightness : this.states.LightbulbBrightness;
     }
 
     if (!this.isCompanionLightbulb) {
@@ -94,7 +99,7 @@ export class Lightbulb extends Accessory {
     }
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.debug(`[${this.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.LightbulbState));
     this.service.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
 
@@ -131,13 +136,13 @@ export class Lightbulb extends Accessory {
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
 
   async getOn(): Promise<CharacteristicValue> {
     const lightbulbState = this.states.LightbulbState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
 
     return lightbulbState;
   }
@@ -147,13 +152,13 @@ export class Lightbulb extends Accessory {
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
+    this.log.info(`[${this.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
     const lightbulbBrightness = this.states.LightbulbBrightness;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
+    this.log.debug(`[${this.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
 
     return lightbulbBrightness;
   }
@@ -163,13 +168,13 @@ export class Lightbulb extends Accessory {
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
+    this.log.debug(`[${this.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
   }
 
   async getColorTemperature(): Promise<CharacteristicValue> {
     const miredValue = this.kelvinToMired(this.states.LightbulbColorTemperature);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
+    this.log.debug(`[${this.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
 
     return miredValue;
   }

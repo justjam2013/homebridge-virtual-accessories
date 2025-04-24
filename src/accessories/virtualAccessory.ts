@@ -19,6 +19,8 @@ export abstract class Accessory {
   readonly accessoryConfiguration: AccessoryConfiguration;
   readonly log: VirtualAccessoriesLogger;
 
+  protected accessoryName: string = '';
+
   protected defaultState;
 
   protected storagePath: string;
@@ -34,9 +36,10 @@ export abstract class Accessory {
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessory.context.deviceConfiguration;
+    this.accessoryName = this.accessoryConfiguration.accessoryName;
     this.log = this.platform.log;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
+    this.log.debug(`[${this.accessoryName}] Accessory context: ${JSON.stringify(accessory.context)}`);
 
     this.storagePath = accessory.context.storagePath;
 
@@ -70,7 +73,7 @@ export abstract class Accessory {
 
     const json = JSON.parse(contents);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Loading state: ${JSON.stringify(json)}`);
+    this.log.debug(`[${this.accessoryName}] Loading state: ${JSON.stringify(json)}`);
     return json;
   }
 
@@ -79,7 +82,7 @@ export abstract class Accessory {
     stateJson: string,
   ): void {
     // Overwrite the existing persistence file
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saving state: ${stateJson}`);
+    this.log.debug(`[${this.accessoryName}] Saving state: ${stateJson}`);
     try {
       fs.writeFileSync(
         storagePath,
@@ -87,21 +90,21 @@ export abstract class Accessory {
         { encoding: 'utf8', flag: 'w' },
       );
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Saved state: ${stateJson}`);
+      this.log.debug(`[${this.accessoryName}] Saved state: ${stateJson}`);
     } catch (error) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error saving state: ${error}`);
+      this.log.error(`[${this.accessoryName}] Error saving state: ${error}`);
     }
   }
 
   protected deleteAccessoryState(
     storagePath: string,
   ) {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Deleting state file ${storagePath}`);
+    this.log.debug(`[${this.accessoryName}] Deleting state file ${storagePath}`);
     if (fs.existsSync(storagePath)) {
       try {
         fs.unlinkSync(storagePath); 
       } catch (err) {
-        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Error deleting state file ${storagePath}`);
+        this.log.error(`[${this.accessoryName}] Error deleting state file ${storagePath}`);
       }
     }
   }
