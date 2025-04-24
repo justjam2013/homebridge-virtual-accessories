@@ -65,6 +65,9 @@
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
+    - [Issues with Homebridge UI](#issues-with-homebridge-ui)
+    - [Issues with underlying frameworks](#issues-with-underlying-frameworks)
+    - [Issues with HomeKit](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
 
@@ -767,10 +770,19 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 
 ## Known Issues
 
+#### Issues with Homebridge UI:
+
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
 -   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
--   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
--   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+-   The Speaker accessory is not propery rendered in Homebridge UI. Homebrige UI currently does not differentiate between Active and Muted properties and once the speaker is switched off, it is unable to switch it back on again.
+
+#### Issues with underlying frameworks:
+
+-   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+
+#### Issues with HomeKit:
+
+-   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not displayed it. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there. The companion switch which you see in the Home app allows you to interact with the Doorbell. The Doorbell then gets HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. However, while you can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), it will not affect the HomePod volume.
 
 ## What if I run into a problem?
 
