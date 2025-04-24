@@ -288,10 +288,11 @@ export class Switch extends Accessory {
   }
 
   private setupResetTimerSliders(): void {
-    this.timerSecondsSlider = this.createSlider('Seconds', DurationConfiguration.SECONDS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.seconds);
-    this.timerMinutesSlider = this.createSlider('Minutes', DurationConfiguration.MINUTES_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.minutes);
-    this.timerHoursSlider = this.createSlider('Hours', DurationConfiguration.HOURS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.hours);
+    // Order days, hours, minutes, seconds
     this.timerDaysSlider = this.createSlider('Days', DurationConfiguration.DAYS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.days);
+    this.timerHoursSlider = this.createSlider('Hours', DurationConfiguration.HOURS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.hours);
+    this.timerMinutesSlider = this.createSlider('Minutes', DurationConfiguration.MINUTES_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.minutes);
+    this.timerSecondsSlider = this.createSlider('Seconds', DurationConfiguration.SECONDS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.seconds);
   }
 
   private createSlider(
@@ -340,10 +341,11 @@ export class Switch extends Accessory {
     const cachedTimerSliderHours = accessoryState[this.timerSliderHoursStorageKey] as number;
     const cachedTimerSliderDays = accessoryState[this.timerSliderDaysStorageKey] as number;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Seconds: ${cachedTimerSliderSeconds}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Minutes: ${cachedTimerSliderMinutes}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Hours: ${cachedTimerSliderHours}`);
+    // Order days, hours, minutes, seconds
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Days: ${cachedTimerSliderDays}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Hours: ${cachedTimerSliderHours}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Minutes: ${cachedTimerSliderMinutes}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Seconds: ${cachedTimerSliderSeconds}`);
 
     this.timerSecondsSlider?.setBrightness(cachedTimerSliderSeconds);
     this.timerMinutesSlider?.setBrightness(cachedTimerSliderMinutes);
