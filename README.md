@@ -53,11 +53,12 @@
     - [Switch with reset timer](#switch-with-reset-timer)
     - [Switch with random reset timer](#switch-with-random-reset-timer)
     - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
-    - [Dynamic Timer](#dynamic-timer)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Extended Accessory Configurations](#extended-accessory-configurations)
+    - [Dynamic Timer](#dynamic-timer)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
@@ -199,6 +200,8 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > [!NOTE]
 > `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
+It is recommended to use the Homebridge UI to configure this plugin, as the requirements may vary based on the property value selections. If you choose to manually create or modify the accessory JSON configurations, the following configurations are references and do not cover all of the different value permutations. Please adjust for your requirements.
+
 <span align="right">
   <h6>
     
@@ -208,8 +211,6 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 </span>
 
 ## Accessory Configurations
-
-It is recommended to use the Homebridge UI to configure this plugin, as the requirements may vary based on the property value selections. If you choose to manually create or modify the accessory JSON configurations, the following are references and do not cover all of the different value permutations. Please adjust for your requirements.
 
 ### Doorbell
 
@@ -575,35 +576,6 @@ To add the speaker accessory in the Home app follow these steps:
 }
 ```
 
-### Dynamic Timer
-
-```json
-{
-    "name": "Virtual Accessories Platform",
-    "devices": [
-        {
-            "accessoryID": "1234567",
-            "accessoryName": "Dynamic Timer",
-            "accessoryType": "switch",
-            "switch": {
-                "defaultState": "off",
-                "hasResetTimer": true
-            },
-            "resetTimer": {
-                "duration": {
-                    "days": 0,
-                    "hours": 0,
-                    "minutes": 0,
-                    "seconds": 8
-                },
-                "isDynamic": true
-            }
-        }
-    ],
-    "platform": "VirtualAccessoriesForHomebridge"
-}
-```
-
 ### Sensor with ping trigger
 
 ```json
@@ -730,6 +702,37 @@ To add the speaker accessory in the Home app follow these steps:
 
   </h6>
 </span>
+
+## Extended Accessory Configurations
+
+### Dynamic Timer
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "Dynamic Timer",
+            "accessoryType": "switch",
+            "switch": {
+                "defaultState": "off",
+                "hasResetTimer": true
+            },
+            "resetTimer": {
+                "duration": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 8
+                },
+                "isDynamic": true
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ## Webhook Service Configuration
 
