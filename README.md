@@ -108,6 +108,14 @@ Currently, these are the implemented virtual accessories:
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Installation
 
 You can install this plugin via the Homebridge UI or from the command line by typing:
@@ -158,6 +166,14 @@ This document provides steps for installing the Entware toolchain and other need
 
 The [Synology DSM 7.2.2 Developer Guide](https://help.synology.com/developer-guide/getting_started/system_requirement.html) provides information to setup the build tools for Synology DSM platforms.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Configuration
 
 You can configure the plugin from the Homebridge UI, or by ediiting the JSON configuration directly in the Homebridge JSON Config editor.
@@ -178,6 +194,14 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 
 > [!NOTE]
 > `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
 
 ## Accessory Configurations
 
@@ -666,6 +690,14 @@ To add the speaker accessory in the Home app follow these steps:
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Webhook Service Configuration
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
@@ -742,6 +774,14 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Creative Uses
 
 I started this plugin as a Homebridge 2.0 ready plugin to replace [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), which, along with six other plugins, formed the backbone of my HomeKit automations. Then I got some really odd requests, like a window covering. Okay ... what the heck are you going to do with a virtual window covering?? Well, the user who requested it wanted to use "Siri open/close .." to control their trash bin, as opposed to "Siri on/off .." as would be required with switches. Yup, "I use [your plugin] for my trash" is what every plugin developer loves to hear! 🤣 <br/>
@@ -800,3 +840,11 @@ Check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/w
 If the Wiki entries do not provide answers to your problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open a bug report or a support request here on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please include log outputs and configuration details to the issue, making sure to remove any sensitive information such as passwords, tokens, etc. The more information you provide, the better I can investigate the issues.
 
 Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open. If the enhancement suggestion fits within the scope of the plugin, I will consider adding it in a future release.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
