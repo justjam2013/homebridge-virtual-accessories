@@ -834,7 +834,7 @@ People using Virtual Accessories For Homebridge!
 
 Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. His videos are amusing to watch and it's cool to see him use this plugin to solve common day-to-day problems that most people that use HomeKit will encounter at some point.
 
-<a href="https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s">
+<a href="https://www.youtube.com/@MakeSmartMatter">
     <img src="assets/mentions/youtube-video.png" height="240">
 </a>
 <p></p>
