@@ -106,7 +106,8 @@
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Valve", "enum": ["valve"] },
-                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
+                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] },
+                { "title": "Dynamic Alarm", "enum": ["dynamicalarm"] }
               ],
               "default": "switch"
             },
@@ -115,8 +116,89 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'valve', 'windowcovering', 'dynamicalarm'].includes(model.devices[arrayIndices].accessoryType);"
               }
+            },
+            "dynamicAlarm": {
+              "title": "Dynamic Alarm",
+              "type": "object",
+              "properties": {
+                "clockType": {
+                  "title": "Clock *",
+                  "description": "12-hour clock or 24-hour clock",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "12-Hour Clock", "enum": ["12hour"] },
+                    { "title": "24-Hour Clock", "enum": ["24hour"] }
+                  ]
+                },
+                "hour12": {
+                  "title": "Hour *",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 12,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].dynamicAlarm && model.devices[arrayIndices].dynamicAlarm.clockType === '12hour';"
+                  }
+                },
+                "hour24": {
+                  "title": "Hour *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].dynamicAlarm && model.devices[arrayIndices].dynamicAlarm.clockType === '24hour';"
+                  }
+                },
+                "minutes": {
+                  "title": "Minutes *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 59,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].dynamicAlarm &&  ['12hour', '24hour'].includes(model.devices[arrayIndices].dynamicAlarm.clockType);"
+                  }
+                },
+                "ampm": {
+                  "title": "AM/PM *",
+                  "description": "AM/PM",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "AM", "enum": ["am"] },
+                    { "title": "PM", "enum": ["pm"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].dynamicAlarm && model.devices[arrayIndices].dynamicAlarm.clockType === '12hour';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'dynamicalarm';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "clockType": { "const": "12hour" }
+                    },
+                    "required": [ "clockType" ]
+                  },
+                  "then": {
+                    "required": [ "hour12", "minutes", "ampm" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "clockType": { "const": "24hour" }
+                    },
+                    "required": [ "clockType" ]
+                  },
+                  "then": {
+                    "required": [ "hour24", "minutes" ]
+                  }
+                }
+              ]
             },
             "doorbell": {
               "title": "Doorbell",
@@ -901,6 +983,21 @@
             }
           },
           "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "dynamicalarm" }
+                }
+              },
+              "then": {
+                "required": [ "dynamicAlarm" ],
+                "properties": {
+                  "dynamicAlarm": {
+                    "required": [ "clockType" ]
+                  }
+                }
+              }
+            },
             {
               "if": {
                 "properties": {
