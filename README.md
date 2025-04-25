@@ -53,6 +53,7 @@
     - [Switch with reset timer](#switch-with-reset-timer)
     - [Switch with random reset timer](#switch-with-random-reset-timer)
     - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+    - [Dynamic Timer](#dynamic-timer)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
@@ -564,6 +565,35 @@ To add the speaker accessory in the Home app follow these steps:
             "companionSensor": {
                 "name": "My Companion Sensor",
                 "type": "contact"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Dynamic Timer
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "Dynamic Timer",
+            "accessoryType": "switch",
+            "switch": {
+                "defaultState": "off",
+                "hasResetTimer": true
+            },
+            "resetTimer": {
+                "duration": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 8
+                },
+                 "isDynamic": true
             }
         }
     ],
