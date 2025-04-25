@@ -734,6 +734,14 @@ To add the speaker accessory in the Home app follow these steps:
 }
 ```
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Webhook Service Configuration
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
