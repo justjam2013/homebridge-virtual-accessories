@@ -111,7 +111,7 @@ Currently, these are the implemented virtual accessories:
 <span align="right">
   <h6>
     
-  [Back to top](#)
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
 
   </h6>
 </span>
