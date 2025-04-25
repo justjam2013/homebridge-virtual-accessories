@@ -74,17 +74,16 @@ export class SecuritySystem extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState)
-      .onGet(this.handleSecuritySystemCurrentStateGet.bind(this));
+      .onGet(this.getSecuritySystemCurrentState.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemTargetState)
-      .onSet(this.handleSecuritySystemTargetStateSet.bind(this))
-      .onGet(this.handleSecuritySystemTargetStateGet.bind(this));
+      .onSet(this.setSecuritySystemTargetState.bind(this))
+      .onGet(this.getSecuritySystemTargetState.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleSecuritySystemCurrentStateGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getSecuritySystemCurrentState(): Promise<CharacteristicValue> {
     const securitySystemState = this.states.SecuritySystemCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(securitySystemState)}`);
@@ -92,10 +91,7 @@ export class SecuritySystem extends Accessory {
     return securitySystemState;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleSecuritySystemTargetStateSet(value: CharacteristicValue) {
+  async setSecuritySystemTargetState(value: CharacteristicValue) {
     this.states.SecuritySystemTargetState = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
@@ -109,10 +105,7 @@ export class SecuritySystem extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleSecuritySystemTargetStateGet(): Promise<CharacteristicValue> {
+  async getSecuritySystemTargetState(): Promise<CharacteristicValue> {
     const securitySystemState = this.states.SecuritySystemTargetState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${SecuritySystem.getStateName(securitySystemState)}`);

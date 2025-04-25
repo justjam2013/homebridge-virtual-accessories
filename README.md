@@ -22,14 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> **The upcoming Virtual Accessories For Homebridge v3.0.0 will be a breaking upgrade.** To get a preview of the coming changes, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.0.0-breaking-update). You do not have to do anything right now. When v3.0.0 is released this documantion will be updated.
-
-> [!WARNING]
-> **Virtual Accessories For Homebridge v2.0.0 is a breaking upgrade.** If you are upgrading from a previous version, please read the [wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v2.0.0-breaking-update) for details on how to update your configuration.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
@@ -37,41 +29,46 @@
 
   </summary>
 
-- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
-    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
-  - [](#)
-  - [](#-1)
-  - [📝 Table Of Contents](#-table-of-contents)
-  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
     - [MacOS](#macos)
     - [Synology](#synology)
   - [Configuration](#configuration)
-  - [Reference JSON Configurations](#reference-json-configurations)
+  - [Accessory Configurations](#accessory-configurations)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
+    - [Heater/Cooler (Celsius)](#heatercooler-celsius)
+    - [Heater/Cooler (Fahrenheit)](#heatercooler-fahrenheit)
     - [Humidifier/Dehumidifier](#humidifierdehumidifier)
     - [Lightbulb](#lightbulb)
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
+      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
     - [Switch with reset timer](#switch-with-reset-timer)
     - [Switch with random reset timer](#switch-with-random-reset-timer)
     - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+    - [Dynamic Timer](#dynamic-timer)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Webhook Service Configuration](#webhook-service-configuration)
+    - [Enable webhook service](#enable-webhook-service)
+    - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
+    - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
+    - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
   - [Creative Uses](#creative-uses)
-- [](#-3)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
+    - [Issues with Homebridge UI](#issues-with-homebridge-ui)
+    - [Issues with underlying frameworks](#issues-with-underlying-frameworks)
+    - [Issues with HomeKit](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
 
@@ -81,38 +78,48 @@
 
 This plugin is inspired by Nick Farina's most excellent 🎸 [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. This plugin is Homebridge Verified and is ready for Homebridge 2.0.
 
-The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became frustrating trying to figure out which plugin provided what functionality or managed which accessory, each time I wanted to make a change.
+The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change.
 
-The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be publishing bug fixes and improvements. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
+The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be releasing bug fixes and updates. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
 Currently, these are the implemented virtual accessories:
 
--   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on Home Pods.
+-   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
--   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. Also, CarPlay will display a widget when you approach your home.
--   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo.
--   **Lightbulb.** Allows you to create virtual white lightbulbs (on/off and brightness). In the Home app, this can be used as a dimmer switch.
--   **Lock.** Allows you to create a vidtual lock. Generates a HomeKit notification when the accessory's state changes. It also creates a (non-functional) Home Key card in the Wallet app.
--   **Security System.** Allows you to create a virtual security system.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home.
+-   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
+-   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
+-   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and color temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
+-   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
+-   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes.
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
     - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
-    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. Currently a switch can only be stateful or timed, but not both.
-    - **Timed switches.** The switch will revert back to its default state when the timer expires. This is a way to introduce timers into HomeKit. Currently a switch can only be stateful or timed, but not both.
+    - **Stateful switches.** The state of the switch persists across restarts of Homebridge. This includes timed switches.
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
+    - **Timed switches.** This is a way to introduce timers into HomeKit. The switch will revert back to its default state when the timer expires. If the switch is stateful, the timer will be restored after a restart of Homebridge. While care is taken to restore the timer with the appropriate time correction, **absolute accuracy is not guaranteed and should not be expected**. The accuracy of the restored timer will be affected, among other things, by the hardware and software Homebridge is running on, the number of plugins installed, the order with which the plugins are restored, etc.
+-   **Dynamic Timer.** Allows you to create a timer whose duration can be manually changed in the Home app.
 -   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by a cron expression. The sensor resets after a brief delay.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Installation
 
-You can install this plugin via the Homebridge UI or from the command line, by typing:
+You can install this plugin via the Homebridge UI or from the command line by typing:
 
 ```
 npm install -g homebridge-virtual-accessories
@@ -134,25 +141,39 @@ npm install -g homebridge-virtual-accessories
 > <img src="assets/keepaccessories.png" height="240" />
 
 ### Docker
+
 If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
+
 ```
 npm uninstall raw-socket
 npm install raw-socket
 ```
+
 This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
 
 ### MacOS
+
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on macOS, you will need to ensure that Xcode or the Xcode Command Line Tools are installed. To install Xcode or the Xcode Command Line Tools, use the following command:
+
 ```
 xcode-select --install
 ```
 
 ### Synology
+
 If you are installing Virtual Accessories For Homebridge in a Homebridge instance running on Synology DSM, you will need to ensure that a build toolchain is installed.
 
 This document provides steps for installing the Entware toolchain and other needed packages: [DSM 7: Enable Compiling Of Native Modules](https://github.com/homebridge/homebridge-syno-spk/wiki/DSM-7:-Enable-Compiling-Of-Native-Modules).
 
 The [Synology DSM 7.2.2 Developer Guide](https://help.synology.com/developer-guide/getting_started/system_requirement.html) provides information to setup the build tools for Synology DSM platforms.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
 
 ## Configuration
 
@@ -161,7 +182,8 @@ In the UI, required fields will be marked with an asterisk (*) and you will not 
 
 `accessoryID`, `accessoryName`, and `accessoryType` are required fields for all the accessories.
 
-The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you to correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
+The configuration is validated on startup, so if an accessory is misconfigured, you will see error entries in the logs to help you correct the configuration. The log entries will indicate the misconfigured fields and look something like this:
+
 ```
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Skipping accessory. Configuration is invalid: { "accessoryID": "12345", "accessoryName": "My Switch", ... }
 [12/21/2024, 12:35:38 AM] [Virtual Accessories Platform] Invalid fields: [switchDefaultState]
@@ -174,9 +196,17 @@ I use [random.org](https://www.random.org/) to generate unique IDs. While the pl
 > [!NOTE]
 > `acccessoryName` is the name that will apppear on the Homekit tile for the accessory, as well as the accessory header in the plugin config. While a unique name is not required, it is recommended to assign different names to each accessory. As Vitual Accessories For Homebridge uses `accessoryID` as the unique identifier, **you can change the accessory name at any time**, if you so choose to. The name change will be propagated to the Home app.
 
-## Reference JSON Configurations
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
 
-If you choose to manually create or modify the accessory JSON configurations, the following are references. Please adjust for your requirements.
+  </h6>
+</span>
+
+## Accessory Configurations
+
+It is recommended to use the Homebridge UI to configure this plugin, as the requirements may vary based on the property value selections. If you choose to manually create or modify the accessory JSON configurations, the following are references and do not cover all of the different value permutations. Please adjust for your requirements.
 
 ### Doorbell
 
@@ -196,6 +226,7 @@ If you choose to manually create or modify the accessory JSON configurations, th
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
 ### Fan
 
 ```json
@@ -238,6 +269,49 @@ If you choose to manually create or modify the accessory JSON configurations, th
 }
 ```
 
+### Heater/Cooler (Celsius)
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Heater",
+            "accessoryType": "heatercooler",
+            "heatercooler": {
+                "type": "auto",
+                "temperatureDisplayUnits": "celsius"
+                "heatingThresholdCelsius": 20,
+                "coolingThresholdCelsius": 25,
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
+### Heater/Cooler (Fahrenheit)
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Heater",
+            "accessoryType": "heatercooler",
+            "heatercooler": {
+                "type": "auto",
+                "temperatureDisplayUnits": "fahrenheit"
+                "heatingThresholdFahrenheit": 68,
+                "coolingThresholdFahrenheit": 77,
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
+> [!NOTE]
+> Internally HomeKit stores temperature values in Celsius and converts to Fahrenheit on the fly, so when values like 70ºF, you may see values displayed like 70.1ºF or 69.9ºF due to conversions between temperature scales. This is unavoidable.
+
 ### Humidifier/Dehumidifier
 
 ```json
@@ -248,8 +322,9 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryName": "My Humidifier",
             "accessoryType": "humidifierdehumidifier",
             "humidifierDehumidifier": {
-                "type": "humidifier",
-                "humidifierThreshold": 50
+                "type": "auto",
+                "humidifierThreshold": 40,
+                "dehumidifierThreshold": 55
             }
         }
     ],
@@ -288,8 +363,6 @@ If you choose to manually create or modify the accessory JSON configurations, th
             "accessoryIsStateful": false,
             "lock": {
                 "defaultState": "locked",
-                "hardwareFinish": "silver",
-                "hasAudioFeedback": false,
                 "autoSecurityTimeout": 5
             }
         }
@@ -297,7 +370,6 @@ If you choose to manually create or modify the accessory JSON configurations, th
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
-`lockHardwareFinish` sets the color of the HomeKey card in the Wallet app.
 
 ### Security System
 
@@ -331,8 +403,20 @@ If you choose to manually create or modify the accessory JSON configurations, th
         }
     ],
 ```
-After restarting Homebridge, you should see a similar message to pair the speaker accessory in the Home app:
-`Please add [Ext. Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+> [!NOTE]
+> After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+> `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+#### Adding a Speaker accessory in the Home app
+
+To add the speaker accessory in the Home app follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
+3. Tap the speaker accessory you created
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
 
 ### Valve
 
@@ -412,8 +496,12 @@ After restarting Homebridge, you should see a similar message to pair the speake
                 "hasResetTimer": true
             },
             "resetTimer": {
-                "duration": 10,
-                "units": "seconds",
+                "duration": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 10
+                },
                 "isResettable": true
             }
         }
@@ -439,9 +527,18 @@ After restarting Homebridge, you should see a similar message to pair the speake
             },
             "resetTimer": {
                 "durationIsRandom": true,
-                "durationRandomMin": 5,
-                "durationRandomMax": 20,
-                "units": "seconds",
+                "durationRandomMin": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 5,
+                    "seconds": 0
+                },
+                "durationRandomMax": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 20,
+                    "seconds": 0
+                },
                 "isResettable": true
             }
         }
@@ -475,6 +572,35 @@ After restarting Homebridge, you should see a similar message to pair the speake
 }
 ```
 
+### Dynamic Timer
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "Dynamic Timer",
+            "accessoryType": "switch",
+            "switch": {
+                "defaultState": "off",
+                "hasResetTimer": true
+            },
+            "resetTimer": {
+                "duration": {
+                    "days": 0,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 8
+                },
+                 "isDynamic": true
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
 ### Sensor with ping trigger
 
 ```json
@@ -500,6 +626,9 @@ After restarting Homebridge, you should see a similar message to pair the speake
 }
 ```
 
+> [!NOTE]
+> The value for `host` can be an IPv4 address (192.168.0.1), IPv6 address (2001:0db8:85a3:0000:0000:8a2e:0370:7334), or hostname (www.google.com).
+
 ### Sensor with cron trigger
 
 ```json
@@ -515,7 +644,7 @@ After restarting Homebridge, you should see a similar message to pair the speake
                 "trigger": "cron"
             },
             "cronTrigger": {
-                "pattern": "* * * * * *",
+                "pattern": "* * * * *",
                 "zoneId": "America/Los_Angeles",
                 "disableTriggerEventLogging": false,
                 "isDisabled": false
@@ -541,7 +670,7 @@ After restarting Homebridge, you should see a similar message to pair the speake
                 "trigger": "cron"
             },
             "cronTrigger": {
-                "pattern": "* * * * * *",
+                "pattern": "* * * * *",
                 "zoneId": "America/Los_Angeles",
                 "startDateTime": "2024-11-14T19:41:00",
                 "endDateTime": "2024-11-30T19:41:00",
@@ -553,11 +682,13 @@ After restarting Homebridge, you should see a similar message to pair the speake
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
-Note: A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
-```
-"startDateTime": "2024-11-14T19:41:00",
-"startDateTime": "2024-11-14T19:41",
-```
+
+> [!NOTE]
+> A datetime field might omit the seconds, if the value is `00`, so, either of the following are valid and equivalent per ISO standard:
+> ```
+> "startDateTime": "2024-11-14T19:41:00",
+> "startDateTime": "2024-11-14T19:41",
+> ```
 
 ### Sensor with sun events trigger
 
@@ -589,6 +720,98 @@ Note: A datetime field might omit the seconds, if the value is `00`, so, either 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
+## Webhook Service Configuration
+
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+
+- **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+- **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+
+### Enable webhook service
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true
+    },
+}
+```
+
+### Enable webhook service with custom port
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "sensorServer": {
+        "enabled": true,
+        "port": "60221"
+    },
+}
+```
+
+> [!NOTE]
+> The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
+
+### Update Humidifier/Dehumidifier humidity sensor
+
+To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `humidity` path:
+
+```
+http://localhost:60221/humidity
+```
+
+The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+
+```json
+{
+    "id": "1234567",
+    "value": 35
+}
+```
+
+Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
+
+### Update Heater/Cooler temperature sensor
+
+To update a Heater/Cooler temperature sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+
+```
+http://localhost:60221/temperature
+```
+
+The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+
+```json
+{
+    "id": "1234567",
+    "value": 50
+}
+```
+
+> [!NOTE]
+> The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>
+
 ## Creative Uses
 
 I started this plugin as a Homebridge 2.0 ready plugin to replace [homebridge-dummy](https://github.com/nfarina/homebridge-dummy), which, along with six other plugins, formed the backbone of my HomeKit automations. Then I got some really odd requests, like a window covering. Okay ... what the heck are you going to do with a virtual window covering?? Well, the user who requested it wanted to use "Siri open/close .." to control their trash bin, as opposed to "Siri on/off .." as would be required with switches. Yup, "I use [your plugin] for my trash" is what every plugin developer loves to hear! 🤣 <br/>
@@ -609,20 +832,54 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 People using Virtual Accessories For Homebridge!
 
-The content creator on the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. His videos are amusing to watch and it's cool to see him use this plugin to solve common day-to-day problems that most people that use HomeKit will encounter at some point.
 
-<a href="https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s">
+<a href="https://www.youtube.com/@MakeSmartMatter">
     <img src="assets/mentions/youtube-video.png" height="240">
 </a>
+<p></p>
+
+You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+
+He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
 
 ## Known Issues
 
+#### Issues with Homebridge UI:
+
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
--   The Speaker tile in Homebridge UI is not working properly. It does not differentiate between Active and Muted properties and once switched off, does not switch it back on again.
--   The ability to order the accessories has been rolled back, as it makes it impossible to drag a number slider, for example to set the Doorbell volume between 0%-100%. A bug report has been opened. Once the bug is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+-   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
+
+#### Issues with underlying frameworks:
+
+-   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+
+#### Issues with HomeKit:
+
+-   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there and the companion switch allows you to interact with it, leading HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. You can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), however it will not affect the HomePod volume.
+
+> [!NOTE]
+> I considered creating a virtual Video Doorbell accessory, however I ruled it out due to the amount of work required. Also, this functionality is easily implemented with the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
+> 
+> Without a live feed, you will get a black rectangle in the Home app. Here are a few ways that you can display something instead of that black rectangle:
+> - Configure it without setting a valid `source` and setting `stillImageSource` to the URL of an image.
+> - Configure it by setting `source` to `"-loop 1 -i http://192.168.4.63:8086/image"` (where `http://192.168.4.63:8086/image` is the URL to a still image) and setting `maxFPS` to `1`.
+> - Configure it by setting `source` to a live internet traffic cam or nature cam.
+>
+> I have not done this myself, so please refer to the plugin documentation for any questions.
 
 ## What if I run into a problem?
 
-If you encounter a problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open an issue on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose). Please attach any log output to the issue, making sure to remove any sensitive information such as passwords, tokens, etc.
+Check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki). Here you will find entries with instructions in the event of breaking updates. I will also post detailed  instructions for using certain functionalities, like the webhook service.
 
-Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open.
+If the Wiki entries do not provide answers to your problem, you can [check the #virtual accessories channel on Discord](https://discord.gg/Z8jmyvb) for any notifications, or [open a bug report or a support request here on GitHub](https://github.com/justjam2013/homebridge-virtual-accessories/issues). Please include log outputs and configuration details to the issue, making sure to remove any sensitive information such as passwords, tokens, etc. The more information you provide, the better I can investigate the issues.
+
+Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-virtual-accessories/issues/new/choose) if you have any enhancement suggestions or any additional functionality that you would like to see added, or comment on an existing issue if one is already open. If the enhancement suggestion fits within the scope of the plugin, I will consider adding it in a future release.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+
+  </h6>
+</span>

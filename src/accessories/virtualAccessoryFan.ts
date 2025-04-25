@@ -1,7 +1,7 @@
-import { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
-import { Percentage } from '../customTypes.js';
 
 /**
  * Fan - Accessory implementation
@@ -35,7 +35,7 @@ export class Fan extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.fan.defaultState === 'on' ? Fan.ON : Fan.OFF;
     const rotationDirection: number = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
-    const rotationSpeed: Percentage = this.accessoryConfiguration.fan.rotationSpeed as Percentage;
+    const rotationSpeed: number = this.accessoryConfiguration.fan.rotationSpeed as number;
 
     this.states.FanState = this.defaultState;
     this.states.FanRotationDirection = rotationDirection;
@@ -80,9 +80,8 @@ export class Fan extends Accessory {
       .onGet(this.getRotationSpeed.bind(this));
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setOn(value: CharacteristicValue) {
     this.states.FanState = value as boolean;
 
@@ -91,9 +90,6 @@ export class Fan extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getOn(): Promise<CharacteristicValue> {
     const fanState = this.states.FanState;
 

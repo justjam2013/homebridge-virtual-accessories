@@ -1,27 +1,22 @@
-import { VirtualAccessoriesLogger } from './virtualLogger';
 import { Utils } from './utils.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
+
 import { ZonedDateTime } from '@js-joda/core';
 
 export class Timer {
-
-  static Units = {
-    Seconds: 'seconds',
-    Minutes: 'minutes',
-    Hours: 'hours',
-    Days: 'days',
-  };
 
   private accessoryName: string;
   private log: VirtualAccessoriesLogger;
 
   private timerIsResettable: boolean = false;
 
-  private timerId: ReturnType<typeof setInterval> | undefined;
-  private initiDuration: number = 0;
+  private id: ReturnType<typeof setInterval> | undefined;
+  private defaultDuration: number = 0;
   private startTime: ZonedDateTime;
 
+  private isRunning: boolean = false;
+  private runtime: number = 0;
   private remainingDuration: number = 0;
-  private timerIsRunning: boolean = false;
 
   private logDebugCountdown: boolean = false;
 
@@ -35,14 +30,12 @@ export class Timer {
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean,
     duration: number,
-    units: string,
   );
   constructor(
     accessoryName: string,
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean = false,
     duration?: number,
-    units?: string,
   ) {
     this.accessoryName = accessoryName;
     this.log = log;
@@ -51,7 +44,7 @@ export class Timer {
     this.startTime = Utils.now();
 
     if (duration !== undefined) {
-      this.setDuration(duration, units!);
+      this.setDefaultDuration(duration);
     }
   }
 
@@ -61,31 +54,25 @@ export class Timer {
   start(
     callback: () => void,
     duration: number,
-    units: string,
   ): void;
   start(
     callback: () => void,
-    duration?: number,
-    units?: string,
+    oneOffDuration?: number,
   ): void {
-    if (this.timerIsRunning && !this.timerIsResettable) {
+    if (this.isRunning && !this.timerIsResettable) {
       return;
     }
 
     // In case timer is running, stop it
     this.stop();
 
-    if (duration !== undefined) {
-      this.setDuration(duration, units!);
-    }
+    this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
 
-    const runtime = (duration === undefined) ? this.initiDuration : this.getSeconds(duration, units!);
+    if (this.runtime > 0) {
+      this.remainingDuration = this.runtime;
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime}`);
 
-    if (runtime > 0) {
-      this.remainingDuration = runtime;
-      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${runtime}`);
-
-      this.timerId = setInterval(() => {
+      this.id = setInterval(() => {
         this.remainingDuration--;
 
         // We don't want this floodin the debug logs
@@ -100,14 +87,15 @@ export class Timer {
       }, 1000);
 
       this.startTime = Utils.now();
-      this.timerIsRunning = true;
+      this.isRunning = true;
     }
   }
 
   stop(): void {
-    clearInterval(this.timerId);
+    clearInterval(this.id);
 
-    this.timerIsRunning = false;
+    this.isRunning = false;
+    this.runtime = 0;
     this.remainingDuration = 0;
 
     this.logDebugCountdown = false;
@@ -119,49 +107,26 @@ export class Timer {
     return this.startTime;
   }
 
+  getRuntime(): number {
+    return this.runtime;
+  }
+
   /**
    * Returns duration in seconds
    */
-  getDuration(): number {
-    return this.initiDuration;
+  getDefaultDuration(): number {
+    return this.defaultDuration;
   }
 
   /**
-   * Set duration in seconds/minutes/hours/days
+   * Set duration in seconds
    */
-  setDuration(
+  setDefaultDuration(
     duration: number,
-    units: string,
   ) {
-    this.initiDuration = this.getSeconds(duration, units);
+    this.defaultDuration = duration;
 
-    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.initiDuration}`);
-  }
-
-  private getSeconds(
-    duration: number,
-    units: string,
-  ) {
-    let seconds = duration;
-
-    switch (units) {
-    case Timer.Units.Days:
-      seconds *= 24;
-      // falls through
-    case Timer.Units.Hours:
-      seconds *= 60;
-      // falls through
-    case Timer.Units.Minutes:
-      seconds *= 60;
-      // falls through
-    case Timer.Units.Seconds:
-      seconds *= 1;
-      break;
-    default:
-      seconds = 0;
-    }
-
-    return seconds;
+    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.defaultDuration}`);
   }
 
   /**
@@ -172,7 +137,7 @@ export class Timer {
   }
 
   isTimerRunning(): boolean {
-    return this.timerIsRunning;
+    return this.isRunning;
   }
 
   debugCountdown() {

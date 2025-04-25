@@ -16,7 +16,7 @@ body:
         Please provide an overview of the what feature you'd like to see.
 
         * What is happening?
-        * What you expect to happen?
+        * What do you expect to happen?
       placeholder: |
         Tip: You can attach images or files by clicking this area to highlight it and then dragging files in.
     validations:

@@ -6,10 +6,12 @@ import { Accessory } from './accessories/virtualAccessory.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
+import { HeaterCooler } from './accessories/virtualAccessoryHeaterCooler.js';
 import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifierDehumidifier.js';
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
+import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
@@ -29,7 +31,6 @@ import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
-import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 
 /**
  * Virtual Accessory Factory
@@ -61,6 +62,9 @@ export abstract class AccessoryFactory {
     case 'garagedoor':
       virtualAccessory = new GarageDoor(platform, accessory);
       break;
+    case 'heatercooler':
+      virtualAccessory = new HeaterCooler(platform, accessory);
+      break;
     case 'humidifierdehumidifier':
       virtualAccessory = new HumidifierDehumidifier(platform, accessory);
       break;
@@ -89,7 +93,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
-      platform.log.error('Error creating accessory. Invalid accessory type:', accessoryType);
+      platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
     }
 
     return virtualAccessory;
@@ -101,6 +105,17 @@ export abstract class AccessoryFactory {
     companionSwitchName: string,
   ): Switch | undefined {
     const virtualAccessory: Switch = new Switch(platform, accessory, companionSwitchName);
+    return virtualAccessory;
+  }
+
+  static createVirtualCompanionLightbulb(
+    platform: VirtualAccessoriesPlatform,
+    accessory: PlatformAccessory,
+    companionLightbulbName: string,
+    companionLightbulbOn: boolean,
+    companionLightbulbBrightness: number,
+  ): Lightbulb | undefined {
+    const virtualAccessory: Lightbulb = new Lightbulb(platform, accessory, companionLightbulbName, companionLightbulbOn, companionLightbulbBrightness);
     return virtualAccessory;
   }
 
@@ -154,7 +169,7 @@ export abstract class AccessoryFactory {
       virtualSensor = new SmokeSensor(platform, accessory, companionSensorName);
       break;
     default:
-      platform.log.error('Error creating sensor. Invalid sensor type:', sensorType);
+      platform.log.error(`Error creating sensor. Invalid sensor type: ${sensorType}`);
     }
 
     return virtualSensor;

@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -11,10 +13,7 @@ export class DoorbellConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidVolume: boolean = (
-      (this.volume !== undefined) &&
-      (this.volume >= 0 && this.volume <= 100)
-    );
+    const isValidVolume: boolean = Utils.isPercentage(this.volume);
 
     // Store fields failing validation
     if (!isValidVolume) this.errorFields.push(DoorbellConfiguration.prefix + '.volume');

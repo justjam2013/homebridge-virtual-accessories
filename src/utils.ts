@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
@@ -31,5 +32,114 @@ export class Utils {
     hhmmss += secs.toString().padStart(2, '0') + 's';
 
     return hhmmss;
+  }
+
+  static daysHoursMinutesSecondsToSeconds(
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number,
+  ) {
+    const convertedSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
+
+    return convertedSeconds;
+  }
+
+  static secondsToDaysHoursMinutesSeconds(
+    seconds: number,
+  ): [number, number, number, number] {
+    if (seconds === 0) {
+      return [0, 0, 0, 0];
+    }
+
+    const convertedDays = Math.trunc(((seconds / 60) / 60) / 24);
+    seconds = seconds - convertedDays * 24 * 60 * 60;
+    const convertedHours = Math.trunc((seconds / 60) / 60);
+    seconds = seconds - convertedHours * 60 * 60;
+    const convertedMinutes = Math.trunc((seconds / 60));
+    seconds = seconds - convertedMinutes * 60;
+    const convertedSeconds = seconds;
+
+    return [convertedDays, convertedHours, convertedMinutes, convertedSeconds];
+  }
+
+
+  static isPoweredState(
+    value: string,
+  ): boolean {
+    let isPowerState = false;
+
+    if ((value !== undefined) &&
+        [ 'on', 'off' ].includes(value)
+    ) {
+      isPowerState = true;
+    }
+
+    return isPowerState;
+  }
+
+  static isPercentage(
+    value: number,
+  ): boolean {
+    let isPercentage = false;
+
+    if ((value !== undefined) &&
+        (value >= 0 && value <= 100)
+    ) {
+      isPercentage = true;
+    }
+
+    return isPercentage;
+  }
+
+  static isRotationDirection(
+    value: string,
+  ): boolean {
+    let isRotation = false;
+
+    if ((value !== undefined) &&
+        [ 'clockwise', 'counterclockwise' ].includes(value)
+    ) {
+      isRotation = true;
+    }
+
+    return isRotation;
+  }
+
+  static isTransitionDuration(
+    value: number,
+  ): boolean {
+    let isTransitionDuration = false;
+
+    if ((value !== undefined) &&
+        (value >= 0)
+    ) {
+      isTransitionDuration = true;
+    }
+
+    return isTransitionDuration;
+  }
+
+  static isTimeout(
+    value: number,
+  ): boolean {
+    return Utils.isTransitionDuration(value);
+  }
+
+  static debounceMillis: number = 300;
+
+  static debounce<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number = Utils.debounceMillis,
+  ): (...args: any[]) => void {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return function(this: any, ...args: any[]) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const context = this;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(context, args);
+      }, delay);
+    };
   }
 }

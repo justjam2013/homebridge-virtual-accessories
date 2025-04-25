@@ -31,3 +31,23 @@ export class TriggerNotAllowedError extends Error {
     this.message = message;
   }
 }
+
+export class SensorValueUpdateNotAllowed extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}
+
+export class InvalidSensorValueType extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}

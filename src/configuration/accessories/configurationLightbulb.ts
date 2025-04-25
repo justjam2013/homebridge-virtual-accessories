@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -17,25 +19,23 @@ export class LightbulbConfiguration {
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      [ 'on', 'off' ].includes(this.defaultState)
-    );
+    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
 
     const isValidType: boolean = (
       (this.type !== undefined) &&
       [ 'white', 'ambiance', 'color' ].includes(this.type)
     );
 
-    const isValidBrightness: boolean = (
-      (this.brightness !== undefined) &&
-      (this.brightness >= 0 && this.brightness <= 100)
-    );
+    const isValidBrightness: boolean = Utils.isPercentage(this.brightness);
 
     const isValidColorTemperature: boolean = (
-      this.colorTemperatureKelvin === undefined?
+      (this.type !== 'ambiance') ?
         true :
-        (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536)
+        (
+          (this.colorTemperatureKelvin !== undefined) ?
+            (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536) :
+            false
+        )
     );
 
     // Store fields failing validation

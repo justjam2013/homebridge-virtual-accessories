@@ -1,13 +1,14 @@
 /* eslint-disable curly */
- 
+
+import { Utils } from '../../utils.js';
 
 /**
  * 
  */
 export class HumidifierDehumidifierConfiguration {
   type!: string;
-  humidifierThreshold: number = 0;
-  dehumidifierThreshold: number = 100;
+  humidifierThreshold!: number;
+  dehumidifierThreshold!: number;
 
   static prefix: string = 'humidifierDehumidifier';
 
@@ -20,19 +21,21 @@ export class HumidifierDehumidifierConfiguration {
     );
 
     const isValidHumidifierThreshold: boolean = (
-      (this.humidifierThreshold !== undefined) &&
-      (this.humidifierThreshold >= 0 && this.humidifierThreshold <= 100)
+      (this.humidifierThreshold !== undefined) ?
+        Utils.isPercentage(this.humidifierThreshold) :
+        true
     );
 
     const isValidDehumidifierThreshold: boolean = (
-      (this.dehumidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold >= 0 && this.dehumidifierThreshold <= 100)
+      (this.dehumidifierThreshold !== undefined) ?
+        Utils.isPercentage(this.dehumidifierThreshold) :
+        true
     );
 
     const isValidThresholdWindow: boolean = (
-      (this.humidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold !== undefined) &&
-      (this.dehumidifierThreshold > this.humidifierThreshold)
+      (this.humidifierThreshold !== undefined) && (this.dehumidifierThreshold !== undefined) ?
+        (this.dehumidifierThreshold > this.humidifierThreshold) :
+        true
     );
 
     // Store fields failing validation

@@ -6,6 +6,37 @@
   "strictValidation": true,
   "schema": {
     "type": "object",
+    "definitions": {
+      "duration": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "hours": {
+            "title": "Hours",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "minutes": {
+            "title": "Minutes",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          }
+        }
+      }
+    },
     "properties": {
       "name": {
         "title": "Platform Name",
@@ -13,6 +44,25 @@
         "required": true,
         "default": "Virtual Accessories Platform",
         "readonly": true
+      },
+      "sensorServer": {
+        "title": "Sensor Webhooks",
+        "type": "object",
+        "expandable": true,
+        "expanded": false,
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "description": "Enable updating humidity sensors via web calls",
+            "type": "boolean"
+          },
+          "port": {
+            "title": "Webhooks Port",
+            "type": "string",
+            "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+            "placeholder": "60221"
+          }
+        }
       },
       "devices": {
         "title": "Accessories",
@@ -47,6 +97,7 @@
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
+                { "title": "Heater/Cooler (AC)", "enum": ["heatercooler"] },
                 { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
@@ -142,6 +193,156 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
+            "heaterCooler": {
+              "title": "Heater/Cooler",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Type *",
+                  "description": "Device type",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Heater", "enum": ["heater"] },
+                    { "title": "Cooler (AC)", "enum": ["cooler"] },
+                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
+                  ]
+                },
+                "temperatureDisplayUnits": {
+                  "title": "Temperature Display Units *",
+                  "description": "Temperature display units",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ]
+                },
+                "heatingThresholdCelsius": {
+                  "title": "Heating Threshold ºC *",
+                  "description": "Temperature level below which the heater turns on (0ºC - 25ºC)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 25,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdCelsius": {
+                  "title": "Cooling Threshold ºC *",
+                  "description": "Temperature level above which the cooler (AC) turns on (10ºC - 35ºC)",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 35,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "heatingThresholdFahrenheit": {
+                  "title": "Heating Threshold ºF *",
+                  "description": "Temperature level below which the heater turns on (32ºF - 77ºF)",
+                  "type": "integer",
+                  "minimum": 32,
+                  "maximum": 77,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdFahrenheit": {
+                  "title": "Cooling Threshold ºF *",
+                  "description": "Temperature level above which the cooler (AC) turns on (50ºF - 95ºF)",
+                  "type": "integer",
+                  "minimum": 50,
+                  "maximum": 95,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "": {
+                  "title": "Note: The heating threshold value **must be lower** than the cooling threshold value",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.type === 'auto';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'heatercooler';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                  }
+                }
+              ]
+            },
             "humidifierDehumidifier": {
               "title": "Humidifier/Dehumidifier",
               "type": "object",
@@ -177,7 +378,7 @@
                   }
                 },
                 "": {
-                  "title": "Note: The dehumidifier threshold value **must be greater** than the humidifier threshold value",
+                  "title": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -294,22 +495,6 @@
                     { "title": "Locked", "enum": ["locked"] },
                     { "title": "Unlocked", "enum": ["unlocked"] }
                   ]
-                },
-                "hardwareFinish": {
-                  "title": "Hardware Finish *",
-                  "description": "Color of the virtual HomeKey card in the Wallet app",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Tan", "enum": ["tan"] },
-                    { "title": "Gold", "enum": ["gold"] },
-                    { "title": "Silver", "enum": ["silver"] },
-                    { "title": "Black", "enum": ["black"] }
-                  ]
-                },
-                "hasAudioFeedback": {
-                  "title": "Audio Feedback",
-                  "description": "Lock has audio feedback",
-                  "type": "boolean"
                 },
                 "autoSecurityTimeout": {
                   "title": "Auto Security Timeout *",
@@ -513,8 +698,7 @@
                 "duration": {
                   "title": "Timer Duration *",
                   "description": "Set timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
@@ -522,8 +706,7 @@
                 "durationRandomMin": {
                   "title": "Timer Min Duration *",
                   "description": "Set minimum timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -531,22 +714,18 @@
                 "durationRandomMax": {
                   "title": "Timer Max Duration *",
                   "description": "Set maximum timer duration for the accessory to reset to default state",
-                  "type": "integer",
-                  "minimum": 0,
+                  "$ref": "#/definitions/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
-                "units": {
-                  "title": "Timer Units *",
-                  "description": "Reset timer units",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Seconds", "enum": ["seconds"] },
-                    { "title": "Minutes", "enum": ["minutes"] },
-                    { "title": "Hours", "enum": ["hours"] },
-                    { "title": "Days", "enum": ["days"] }
-                  ]
+                "isDynamic": {
+                  "title": "Timer is Dynamic",
+                  "description": "The timer duration can be changed in the UI",
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
+                  }
                 },
                 "isResettable": {
                   "title": "Timer is Resettable",
@@ -566,10 +745,23 @@
                     "required": [ "durationIsRandom" ]
                   },
                   "then": {
-                    "required": [ "durationRandomMin", "durationRandomMax" ]
+                    "required": [ "durationRandomMin", "durationRandomMax" ],
+                    "properties": {
+                      "durationRandomMin": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      },
+                      "durationRandomMax": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   },
                   "else": {
-                    "required": [ "duration" ]
+                    "required": [ "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "days", "hours", "minutes", "seconds" ]
+                      }
+                    }
                   }
                 }
               ]
@@ -608,10 +800,9 @@
               "properties": {
                 "host": {
                   "title": "Host *",
-                  "description": "IP address of host to ping",
+                  "description": "IP address (142.250.178.4) or domain name (www.google.com) of host to ping",
                   "placeholder": "192.168.0.1",
-                  "type": "string",
-                  "pattern": "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$"
+                  "type": "string"
                 },
                 "failureRetryCount": {
                   "title": "Retries Before Failure *",
@@ -793,6 +984,21 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "heatercooler" }
+                }
+              },
+              "then": {
+                "required": [ "heaterCooler" ],
+                "properties": {
+                  "heaterCooler": {
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryType": { "const": "humidifierdehumidifier" }
                 }
               },
@@ -830,7 +1036,7 @@
                 "required": [ "lock" ],
                 "properties": {
                   "lock": {
-                    "required": [ "defaultState", "hardwareFinish", "autoSecurityTimeout" ]
+                    "required": [ "defaultState", "autoSecurityTimeout" ]
                   }
                 }
               }
@@ -923,12 +1129,7 @@
                 "required": [ "switch" ]
               },
               "then": {
-                "required": [ "resetTimer" ],
-                "properties": {
-                  "resetTimer": {
-                    "required": [ "units" ]
-                  }
-                }
+                "required": [ "resetTimer" ]
               }
             },
             {

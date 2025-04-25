@@ -1,12 +1,12 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
 export class LockConfiguration {
   defaultState!: string;
-  hardwareFinish!: string;
-  hasAudioFeedback!: boolean;
   autoSecurityTimeout!: number;
 
   static prefix: string = 'lock';
@@ -19,24 +19,14 @@ export class LockConfiguration {
       [ 'locked', 'unlocked' ].includes(this.defaultState)
     );
 
-    const isValidHardwareFinish: boolean = (
-      (this.hardwareFinish !== undefined) &&
-      ([ 'tan', 'gold', 'silver', 'black' ].includes(this.hardwareFinish))
-    );
-
-    const isValidAutoSecurityTimeout: boolean = (
-      (this.autoSecurityTimeout !== undefined) &&
-      (this.autoSecurityTimeout >= 0)
-    );
+    const isValidAutoSecurityTimeout: boolean = Utils.isTimeout(this.autoSecurityTimeout);
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(LockConfiguration.prefix + '.defaultState');
-    if (!isValidHardwareFinish) this.errorFields.push(LockConfiguration.prefix + '.hardwareFinish');
     if (!isValidAutoSecurityTimeout) this.errorFields.push(LockConfiguration.prefix + '.autoSecurityTimeout');
 
     return [
       (isValidDefaultState &&
-        isValidHardwareFinish &&
         isValidAutoSecurityTimeout),
       this.errorFields,
     ];

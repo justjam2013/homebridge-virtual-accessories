@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -20,7 +22,7 @@ export class GarageDoorConfiguration {
     const isValidTransitionDuration: boolean = (
       this.transitionDuration === undefined?
         true :
-        (0 <= this.transitionDuration)
+        Utils.isTransitionDuration(this.transitionDuration)
     );
 
     // Store fields failing validation

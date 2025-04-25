@@ -3,9 +3,9 @@ import { Trigger } from './trigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Utils } from '../utils.js';
 
+import { Cron } from 'croner';
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
-import { Cron } from 'croner';
 
 /**
  * CronTrigger - Trigger implementation
@@ -63,7 +63,7 @@ export class CronTrigger extends Trigger {
     this.cronJob = new Cron(
       triggerConfig.pattern,
       {
-        name: 'Schedule Cron Job',
+        name: `Schedule Cron Job  (${this.sensorConfig.accessoryName})`,
         startAt: this.includeStartTime(triggerConfig.startDateTime),
         stopAt: this.includeEndTime(triggerConfig.endDateTime),
         timezone: timezone,

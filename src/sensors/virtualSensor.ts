@@ -1,7 +1,8 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
+
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from '../triggers/trigger.js';
 import { NotCompanionError, AccessoryNotAllowedError, TriggerNotAllowedError } from '../errors.js';
@@ -24,7 +25,7 @@ export abstract class Sensor extends Accessory {
 
   private uuidPostfix: string = '-sensor';
 
-  private sensorCharacteristic;
+  private sensorCharacteristic: WithUUID<{ new (): Characteristic; }>;
 
   private isCompanionSensor: boolean = false;
 
@@ -37,8 +38,8 @@ export abstract class Sensor extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    sensorService,
-    sensorCharacteristic,
+    sensorService: WithUUID<typeof Service>,
+    sensorCharacteristic: WithUUID<{ new (): Characteristic; }>,
     companionSensorName?: string,
   ) {
     super(platform, accessory);
@@ -50,15 +51,13 @@ export abstract class Sensor extends Accessory {
     }
 
     if (!this.isCompanionSensor) {
-      this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService);
+      this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService as unknown as Service);
+
+      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
       this.service = this.accessory.getService(companionSensorName!) ||
                      this.accessory.addService(sensorService, companionSensorName, accessory.UUID + this.uuidPostfix);
-    }
 
-    if (!this.isCompanionSensor) {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-    } else {
       this.service.setCharacteristic(this.platform.Characteristic.Name, companionSensorName!);
     }
 

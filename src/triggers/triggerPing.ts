@@ -1,9 +1,9 @@
-import { Trigger } from './trigger.js';
-import { Sensor } from '../sensors/virtualSensor.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { PingTriggerConfiguration } from '../configuration/triggers/configurationPingTrigger.js';
+import { Trigger } from './trigger.js';
+import { Sensor } from '../sensors/virtualSensor.js';
 
-// import dns from 'dns';
+import dns from 'dns';
 import net from 'net';
 import ping from 'net-ping';
 
@@ -45,12 +45,19 @@ export class PingTrigger extends Trigger {
       return;
     }
 
-    const ipProtocolVersion = net.isIP(triggerConfig.host);
-    // TODO: DNS lookup
-    // if (ipVersion === this.NOT_IP) {
-    //   const ip = this.getIP(trigger.host);
-    //   ipVersion = net.isIP(ip);
-    // }
+    this.setup(triggerConfig);
+  }
+
+  async setup(triggerConfig: PingTriggerConfiguration) {
+
+    let ipProtocolVersion = net.isIP(triggerConfig.host);
+    if (ipProtocolVersion === this.NOT_IP) {
+      const ip: string | void = await this.getIP(triggerConfig.host);
+      if (ip) {
+        ipProtocolVersion = net.isIP(ip);
+        triggerConfig.host = ip;
+      }
+    }
 
     let protocol: string;
     switch(ipProtocolVersion) {
@@ -60,10 +67,6 @@ export class PingTrigger extends Trigger {
     case this.IPv6:
       protocol = ping.NetworkProtocol.IPv6;
       break;
-    // case this.NOT_IP:
-    //   // TODO: this is a domain name, perform DNS lookup
-    //   protocol = ping.NetworkProtocol.None;  // 0
-    //   break;
     default:
       this.log.error(`[${this.sensorConfig.accessoryName}] Unkown or invalid IP protocol version: ${ipProtocolVersion}`);
       return;
@@ -136,17 +139,18 @@ export class PingTrigger extends Trigger {
     });
   }
 
-  // private async getIP(hostname: string) {
-  //   const response = await dns.promises.lookup(hostname)
-  //     .then((result: dns.LookupAddress) => {
-  //       this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] IP address retrieved for '${hostname}' is '${result.address}'`);
-  //     })
-  //     .catch((error: Error) => {
-  //       this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] Error retrieving IP address for '${hostname}': ${error.message}`);
-  //     })
-  //
-  //   return response?.address;
-  // }
+  private async getIP(hostname: string): Promise<string | void> {
+    const response = await dns.promises.lookup(hostname)
+      .then((result: dns.LookupAddress) => {
+        this.sensor.platform.log.info(`[${this.sensorConfig.accessoryName}] IP address retrieved for '${hostname}' is '${result.address}'`);
+        return result.address;
+      })
+      .catch((error: Error) => {
+        this.sensor.platform.log.error(`[${this.sensorConfig.accessoryName}] Error retrieving IP address for '${hostname}': ${error.message}`);
+      });
+  
+    return response;
+  }
 }
 
 export const dynamicTrigger = PingTrigger;

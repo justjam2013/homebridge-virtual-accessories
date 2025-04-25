@@ -2,9 +2,10 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { Switch } from './virtualAccessorySwitch.js';
 import { AccessoryNotAllowedError } from '../errors.js';
+import { Switch } from './virtualAccessorySwitch.js';
 
 /**
  * Doorbell - Accessory implementation
@@ -23,7 +24,7 @@ export class Doorbell extends Accessory {
     Volume: 100,
   };
 
-  protected companionSwitch?: Switch;
+  private companionSwitch?: Switch;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -39,23 +40,12 @@ export class Doorbell extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     this.service.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent)
-      .onGet(this.handleProgrammableSwitchEventGet.bind(this)); // GET - bind to the 'handleProgrammableSwitchEventGet` method below
+      .onGet(this.getProgrammableSwitchEvent.bind(this));
 
     // TODO: Figure out how to change the volume
     this.service.getCharacteristic(this.platform.Characteristic.Volume)
-      .onSet(this.handleVolumeSet.bind(this)) // SET - bind to the 'handleVolumeSet` method below
-      .onGet(this.handleVolumeGet.bind(this)); // GET - bind to the 'handleVolumeGet` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
+      .onSet(this.setVolume.bind(this))
+      .onGet(this.getVolume.bind(this));
 
     // Create switch service
     this.companionSwitch = AccessoryFactory.createVirtualCompanionSwitch(
@@ -63,13 +53,12 @@ export class Doorbell extends Accessory {
 
     // Overwrite the "onSet" handler to trigger doorbell
     this.companionSwitch!.service!.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.companionSwitchSetOn.bind(this));  // SET - bind to the `setOn` method below
+      .onSet(this.setCompanionSwitchOn.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleProgrammableSwitchEventGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getProgrammableSwitchEvent(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
     const pressEvent = Doorbell.SINGLE_PRESS;
 
@@ -77,19 +66,14 @@ export class Doorbell extends Accessory {
 
     return pressEvent;
   }
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleVolumeSet(value: CharacteristicValue) {
+
+  async setVolume(value: CharacteristicValue) {
     this.states.Volume = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleVolumeGet(): Promise<CharacteristicValue> {
+  async getVolume(): Promise<CharacteristicValue> {
     const volume = this.states.Volume;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
@@ -97,10 +81,7 @@ export class Doorbell extends Accessory {
     return volume;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async companionSwitchSetOn(value: CharacteristicValue) {
+  async setCompanionSwitchOn(value: CharacteristicValue) {
     const newState = value as boolean;
     this.companionSwitch!.setCompanionSwitchState(newState, this);
 

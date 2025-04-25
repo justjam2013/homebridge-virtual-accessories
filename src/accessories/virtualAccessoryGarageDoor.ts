@@ -63,20 +63,19 @@ export class GarageDoor extends Accessory {
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentDoorState)
-      .onGet(this.handleCurrentDoorStateGet.bind(this));
+      .onGet(this.getCurrentDoorState.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState)
-      .onSet(this.handleTargetDoorStateSet.bind(this))
-      .onGet(this.handleTargetDoorStateGet.bind(this));
+      .onSet(this.setTargetDoorState.bind(this))
+      .onGet(this.getTargetDoorState.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.ObstructionDetected)
-      .onGet(this.handleObstructionDetectedGet.bind(this));
+      .onGet(this.getObstructionDetected.bind(this));
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleCurrentDoorStateGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getCurrentDoorState(): Promise<CharacteristicValue> {
     const garageDoorCurrentState = this.states.GarageDoorCurrentState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${GarageDoor.getStateName(garageDoorCurrentState)}`);
@@ -84,10 +83,7 @@ export class GarageDoor extends Accessory {
     return garageDoorCurrentState;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
-  async handleTargetDoorStateSet(value: CharacteristicValue) {
+  async setTargetDoorState(value: CharacteristicValue) {
     this.states.GarageDoorTargetState = value as number;
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
@@ -113,10 +109,7 @@ export class GarageDoor extends Accessory {
     }, transitionDelayMillis);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
-  async handleTargetDoorStateGet(): Promise<CharacteristicValue> {
+  async getTargetDoorState(): Promise<CharacteristicValue> {
     const garageDoorTargetState = this.states.GarageDoorTargetState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${GarageDoor.getStateName(garageDoorTargetState)}`);
@@ -124,10 +117,7 @@ export class GarageDoor extends Accessory {
     return garageDoorTargetState;
   }
 
-  /**
-   * Handle "GET" requests from HomeKit
-   */
-  async handleObstructionDetectedGet(): Promise<CharacteristicValue> {
+  async getObstructionDetected(): Promise<CharacteristicValue> {
     const obstructionDetected = this.states.ObstructionDetected;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);

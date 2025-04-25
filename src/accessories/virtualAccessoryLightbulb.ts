@@ -1,7 +1,9 @@
+/* eslint-disable brace-style */
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { Utils } from '../utils.js';
 
 /**
  * Lightbulb - Accessory implementation
@@ -22,11 +24,13 @@ export class Lightbulb extends Accessory {
   private readonly brightnessStorageKey: string = 'LightbulbBrightness';
   private readonly colorTemperatureStorageKey: string = 'LightbulbColorTemperature';
 
-  private type: string;
+  private type: string = Lightbulb.WHITE;
+
+  private isCompanionLightbulb: boolean = false;
 
   private states = {
     LightbulbState: Lightbulb.OFF,
-    LightbulbBrightness: 100,
+    LightbulbBrightness: 0,
     LightbulbColorTemperature: 2700,  // Kelvin
     // TODO: Add Brightness, Hue, Saturation
   };
@@ -34,48 +38,68 @@ export class Lightbulb extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    companionLightbulbName?: string,
+    companionLightbulbOn?: boolean,
+    companionLightbulbBrightness?: number,
   ) {
     super(platform, accessory);
 
-    this.type = this.accessoryConfiguration.lightbulb.type;
-
-    // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
-    const brightness = this.accessoryConfiguration.lightbulb.brightness;
-    const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
-
-    this.states.LightbulbState = this.defaultState;
-    this.states.LightbulbBrightness = brightness;
-
-    if (this.type === Lightbulb.AMBIANCE) {
-      this.states.LightbulbColorTemperature = colorTemperatureKelvin;
+    if (companionLightbulbName !== undefined) {
+      this.accessoryName = companionLightbulbName;
+      this.isCompanionLightbulb = true;
+      this.states.LightbulbState = (companionLightbulbOn !== undefined) ? companionLightbulbOn : this.states.LightbulbState;
+      this.states.LightbulbBrightness = (companionLightbulbBrightness !== undefined) ? companionLightbulbBrightness : this.states.LightbulbBrightness;
     }
 
-    // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
-      const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
-      const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
+    if (!this.isCompanionLightbulb) {
+      this.type = this.accessoryConfiguration.lightbulb.type;
 
-      if (cachedState !== undefined) {
-        this.states.LightbulbState = cachedState;
-      }
-      if (cachedBrightness !== undefined) {
-        this.states.LightbulbBrightness = cachedBrightness;
+      // First configure the device based on the accessory details
+      this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
+      const brightness = this.accessoryConfiguration.lightbulb.brightness;
+      const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
+
+      this.states.LightbulbState = this.defaultState;
+      this.states.LightbulbBrightness = brightness;
+
+      if (this.type === Lightbulb.AMBIANCE) {
+        this.states.LightbulbColorTemperature = colorTemperatureKelvin;
       }
 
-      if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
-        this.states.LightbulbColorTemperature = cachedColorTemperature;
+      // If the accessory is stateful retrieve stored state
+      if (this.accessoryConfiguration.accessoryIsStateful) {
+        const accessoryState = this.loadAccessoryState(this.storagePath);
+        const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+        const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
+        const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
+
+        if (cachedState !== undefined) {
+          this.states.LightbulbState = cachedState;
+        }
+        if (cachedBrightness !== undefined) {
+          this.states.LightbulbBrightness = cachedBrightness;
+        }
+
+        if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
+          this.states.LightbulbColorTemperature = cachedColorTemperature;
+        }
       }
     }
 
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    if (!this.isCompanionLightbulb) {
+      this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    }
+    else {
+      this.service = this.accessory.getService(companionLightbulbName!) ||
+                     this.accessory.addService(this.platform.Service.Lightbulb, companionLightbulbName, accessory.UUID + companionLightbulbName);
+
+      this.service.setCharacteristic(this.platform.Characteristic.Name, companionLightbulbName!);
+    }
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.debug(`[${this.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.LightbulbState));
     this.service.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
 
@@ -86,14 +110,14 @@ export class Lightbulb extends Accessory {
       .onGet(this.getOn.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this))
+      .onSet(Utils.debounce(this.setBrightness.bind(this)))
       .onGet(this.getBrightness.bind(this));
 
     switch(this.type) {
     case Lightbulb.AMBIANCE:
       // register handlers for the ColorTemperature Characteristic
       this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature)
-        .onSet(this.setColorTemperature.bind(this))
+        .onSet(Utils.debounce(this.setColorTemperature.bind(this)))
         .onGet(this.getColorTemperature.bind(this));
       break;
     case Lightbulb.COLOR:
@@ -105,24 +129,20 @@ export class Lightbulb extends Accessory {
     }
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   */
+  // Handlers
+
   async setOn(value: CharacteristicValue) {
     this.states.LightbulbState = value as boolean;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   */
   async getOn(): Promise<CharacteristicValue> {
     const lightbulbState = this.states.LightbulbState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Lightbulb.getStateName(lightbulbState)}`);
 
     return lightbulbState;
   }
@@ -132,31 +152,29 @@ export class Lightbulb extends Accessory {
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
+    this.log.info(`[${this.accessoryName}] Setting Brightness: ${this.states.LightbulbBrightness}%`);
   }
 
   async getBrightness(): Promise<CharacteristicValue> {
     const lightbulbBrightness = this.states.LightbulbBrightness;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
+    this.log.debug(`[${this.accessoryName}] Getting Brightness: ${lightbulbBrightness}%`);
 
     return lightbulbBrightness;
   }
 
-  // Receive value in mireds
-  async setColorTemperature(value: CharacteristicValue) {
-    this.states.LightbulbColorTemperature = this.miredToKelvin(value as number);
+  async setColorTemperature(miredValue: CharacteristicValue) {
+    this.states.LightbulbColorTemperature = this.miredToKelvin(miredValue as number);
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${value} Mired)`);
+    this.log.debug(`[${this.accessoryName}] Setting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
   }
 
-  // Return value in mireds
   async getColorTemperature(): Promise<CharacteristicValue> {
     const miredValue = this.kelvinToMired(this.states.LightbulbColorTemperature);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
+    this.log.debug(`[${this.accessoryName}] Getting Color Temperature: ${this.states.LightbulbColorTemperature}K (${miredValue} Mired)`);
 
     return miredValue;
   }
