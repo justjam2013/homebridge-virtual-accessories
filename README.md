@@ -593,7 +593,7 @@ To add the speaker accessory in the Home app follow these steps:
                     "minutes": 0,
                     "seconds": 8
                 },
-                 "isDynamic": true
+                "isDynamic": true
             }
         }
     ],
