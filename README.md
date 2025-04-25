@@ -832,13 +832,16 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 People using Virtual Accessories For Homebridge!
 
-Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. His videos are amusing to watch and it's cool to see him use this plugin to solve common day-to-day problems that most people that use HomeKit will encounter at some point.
 
 <a href="https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s">
     <img src="assets/mentions/youtube-video.png" height="240">
 </a>
+<p></p>
 
-He again uses Virtual Accessories for Homebridge in his latest video [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI). His videos are a fun watch and it's cool to see him use this plugin to solve common day-to-day issues. That's the point of developing this plugin and making it available.
+You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
+
+He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
 
 ## Known Issues
 
