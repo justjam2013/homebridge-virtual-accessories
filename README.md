@@ -77,7 +77,7 @@
 
 This plugin is inspired by Nick Farina's most excellent 🎸 [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. This plugin is Homebridge Verified and is ready for Homebridge 2.0.
 
-The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became annoying having to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change.
+The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change.
 
 The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be releasing bug fixes and updates. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
@@ -101,7 +101,7 @@ Currently, these are the implemented virtual accessories:
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
     - **Timed switches.** This is a way to introduce timers into HomeKit. The switch will revert back to its default state when the timer expires. If the switch is stateful, the timer will be restored after a restart of Homebridge. While care is taken to restore the timer with the appropriate time correction, **absolute accuracy is not guaranteed and should not be expected**. The accuracy of the restored timer will be affected, among other things, by the hardware and software Homebridge is running on, the number of plugins installed, the order with which the plugins are restored, etc.
--   **Dynamic Timer.** Allows you to create a timer whose duration can be manually changed in the Home app. **This is a beta feature.**
+-   **Dynamic Timer.** Allows you to create a timer whose duration can be manually changed in the Home app.
 -   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by a cron expression. The sensor resets after a brief delay.
@@ -774,7 +774,6 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 
 -   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
 -   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
--   The Speaker accessory is not propery rendered in Homebridge UI. Homebrige UI currently does not differentiate between Active and Muted properties and once the speaker is switched off, it is unable to switch it back on again.
 
 #### Issues with underlying frameworks:
 
