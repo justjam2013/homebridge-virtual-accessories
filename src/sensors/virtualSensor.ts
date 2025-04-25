@@ -1,4 +1,4 @@
-import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from '../accessories/virtualAccessory.js';
@@ -38,7 +38,7 @@ export abstract class Sensor extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    sensorService: WithUUID<typeof Service>,
+    sensorService,
     sensorCharacteristic: WithUUID<{ new (): Characteristic; }>,
     companionSensorName?: string,
   ) {
@@ -51,7 +51,7 @@ export abstract class Sensor extends Accessory {
     }
 
     if (!this.isCompanionSensor) {
-      this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService.prototype);
+      this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService);
 
       this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
     } else {
