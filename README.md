@@ -838,6 +838,8 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
     <img src="assets/mentions/youtube-video.png" height="240">
 </a>
 
+He again uses Virtual Accessories for Homebridge in his latest video [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI). His videos are a fun watch and it's cool to see him use this plugin to solve common day-to-day issues. That's the point of developing this plugin and making it available.
+
 ## Known Issues
 
 #### Issues with Homebridge UI:
