@@ -6,18 +6,20 @@ import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';
+import { DynamicAlarmConfiguration } from '../configuration/extendedAccessories/configurationDynamicAlarm.js';
 import { Lightbulb } from './virtualAccessoryLightbulb.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Utils } from '../utils.js';
 
+import { Cron } from 'croner';
 import { Duration } from '@js-joda/core';
 
 /**
- * Switch - Accessory implementation
+ * AbstractSwitch - Accessory implementation
  */
-export class Switch extends Accessory {
+export abstract class AbstractSwitch extends Accessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Switch';
 
@@ -34,6 +36,9 @@ export class Switch extends Accessory {
   private readonly timerSliderHoursStorageKey: string = 'TimerSliderHours';
   private readonly timerSliderDaysStorageKey: string = 'TimerSliderDays';
 
+  private readonly alarmSliderMinutesStorageKey: string = 'AlarmSliderMinutes';
+  private readonly alarmSliderHourStorageKey: string = 'AlarmSliderHour';
+
   private durationTimer?: Timer;
   private timerSecondsSlider?: Lightbulb;
   private timerMinutesSlider?: Lightbulb;
@@ -44,6 +49,11 @@ export class Switch extends Accessory {
 
   private isCompanionSwitch: boolean = false;
   private companionSwitchPostfix: string = '-switch';
+
+  private isDynamicAlarm: boolean = false;
+  private alarmMinutesSlider?: Lightbulb;
+  private alarmHourSlider?: Lightbulb;
+  private alarmCronJob?: Cron;
 
   private states = {
     SwitchState: Switch.OFF,
@@ -74,6 +84,10 @@ export class Switch extends Accessory {
         this.setupResetTimer(this.accessoryConfiguration.resetTimer);
       }
 
+      if (this instanceof DynamicAlarm) {
+        this.setupDynamicAlarm(this.accessoryConfiguration.dynamicAlarm);
+      }
+
       // If the accessory is stateful retrieve stored state
       if (this.accessoryConfiguration.accessoryIsStateful) {
         this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch is stateful`);
@@ -87,24 +101,11 @@ export class Switch extends Accessory {
         }
 
         if (this.accessoryConfiguration.switch.hasResetTimer) {
-          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
+          this.restoreResetTimer(accessoryState);
+        }
 
-          if (this.accessoryConfiguration.resetTimer.isDynamic) {
-            this.restoreTimerSliders(accessoryState);
-          }    
-
-          const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
-          const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
-          const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
-
-          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
-          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
-          this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
-
-          // If the timer was running, calculate elapsed time and set timer for remaining duration
-          if (cachedTimerIsRunning) {
-            this.restoreRunningTimer(cachedTimerStartTime, cachedTimerDuration);
-          }
+        if (this instanceof DynamicAlarm) {
+          this.restoreDynamicAlarm(accessoryState);
         }
       }
     }
@@ -150,6 +151,10 @@ export class Switch extends Accessory {
       if (this.accessoryConfiguration.switch.hasCompanionSensor) {
         this.setupCompanionSensor();
       }
+
+      if (this instanceof DynamicAlarm) {
+        this.setupAlarmSliders();
+      }
     }
   }
 
@@ -176,10 +181,20 @@ export class Switch extends Accessory {
     // eslint-disable-next-line max-len
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`, this.accessoryConfiguration.switch.muteLogging);
 
-    if (this.accessoryConfiguration.switch.hasCompanionSensor) {
-      this.states.SensorState = this.determineSensorState();
+    if (this instanceof Switch) {
+      if (this.accessoryConfiguration.switch.hasCompanionSensor) {
+        this.states.SensorState = this.determineSensorState();
 
       this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
+      }
+    }
+
+    if (this instanceof DynamicAlarm) {
+      if (this.states.SwitchState === Switch.ON) {
+        this.alarmCronJob?.resume();
+      } else {
+        this.alarmCronJob?.pause();
+      }
     }
   }
 
@@ -223,14 +238,17 @@ export class Switch extends Accessory {
       }
     }
 
+    if (this instanceof DynamicAlarm) {
+      Object.assign(jsonState, { [this.alarmSliderMinutesStorageKey]: this.alarmMinutesSlider?.getBrightness() });
+      Object.assign(jsonState, { [this.alarmSliderHourStorageKey]: this.alarmHourSlider?.getBrightness() });
+    }
+
     const json = JSON.stringify(jsonState);
 
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Switch.ACCESSORY_TYPE_NAME;
-  }
+  protected abstract getAccessoryTypeName(): string;
 
   private determineSensorState(): number {
     let sensorState: number;
@@ -280,6 +298,15 @@ export class Switch extends Accessory {
     );
   }
 
+  private setupDynamicAlarm(dynamicAlarmConfig: DynamicAlarmConfiguration): void {
+    const minutes: number = dynamicAlarmConfig.minutes;
+    const hour: number = dynamicAlarmConfig.getHour();
+
+    const pattern: string = `${minutes} ${hour} * * *`;
+
+    this.alarmCronJob = this.createAlarmCronJob(pattern);
+  }
+
   private setupCompanionSensor(): void {
     this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
       this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
@@ -288,15 +315,26 @@ export class Switch extends Accessory {
   }
 
   private setupResetTimerSliders(): void {
+    const minimumValue: number = DurationConfiguration.MIN_VALUE;
+    const duration: DurationConfiguration = this.accessoryConfiguration.resetTimer.duration;
     // Order days, hours, minutes, seconds
-    this.timerDaysSlider = this.createSlider('Days', DurationConfiguration.DAYS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.days);
-    this.timerHoursSlider = this.createSlider('Hours', DurationConfiguration.HOURS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.hours);
-    this.timerMinutesSlider = this.createSlider('Minutes', DurationConfiguration.MINUTES_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.minutes);
-    this.timerSecondsSlider = this.createSlider('Seconds', DurationConfiguration.SECONDS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.seconds);
+    this.timerDaysSlider = this.createSlider('Days', minimumValue, DurationConfiguration.DAYS_MAX_VALUE, duration.days);
+    this.timerHoursSlider = this.createSlider('Hours', minimumValue, DurationConfiguration.HOURS_MAX_VALUE, duration.hours);
+    this.timerMinutesSlider = this.createSlider('Minutes', minimumValue, DurationConfiguration.MINUTES_MAX_VALUE, duration.minutes);
+    this.timerSecondsSlider = this.createSlider('Seconds', minimumValue, DurationConfiguration.SECONDS_MAX_VALUE, duration.seconds);
+  }
+
+  private setupAlarmSliders(): void {
+    const alarmConfig: DynamicAlarmConfiguration = this.accessoryConfiguration.dynamicAlarm;    
+    // Order hours, minutes
+    this.timerHoursSlider = this.createSlider('Hour', alarmConfig.getHourMinValue(), alarmConfig.getHourMaxValue(), alarmConfig.getHour());
+    // eslint-disable-next-line max-len
+    this.timerMinutesSlider = this.createSlider('Minutes', DynamicAlarmConfiguration.MINUTES_MIN_VALUE, DurationConfiguration.MINUTES_MAX_VALUE, alarmConfig.minutes);
   }
 
   private createSlider(
     companionName: string,
+    minimumValue: number,
     maximumValue: number,
     value: number,
   ): Lightbulb | undefined {
@@ -305,7 +343,7 @@ export class Switch extends Accessory {
 
     slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
       .setProps({
-        minValue: 0,
+        minValue: minimumValue,
         maxValue: maximumValue,
         minStep: 1,
         unit: null,
@@ -321,16 +359,81 @@ export class Switch extends Accessory {
         this.storeState();
 
         // recalculate duration
-        const duration = new DurationConfiguration();
-        duration.seconds = (await this.timerSecondsSlider?.getBrightness())! as number;
-        duration.minutes = (await this.timerMinutesSlider?.getBrightness())! as number;
-        duration.hours = (await this.timerHoursSlider?.getBrightness())! as number;
-        duration.days = (await this.timerDaysSlider?.getBrightness())! as number;
+        if (this instanceof Switch) {
+          const duration = new DurationConfiguration();
+          duration.seconds = (await this.timerSecondsSlider?.getBrightness())! as number;
+          duration.minutes = (await this.timerMinutesSlider?.getBrightness())! as number;
+          duration.hours = (await this.timerHoursSlider?.getBrightness())! as number;
+          duration.days = (await this.timerDaysSlider?.getBrightness())! as number;
 
-        this.durationTimer?.setDefaultDuration(this.convertDurationToSeconds(duration));
+          this.durationTimer?.setDefaultDuration(this.convertDurationToSeconds(duration));
+        }
+
+        // update alarm
+        if (this instanceof DynamicAlarm) {
+          this.alarmCronJob?.stop();
+        
+          const minutes: number = (await this.alarmMinutesSlider?.getBrightness())! as number;
+          const hour: number = (await this.alarmHourSlider?.getBrightness())! as number;
+          const pattern: string = `${minutes} ${hour} * * *`;
+
+          this.alarmCronJob = this.createAlarmCronJob(pattern);
+        }
       }));
 
     return slider;
+  }
+
+  private createAlarmCronJob(
+    pattern: string,
+    resetDelayMillis?: number,
+  ): Cron {
+    const resetDelay: number = 3 * 1000;     // 3 second reset delay
+
+    const cronJob: Cron = new Cron(
+      pattern,
+      {
+        name: `Alarm Cron Job  (${this.accessoryConfiguration.accessoryName})`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      (async () => {
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Matched cron pattern '${pattern}'. Triggering sensor`);
+
+        this.companionSensor!.triggerCompanionSensorState(Sensor.TRIGGERED, this, this.accessoryConfiguration.switch.muteLogging);
+        await Utils.delay(resetDelayMillis ? resetDelayMillis : resetDelay);
+        this.companionSensor!.triggerCompanionSensorState(Sensor.NORMAL, this, this.accessoryConfiguration.switch.muteLogging);
+      }),
+    );
+    if (this.states.SwitchState === Switch.OFF) {
+      cronJob.pause();
+    }
+
+    return cronJob;
+  }
+
+  // Restore state
+
+  private restoreResetTimer(
+    accessoryState: string,
+  ): void {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
+
+    if (this.accessoryConfiguration.resetTimer.isDynamic) {
+      this.restoreTimerSliders(accessoryState);
+    }    
+
+    const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
+    const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+    const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
+
+    // If the timer was running, calculate elapsed time and set timer for remaining duration
+    if (cachedTimerIsRunning) {
+      this.restoreRunningTimer(cachedTimerStartTime, cachedTimerDuration);
+    }
   }
 
   private restoreTimerSliders(
@@ -380,5 +483,62 @@ export class Switch extends Accessory {
       },
       remainingTimerDuration,
     );
+  }
+
+  private restoreDynamicAlarm(
+    accessoryState: string,
+  ): void {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Dynamic Alarm`);
+
+    const cachedAlarmSliderMinutes = accessoryState[this.alarmSliderMinutesStorageKey] as number;
+    const cachedAlarmSliderHour = accessoryState[this.alarmSliderHourStorageKey] as number;
+
+    // Order hours, minutes
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Alarm Slider Hour: ${cachedAlarmSliderHour}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Alarm Slider Minutes: ${cachedAlarmSliderMinutes}`);
+
+    this.alarmMinutesSlider?.setBrightness(cachedAlarmSliderMinutes);
+    this.alarmHourSlider?.setBrightness(cachedAlarmSliderHour);
+  }
+}
+
+/**
+ * Switch - Accessory implementation
+ */
+
+export class Switch extends AbstractSwitch {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'Switch';
+
+  constructor(
+    platform: VirtualAccessoriesPlatform,
+    accessory: PlatformAccessory,
+    companionSwitchName?: string,
+  ) {
+    super(platform, accessory, companionSwitchName);
+  }
+
+  protected getAccessoryTypeName(): string {
+    return Switch.ACCESSORY_TYPE_NAME;
+  }
+}
+
+/**
+ * DynamicAlarm - Accessory implementation
+ */
+
+export class DynamicAlarm extends Switch {
+
+  static readonly ACCESSORY_TYPE_NAME: string = 'DynamicAlarm';
+
+  constructor(
+    platform: VirtualAccessoriesPlatform,
+    accessory: PlatformAccessory,
+  ) {
+    super(platform, accessory);
+  }
+
+  protected getAccessoryTypeName(): string {
+    return DynamicAlarm.ACCESSORY_TYPE_NAME;
   }
 }

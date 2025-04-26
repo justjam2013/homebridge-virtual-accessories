@@ -77,7 +77,7 @@ export class CronTrigger extends Trigger {
         this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
         sensor.triggerKeySensorState(Sensor.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
-        await this.delay(resetDelayMillis);
+        await Utils.delay(resetDelayMillis);
         sensor.triggerKeySensorState(Sensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
 
         if (!this.cronJob.nextRun()) {
@@ -101,10 +101,6 @@ export class CronTrigger extends Trigger {
       'None scheduled' :
       `${nextRunTimestamp.split('.')[0]} (count: ${cronJob.options.maxRuns})`;
     this.log.debug(`[${this.sensorConfig.accessoryName}] Next ${cronJob.name} run: ${nextRunTimestamp}`);
-  }
-
-  private delay(millis: number) {
-    return new Promise(resolve => setTimeout(resolve, millis));
   }
 
   private getZonedDateTime(datetime: string | undefined, zoneId: ZoneId): ZonedDateTime | undefined {

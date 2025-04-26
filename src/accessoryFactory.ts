@@ -12,7 +12,7 @@ import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
 import { Speaker } from './accessories/virtualAccessorySpeaker.js';
-import { Switch } from './accessories/virtualAccessorySwitch.js';
+import { DynamicAlarm, Switch } from './accessories/virtualAccessorySwitch.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
@@ -91,6 +91,9 @@ export abstract class AccessoryFactory {
       break;
     case 'sensor':
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
+      break;
+    case 'dynamicalarm':
+      virtualAccessory = new DynamicAlarm(platform, accessory);
       break;
     default:
       platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);

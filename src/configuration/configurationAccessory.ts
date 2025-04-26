@@ -22,6 +22,8 @@ import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
+import { DynamicAlarmConfiguration } from './extendedAccessories/configurationDynamicAlarm.js';
+
 import { Type } from 'typeserializer';
 
 /**
@@ -111,6 +113,11 @@ export class AccessoryConfiguration {
   @Type(SunEventsTriggerConfiguration)
     sunEventsTrigger!: SunEventsTriggerConfiguration;
 
+  // Extended accessories
+
+  @Type(DynamicAlarmConfiguration)
+    dynamicAlarm!: DynamicAlarmConfiguration;
+
   private errorFields: string[] = [];
 
   isValid(): [boolean, string[]] {
@@ -178,6 +185,9 @@ export class AccessoryConfiguration {
       return this.isValidValve();
     case 'windowcovering':
       return this.isValidWindowCovering();
+    case 'dynamicalarm':
+      this.enrichDynamicAlarmConfiguration();
+      return this.isValidDynamicAlarm() && this.isValidSwitch();
     }
 
     return false;
@@ -486,5 +496,36 @@ export class AccessoryConfiguration {
     }
 
     return [false, ['sensorTrigger']];
+  }
+
+  // Extended accessories
+
+  private isValidDynamicAlarm() {
+    let isValidDynamicAlarm: boolean = false;
+    let dynamicAlarmErrorFields: string[] = [ DynamicAlarmConfiguration.prefix ];
+
+    if (this.dynamicAlarm !== undefined) {
+      [isValidDynamicAlarm, dynamicAlarmErrorFields] = this.dynamicAlarm.isValid();
+    }
+
+    this.errorFields.push(...dynamicAlarmErrorFields);
+
+    return (
+      isValidDynamicAlarm
+    );
+  }
+
+  private enrichDynamicAlarmConfiguration() {
+    if (this.dynamicAlarm !== undefined) {
+      const switchConfiguration = new SwitchConfiguration();
+      switchConfiguration.defaultState = 'off';
+      switchConfiguration.hasCompanionSensor = true;
+      this.switch = switchConfiguration;
+
+      const companionSensorConfiguration = new CompanionSensorConfiguration();
+      companionSensorConfiguration.name = this.accessoryName + ' Sensor';
+      companionSensorConfiguration.type = 'contact';
+      this.companionSensor = companionSensorConfiguration;
+    }
   }
 }

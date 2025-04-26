@@ -5,6 +5,8 @@
  */
 export class DurationConfiguration {
 
+  static readonly MIN_VALUE: number = 0;
+
   static readonly SECONDS_MAX_VALUE: number = 59;
   static readonly MINUTES_MAX_VALUE: number = 59;
   static readonly HOURS_MAX_VALUE: number = 23;
