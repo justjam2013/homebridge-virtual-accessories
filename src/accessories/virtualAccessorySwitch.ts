@@ -301,7 +301,7 @@ export class Switch extends Accessory {
     value: number,
   ): Lightbulb | undefined {
     const slider: Lightbulb | undefined = AccessoryFactory.createVirtualCompanionLightbulb(
-      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName, Lightbulb.ON, value);
+      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName, value);
 
     slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
       .setProps({
