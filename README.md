@@ -57,8 +57,6 @@
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
-  - [Extended Accessory Configurations](#extended-accessory-configurations)
-    - [Dynamic Timer](#dynamic-timer)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
@@ -109,10 +107,6 @@ Currently, these are the implemented virtual accessories:
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
  
-Extended virtual accessories:
-
--   **Dynamic Timer.** Allows you to create a timer whose duration can be manually changed in the Home app. To create a dynamic timer, create a virtual switch accessory with a timer and select `isDynamic`.
-
 <span align="right">
   <h6>
     
@@ -694,45 +688,6 @@ To add the speaker accessory in the Home app follow these steps:
 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
-
-<span align="right">
-  <h6>
-    
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
-
-  </h6>
-</span>
-
-## Extended Accessory Configurations
-
-### Dynamic Timer
-
-```json
-{
-    "name": "Virtual Accessories Platform",
-    "devices": [
-        {
-            "accessoryID": "1234567",
-            "accessoryName": "Dynamic Timer",
-            "accessoryType": "switch",
-            "switch": {
-                "defaultState": "off",
-                "hasResetTimer": true
-            },
-            "resetTimer": {
-                "duration": {
-                    "days": 0,
-                    "hours": 0,
-                    "minutes": 0,
-                    "seconds": 8
-                },
-                "isDynamic": true
-            }
-        }
-    ],
-    "platform": "VirtualAccessoriesForHomebridge"
-}
-```
 
 <span align="right">
   <h6>
