@@ -308,7 +308,7 @@ export class Switch extends Accessory {
         minValue: 0,
         maxValue: maximumValue,
         minStep: 1,
-        unit: null,
+        unit: 'seconds',
       })
       .onSet(Utils.debounce(async (value: number) => {
         const maxValue: number | undefined = slider.service?.getCharacteristic(this.platform.Characteristic.Brightness).props.maxValue;

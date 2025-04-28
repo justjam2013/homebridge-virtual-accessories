@@ -704,7 +704,7 @@
                   "description": "The timer duration can be changed in the UI",
                   "type": "boolean",
                   "condition": {
-                    "functionBody": "return false;"
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "isResettable": {
