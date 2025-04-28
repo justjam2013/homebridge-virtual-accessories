@@ -91,7 +91,7 @@ export class Switch extends Accessory {
 
           if (this.accessoryConfiguration.resetTimer.isDynamic) {
             this.restoreTimerSliders(accessoryState);
-          }    
+          }
 
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
