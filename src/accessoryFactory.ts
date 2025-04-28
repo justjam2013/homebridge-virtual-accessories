@@ -112,10 +112,9 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     companionLightbulbName: string,
-    companionLightbulbOn: boolean,
     companionLightbulbBrightness: number,
   ): Lightbulb | undefined {
-    const virtualAccessory: Lightbulb = new Lightbulb(platform, accessory, companionLightbulbName, companionLightbulbOn, companionLightbulbBrightness);
+    const virtualAccessory: Lightbulb = new Lightbulb(platform, accessory, companionLightbulbName, companionLightbulbBrightness);
     return virtualAccessory;
   }
 

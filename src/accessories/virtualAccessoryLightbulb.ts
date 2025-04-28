@@ -39,7 +39,6 @@ export class Lightbulb extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     companionLightbulbName?: string,
-    companionLightbulbOn?: boolean,
     companionLightbulbBrightness?: number,
   ) {
     super(platform, accessory);
@@ -47,8 +46,8 @@ export class Lightbulb extends Accessory {
     if (companionLightbulbName !== undefined) {
       this.accessoryName = companionLightbulbName;
       this.isCompanionLightbulb = true;
-      this.states.LightbulbState = (companionLightbulbOn !== undefined) ? companionLightbulbOn : this.states.LightbulbState;
       this.states.LightbulbBrightness = (companionLightbulbBrightness !== undefined) ? companionLightbulbBrightness : this.states.LightbulbBrightness;
+      this.states.LightbulbState = (this.states.LightbulbBrightness === 0) ? Lightbulb.OFF : Lightbulb.ON;
     }
 
     if (!this.isCompanionLightbulb) {
@@ -135,6 +134,11 @@ export class Lightbulb extends Accessory {
     this.states.LightbulbState = value as boolean;
 
     this.storeState();
+
+    if (this.states.LightbulbState === Lightbulb.OFF) {
+      this.states.LightbulbBrightness = 0;
+      this.service?.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
+    }
 
     this.log.info(`[${this.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
