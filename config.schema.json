@@ -525,8 +525,12 @@
                       "Night"
                     ]
                   }
+<<<<<<< Updated upstream
                 },
                 "defaultState": {
+=======
+                },                "defaultState": {
+>>>>>>> Stashed changes
                   "title": "Default State *",
                   "description": "Security System default state",
                   "type": "string",
