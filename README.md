@@ -839,6 +839,8 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 -   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
 
+**This issue has been fixed in the underlying framework and ability to order the accessories in the config popup will be available in an upcoming release.**
+
 #### Issues with HomeKit:
 
 -   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there and the companion switch allows you to interact with it, leading HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. You can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), however it will not affect the HomePod volume.
