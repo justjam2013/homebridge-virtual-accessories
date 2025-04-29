@@ -168,7 +168,7 @@ The [Synology DSM 7.2.2 Developer Guide](https://help.synology.com/developer-gui
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -199,7 +199,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -692,7 +692,7 @@ To add the speaker accessory in the Home app follow these steps:
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -776,7 +776,7 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -797,6 +797,14 @@ So here are creative ways people have used this plugin. Maybe they might inspire
     </a>
 </figure>
 
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## Mentions
 
 People using Virtual Accessories For Homebridge!
@@ -811,6 +819,14 @@ Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube
 You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
 
 He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
+
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
 
 ## Known Issues
 
@@ -837,6 +853,14 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 >
 > I have not done this myself, so please refer to the plugin documentation for any questions.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## What if I run into a problem?
 
 Check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki). Here you will find entries with instructions in the event of breaking updates. I will also post detailed  instructions for using certain functionalities, like the webhook service.
@@ -848,7 +872,7 @@ Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
