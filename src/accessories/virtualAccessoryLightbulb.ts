@@ -1,4 +1,5 @@
 /* eslint-disable brace-style */
+ 
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -26,8 +27,6 @@ export class Lightbulb extends Accessory {
 
   private type: string = Lightbulb.WHITE;
 
-  private isCompanionLightbulb: boolean = false;
-
   private states = {
     LightbulbState: Lightbulb.OFF,
     LightbulbBrightness: 0,
@@ -38,64 +37,45 @@ export class Lightbulb extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    companionLightbulbName?: string,
-    companionLightbulbBrightness?: number,
   ) {
     super(platform, accessory);
 
-    if (companionLightbulbName !== undefined) {
-      this.accessoryName = companionLightbulbName;
-      this.isCompanionLightbulb = true;
-      this.states.LightbulbBrightness = (companionLightbulbBrightness !== undefined) ? companionLightbulbBrightness : this.states.LightbulbBrightness;
-      this.states.LightbulbState = (this.states.LightbulbBrightness === 0) ? Lightbulb.OFF : Lightbulb.ON;
+    this.type = this.accessoryConfiguration.lightbulb.type;
+
+    // First configure the device based on the accessory details
+    this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
+    const brightness = this.accessoryConfiguration.lightbulb.brightness;
+    const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
+
+    this.states.LightbulbState = this.defaultState;
+    this.states.LightbulbBrightness = brightness;
+
+    if (this.type === Lightbulb.AMBIANCE) {
+      this.states.LightbulbColorTemperature = colorTemperatureKelvin;
     }
 
-    if (!this.isCompanionLightbulb) {
-      this.type = this.accessoryConfiguration.lightbulb.type;
+    // If the accessory is stateful retrieve stored state
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+      const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
+      const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
 
-      // First configure the device based on the accessory details
-      this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
-      const brightness = this.accessoryConfiguration.lightbulb.brightness;
-      const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
-
-      this.states.LightbulbState = this.defaultState;
-      this.states.LightbulbBrightness = brightness;
-
-      if (this.type === Lightbulb.AMBIANCE) {
-        this.states.LightbulbColorTemperature = colorTemperatureKelvin;
+      if (cachedState !== undefined) {
+        this.states.LightbulbState = cachedState;
+      }
+      if (cachedBrightness !== undefined) {
+        this.states.LightbulbBrightness = cachedBrightness;
       }
 
-      // If the accessory is stateful retrieve stored state
-      if (this.accessoryConfiguration.accessoryIsStateful) {
-        const accessoryState = this.loadAccessoryState(this.storagePath);
-        const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
-        const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
-        const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
-
-        if (cachedState !== undefined) {
-          this.states.LightbulbState = cachedState;
-        }
-        if (cachedBrightness !== undefined) {
-          this.states.LightbulbBrightness = cachedBrightness;
-        }
-
-        if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
-          this.states.LightbulbColorTemperature = cachedColorTemperature;
-        }
+      if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
+        this.states.LightbulbColorTemperature = cachedColorTemperature;
       }
     }
 
-    if (!this.isCompanionLightbulb) {
-      this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
 
-      this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-    }
-    else {
-      this.service = this.accessory.getService(companionLightbulbName!) ||
-                     this.accessory.addService(this.platform.Service.Lightbulb, companionLightbulbName, accessory.UUID + companionLightbulbName);
-
-      this.service.setCharacteristic(this.platform.Characteristic.Name, companionLightbulbName!);
-    }
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
@@ -133,12 +113,17 @@ export class Lightbulb extends Accessory {
   async setOn(value: CharacteristicValue) {
     this.states.LightbulbState = value as boolean;
 
-    this.storeState();
-
-    if (this.states.LightbulbState === Lightbulb.OFF) {
+    // If brightness is 0% or 100%, ON = 100%, OFF = 0%
+    if ((this.states.LightbulbState === Lightbulb.ON) && (this.states.LightbulbBrightness === 0)) {
+      this.states.LightbulbBrightness = 100;
+      this.service?.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
+    }
+    else if ((this.states.LightbulbState === Lightbulb.OFF) && (this.states.LightbulbBrightness === 100)) {
       this.states.LightbulbBrightness = 0;
       this.service?.updateCharacteristic(this.platform.Characteristic.Brightness, (this.states.LightbulbBrightness));
     }
+
+    this.storeState();
 
     this.log.info(`[${this.accessoryName}] Setting State: ${Lightbulb.getStateName(this.states.LightbulbState)}`);
   }
@@ -153,6 +138,12 @@ export class Lightbulb extends Accessory {
 
   async setBrightness(value: CharacteristicValue) {
     this.states.LightbulbBrightness = value as number;
+
+    // Setting the brightness to 0 turns lightbulb OFF
+    if ((this.states.LightbulbBrightness === 0) && (this.states.LightbulbState === Lightbulb.ON)) {
+      this.states.LightbulbState = Lightbulb.OFF;
+      this.service?.updateCharacteristic(this.platform.Characteristic.On, (this.states.LightbulbState));
+    }
 
     this.storeState();
 
