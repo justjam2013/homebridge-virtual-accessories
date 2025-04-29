@@ -108,17 +108,6 @@ export abstract class AccessoryFactory {
     return virtualAccessory;
   }
 
-  static createVirtualCompanionLightbulb(
-    platform: VirtualAccessoriesPlatform,
-    accessory: PlatformAccessory,
-    companionLightbulbName: string,
-    companionLightbulbOn: boolean,
-    companionLightbulbBrightness: number,
-  ): Lightbulb | undefined {
-    const virtualAccessory: Lightbulb = new Lightbulb(platform, accessory, companionLightbulbName, companionLightbulbOn, companionLightbulbBrightness);
-    return virtualAccessory;
-  }
-
   static createVirtualCompanionSensor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,

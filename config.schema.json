@@ -723,14 +723,6 @@
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
-                "isDynamic": {
-                  "title": "Timer is Dynamic",
-                  "description": "The timer duration can be changed in the UI",
-                  "type": "boolean",
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
-                  }
-                },
                 "isResettable": {
                   "title": "Timer is Resettable",
                   "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",

@@ -6,7 +6,6 @@ import { Accessory } from './virtualAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { AccessoryNotAllowedError, NotCompanionError } from '../errors.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';
-import { Lightbulb } from './virtualAccessoryLightbulb.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
@@ -29,16 +28,7 @@ export class Switch extends Accessory {
   private readonly timerDurationStorageKey: string = 'TimerDuration';
   private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
-  private readonly timerSliderSecondsStorageKey: string = 'TimerSliderSeconds';
-  private readonly timerSliderMinutesStorageKey: string = 'TimerSliderMinutes';
-  private readonly timerSliderHoursStorageKey: string = 'TimerSliderHours';
-  private readonly timerSliderDaysStorageKey: string = 'TimerSliderDays';
-
   private durationTimer?: Timer;
-  private timerSecondsSlider?: Lightbulb;
-  private timerMinutesSlider?: Lightbulb;
-  private timerHoursSlider?: Lightbulb;
-  private timerDaysSlider?: Lightbulb;
 
   private companionSensor?: Sensor;
 
@@ -89,10 +79,6 @@ export class Switch extends Accessory {
         if (this.accessoryConfiguration.switch.hasResetTimer) {
           this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
 
-          if (this.accessoryConfiguration.resetTimer.isDynamic) {
-            this.restoreTimerSliders(accessoryState);
-          }    
-
           const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
           const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
           const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
@@ -142,10 +128,6 @@ export class Switch extends Accessory {
      */
 
     if (!this.isCompanionSwitch) {
-      if (this.accessoryConfiguration.switch.hasResetTimer && this.accessoryConfiguration.resetTimer.isDynamic) {
-        this.setupResetTimerSliders();
-      }
-
       // Create sensor service
       if (this.accessoryConfiguration.switch.hasCompanionSensor) {
         this.setupCompanionSensor();
@@ -214,13 +196,6 @@ export class Switch extends Accessory {
       Object.assign(jsonState, { [this.timerStartTimeStorageKey]: timerStartTime });
       Object.assign(jsonState, { [this.timerDurationStorageKey]: timerDuration });
       Object.assign(jsonState, { [this.timerIsRunningStorageKey]: timerIsRunning });
-
-      if (this.accessoryConfiguration.resetTimer.isDynamic) {
-        Object.assign(jsonState, { [this.timerSliderSecondsStorageKey]: this.timerSecondsSlider?.getBrightness() });
-        Object.assign(jsonState, { [this.timerSliderMinutesStorageKey]: this.timerMinutesSlider?.getBrightness() });
-        Object.assign(jsonState, { [this.timerSliderHoursStorageKey]: this.timerHoursSlider?.getBrightness() });
-        Object.assign(jsonState, { [this.timerSliderDaysStorageKey]: this.timerDaysSlider?.getBrightness() });
-      }
     }
 
     const json = JSON.stringify(jsonState);
@@ -285,72 +260,6 @@ export class Switch extends Accessory {
       this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
     this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
-  }
-
-  private setupResetTimerSliders(): void {
-    // Order days, hours, minutes, seconds
-    this.timerDaysSlider = this.createSlider('Days', DurationConfiguration.DAYS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.days);
-    this.timerHoursSlider = this.createSlider('Hours', DurationConfiguration.HOURS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.hours);
-    this.timerMinutesSlider = this.createSlider('Minutes', DurationConfiguration.MINUTES_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.minutes);
-    this.timerSecondsSlider = this.createSlider('Seconds', DurationConfiguration.SECONDS_MAX_VALUE, this.accessoryConfiguration.resetTimer.duration.seconds);
-  }
-
-  private createSlider(
-    companionName: string,
-    maximumValue: number,
-    value: number,
-  ): Lightbulb | undefined {
-    const slider: Lightbulb | undefined = AccessoryFactory.createVirtualCompanionLightbulb(
-      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' ' + companionName, Lightbulb.ON, value);
-
-    slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
-      .setProps({
-        minValue: 0,
-        maxValue: maximumValue,
-        minStep: 1,
-        unit: null,
-      })
-      .onSet(Utils.debounce(async (value: number) => {
-        const maxValue: number | undefined = slider.service?.getCharacteristic(this.platform.Characteristic.Brightness).props.maxValue;
-        
-        const brightness = (maxValue !== undefined && value > maxValue) ? maxValue : value;
-
-        // call original handler
-        slider.setBrightness(brightness);
-
-        this.storeState();
-
-        // recalculate duration
-        const duration = new DurationConfiguration();
-        duration.seconds = (await this.timerSecondsSlider?.getBrightness())! as number;
-        duration.minutes = (await this.timerMinutesSlider?.getBrightness())! as number;
-        duration.hours = (await this.timerHoursSlider?.getBrightness())! as number;
-        duration.days = (await this.timerDaysSlider?.getBrightness())! as number;
-
-        this.durationTimer?.setDefaultDuration(this.convertDurationToSeconds(duration));
-      }));
-
-    return slider;
-  }
-
-  private restoreTimerSliders(
-    accessoryState: string,
-  ): void {
-    const cachedTimerSliderSeconds = accessoryState[this.timerSliderSecondsStorageKey] as number;
-    const cachedTimerSliderMinutes = accessoryState[this.timerSliderMinutesStorageKey] as number;
-    const cachedTimerSliderHours = accessoryState[this.timerSliderHoursStorageKey] as number;
-    const cachedTimerSliderDays = accessoryState[this.timerSliderDaysStorageKey] as number;
-
-    // Order days, hours, minutes, seconds
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Days: ${cachedTimerSliderDays}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Hours: ${cachedTimerSliderHours}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Minutes: ${cachedTimerSliderMinutes}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Slider Seconds: ${cachedTimerSliderSeconds}`);
-
-    this.timerSecondsSlider?.setBrightness(cachedTimerSliderSeconds);
-    this.timerMinutesSlider?.setBrightness(cachedTimerSliderMinutes);
-    this.timerHoursSlider?.setBrightness(cachedTimerSliderHours);
-    this.timerDaysSlider?.setBrightness(cachedTimerSliderDays);
   }
 
   private restoreRunningTimer(
