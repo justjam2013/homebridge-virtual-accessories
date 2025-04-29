@@ -1190,6 +1190,11 @@
             }
           ]
         }
+      },
+      "": {
+        "title": "Note: You can reorder accessories by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "type": "object",
+        "properties": {}
       }
     }
   },
