@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
@@ -87,7 +87,7 @@ export class Lock extends Accessory {
      */
 
     // Creating Lock Management service
-    const lockManagementServiceName = 'Lock Management';
+    const lockManagementServiceName = `${this.accessoryConfiguration.accessoryName} Management`;
     const lockManagementService = this.accessory.getService(lockManagementServiceName)
       || this.accessory.addService(this.platform.Service.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
 
@@ -97,7 +97,14 @@ export class Lock extends Accessory {
       .onGet(this.getVersion.bind(this));
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
       .onSet(this.setLockManagementAutoSecurityTimeout.bind(this))
-      .onGet(this.getLockManagementAutoSecurityTimeout.bind(this));
+      .onGet(this.getLockManagementAutoSecurityTimeout.bind(this))
+      .setProps({
+        minValue: 0,
+        maxValue: 3600,
+        minStep: 1,
+        unit: Units.SECONDS,
+      });
+    ;
   }
 
   // Handlers
