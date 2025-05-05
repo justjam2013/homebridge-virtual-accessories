@@ -22,6 +22,11 @@
 
 ## <!-- Thin separator line -->
 
+> [!CAUTION]
+> Version 3.3.1 breaks the Lock accessory. You will have to delete existing Lock accessories and recreate them.
+
+## <!-- Thin separator line -->
+
 <details>
   <summary>
     
@@ -110,7 +115,7 @@ Currently, these are the implemented virtual accessories:
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -168,7 +173,7 @@ The [Synology DSM 7.2.2 Developer Guide](https://help.synology.com/developer-gui
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -199,7 +204,7 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -692,7 +697,7 @@ To add the speaker accessory in the Home app follow these steps:
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -776,7 +781,7 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
@@ -797,6 +802,14 @@ So here are creative ways people have used this plugin. Maybe they might inspire
     </a>
 </figure>
 
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## Mentions
 
 People using Virtual Accessories For Homebridge!
@@ -812,6 +825,14 @@ You can catch a glimpse in the [Introduction to Automations in Apple Home](https
 
 He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
 
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## Known Issues
 
 #### Issues with Homebridge UI:
@@ -822,6 +843,8 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 #### Issues with underlying frameworks:
 
 -   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
+
+**This issue has been fixed in the underlying framework and ability to order the accessories in the config popup will be available in an upcoming release.**
 
 #### Issues with HomeKit:
 
@@ -837,6 +860,14 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 >
 > I have not done this myself, so please refer to the plugin documentation for any questions.
 
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## What if I run into a problem?
 
 Check the [Wiki](https://github.com/justjam2013/homebridge-virtual-accessories/wiki). Here you will find entries with instructions in the event of breaking updates. I will also post detailed  instructions for using certain functionalities, like the webhook service.
@@ -848,7 +879,7 @@ Please open a [Feature Request issue](https://github.com/justjam2013/homebridge-
 <span align="right">
   <h6>
     
-  [Back to top](https://github.com/justjam2013/homebridge-virtual-accessories)
+  [Back to top](#top)
 
   </h6>
 </span>
