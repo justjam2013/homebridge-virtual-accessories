@@ -27,16 +27,21 @@ export class Lightbulb extends Accessory {
 
   private type: string = Lightbulb.WHITE;
 
+  private isCompanionLightbulb: boolean = false;
+
   private states = {
     LightbulbState: Lightbulb.OFF,
     LightbulbBrightness: 0,
     LightbulbColorTemperature: 2700,  // Kelvin
-    // TODO: Add Brightness, Hue, Saturation
+    // TODO: Add Hue, Saturation
   };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    companionLightbulbName?: string,
+    companionLightbulbOn?: boolean,
+    companionLightbulbBrightness?: number,
   ) {
     super(platform, accessory);
 
