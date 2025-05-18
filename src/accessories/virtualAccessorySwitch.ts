@@ -343,6 +343,9 @@ export abstract class AbstractSwitch extends Accessory {
     const n = maximumValue - minimumValue;
     const validValues = new Array(n).fill(null).map((_, i) => i + minimumValue);
 
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Maximum value: '${maximumValue}', minimum value: '${minimumValue}'`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Valid values: [${validValues.toString()}]`);
+
     slider?.service?.getCharacteristic(this.platform.Characteristic.Brightness)
       .setProps({
         minValue: minimumValue,
