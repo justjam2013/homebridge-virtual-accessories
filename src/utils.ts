@@ -142,4 +142,8 @@ export class Utils {
       }, delay);
     };
   }
+
+  static async delay(millis: number) {
+    return new Promise(resolve => setTimeout(resolve, millis));
+  }
 }

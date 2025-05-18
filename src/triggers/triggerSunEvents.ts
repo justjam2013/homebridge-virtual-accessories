@@ -118,36 +118,37 @@ export class SunEventsTrigger extends Trigger {
     let dataResponse: string | undefined;
     let gaveUp: boolean = false;
 
-    try {
-      let attempts: number = 0;
-      let dataFetchResponse: globalThis.Response;
-      do {
+    let attempts: number = 0;
+    let dataFetchResponse: globalThis.Response | undefined;
+    do {
+      try {
         dataFetchResponse = await fetch(request);
-        if (!dataFetchResponse.ok) {
-          this.log.error(`[${this.sensorConfig.accessoryName}] Error fetching sunrise/sunset data. Response status: ${dataFetchResponse.status}`);
-          attempts++;
-
-          const baseErrorMsg: string = `Failed ${attempts} of ${maxAttempts} attempts.`;
-
-          if (attempts === maxAttempts) {
-            gaveUp = true;
-            this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Giving up`);
-          } else {
-            const backoffMinutes: number = (attempts * waitMinutes);
-            this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
-            await new Promise(resolve => setTimeout(resolve, backoffMinutes * millis));
-          }
-        }
-      } while (!dataFetchResponse.ok && attempts < maxAttempts);
-
-      if (!gaveUp) {
-        dataResponse = await dataFetchResponse.text();
-        this.log.debug(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
-
-        response = this.desrializeSunEventsResponse(dataResponse);
+      } catch (error) {
+        this.log.error(`[${this.sensorConfig.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
       }
-    } catch (error) {
-      this.log.error(`[${this.sensorConfig.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
+
+      if (dataFetchResponse === undefined || !dataFetchResponse.ok) {
+        this.log.error(`[${this.sensorConfig.accessoryName}] Error fetching sunrise/sunset data. Response status: ${dataFetchResponse?.status}`);
+        attempts++;
+
+        const baseErrorMsg: string = `Failed ${attempts} of ${maxAttempts} attempts.`;
+
+        if (attempts === maxAttempts) {
+          gaveUp = true;
+          this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Giving up`);
+        } else {
+          const backoffMinutes: number = (attempts * waitMinutes);
+          this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
+          await new Promise(resolve => setTimeout(resolve, backoffMinutes * millis));
+        }
+      }
+    } while ((dataFetchResponse === undefined || !dataFetchResponse.ok) && attempts < maxAttempts);
+
+    if (!gaveUp) {
+      dataResponse = await dataFetchResponse!.text();
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
+
+      response = this.desrializeSunEventsResponse(dataResponse);
     }
 
     return response;
