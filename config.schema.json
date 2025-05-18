@@ -67,7 +67,7 @@
       "devices": {
         "title": "Accessories",
         "type": "array",
-        "orderable": false,
+        "orderable": true,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
           "title": " {{ value.accessoryName || 'New Accessory' }}",
@@ -1190,6 +1190,12 @@
             }
           ]
         }
+      },
+      "": {
+        "title": " ",
+        "description": "Note: You can reorder accessories by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "type": "object",
+        "properties": {}
       }
     }
   },
