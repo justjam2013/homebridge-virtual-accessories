@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
  
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { Units, type CharacteristicValue, type PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
@@ -91,6 +91,21 @@ export class Lightbulb extends Accessory {
     this.service.getCharacteristic(this.platform.Characteristic.Brightness)
       .onSet(Utils.debounce(this.setBrightness.bind(this)))
       .onGet(this.getBrightness.bind(this));
+
+    if (this.accessoryConfiguration.accessoryName === 'Slider Test') {
+      this.log.info(`[${this.accessoryName}] Testing Lightbulb Sliders`);
+
+      const validValues = new Array(24).fill(null).map((_, i) => i);
+      this.service.getCharacteristic(this.platform.Characteristic.Brightness)
+        .setProps({
+          minValue: 0,
+          maxValue: 23,
+          minStep: 1,
+          validValueRanges: [0, 23],
+          validValues: validValues,
+          unit: Units.SECONDS,
+        });
+    }
 
     switch(this.type) {
     case Lightbulb.AMBIANCE:
