@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> Version 3.3.1 breaks the Lock accessory. If you are updating from a previous version to v3.3.1 or later, you will have to delete existing Lock accessories and recreate them.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
