@@ -842,9 +842,7 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 #### Issues with underlying frameworks:
 
--   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
-
-**This issue has been fixed in the underlying framework and ability to order the accessories in the config popup will be available in an upcoming release.**
+-   None presently known.
 
 #### Issues with HomeKit:
 
