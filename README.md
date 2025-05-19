@@ -837,7 +837,7 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 #### Issues with underlying frameworks:
 
--   None presently known.
+-   There is an issue with the drag-and-drop reordering, where the form layout can get degraded. A bug report has been opened on the framework repo.
 
 #### Issues with HomeKit:
 
