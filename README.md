@@ -62,6 +62,7 @@
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
+    - [Update Garage Door obstruction detected](#update-garage-door-obstruction-detected)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
