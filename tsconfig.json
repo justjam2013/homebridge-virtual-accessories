@@ -17,7 +17,8 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "resolveJsonModule": true
   },
   "include": [
     "eslint.config.js",
