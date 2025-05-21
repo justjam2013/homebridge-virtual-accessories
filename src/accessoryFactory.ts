@@ -83,6 +83,9 @@ export abstract class AccessoryFactory {
     case 'switch':
       virtualAccessory = new Switch(platform, accessory);
       break;
+    // case 'television':
+    //   virtualAccessory = new Television(platform, accessory);
+    //   break;
     case 'valve':
       virtualAccessory = new Valve(platform, accessory);
       break;
