@@ -51,3 +51,23 @@ export class InvalidSensorValueType extends Error {
     this.message = message;
   }
 }
+
+export class ObstructionValueUpdateNotAllowed extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}
+
+export class InvalidObstructionValueType extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}

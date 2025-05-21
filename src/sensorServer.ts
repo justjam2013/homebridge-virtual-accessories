@@ -3,6 +3,7 @@
 import { Server } from 'http';
 import { Accessory } from './accessories/virtualAccessory.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
+import { UpdatableObstruction } from './updatableObstruction.js';
 import { UpdatableSensor } from './updatableSensor.js';
 import { VirtualAccessoriesLogger } from './virtualLogger.js';
 
@@ -73,6 +74,19 @@ export class SensorUpdateServer {
         this.processRequest(accessoryId, 'heatercooler', Number(temperature), response);
       }
     });
+
+    const routeObstruction: string = '/obstruction';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeObstruction}`);
+    this.server.post(routeObstruction, (request: Request, response: Response) => {
+      const accessoryId: string = request.body.id;
+      const obstruction: string = request.body.value;
+
+      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+
+      if (this.accessoryIdIsValid(accessoryId, response) && this.obstructionIsValid(obstruction, response)) {
+        this.processRequest(accessoryId, 'heatercooler', Boolean(obstruction), response);
+      }
+    });
   }
 
   start() {
@@ -93,18 +107,25 @@ export class SensorUpdateServer {
     accessories: Accessory[],
   ) {
     accessories.forEach((accessory) => {
-      if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-        this.addAccessory(accessory);
-      }
+      this.addAccessory(accessory);
     });
   }
 
   addAccessory(
     accessory: Accessory,
   ) {
-    this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-
-    this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+    if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
+      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+    }
+    else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
+      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+    }
+    else {
+      // eslint-disable-next-line max-len
+      this.log.info(`[${this.serverName}] Invalid accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+    }
   }
 
   removeAccessory(
@@ -173,17 +194,36 @@ export class SensorUpdateServer {
     return true;
   }
 
+  private obstructionIsValid(
+    obstruction: string,
+    response: Response,
+  ): boolean {
+    if (obstruction !== 'true' && obstruction !== 'false') {
+      this.log.error(`[${this.serverName}] Bad Request: Invalid obstruction value ${obstruction}`);
+      response.status(HttpResponse.BadRequest).send(`Invalid obstruction value: ${obstruction}`);
+
+      return false;
+    }
+
+    return true;
+  }
+
   private processRequest(
     accessoryId: string,
     accessoryType: string,
-    value: number,
+    value: number | boolean,
     response: Response,
   ) {
     const accessory: Accessory | undefined = this.accessories.get(accessoryId);
 
     if (accessory !== undefined && accessory.accessoryConfiguration.accessoryType === accessoryType) {
       try {
-        (<UpdatableSensor><unknown>accessory).updateSensor(value, accessoryId);
+        if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
+          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
+        }
+        else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
+          (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
+        }
 
         this.log.debug(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
         response.status(HttpResponse.Ok).send(`Set accessory with id: ${accessoryId} to value: ${value}`);
