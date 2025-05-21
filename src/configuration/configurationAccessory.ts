@@ -119,10 +119,9 @@ export class AccessoryConfiguration {
       this.isValidId()
     );
     const isValidAccessoryName: boolean = (this.accessoryName !== undefined);
-    const isValidAccessoryType: boolean = (
-      (this.accessoryType !== undefined) &&
-      this.isValidAccessory()
-    );
+    const isValidAccessoryType: boolean = (this.accessoryType !== undefined);
+
+    const isValidAccessory: boolean = (this.isValidAccessory());
 
     // Store fields failing validation
     if (!isValidAccessoryID) this.errorFields.push('accessoryID');
@@ -132,7 +131,8 @@ export class AccessoryConfiguration {
     return [
       (isValidAccessoryID &&
         isValidAccessoryName &&
-        isValidAccessoryType),
+        isValidAccessoryType &&
+        isValidAccessory),
       this.errorFields,
     ];
   }
