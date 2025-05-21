@@ -13,6 +13,10 @@ import { VirtualAccessoriesLogger } from './virtualLogger.js';
 import * as path from 'path';
 import fs from 'fs';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore <-- TODO remove this line, unless that gives an error
+import packageInfo from '../package.json' with { type: 'json' };
+
 /**
  * HomebridgePlatform
  */
@@ -26,6 +30,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
+
+  public version = packageInfo.version;
 
   constructor(
     log: Logging,
@@ -53,6 +59,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       log.debug('Executing didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
       this.discoverDevices();
+
+      this.log.info(`Running Virtual Accessories For Homebridge v${this.version}`);
     });
 
     this.api.on('shutdown', () => {
