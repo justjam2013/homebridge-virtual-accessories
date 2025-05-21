@@ -740,7 +740,7 @@ The target URL (replace hostname and port per your setup) will specify the `humi
 http://localhost:60221/humidity
 ```
 
-The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+The raw json payload will contain the accessory id of the Humidifier/Dehumidifier accessory and the humidity percentage value:
 
 ```json
 {
@@ -761,7 +761,7 @@ The target URL (replace hostname and port per your setup) will specify the `temp
 http://localhost:60221/temperature
 ```
 
-The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+The raw json payload will contain the accessory id of the Heater/Cooler accessory and the temperature value:
 
 ```json
 {
@@ -772,6 +772,25 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
+
+### Update Garage Door obstruction detected
+
+To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+
+```
+http://localhost:60221/obstruction
+```
+
+The raw json payload will contain the accessory id of the Garage Door accessory and the obstruction value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
 
 <span align="right">
   <h6>
