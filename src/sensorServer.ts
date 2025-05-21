@@ -79,12 +79,12 @@ export class SensorUpdateServer {
     this.log.info(`[${this.serverName}] Setting up route: ${routeObstruction}`);
     this.server.post(routeObstruction, (request: Request, response: Response) => {
       const accessoryId: string = request.body.id;
-      const obstruction: string = request.body.value;
+      const obstruction: boolean = request.body.value;
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
       if (this.accessoryIdIsValid(accessoryId, response) && this.obstructionIsValid(obstruction, response)) {
-        this.processRequest(accessoryId, 'heatercooler', Boolean(obstruction), response);
+        this.processRequest(accessoryId, 'garagedoor', obstruction, response);
       }
     });
   }
@@ -124,7 +124,7 @@ export class SensorUpdateServer {
     }
     else {
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.serverName}] Invalid accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+      this.log.debug(`[${this.serverName}] Skipping accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
     }
   }
 
@@ -195,10 +195,10 @@ export class SensorUpdateServer {
   }
 
   private obstructionIsValid(
-    obstruction: string,
+    obstruction: boolean,
     response: Response,
   ): boolean {
-    if (obstruction !== 'true' && obstruction !== 'false') {
+    if (typeof obstruction !== 'boolean') {
       this.log.error(`[${this.serverName}] Bad Request: Invalid obstruction value ${obstruction}`);
       response.status(HttpResponse.BadRequest).send(`Invalid obstruction value: ${obstruction}`);
 
