@@ -397,7 +397,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
   // Updatable Sensor interface
 
-  updateSensor(value: boolean | number, accessoryId: string):void {
+  updateSensor(value: number, accessoryId: string):void {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}%`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
