@@ -1,21 +1,11 @@
 /* eslint-disable curly */
 
-import { Type } from 'typeserializer';
-
-/**
- * 
- */
-export class TelevisionInput {
-  name!: string;
-}
-
 /**
  * 
  */
 export class TelevisionConfiguration {
 
-  @Type(TelevisionInput)
-    inputs!: TelevisionInput[];
+  inputs!: string[];
 
   static prefix: string = 'television';
 
@@ -28,13 +18,13 @@ export class TelevisionConfiguration {
     );
 
     let isValidInputNames: boolean = true;
-    const inputNames: string[] = [];
+    const namesSet: Set<string> = new Set();
     this.inputs.forEach(input => {
       isValidInputNames &&=
-        input.name.length > 0 &&
-        !inputNames.includes(input.name);
+        input.length > 0 &&
+        !namesSet.has(input);
 
-      inputNames.push(input.name);
+      namesSet.add(input);
     });
 
     // Store fields failing validation

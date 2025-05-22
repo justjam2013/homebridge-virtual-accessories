@@ -589,28 +589,16 @@
               "title": "Television",
               "type": "object",
               "properties": {
-                "name": {
-                  "title": "Inputs",
-                  "type": "null"
-                },
                 "inputs": {
                   "title": " ",
                   "type": "array",
                   "minItems": 1,
                   "orderable": true,
                   "items": {
-                    "title": "{{ value.input || ' Input ' + $index }}",
-                    "type": "object",
-                    "expandable": true,
-                    "expanded": false,
-                    "properties": {
-                      "input": {
-                        "title": " ",
-                        "type": "string",
-                        "minLength": 1,
-                        "placeholder": "HDMI"
-                      }
-                    }
+                    "title": "{{ ' Input ' + $index }}",
+                    "type": "string",
+                    "minLength": 1,
+                    "placeholder": "HDMI"
                   }
                 }
               },
