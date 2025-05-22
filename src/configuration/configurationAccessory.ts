@@ -180,6 +180,7 @@ export class AccessoryConfiguration {
     case 'switch':
       return this.isValidSwitch();
     case 'television':
+      this.category = Categories.TELEVISION;
       return this.isValidTelevision();
     case 'valve':
       return this.isValidValve();
