@@ -369,21 +369,23 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     if (currentStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
+      service.getCharacteristic(CurrentHumidifierDehumidifierState)
         .setProps({
           validValues: Array.from(currentStateValues),
         });
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHumidifierDehumidifierState).props)}`);
     }
     if (targetStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
+      service.getCharacteristic(TargetHumidifierDehumidifierState)
         .setProps({
           validValues: Array.from(targetStateValues),
         });
-    }
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Props: ${JSON.stringify(service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState).props)}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHumidifierDehumidifierState).props)}`);
+    }
   }
 
   private getCurrentStateLabels(values: Set<number>): string[] {

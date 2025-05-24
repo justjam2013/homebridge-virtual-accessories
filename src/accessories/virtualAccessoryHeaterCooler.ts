@@ -421,6 +421,8 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
         .setProps({
           validValues: Array.from(currentStateValues),
         });
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHeaterCoolerState).props)}`);
     }
     if (targetStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
@@ -429,9 +431,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
         .setProps({
           validValues: Array.from(targetStateValues),
         });
-    }
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Props: ${JSON.stringify(service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState).props)}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHeaterCoolerState).props)}`);
+    }
   }
 
   private getCurrentStateLabels(values: Set<number>): string[] {
