@@ -104,6 +104,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     // get the HeaterCooler service if it exists, otherwise create a new LightBulb service
     this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
+    // These characteristics will be added back as needed
+    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature));
+    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature));
 
     this.setHeaterCoolerServiceProperties(this.service!);
 
@@ -132,13 +135,15 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
       .onGet(this.getCurrentTemperature.bind(this));
 
     if (this.deviceCools()) {
-      this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
+      // Characteristic was removed when adding the Service
+      this.service.addCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
         .onSet(this.setCoolingThresholdTemperature.bind(this))
         .onGet(this.getCoolingThresholdTemperature.bind(this));
     }
 
     if (this.deviceHeats()) {
-      this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
+      // Characteristic was removed when adding the Service
+      this.service.addCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
         .onSet(this.setHeatingThresholdTemperature.bind(this))
         .onGet(this.getHeatingThresholdTemperature.bind(this));
     }
@@ -146,6 +151,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
       .onSet(this.setTemperatureDisplayUnits.bind(this))
       .onGet(this.getTemperatureDisplayUnits.bind(this));
+
+    const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
   }
 
   // Handlers
@@ -369,61 +377,64 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     return unitsName;
   }
 
+  /**
+   * Ensure all the property values are set, then remove as required
+   */
   private setHeaterCoolerServiceProperties(
     service: Service,
   ) {
-    const currentStateValues: number[] = [];
-    const targetStateValues: number[] = [];
+    const CurrentHeaterCoolerState = this.platform.Characteristic.CurrentHeaterCoolerState;
+    const TargetHeaterCoolerState = this.platform.Characteristic.TargetHeaterCoolerState;
+
+    const currentStateValues: Set<number> = new Set([
+      CurrentHeaterCoolerState.INACTIVE,
+      CurrentHeaterCoolerState.IDLE,
+      CurrentHeaterCoolerState.CurrentHeaterCoolerState.HEATING,
+      CurrentHeaterCoolerState.CurrentHeaterCoolerState.COOLING,
+    ]);
+    const targetStateValues: Set<number> = new Set([
+      TargetHeaterCoolerState.AUTO,
+      TargetHeaterCoolerState.HEAT,
+      TargetHeaterCoolerState.COOL,
+    ]);
 
     if (this.isHeaterOnly()) {
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.IDLE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.HEATING);
-
-      // AUTOMATIC and HUMIDIFY
-      targetStateValues.push(this.platform.Characteristic.TargetHeaterCoolerState.AUTO);
-      targetStateValues.push(this.platform.Characteristic.TargetHeaterCoolerState.HEAT);
+      currentStateValues.delete(CurrentHeaterCoolerState.COOLING);
+      targetStateValues.delete(TargetHeaterCoolerState.COOL);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater`);
     }
     else if (this.isCoolerOnly()) {
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.IDLE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHeaterCoolerState.COOLING);
-
-      // AUTOMATIC and DEHUMIDIFY
-      targetStateValues.push(this.platform.Characteristic.TargetHeaterCoolerState.AUTO);
-      targetStateValues.push(this.platform.Characteristic.TargetHeaterCoolerState.HEAT);
+      currentStateValues.delete(CurrentHeaterCoolerState.HEATING);
+      targetStateValues.delete(TargetHeaterCoolerState.HEAT);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Cooler`);
     }
     else {
-      // Is both a heater and cooler - leave default service properties
-
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater/Cooler`);
     }
 
-    if (currentStateValues.length > 0) {
+    if (currentStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState)
+      service.getCharacteristic(CurrentHeaterCoolerState)
         .setProps({
-          validValues: currentStateValues,
+          validValues: Array.from(currentStateValues),
         });
     }
-    if (targetStateValues.length > 0) {
+    if (targetStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState)
+      service.getCharacteristic(TargetHeaterCoolerState)
         .setProps({
-          validValues: targetStateValues,
+          validValues: Array.from(targetStateValues),
         });
     }
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Props: ${JSON.stringify(service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState).props)}`);
   }
 
-  private getCurrentStateLabels(values: number[]): string[] {
+  private getCurrentStateLabels(values: Set<number>): string[] {
     const labels: string[] = [];
 
     values.forEach(value => {
@@ -433,7 +444,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     return labels;
   }
 
-  private getTargetStateLabels(values: number[]): string[] {
+  private getTargetStateLabels(values: Set<number>): string[] {
     const labels: string[] = [];
 
     values.forEach(value => {

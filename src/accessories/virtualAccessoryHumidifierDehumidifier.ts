@@ -72,13 +72,13 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       if (cachedTargetState !== undefined) {
         this.states.HumidifierDehumidifierTargetState = cachedTargetState;
       }
-      if (this.deviceDehumidifies()) {
+      if (this.dehumidifies()) {
         const cachedDehumidifierThreshold: number = accessoryState[this.dehumidifierThresholdStorageKey] as number;
         if (cachedDehumidifierThreshold !== undefined) {
           this.states.DehumidifierThreshold = cachedDehumidifierThreshold;
         }
       }
-      if (this.deviceHumidifies()) {
+      if (this.humidifies()) {
         const cachedHumidifierThreshold: number = accessoryState[this.humidifierThresholdStorageKey] as number;
         if (cachedHumidifierThreshold !== undefined) {
           this.states.HumidifierThreshold = cachedHumidifierThreshold;
@@ -90,6 +90,9 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
     // get the HumidifierDehumidifier service if it exists, otherwise create a new LightBulb service
     this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
+    // These characteristics will be added back as needed
+    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold));
+    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold));
 
     this.setHumidifierDehumidifierServiceProperties(this.service!);
 
@@ -117,17 +120,22 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
       .onGet(this.getCurrentRelativeHumidity.bind(this));
 
-    if (this.deviceDehumidifies()) {
-      this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
+    if (this.dehumidifies()) {
+      // Characteristic was removed when adding the Service
+      this.service.addCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
         .onSet(this.setRelativeHumidityDehumidifierThreshold.bind(this))
         .onGet(this.getRelativeHumidityDehumidifierThreshold.bind(this));
     }
 
-    if (this.deviceHumidifies()) {
-      this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
+    if (this.humidifies()) {
+      // Characteristic was removed when adding the Service
+      this.service.addCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
         .onSet(this.setRelativeHumidityHumidifierThreshold.bind(this))
         .onGet(this.getRelativeHumidityHumidifierThreshold.bind(this));
     }
+
+    const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
   }
 
   // Handlers
@@ -228,20 +236,20 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     return HumidifierDehumidifier.ACCESSORY_TYPE_NAME;
   }
 
-  private isHumidifierOnly(): boolean {
-    return ['humidifier'].includes(this.deviceType);
+  private isHumidifier(): boolean {
+    return this.deviceType === 'humidifier';
   }
 
-  private isDehumidifierOnly(): boolean {
-    return ['dehumidifier'].includes(this.deviceType);
+  private isDehumidifier(): boolean {
+    return this.deviceType === 'dehumidifier';
   }
 
-  private deviceHumidifies(): boolean {
-    return ['auto', 'humidifier'].includes(this.deviceType);
+  private humidifies(): boolean {
+    return this.deviceType === 'auto' || this.deviceType === 'humidifier';
   }
 
-  private deviceDehumidifies(): boolean {
-    return ['auto', 'dehumidifier'].includes(this.deviceType);
+  private dehumidifies(): boolean {
+    return this.deviceType === 'auto' || this.deviceType === 'dehumidifier';
   }
 
   private setDeviceOperationalCondition() {
@@ -257,12 +265,12 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       }
       else {  // (this.states.HumidifierDehumidifierTargetState === HumidifierDehumidifier.AUTOMATIC)
         if (this.states.CurrentRelativeHumidity < this.states.HumidifierThreshold) {
-          if (this.deviceHumidifies()) {
+          if (this.humidifies()) {
             this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
           }
         }
         else if (this.states.CurrentRelativeHumidity > this.states.DehumidifierThreshold) {
-          if (this.deviceDehumidifies()) {
+          if (this.dehumidifies()) {
             this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
           }
         }
@@ -321,61 +329,64 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     return stateName;
   }
 
+  /**
+   * Ensure all the property values are set, then remove as required
+   */
   private setHumidifierDehumidifierServiceProperties(
     service: Service,
   ) {
-    const currentStateValues: number[] = [];
-    const targetStateValues: number[] = [];
+    const CurrentHumidifierDehumidifierState = this.platform.Characteristic.CurrentHumidifierDehumidifierState;
+    const TargetHumidifierDehumidifierState = this.platform.Characteristic.TargetHumidifierDehumidifierState;
 
-    if (this.isHumidifierOnly()) {
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.INACTIVE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.IDLE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING);
+    const currentStateValues: Set<number> = new Set([
+      CurrentHumidifierDehumidifierState.INACTIVE,
+      CurrentHumidifierDehumidifierState.IDLE,
+      CurrentHumidifierDehumidifierState.HUMIDIFYING,
+      CurrentHumidifierDehumidifierState.DEHUMIDIFYING,
+    ]);
+    const targetStateValues: Set<number> = new Set([
+      TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER,
+      TargetHumidifierDehumidifierState.HUMIDIFIER,
+      TargetHumidifierDehumidifierState.DEHUMIDIFIER,
+    ]);
 
-      // AUTOMATIC and HUMIDIFY
-      targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
-      targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER);
+    if (this.isHumidifier()) {
+      currentStateValues.delete(CurrentHumidifierDehumidifierState.DEHUMIDIFYING);
+      targetStateValues.delete(TargetHumidifierDehumidifierState.DEHUMIDIFIER);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier`);
     }
-    else if (this.isDehumidifierOnly()) {
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.INACTIVE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.IDLE);
-      currentStateValues.push(this.platform.Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING);
-
-      // AUTOMATIC and DEHUMIDIFY
-      targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
-      targetStateValues.push(this.platform.Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER);
+    else if (this.isDehumidifier()) {
+      currentStateValues.delete(CurrentHumidifierDehumidifierState.HUMIDIFYING);
+      targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Dehumidifier`);
     }
     else {
-      // Is both a humidifier and dehumidifier - leave default service properties
-
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier/Dehumidifier`);
     }
 
-    if (currentStateValues.length > 0) {
+    if (currentStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
+      service.getCharacteristic(CurrentHumidifierDehumidifierState)
         .setProps({
-          validValues: currentStateValues,
+          validValues: Array.from(currentStateValues),
         });
     }
-    if (targetStateValues.length > 0) {
+    if (targetStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
 
-      service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
+      service.getCharacteristic(TargetHumidifierDehumidifierState)
         .setProps({
-          validValues: targetStateValues,
+          validValues: Array.from(targetStateValues),
         });
     }
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Props: ${JSON.stringify(service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState).props)}`);
   }
 
-  private getCurrentStateLabels(values: number[]): string[] {
+  private getCurrentStateLabels(values: Set<number>): string[] {
     const labels: string[] = [];
 
     values.forEach(value => {
@@ -385,7 +396,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     return labels;
   }
 
-  private getTargetStateLabels(values: number[]): string[] {
+  private getTargetStateLabels(values: Set<number>): string[] {
     const labels: string[] = [];
 
     values.forEach(value => {
