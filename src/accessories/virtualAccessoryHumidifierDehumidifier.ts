@@ -135,7 +135,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
     }
 
     const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
   }
 
   // Handlers

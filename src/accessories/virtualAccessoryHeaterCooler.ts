@@ -153,7 +153,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
       .onGet(this.getTemperatureDisplayUnits.bind(this));
 
     const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
   }
 
   // Handlers
