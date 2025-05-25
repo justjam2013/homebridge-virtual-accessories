@@ -852,8 +852,7 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 #### Issues with Homebridge UI:
 
--   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
--   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
+-   None currently.
 
 #### Issues with underlying frameworks:
 
