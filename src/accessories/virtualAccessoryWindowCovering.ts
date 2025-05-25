@@ -90,12 +90,10 @@ export class WindowCovering extends Accessory {
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${WindowCovering.getStateName(this.states.WindowCoveringTargetPosition)}`);
 
-    // PositionState DECREASING/INCREASING
-    this.states.WindowCoveringPositionState = (this.states.WindowCoveringTargetPosition === WindowCovering.OPEN) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
+    this.states.WindowCoveringPositionState = (this.states.WindowCoveringTargetPosition > this.states.WindowCoveringCurrentPosition) ? WindowCovering.INCREASING : WindowCovering.DECREASING;
     this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.WindowCoveringPositionState));
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${WindowCovering.getPositionName(this.states.WindowCoveringPositionState)}`);
 
-    // PositionState STOPPED
     const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
     const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
     this.transitionTimerId = setTimeout(() => {
