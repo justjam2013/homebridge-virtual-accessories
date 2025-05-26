@@ -19,6 +19,8 @@ export class WindowCovering extends Accessory {
   static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;  -> OPENING
   static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;     -> OPEN or CLOSED
 
+  private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
+
   private readonly stateStorageKey: string = 'WindowCoveringPosition';
 
   private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -95,7 +97,10 @@ export class WindowCovering extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${WindowCovering.getPositionName(this.states.WindowCoveringPositionState)}`);
 
     const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
-    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
+    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : WindowCovering.DEFAULT_TIMEOUT_SECS) * 1000;
+
+    const proportionalTransitionDelayMillis = transitionDelayMillis / 100 * Math.abs(this.states.WindowCoveringTargetPosition - this.states.WindowCoveringCurrentPosition);
+
     this.transitionTimerId = setTimeout(() => {
       // Reset timer
       clearTimeout(this.transitionTimerId);
@@ -110,7 +115,7 @@ export class WindowCovering extends Accessory {
       this.storeState();
 
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${WindowCovering.getStateName(this.states.WindowCoveringCurrentPosition)}`);
-    }, transitionDelayMillis);
+    }, proportionalTransitionDelayMillis);
   }
 
   async getTargetPosition(): Promise<CharacteristicValue> {
