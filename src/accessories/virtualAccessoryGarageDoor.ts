@@ -22,6 +22,8 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING;
   static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED;
 
+  private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
+
   private readonly stateStorageKey: string = 'GarageDoorState';
 
   private transitionTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -104,7 +106,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     // CurrentDoorState CLOSED/OPEN with 3 second delay
     const transitionDuration = this.accessoryConfiguration.garageDoor.transitionDuration;
-    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : 3) * 1000;
+    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : GarageDoor.DEFAULT_TIMEOUT_SECS) * 1000;
 
     // Reset timer, if running
     clearTimeout(this.transitionTimerId);

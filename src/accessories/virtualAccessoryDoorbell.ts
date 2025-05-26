@@ -18,6 +18,8 @@ export class Doorbell extends Accessory {
   static readonly DOUBLE_PRESS: number = 1;  // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS
   static readonly LONG_PRESS: number = 2;    // Characteristic.ProgrammableSwitchEvent.LONG_PRESS;
 
+  private static readonly COMPANION_TIMEOUT_SECS: number = 1000;
+
   private companionSensorResetTimerId: ReturnType<typeof setTimeout> | undefined;
 
   private states = {
@@ -97,7 +99,7 @@ export class Doorbell extends Accessory {
       // Reset switch after timer delay
       this.companionSensorResetTimerId = setTimeout(() => {
         this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, Switch.OFF);
-      }, 1000);
+      }, Doorbell.COMPANION_TIMEOUT_SECS);
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
     }
 
