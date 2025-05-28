@@ -14,6 +14,7 @@ import { SecuritySystemConfiguration } from './accessories/configurationSecurity
 import { SensorConfiguration } from './configurationSensor.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
+import { TelevisionConfiguration } from './accessories/configurationTelevision.js';
 import { TimerConfiguration } from './configurationTimer.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
@@ -81,6 +82,10 @@ export class AccessoryConfiguration {
   // Switch
   @Type(SwitchConfiguration)
     switch!: SwitchConfiguration;
+
+  // Television
+  @Type(TelevisionConfiguration)
+    television!: TelevisionConfiguration;
 
   // Valve
   @Type(ValveConfiguration)
@@ -174,6 +179,9 @@ export class AccessoryConfiguration {
       return this.isValidSpeaker();
     case 'switch':
       return this.isValidSwitch();
+    case 'television':
+      this.category = Categories.TELEVISION;
+      return this.isValidTelevision();
     case 'valve':
       return this.isValidValve();
     case 'windowcovering':
@@ -380,6 +388,21 @@ export class AccessoryConfiguration {
       isValidCompanionSensor
     );
   };
+
+  private isValidTelevision(): boolean {
+    let isValidTelevision: boolean = false;
+    let televisionErrorFields: string[] = [ TelevisionConfiguration.prefix ];
+
+    if (this.television !== undefined) {
+      [isValidTelevision, televisionErrorFields] = this.television.isValid();
+    }
+
+    this.errorFields.push(...televisionErrorFields);
+
+    return (
+      isValidTelevision
+    );
+  }
 
   private isValidValve(): boolean {
     let isValidValve: boolean = false;

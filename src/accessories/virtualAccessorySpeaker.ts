@@ -1,12 +1,12 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { ExternalAccessory } from './externalAccessory.js';
 
 /**
  * Lightbulb - Accessory implementation
  */
-export class Speaker extends Accessory {
+export class Speaker extends ExternalAccessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Speaker';
 

@@ -1,5 +1,4 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
-import { Categories } from 'homebridge';
 
 import { Accessory } from './accessories/virtualAccessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -158,10 +157,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
-        } else if (configuredAccessory.category === Categories.SPEAKER) {
+        } else if (virtualAccessory.isExternalAccessory()) {
+          this.log.info(`Publishing new external accessory: ${configuredAccessory.accessoryName}`);
           this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
         } else {
           // link the accessory to your platform
+          this.log.info(`Publishing new accessory: ${configuredAccessory.accessoryName}`);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
           virtualAccessories.push(virtualAccessory);

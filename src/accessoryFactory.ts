@@ -13,8 +13,11 @@ import { Lock } from './accessories/virtualAccessoryLock.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
 import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
+import { Television } from './accessories/virtualAccessoryTelevision.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
+
+import { InputSource } from './accessories/virtualAccessoryInputSource.js';
 
 import { Sensor } from './sensors/virtualSensor.js';
 import { ContactSensor } from './sensors/virtualSensorContact.js';
@@ -82,6 +85,9 @@ export abstract class AccessoryFactory {
       break;
     case 'switch':
       virtualAccessory = new Switch(platform, accessory);
+      break;
+    case 'television':
+      virtualAccessory = new Television(platform, accessory);
       break;
     case 'valve':
       virtualAccessory = new Valve(platform, accessory);
@@ -186,5 +192,14 @@ export abstract class AccessoryFactory {
     }
 
     return trigger;
+  }
+
+  static createInputSource(
+    platform: VirtualAccessoriesPlatform,
+    accessory: PlatformAccessory,
+    inputName: string,
+  ): InputSource {
+    const inputSource = new InputSource(platform, accessory, inputName);
+    return inputSource;
   }
 }

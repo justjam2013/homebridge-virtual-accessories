@@ -35,6 +35,23 @@
             "maximum": 59
           }
         }
+      },
+      "speaker": {
+        "type": "object",
+        "properties": {
+          "mute": {
+            "title": "Mute",
+            "description": "Speaker is muted",
+            "type": "boolean"
+          },
+          "volume": {
+            "title": "Volume *",
+            "description": "Speaker volume (0% - 100%)",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
       }
     },
     "properties": {
@@ -105,6 +122,7 @@
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
+                { "title": "Television", "enum": ["television"] },
                 { "title": "Valve", "enum": ["valve"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
               ],
@@ -115,7 +133,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "doorbell": {
@@ -529,21 +547,7 @@
             },
             "speaker": {
               "title": "Speaker",
-              "type": "object",
-              "properties": {
-                "mute": {
-                  "title": "Mute",
-                  "description": "Speaker is muted",
-                  "type": "boolean"
-                },
-                "volume": {
-                  "title": "Volume *",
-                  "description": "Speaker volume (0% - 100%)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
-              },
+              "$ref": "#/$defs/speaker",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
               }
@@ -579,6 +583,27 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
+              }
+            },
+            "television": {
+              "title": "Television",
+              "type": "object",
+              "properties": {
+                "inputs": {
+                  "title": " ",
+                  "type": "array",
+                  "minItems": 1,
+                  "orderable": true,
+                  "items": {
+                    "title": "{{ ' Input ' + $index }}",
+                    "type": "string",
+                    "minLength": 1,
+                    "placeholder": "HDMI"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'television';"
               }
             },
             "valve": {
@@ -1040,6 +1065,21 @@
                 "properties": {
                   "speaker": {
                     "required": [ "volume" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "television" }
+                }
+              },
+              "then": {
+                "required": [ "television" ],
+                "properties": {
+                  "television": {
+                    "required": [ "inputs" ]
                   }
                 }
               }
