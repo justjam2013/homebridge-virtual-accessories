@@ -3,8 +3,8 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
-import { AccessoryFactory } from '../accessoryFactory.js';
 import { AccessoryNotAllowedError } from '../errors.js';
+import { CompanionSwitch } from './companion/companionSwitch.js';
 import { Switch } from './virtualAccessorySwitch.js';
 
 /**
@@ -26,7 +26,7 @@ export class Doorbell extends Accessory {
     Volume: 100,
   };
 
-  private companionSwitch?: Switch;
+  private companionSwitch?: CompanionSwitch;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -50,7 +50,7 @@ export class Doorbell extends Accessory {
       .onGet(this.getVolume.bind(this));
 
     // Create switch service
-    this.companionSwitch = AccessoryFactory.createVirtualCompanionSwitch(
+    this.companionSwitch = new CompanionSwitch(
       this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
 
     // Overwrite the "onSet" handler to trigger doorbell
@@ -85,7 +85,7 @@ export class Doorbell extends Accessory {
 
   async setCompanionSwitchOn(value: CharacteristicValue) {
     const newState = value as boolean;
-    this.companionSwitch!.setCompanionSwitchState(newState, this);
+    this.companionSwitch!.setState(newState, this);
 
     if (newState === Switch.ON) {
       // this.service!.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent).updateValue(this.state);
