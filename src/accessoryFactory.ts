@@ -17,8 +17,6 @@ import { Television } from './accessories/virtualAccessoryTelevision.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
-import { InputSource } from './accessories/virtualAccessoryInputSource.js';
-
 import { Sensor } from './sensors/virtualSensor.js';
 import { ContactSensor } from './sensors/virtualSensorContact.js';
 import { LeakSensor } from './sensors/virtualSensorLeak.js';
@@ -183,14 +181,5 @@ export abstract class AccessoryFactory {
     }
 
     return trigger;
-  }
-
-  static createInputSource(
-    platform: VirtualAccessoriesPlatform,
-    accessory: PlatformAccessory,
-    inputName: string,
-  ): InputSource {
-    const inputSource = new InputSource(platform, accessory, inputName);
-    return inputSource;
   }
 }
