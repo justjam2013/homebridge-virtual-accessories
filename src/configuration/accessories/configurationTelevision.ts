@@ -1,10 +1,11 @@
 /* eslint-disable curly */
 
+import { InputSourceConfiguration } from './configurationInputSource.js';
+
 /**
  * 
  */
 export class TelevisionConfiguration {
-
   inputs!: string[];
 
   static prefix: string = 'television';
@@ -36,5 +37,19 @@ export class TelevisionConfiguration {
         isValidInputNames),
       this.errorFields,
     ];
+  }
+
+  getInputSources(): InputSourceConfiguration[] {
+    const HDMI = 3;   // Characteristic.InputSourceType.HDMI
+
+    const inputSources: InputSourceConfiguration[] = [];
+    this.inputs.forEach(name => {
+      const inputSource = new InputSourceConfiguration();
+      inputSource.name = name;
+      inputSource.inputSourceType = HDMI;
+      inputSources.push(inputSource);
+    });
+
+    return inputSources;
   }
 }

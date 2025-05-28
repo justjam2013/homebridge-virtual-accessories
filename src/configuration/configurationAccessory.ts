@@ -23,6 +23,8 @@ import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
+import { InputSourceConfiguration } from './accessories/configurationInputSource.js';
+
 import { Type } from 'typeserializer';
 
 /**
@@ -115,6 +117,9 @@ export class AccessoryConfiguration {
 
   @Type(SunEventsTriggerConfiguration)
     sunEventsTrigger!: SunEventsTriggerConfiguration;
+
+  // Only used for enriching Television configuration
+  inputSource?: InputSourceConfiguration;
 
   private errorFields: string[] = [];
 

@@ -38,12 +38,14 @@ export class InputSource extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    inputName: string,
   ) {
     super(platform, accessory);
 
+    const inputName: string = this.accessoryConfiguration.inputSource!.name;
+
     // First configure the device based on the accessory details
     this.states.InputSourceConfiguredName = inputName;
+    this.states.InputSourceType = this.accessoryConfiguration.inputSource!.inputSourceType;
 
     // set accessory information
     this.service = this.accessory.getService(this.platform.Service.InputSource) ||

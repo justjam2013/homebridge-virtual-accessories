@@ -3,7 +3,6 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
-import { AccessoryFactory } from '../accessoryFactory.js';
 import { InputSource } from './virtualAccessoryInputSource.js';
 
 /**
@@ -108,10 +107,14 @@ export class Television extends ExternalAccessory {
      * can use the same subtype id.)
      */
 
-    this.accessoryConfiguration.television.inputs.forEach(inputName => {
-      const inputSource: InputSource = AccessoryFactory.createInputSource(this.platform, this.accessory, inputName);
+    this.accessoryConfiguration.television.getInputSources().forEach(inputSourceConfig => {
+      // Enrich configuration with "inputSource" settings
+      this.accessoryConfiguration.inputSource = inputSourceConfig;
+      const inputSource: InputSource = new InputSource(this.platform, this.accessory);
       this.inputSources.push(inputSource);
     });
+    // Remove configuration enrichments
+    this.accessoryConfiguration.inputSource = undefined;
   }
 
   // Handlers
