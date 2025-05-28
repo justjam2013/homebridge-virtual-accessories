@@ -6,7 +6,7 @@
   "strictValidation": true,
   "schema": {
     "type": "object",
-    "definitions": {
+    "$defs": {
       "duration": {
         "type": "object",
         "properties": {
@@ -703,7 +703,7 @@
                 "duration": {
                   "title": "Timer Duration *",
                   "description": "Set timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
@@ -711,7 +711,7 @@
                 "durationRandomMin": {
                   "title": "Timer Min Duration *",
                   "description": "Set minimum timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -719,7 +719,7 @@
                 "durationRandomMax": {
                   "title": "Timer Max Duration *",
                   "description": "Set maximum timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -851,7 +851,8 @@
                   "format": "date-time",
                   "x-inputAttributes": {
                     "step": 1
-                  }                },
+                  }
+                },
                 "disableTriggerEventLogging": {
                   "title": "Disable Trigger Event Logging",
                   "description": "Disable logging for high frequency trigger events",

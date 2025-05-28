@@ -126,11 +126,11 @@ export class Utils {
     return Utils.isTransitionDuration(value);
   }
 
-  static debounceMillis: number = 300;
+  private static readonly debounceMillis: number = 300;
 
   static debounce<T extends (...args: any[]) => void>(
     func: T,
-    delay: number = Utils.debounceMillis,
+    delayMillis: number = Utils.debounceMillis,
   ): (...args: any[]) => void {
     let timeoutId: ReturnType<typeof setTimeout>;
     return function(this: any, ...args: any[]) {
@@ -139,7 +139,7 @@ export class Utils {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         func.apply(context, args);
-      }, delay);
+      }, delayMillis);
     };
   }
 

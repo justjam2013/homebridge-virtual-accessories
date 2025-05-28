@@ -62,6 +62,7 @@
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
+    - [Update Garage Door obstruction detected](#update-garage-door-obstruction-detected)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -85,7 +86,7 @@ Currently, these are the implemented virtual accessories:
 
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
--   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and color temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
@@ -740,7 +741,7 @@ The target URL (replace hostname and port per your setup) will specify the `humi
 http://localhost:60221/humidity
 ```
 
-The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+The raw json payload will contain the accessory id of the Humidifier/Dehumidifier accessory and the humidity percentage value:
 
 ```json
 {
@@ -761,7 +762,7 @@ The target URL (replace hostname and port per your setup) will specify the `temp
 http://localhost:60221/temperature
 ```
 
-The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+The raw json payload will contain the accessory id of the Heater/Cooler accessory and the temperature value:
 
 ```json
 {
@@ -772,6 +773,25 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
+
+### Update Garage Door obstruction detected
+
+To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+
+```
+http://localhost:60221/obstruction
+```
+
+The raw json payload will contain the accessory id of the Garage Door accessory and the obstruction value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
 
 <span align="right">
   <h6>
@@ -832,8 +852,7 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 #### Issues with Homebridge UI:
 
--   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
--   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
+-   None currently.
 
 #### Issues with underlying frameworks:
 
