@@ -36,9 +36,6 @@ export class Switch extends Accessory {
     SensorState: Sensor.NORMAL,
   };
 
-  /**
-   * Switch may be a companion switch, so check if the "switch" section exists in the configuration
-   */
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
@@ -46,12 +43,12 @@ export class Switch extends Accessory {
     super(platform, accessory);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.switch?.defaultState === 'on' ? Switch.ON : Switch.OFF;
+    this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
 
     this.states.SwitchState = this.defaultState;
     this.states.SensorState = Sensor.NORMAL;
 
-    if (this.accessoryConfiguration.switch?.hasResetTimer) {
+    if (this.accessoryConfiguration.switch.hasResetTimer) {
       this.setupResetTimer(this.accessoryConfiguration.resetTimer);
     }
 
@@ -67,7 +64,7 @@ export class Switch extends Accessory {
         this.states.SensorState = this.determineSensorState();
       }
 
-      if (this.accessoryConfiguration.switch?.hasResetTimer) {
+      if (this.accessoryConfiguration.switch.hasResetTimer) {
         this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Switch has reset timer`);
 
         const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
@@ -111,7 +108,7 @@ export class Switch extends Accessory {
      */
 
     // Create sensor service
-    if (this.accessoryConfiguration.switch?.hasCompanionSensor) {
+    if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.setupCompanionSensor();
     }
   }
@@ -121,7 +118,7 @@ export class Switch extends Accessory {
   async setOn(value: CharacteristicValue) {
     this.states.SwitchState = value as boolean;
 
-    if (this.accessoryConfiguration.switch?.hasResetTimer) {
+    if (this.accessoryConfiguration.switch.hasResetTimer) {
       // switch is reset: turn off timer
       if (this.states.SwitchState === this.defaultState) {
         this.durationTimer!.stop();
@@ -137,12 +134,12 @@ export class Switch extends Accessory {
     this.storeState();
 
     // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`, this.accessoryConfiguration.switch?.muteLogging);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Switch.getStateName(this.states.SwitchState)}`, this.accessoryConfiguration.switch.muteLogging);
 
-    if (this.accessoryConfiguration.switch?.hasCompanionSensor) {
+    if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.states.SensorState = this.determineSensorState();
 
-      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch?.muteLogging);
+      this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
     }
   }
 
@@ -159,7 +156,7 @@ export class Switch extends Accessory {
       [this.stateStorageKey]: this.states.SwitchState,
     };
 
-    if (this.accessoryConfiguration.switch?.hasResetTimer) {
+    if (this.accessoryConfiguration.switch.hasResetTimer) {
       const timerStartTime: string = this.durationTimer!.getStartTime().toString();
       const timerDuration: number = (this.durationTimer!.getRuntime() > 0) ? this.durationTimer!.getRuntime() : this.durationTimer!.getDefaultDuration();
       const timerIsRunning: boolean = this.durationTimer!.isTimerRunning();
@@ -230,7 +227,7 @@ export class Switch extends Accessory {
     this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
       this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
-    this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch?.muteLogging);
+    this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.accessoryConfiguration.switch.muteLogging);
   }
 
   private restoreRunningTimer(

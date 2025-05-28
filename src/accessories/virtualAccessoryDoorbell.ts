@@ -5,6 +5,7 @@ import { Accessory } from './virtualAccessory.js';
 
 import { AccessoryNotAllowedError } from '../errors.js';
 import { CompanionSwitch } from './companion/companionSwitch.js';
+import { SwitchConfiguration } from '../configuration/accessories/configurationSwitch.js';
 
 /**
  * Doorbell - Accessory implementation
@@ -49,8 +50,7 @@ export class Doorbell extends Accessory {
       .onGet(this.getVolume.bind(this));
 
     // Create switch service
-    this.companionSwitch = new CompanionSwitch(
-      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
+    this.companionSwitch = this.createCompanionSwitch();
 
     // Overwrite the "onSet" handler to trigger doorbell
     this.companionSwitch!.service!.getCharacteristic(this.platform.Characteristic.On)
@@ -138,5 +138,17 @@ export class Doorbell extends Accessory {
     }
 
     return eventName;
+  }
+
+  private createCompanionSwitch(): CompanionSwitch {
+
+    // Enrich configuration with "switch" settings
+    this.accessoryConfiguration.switch = new SwitchConfiguration();
+    this.accessoryConfiguration.switch.defaultState = 'off';
+    this.accessoryConfiguration.switch.hasCompanionSensor = false;
+    this.accessoryConfiguration.switch.hasResetTimer = false;
+    this.accessoryConfiguration.switch.muteLogging = false;
+
+    return new CompanionSwitch(this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
   }
 }
