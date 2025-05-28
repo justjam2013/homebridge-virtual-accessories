@@ -5,7 +5,6 @@ import { Accessory } from './virtualAccessory.js';
 
 import { AccessoryNotAllowedError } from '../errors.js';
 import { CompanionSwitch } from './companion/companionSwitch.js';
-import { Switch } from './virtualAccessorySwitch.js';
 
 /**
  * Doorbell - Accessory implementation
@@ -87,7 +86,7 @@ export class Doorbell extends Accessory {
     const newState = value as boolean;
     this.companionSwitch!.setState(newState, this);
 
-    if (newState === Switch.ON) {
+    if (newState === CompanionSwitch.ON) {
       // this.service!.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent).updateValue(this.state);
       this.triggerDoorbellEvent(Doorbell.SINGLE_PRESS, this.companionSwitch!);
 
@@ -98,12 +97,12 @@ export class Doorbell extends Accessory {
 
       // Reset switch after timer delay
       this.companionSensorResetTimerId = setTimeout(() => {
-        this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, Switch.OFF);
+        this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, CompanionSwitch.OFF);
       }, Doorbell.COMPANION_TIMEOUT_SECS);
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
     }
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(newState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${CompanionSwitch.getStateName(newState)}`);
   }
 
   /**
