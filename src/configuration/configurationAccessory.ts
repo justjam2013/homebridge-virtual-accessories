@@ -393,7 +393,7 @@ export class AccessoryConfiguration {
     let isValidTelevision: boolean = false;
     let televisionErrorFields: string[] = [ TelevisionConfiguration.prefix ];
 
-    if (this.valve !== undefined) {
+    if (this.television !== undefined) {
       [isValidTelevision, televisionErrorFields] = this.television.isValid();
     }
 
