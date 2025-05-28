@@ -1,5 +1,6 @@
 import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { PlatformAccessory } from 'homebridge';
+
 import { Switch } from '../virtualAccessorySwitch.js';
 import { Accessory } from '../virtualAccessory';
 import { AccessoryNotAllowedError } from '../../errors.js';
@@ -28,11 +29,11 @@ export class CompanionSwitch extends Switch {
       this.accessory.removeService(switchService);
     }
 
-    this.service = this.accessory.getService(companionName) ||
-                     this.accessory.addService(this.platform.Service.Switch, companionName, accessory.UUID + this.postfix);
+    this.service = this.accessory.getService(this.companionName) ||
+                     this.accessory.addService(this.platform.Service.Switch, this.companionName, accessory.UUID + this.postfix);
 
     // Replace the Name Characteristic
-    this.service.setCharacteristic(this.platform.Characteristic.Name, companionName!);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.companionName!);
 
     // Remove any decorations
     this.durationTimer = undefined;
