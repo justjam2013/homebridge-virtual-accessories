@@ -105,15 +105,6 @@ export abstract class AccessoryFactory {
     return virtualAccessory;
   }
 
-  static createVirtualCompanionSwitch(
-    platform: VirtualAccessoriesPlatform,
-    accessory: PlatformAccessory,
-    companionSwitchName: string,
-  ): Switch | undefined {
-    const virtualAccessory: Switch = new Switch(platform, accessory, companionSwitchName);
-    return virtualAccessory;
-  }
-
   static createVirtualCompanionSensor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,

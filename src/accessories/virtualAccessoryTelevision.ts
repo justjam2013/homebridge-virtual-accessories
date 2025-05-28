@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { ExternalAccessory } from './externalAccessory.js';
+
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { InputSource } from './virtualAccessoryInputSource.js';
 

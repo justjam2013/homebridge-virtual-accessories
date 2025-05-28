@@ -4,6 +4,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+
 import { Utils } from '../utils.js';
 
 /**
