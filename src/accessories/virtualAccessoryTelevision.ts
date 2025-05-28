@@ -1,14 +1,14 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { ExternalAccessory } from './externalAccessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { InputSource } from './virtualAccessoryInputSource.js';
 
 /**
  * Television - Accessory implementation
  */
-export class Television extends Accessory {
+export class Television extends ExternalAccessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Television';
 
