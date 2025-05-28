@@ -547,7 +547,7 @@
             },
             "speaker": {
               "title": "Speaker",
-              "$ref": "#/definitions/speaker",
+              "$ref": "#/$defs/speaker",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
               }
