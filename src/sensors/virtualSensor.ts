@@ -38,18 +38,17 @@ export abstract class Sensor extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    sensorService: WithUUID<typeof Service>,
-    sensorCharacteristic: WithUUID<{ new (): Characteristic; }>,
     companionSensorName?: string,
   ) {
     super(platform, accessory);
 
-    this.sensorCharacteristic = sensorCharacteristic;
+    this.sensorCharacteristic = this.getSensorCharacteristic();
 
     if (companionSensorName !== undefined) {
       this.isCompanionSensor = true;
     }
 
+    const sensorService: WithUUID<typeof Service> = this.getSensorService();
     if (!this.isCompanionSensor) {
       this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService as unknown as Service);
 
@@ -86,6 +85,10 @@ export abstract class Sensor extends Accessory {
       this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryConfiguration.accessoryName + ' Trigger');
     }
   }
+
+  protected abstract getSensorService(): WithUUID<typeof Service>;
+
+  protected abstract getSensorCharacteristic(): WithUUID<{ new (): Characteristic; }>;
 
   /**
    * Handle requests to get the current value of the "Sensor State" characteristic
