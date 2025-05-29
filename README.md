@@ -47,6 +47,7 @@
     - [Security System](#security-system)
     - [Speaker](#speaker)
       - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
+    - [Television](#television)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
@@ -93,6 +94,7 @@ Currently, these are the implemented virtual accessories:
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes.
 -   **Speaker.** Allows you to create a virtual speaker.
+-   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
@@ -416,6 +418,28 @@ To add the speaker accessory in the Home app follow these steps:
 4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
 5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
 6. Finally, tap `Done`
+
+### Television
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Television",
+            "accessoryType": "television",
+            "television": {
+                "inputs": [
+                    "HDMI 1",
+                    "HDMI 2"
+                ]
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Valve
 
