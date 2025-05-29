@@ -4,6 +4,9 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
 import { InputSource } from './virtualAccessoryInputSource.js';
+import { Speaker } from './virtualAccessorySpeaker.js';
+import { InputSourceConfiguration } from '../configuration/accessories/configurationInputSource.js';
+import { SpeakerConfiguration } from '../configuration/accessories/configurationSpeaker.js';
 
 /**
  * Television - Accessory implementation
@@ -37,6 +40,7 @@ export class Television extends ExternalAccessory {
   private readonly configuredNameStorageKey: string = 'TelevisionConfiguredName';
 
   private inputSources: InputSource[] = [];
+  private speaker!: Speaker;
 
   private states = {
     TelevisionState: Television.INACTIVE,
@@ -109,12 +113,27 @@ export class Television extends ExternalAccessory {
 
     this.accessoryConfiguration.television.getInputSources().forEach(inputSourceConfig => {
       // Enrich configuration with "inputSource" settings
+      const tempHolder: InputSourceConfiguration = this.accessoryConfiguration.inputSource;
       this.accessoryConfiguration.inputSource = inputSourceConfig;
+
       const inputSource: InputSource = new InputSource(this.platform, this.accessory);
+
+      // Remove configuration enrichments
+      this.accessoryConfiguration.inputSource = tempHolder;
+
       this.inputSources.push(inputSource);
     });
-    // Remove configuration enrichments
-    this.accessoryConfiguration.inputSource = undefined;
+
+    if (this.accessoryConfiguration.television.hasAudio) {
+      // Enrich configuration with "television.speaker" settings
+      const tempHolder: SpeakerConfiguration = this.accessoryConfiguration.speaker;
+      this.accessoryConfiguration.speaker = this.accessoryConfiguration.television.speaker;
+
+      this.speaker = new Speaker(this.platform, this.accessory);
+
+      // Remove configuration enrichments
+      this.accessoryConfiguration.speaker = tempHolder;
+    }
   }
 
   // Handlers

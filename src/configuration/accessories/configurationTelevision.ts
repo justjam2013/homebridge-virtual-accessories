@@ -1,12 +1,18 @@
 /* eslint-disable curly */
 
+import { Type } from 'typeserializer';
 import { InputSourceConfiguration } from './configurationInputSource.js';
+import { SpeakerConfiguration } from './configurationSpeaker.js';
 
 /**
  * 
  */
 export class TelevisionConfiguration {
   inputs!: string[];
+  hasAudio: boolean = false;
+
+  @Type(SpeakerConfiguration)
+    speaker!: SpeakerConfiguration;
 
   static prefix: string = 'television';
 

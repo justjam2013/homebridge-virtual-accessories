@@ -125,7 +125,6 @@
             },
             "accessoryType": {
               "title": "Accessory Type",
-              "description": "Accessory type",
               "type": "string",
               "required": true,
               "oneOf": [
@@ -595,6 +594,17 @@
                     "type": "string",
                     "minLength": 1,
                     "placeholder": "HDMI"
+                  }
+                },
+                "hasAudio": {
+                  "title": "Has speakers",
+                  "type": "boolean"
+                },
+                "speaker": {
+                  "title": "Television Audio",
+                  "$ref": "#/$defs/speaker",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].television && model.devices[arrayIndices].television.hasAudio === true;"
                   }
                 }
               },
