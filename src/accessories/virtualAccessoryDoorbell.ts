@@ -4,7 +4,7 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 import { AccessoryNotAllowedError } from '../errors.js';
-import { CompanionSwitch } from './companions/companionSwitch.js';
+import { CompanionSwitch } from '../companions/companionSwitch.js';
 import { SwitchConfiguration } from '../configuration/accessories/configurationSwitch.js';
 
 /**

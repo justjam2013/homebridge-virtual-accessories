@@ -1,9 +1,9 @@
-import { VirtualAccessoriesPlatform } from '../../platform.js';
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { PlatformAccessory } from 'homebridge';
 
-import { Switch } from '../virtualAccessorySwitch.js';
-import { Accessory } from '../virtualAccessory';
-import { AccessoryNotAllowedError } from '../../errors.js';
+import { Switch } from '../accessories/virtualAccessorySwitch.js';
+import { Accessory } from '../accessories/virtualAccessory';
+import { AccessoryNotAllowedError } from '../errors.js';
 
 export class CompanionSwitch extends Switch {
 

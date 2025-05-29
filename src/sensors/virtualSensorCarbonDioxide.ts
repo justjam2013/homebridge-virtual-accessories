@@ -1,4 +1,4 @@
-import type { PlatformAccessory } from 'homebridge';
+import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Sensor } from './virtualSensor.js';
@@ -20,7 +20,15 @@ export class CarbonDioxideSensor extends Sensor {
     accessory: PlatformAccessory,
     companionSensorName?: string,
   ) {
-    super(platform, accessory, platform.Service.CarbonDioxideSensor, platform.Characteristic.CarbonDioxideDetected, companionSensorName);
+    super(platform, accessory, companionSensorName);
+  }
+
+  protected getSensorService(): WithUUID<typeof Service> {
+    return this.platform.Service.CarbonDioxideSensor;
+  }
+
+  protected getSensorCharacteristic(): WithUUID<{ new (): Characteristic; }> {
+    return this.platform.Characteristic.CarbonDioxideDetected;
   }
 
   protected getStateName(state: number): string {
