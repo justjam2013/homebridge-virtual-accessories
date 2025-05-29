@@ -50,6 +50,26 @@
             "maximum": 100
           }
         }
+      },
+      "doorAndWindowAccessory": {
+        "type": "object",
+        "properties": {
+          "defaultState": {
+            "title": "Default State *",
+            "type": "string",
+            "oneOf": [
+              { "title": "Closed", "enum": ["closed"] },
+              { "title": "Open", "enum": ["open"] }
+            ]
+          },
+          "transitionDuration": {
+            "title": "Transition Duration",
+            "description": "Open & close transition duration in seconds (default: 3 seconds)",
+            "type": "integer",
+            "mminimum": 0,
+            "placeholder": 3
+          }
+        }
       }
     },
     "properties": {
@@ -138,24 +158,7 @@
             },
             "door": {
               "title": "Door",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
               }
@@ -208,24 +211,7 @@
             },
             "garageDoor": {
               "title": "Garage Door",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
@@ -644,48 +630,14 @@
             },
             "window": {
               "title": "Window",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
               }
             },
             "windowCovering": {
               "title": "Window Covering",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
