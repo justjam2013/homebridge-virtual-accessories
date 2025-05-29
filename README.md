@@ -46,7 +46,6 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
-      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
     - [Television](#television)
     - [Valve](#valve)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
