@@ -111,6 +111,7 @@
               "type": "string",
               "required": true,
               "oneOf": [
+                { "title": "Door", "enum": ["door"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
@@ -124,6 +125,7 @@
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Television", "enum": ["television"] },
                 { "title": "Valve", "enum": ["valve"] },
+                { "title": "Window", "enum": ["window"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
               ],
               "default": "switch"
@@ -133,7 +135,32 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window' 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "door": {
+              "title": "Door",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Door Default State *",
+                  "description": "Door default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
+                  "type": "integer",
+                  "mminimum": 0,
+                  "placeholder": 3
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
               }
             },
             "doorbell": {
@@ -633,6 +660,31 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
             },
+            "window": {
+              "title": "Window",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Window Default State *",
+                  "description": "Window default state",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
+                  "type": "integer",
+                  "mminimum": 0,
+                  "placeholder": 3
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
+              }
+            },
             "windowCovering": {
               "title": "Window Covering",
               "type": "object",
@@ -937,6 +989,21 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "door" }
+                }
+              },
+              "then": {
+                "required": [ "door" ],
+                "properties": {
+                  "door": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryType": { "const": "doorbell" }
                 }
               },
@@ -1095,6 +1162,21 @@
                 "properties": {
                   "valve": {
                     "required": [ "type", "duration" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "window" }
+                }
+              },
+              "then": {
+                "required": [ "window" ],
+                "properties": {
+                  "window": {
+                    "required": [ "defaultState" ]
                   }
                 }
               }

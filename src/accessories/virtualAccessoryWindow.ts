@@ -5,11 +5,11 @@ import { OpeningAccessory } from './openingAccessory.js';
 import { OpeningAccessoryConfiguration } from '../configuration/configurationOpeningAccesory.js';
 
 /**
- * WindowCovering - Accessory implementation
+ * Window - Accessory implementation
  */
-export class WindowCovering extends OpeningAccessory {
+export class Window extends OpeningAccessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Window Covering';
+  static readonly ACCESSORY_TYPE_NAME: string = 'Window';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -19,14 +19,14 @@ export class WindowCovering extends OpeningAccessory {
   }
 
   protected getOpeningAccessoryConfiguration(): OpeningAccessoryConfiguration {
-    return this.accessoryConfiguration.windowCovering;
+    return this.accessoryConfiguration.window;
   }
 
   protected getOpeningAccessoryService(): WithUUID<typeof Service> {
-    return this.platform.Service.WindowCovering;
+    return this.platform.Service.Window;
   }
 
   protected getAccessoryTypeName(): string {
-    return WindowCovering.ACCESSORY_TYPE_NAME;
+    return Window.ACCESSORY_TYPE_NAME;
   }
 }

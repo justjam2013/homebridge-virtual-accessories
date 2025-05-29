@@ -7,11 +7,11 @@ import { Utils } from '../../utils.js';
 /**
  * 
  */
-export class WindowCoveringConfiguration extends OpeningAccessoryConfiguration {
-  // defaultState!: string;
-  // transitionDuration!: number;
+export class DoorConfiguration extends OpeningAccessoryConfiguration {
+  // defaultState: string;
+  // transitionDuration: number;
 
-  static prefix: string = 'windowCovering';
+  static prefix: string = 'door';
 
   private errorFields: string[] = [];
 
@@ -28,8 +28,8 @@ export class WindowCoveringConfiguration extends OpeningAccessoryConfiguration {
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(WindowCoveringConfiguration.prefix + '.defaultState');
-    if (!isValidTransitionDuration) this.errorFields.push(WindowCoveringConfiguration.prefix + '.transitionDuration');
+    if (!isValidDefaultState) this.errorFields.push(DoorConfiguration.prefix + '.defaultState');
+    if (!isValidTransitionDuration) this.errorFields.push(DoorConfiguration.prefix + '.transitionDuration');
 
     return [
       (isValidDefaultState &&
