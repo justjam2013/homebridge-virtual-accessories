@@ -141,6 +141,7 @@ export class Doorbell extends Accessory {
   }
 
   private createCompanionSwitch(): CompanionSwitch {
+    const confHolder: SwitchConfiguration = this.accessoryConfiguration.switch;
 
     // Enrich configuration with "switch" settings
     this.accessoryConfiguration.switch = new SwitchConfiguration();
@@ -149,6 +150,11 @@ export class Doorbell extends Accessory {
     this.accessoryConfiguration.switch.hasResetTimer = false;
     this.accessoryConfiguration.switch.muteLogging = false;
 
-    return new CompanionSwitch(this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
+    const companionSwitch = new CompanionSwitch(this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
+
+    // Remove configuration enrichments
+    this.accessoryConfiguration.switch = confHolder;
+
+    return companionSwitch;
   }
 }
