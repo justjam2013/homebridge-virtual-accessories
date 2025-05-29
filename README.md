@@ -718,8 +718,8 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 
 ## Adding an external accessory in the Home app
 
-When you add an external accessory and restart Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
-`Please add [My Speaker/Television XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+When you create an external accessory and restart Homebridge, you should see a similar message in the logs, with the code required to pair the accessory in the Home app:
+> Please add [My *ExtDevice* XXXX] manually in Home app. Setup Code: XXX-XX-XXX
 
 To add an external accessory in the Home app follow these steps:
 1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
