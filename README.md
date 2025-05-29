@@ -58,6 +58,7 @@
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
@@ -406,18 +407,8 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 ```
 
 > [!NOTE]
-> After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
-> `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
-
-#### Adding a Speaker accessory in the Home app
-
-To add the speaker accessory in the Home app follow these steps:
-1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
-2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
-3. Tap the speaker accessory you created
-4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
-5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
-6. Finally, tap `Done`
+> A Speaker is an external accessory and must be added separately to the Home app. Follow the instructions below in the
+> [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app) section to finish setting it up.
 
 ### Television
 
@@ -440,6 +431,10 @@ To add the speaker accessory in the Home app follow these steps:
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
+> [!NOTE]
+> A Television is an external accessory and must be added separately to the Home app. Follow the instructions below in the
+> [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app) section to finish setting it up.
 
 ### Valve
 
@@ -713,6 +708,27 @@ To add the speaker accessory in the Home app follow these steps:
 
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
+## Adding an external accessory in the Home app
+
+When you add an external accessory and restart Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
+`Please add [My Speaker/Television XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+
+To add an external accessory in the Home app follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the accessory listed in the `NEARBY` section
+3. Tap the new accessory you created
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
 
 <span align="right">
   <h6>
