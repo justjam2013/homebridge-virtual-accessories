@@ -1,13 +1,15 @@
 /* eslint-disable curly */
 
+import { OpeningAccessoryConfiguration } from '../configurationOpeningAccesory.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class WindowConfiguration {
-  defaultState!: string;
-  transitionDuration!: number;
+export class WindowConfiguration extends OpeningAccessoryConfiguration {
+  // defaultState!: string;
+  // transitionDuration!: number;
 
   static prefix: string = 'window';
 

@@ -1,13 +1,15 @@
 /* eslint-disable curly */
 
+import { OpeningAccessoryConfiguration } from '../configurationOpeningAccesory.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class DoorConfiguration {
-  defaultState!: string;
-  transitionDuration!: number;
+export class DoorConfiguration extends OpeningAccessoryConfiguration {
+  // defaultState: string;
+  // transitionDuration: number;
 
   static prefix: string = 'door';
 

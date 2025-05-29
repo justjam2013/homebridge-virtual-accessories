@@ -2,6 +2,7 @@ import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { OpeningAccessoryConfiguration } from '../configuration/configurationOpeningAccesory.js';
 
 export abstract class OpeningAccessory extends Accessory {
 
@@ -18,6 +19,8 @@ export abstract class OpeningAccessory extends Accessory {
 
   protected transitionTimerId: ReturnType<typeof setTimeout> | undefined;
 
+  private openingAccessoryConfiguration: OpeningAccessoryConfiguration;
+
   protected states = {
     TargetPosition: OpeningAccessory.CLOSED,
     CurrentPosition: OpeningAccessory.CLOSED,
@@ -27,11 +30,12 @@ export abstract class OpeningAccessory extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    service: WithUUID<typeof Service>,
   ) {
     super(platform, accessory);
+
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.windowCovering.defaultState === 'open' ? OpeningAccessory.OPEN : OpeningAccessory.CLOSED;
+    this.openingAccessoryConfiguration = this.getOpeningAccessoryConfiguration();
+    this.defaultState = this.openingAccessoryConfiguration.defaultState === 'open' ? OpeningAccessory.OPEN : OpeningAccessory.CLOSED;
 
     this.states.CurrentPosition = this.defaultState;
 
@@ -47,6 +51,7 @@ export abstract class OpeningAccessory extends Accessory {
 
     this.states.TargetPosition = this.states.CurrentPosition;
 
+    const service: WithUUID<typeof Service> = this.getOpeningAccessoryService();
     this.service = this.accessory.getService(service) || this.accessory.addService(service as unknown as Service);
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
@@ -74,11 +79,11 @@ export abstract class OpeningAccessory extends Accessory {
   // Handlers
 
   async getCurrentPosition(): Promise<CharacteristicValue> {
-    const windowCoveringCurrentPosition = this.states.CurrentPosition;
+    const currentPosition = this.states.CurrentPosition;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${OpeningAccessory.getStateName(windowCoveringCurrentPosition)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${OpeningAccessory.getStateName(currentPosition)}`);
 
-    return windowCoveringCurrentPosition;
+    return currentPosition;
   }
 
   async setTargetPosition(value: CharacteristicValue) {
@@ -90,7 +95,7 @@ export abstract class OpeningAccessory extends Accessory {
     this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
 
-    const transitionDuration = this.accessoryConfiguration.windowCovering.transitionDuration;
+    const transitionDuration = this.openingAccessoryConfiguration.transitionDuration;
     const transitionDelayMillis: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS) * 1000;
 
     const proportionalTransitionDelayMillis = transitionDelayMillis / 100 * Math.abs(this.states.TargetPosition - this.states.CurrentPosition);
@@ -113,20 +118,24 @@ export abstract class OpeningAccessory extends Accessory {
   }
 
   async getTargetPosition(): Promise<CharacteristicValue> {
-    const windowCoveringTargetPosition = this.states.TargetPosition;
+    const targetPosition = this.states.TargetPosition;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${OpeningAccessory.getStateName(windowCoveringTargetPosition)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${OpeningAccessory.getStateName(targetPosition)}`);
 
-    return windowCoveringTargetPosition;
+    return targetPosition;
   }
 
   async getPositionState(): Promise<CharacteristicValue> {
-    const windowCoveringPositionState = this.states.PositionState;
+    const positionState = this.states.PositionState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${OpeningAccessory.getPositionName(windowCoveringPositionState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${OpeningAccessory.getPositionName(positionState)}`);
 
-    return windowCoveringPositionState;
+    return positionState;
   }
+
+  protected abstract getOpeningAccessoryConfiguration(): OpeningAccessoryConfiguration;
+
+  protected abstract getOpeningAccessoryService(): WithUUID<typeof Service>;
 
   protected getJsonState(): string {
     const json = JSON.stringify({

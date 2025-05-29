@@ -218,8 +218,8 @@ export class PlatformConfiguration {
     let isValidDoor: boolean = false;
     let doorErrorFields: string[] = [ DoorConfiguration.prefix ];
 
-    if (this.doorbell !== undefined) {
-      [isValidDoor, doorErrorFields] = this.doorbell.isValid();
+    if (this.door !== undefined) {
+      [isValidDoor, doorErrorFields] = this.door.isValid();
     }
 
     this.errorFields.push(...doorErrorFields);
@@ -457,8 +457,8 @@ export class PlatformConfiguration {
     let isValidWindow: boolean = false;
     let windowErrorFields: string[] = [ WindowConfiguration.prefix ];
 
-    if (this.windowCovering !== undefined) {
-      [isValidWindow, windowErrorFields] = this.windowCovering.isValid();
+    if (this.window !== undefined) {
+      [isValidWindow, windowErrorFields] = this.window.isValid();
     }
 
     this.errorFields.push(...windowErrorFields);
