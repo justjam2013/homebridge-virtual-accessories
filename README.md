@@ -36,6 +36,7 @@
     - [Synology](#synology)
   - [Configuration](#configuration)
   - [Accessory Configurations](#accessory-configurations)
+    - [Door](#door)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -48,6 +49,7 @@
     - [Speaker](#speaker)
     - [Television](#television)
     - [Valve](#valve)
+    - [Window](#window)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
     - [Switch with reset timer](#switch-with-reset-timer)
@@ -85,6 +87,7 @@ The downside to a single plugin is trading ease of accessory maintenance for a s
 
 Currently, these are the implemented virtual accessories:
 
+-   **Door.** Allows you to create a virtual door.
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
@@ -96,6 +99,7 @@ Currently, these are the implemented virtual accessories:
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
+-   **Window.** Allows you to create a virtual window.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
@@ -208,6 +212,27 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 </span>
 
 ## Accessory Configurations
+
+### Door
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Blinds",
+            "accessoryType": "door",
+            "accessoryIsStateful": false,
+            "door": {
+                "defaultState": "closed",
+                "transitionDuration": 3
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Doorbell
 
@@ -467,6 +492,27 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryType": "windowcovering",
             "accessoryIsStateful": false,
             "windowCovering": {
+                "defaultState": "closed",
+                "transitionDuration": 3
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Window
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Blinds",
+            "accessoryType": "window",
+            "accessoryIsStateful": false,
+            "window": {
                 "defaultState": "closed",
                 "transitionDuration": 3
             }
