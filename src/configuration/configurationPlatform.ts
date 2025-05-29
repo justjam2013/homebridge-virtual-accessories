@@ -2,7 +2,7 @@
 
 import { Categories } from 'homebridge';
 
-import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
+import { DoorConfiguration } from './accessories/configurationDoor.js';
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
 import { GarageDoorConfiguration } from './accessories/configurationGarageDoor.js';
@@ -15,22 +15,24 @@ import { SensorConfiguration } from './configurationSensor.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
 import { TelevisionConfiguration } from './accessories/configurationTelevision.js';
-import { TimerConfiguration } from './configurationTimer.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
+import { WindowConfiguration } from './accessories/configurationWindow.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
 
 import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
 
+import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { InputSourceConfiguration } from './accessories/configurationInputSource.js';
+import { TimerConfiguration } from './configurationTimer.js';
 
 import { Type } from 'typeserializer';
 
 /**
  * 
  */
-export class AccessoryConfiguration {
+export class PlatformConfiguration {
   // Required
   accessoryID!: string;
   accessoryName!: string;
@@ -40,6 +42,10 @@ export class AccessoryConfiguration {
   accessoryIsStateful: boolean = false;
 
   category?: Categories;
+
+  // Door
+  @Type(DoorConfiguration)
+    door!: DoorConfiguration;
 
   // Doorbell
   @Type(DoorbellConfiguration)
@@ -92,6 +98,10 @@ export class AccessoryConfiguration {
   // Valve
   @Type(ValveConfiguration)
     valve!: ValveConfiguration;
+
+  // Window
+  @Type(WindowConfiguration)
+    window!: WindowConfiguration;
 
   // Window Covering
   @Type(WindowCoveringConfiguration)
@@ -161,6 +171,8 @@ export class AccessoryConfiguration {
 
   private isValidAccessory(): boolean {
     switch (this.accessoryType) {
+    case 'door':
+      return this.isValidDoor();
     case 'doorbell':
       return this.isValidDoorbell();
     case 'fan':
@@ -189,6 +201,8 @@ export class AccessoryConfiguration {
       return this.isValidTelevision();
     case 'valve':
       return this.isValidValve();
+    case 'window':
+      return this.isValidWindow();
     case 'windowcovering':
       return this.isValidWindowCovering();
     }
@@ -199,6 +213,21 @@ export class AccessoryConfiguration {
   /**
    * Accessory validation
    */
+
+  private isValidDoor(): boolean {
+    let isValidDoor: boolean = false;
+    let doorErrorFields: string[] = [ DoorConfiguration.prefix ];
+
+    if (this.doorbell !== undefined) {
+      [isValidDoor, doorErrorFields] = this.doorbell.isValid();
+    }
+
+    this.errorFields.push(...doorErrorFields);
+
+    return (
+      isValidDoor
+    );
+  };
 
   private isValidDoorbell(): boolean {
     let isValidDoorbell: boolean = false;
@@ -421,6 +450,21 @@ export class AccessoryConfiguration {
 
     return (
       isValidValve
+    );
+  }
+
+  private isValidWindow(): boolean {
+    let isValidWindow: boolean = false;
+    let windowErrorFields: string[] = [ WindowConfiguration.prefix ];
+
+    if (this.windowCovering !== undefined) {
+      [isValidWindow, windowErrorFields] = this.windowCovering.isValid();
+    }
+
+    this.errorFields.push(...windowErrorFields);
+
+    return (
+      isValidWindow
     );
   }
 

@@ -3,7 +3,7 @@ import { Categories } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 
-import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
 import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 import fs from 'fs';
@@ -17,7 +17,7 @@ export abstract class Accessory {
   readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
 
-  readonly accessoryConfiguration: AccessoryConfiguration;
+  readonly accessoryConfiguration: PlatformConfiguration;
   readonly log: VirtualAccessoriesLogger;
 
   protected accessoryName: string = '';

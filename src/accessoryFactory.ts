@@ -3,6 +3,7 @@ import type { PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from './platform.js';
 
 import { Accessory } from './accessories/virtualAccessory.js';
+import { Door } from './accessories/virtualAccessoryDoor.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { Fan } from './accessories/virtualAccessoryFan.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
@@ -15,6 +16,7 @@ import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Television } from './accessories/virtualAccessoryTelevision.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
+import { Window } from './accessories/virtualAccessoryWindow.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
 import { Sensor } from './sensors/virtualSensor.js';
@@ -31,7 +33,7 @@ import { CronTrigger } from './triggers/triggerCron.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
-import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { PlatformConfiguration } from './configuration/configurationPlatform.js';
 
 /**
  * Virtual Accessory Factory
@@ -51,9 +53,12 @@ export abstract class AccessoryFactory {
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;
 
-    const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
+    const accessoryConfiguration: PlatformConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
+    case 'door':
+      virtualAccessory = new Door(platform, accessory);
+      break;
     case 'doorbell':
       virtualAccessory = new Doorbell(platform, accessory);
       break;
@@ -89,6 +94,9 @@ export abstract class AccessoryFactory {
       break;
     case 'valve':
       virtualAccessory = new Valve(platform, accessory);
+      break;
+    case 'window':
+      virtualAccessory = new Window(platform, accessory);
       break;
     case 'windowcovering':
       virtualAccessory = new WindowCovering(platform, accessory);

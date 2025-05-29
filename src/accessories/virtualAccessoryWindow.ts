@@ -4,20 +4,20 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { OpeningAccessory } from './openingAccessory.js';
 
 /**
- * WindowCovering - Accessory implementation
+ * Window - Accessory implementation
  */
-export class WindowCovering extends OpeningAccessory {
+export class Window extends OpeningAccessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Window Covering';
+  static readonly ACCESSORY_TYPE_NAME: string = 'Window';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
   ) {
-    super(platform, accessory, platform.Service.WindowCovering);
+    super(platform, accessory, platform.Service.Window);
   }
 
   protected getAccessoryTypeName(): string {
-    return WindowCovering.ACCESSORY_TYPE_NAME;
+    return Window.ACCESSORY_TYPE_NAME;
   }
 }

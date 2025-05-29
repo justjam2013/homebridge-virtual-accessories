@@ -1,4 +1,4 @@
-import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
 import { PingTriggerConfiguration } from '../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
 import { Sensor } from '../sensors/virtualSensor.js';
@@ -109,7 +109,7 @@ export class PingTrigger extends Trigger {
       ttl: 128,
     };
 
-    const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
+    const sensorConfig: PlatformConfiguration = trigger.sensor.accessoryConfiguration;
 
     const session = ping.createSession(options);
 

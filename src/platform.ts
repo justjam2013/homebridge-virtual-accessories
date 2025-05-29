@@ -1,7 +1,7 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { Accessory } from './accessories/virtualAccessory.js';
-import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { PlatformConfiguration } from './configuration/configurationPlatform.js';
 import { AccessoryFactory } from './accessoryFactory.js';
 import { Configuration } from './configuration/configuration.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -92,7 +92,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
     this.log.debug(`Found ${configuredDevices.length} configured accessories: ${JSON.stringify(configuredDevices)}`);
 
-    const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
+    const configuredAccessories: PlatformConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
     this.log.debug(`Deserialized accessories: ${JSON.stringify(configuredAccessories)}`);
 
     const virtualAccessories: Accessory[] = [];
@@ -208,14 +208,14 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   private deserializeConfiguredAccessories(
     configuredDevices,
-  ): AccessoryConfiguration[] {
-    const accessoryConfigurations: AccessoryConfiguration[] = [];
+  ): PlatformConfiguration[] {
+    const accessoryConfigurations: PlatformConfiguration[] = [];
     const accessoryUUIDs: string[] = [];
 
     for (const configuredDevice of configuredDevices) {
       // Deserialize accessory configuration
       const configuration: Configuration = new Configuration(this.log);
-      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
+      const accessoryConfiguration: PlatformConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
 
       // Skip accessory if the configuration is invalid
       if (accessoryConfiguration === undefined) {
