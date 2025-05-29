@@ -40,13 +40,11 @@
         "type": "object",
         "properties": {
           "mute": {
-            "title": "Mute",
-            "description": "Speaker is muted",
+            "title": "Muted",
             "type": "boolean"
           },
           "volume": {
-            "title": "Volume *",
-            "description": "Speaker volume (0% - 100%)",
+            "title": "Volume (0% - 100%) *",
             "type": "integer",
             "minimum": 0,
             "maximum": 100
@@ -74,7 +72,7 @@
             "type": "boolean"
           },
           "port": {
-            "title": "Webhooks Port",
+            "title": "Server Port",
             "type": "string",
             "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
             "placeholder": "60221"
@@ -143,8 +141,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Door Default State *",
-                  "description": "Door default state",
+                  "title": "Default State *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Closed", "enum": ["closed"] },
@@ -168,8 +165,7 @@
               "type": "object",
               "properties": {
                 "volume": {
-                  "title": "Doorbell Volume *",
-                  "description": "Doorbell volume (0% - 100%)",
+                  "title": "Volume (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -185,7 +181,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Fan default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -194,7 +189,6 @@
                 },
                 "rotationDirection": {
                   "title": "Rotation Direction *",
-                  "description": "Fan rotation direction",
                   "type": "string",
                   "oneOf": [
                     { "title": "Clockwise", "enum": ["clockwise"] },
@@ -202,8 +196,7 @@
                   ]
                 },
                 "rotationSpeed": {
-                  "title": "Rotation Speed *",
-                  "description": "Fan rotation speed (0% - 100%)",
+                  "title": "Rotation Speed (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -219,7 +212,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Garage Door default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Closed", "enum": ["closed"] },
@@ -244,7 +236,6 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Device type",
                   "type": "string",
                   "oneOf": [
                     { "title": "Heater", "enum": ["heater"] },
@@ -254,7 +245,6 @@
                 },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
-                  "description": "Temperature display units",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -394,7 +384,6 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Device type",
                   "type": "string",
                   "oneOf": [
                     { "title": "Humidifier", "enum": ["humidifier"] },
@@ -403,7 +392,7 @@
                   ]
                 },
                 "humidifierThreshold": {
-                  "title": "Humidifier Threshold *",
+                  "title": "Humidifying Threshold *",
                   "description": "Humidity level below which the humidifier turns on (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
@@ -413,7 +402,7 @@
                   }
                 },
                 "dehumidifierThreshold": {
-                  "title": "Dehumidifier Threshold *",
+                  "title": "Dehumidifying Threshold *",
                   "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
@@ -476,7 +465,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Lightbulb default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -484,15 +472,13 @@
                   ]
                 },
                 "brightness": {
-                  "title": "Brightness *",
-                  "description": "Lightbulb brightness (0% - 100%)",
+                  "title": "Brightness (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
                 },
                 "type": {
                   "title": "Type *",
-                  "description": "Lightbulb type",
                   "type": "string",
                   "oneOf": [
                     { "title": "White", "enum": ["white"] },
@@ -534,7 +520,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Lock default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Locked", "enum": ["locked"] },
@@ -558,7 +543,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Security System default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Armed - Away", "enum": ["awayarm"] },
@@ -584,8 +568,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Switch Default State *",
-                  "description": "Switch default state",
+                  "title": "Default State *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -613,7 +596,7 @@
               }
             },
             "television": {
-              "title": "Television",
+              "title": "Television Inputs",
               "type": "object",
               "properties": {
                 "inputs": {
@@ -638,8 +621,7 @@
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Valve Type *",
-                  "description": "Valve type",
+                  "title": "Type *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Generic Valve", "enum": ["generic"] },
@@ -649,7 +631,7 @@
                   ]
                 },
                 "duration": {
-                  "title": "Valve Runtime *",
+                  "title": "Runtime *",
                   "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
                   "type": "integer",
                   "minimum": 0,
@@ -665,8 +647,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Window Default State *",
-                  "description": "Window default state",
+                  "title": "Default State *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Closed", "enum": ["closed"] },
@@ -690,8 +671,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Window Covering Default State *",
-                  "description": "Window Covering default state",
+                  "title": "Default State *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Closed", "enum": ["closed"] },
@@ -730,7 +710,6 @@
                 },
                 "trigger": {
                   "title": "Trigger *",
-                  "description": "Sensor trigger source",
                   "type": "string",
                   "oneOf": [
                     { "title": "Ping Host", "enum": ["ping"] },
@@ -748,36 +727,32 @@
               "type": "object",
               "properties": {
                 "durationIsRandom": {
-                  "title": "Timer Duration is Random",
-                  "description": "The timer duration is random",
+                  "title": "Duration is Random",
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Timer Duration *",
-                  "description": "Set timer duration for the accessory to reset to default state",
+                  "title": "Duration *",
                   "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Timer Min Duration *",
-                  "description": "Set minimum timer duration for the accessory to reset to default state",
+                  "title": "Min Duration *",
                   "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Timer Max Duration *",
-                  "description": "Set maximum timer duration for the accessory to reset to default state",
+                  "title": "Max Duration *",
                   "$ref": "#/$defs/duration",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "isResettable": {
-                  "title": "Timer is Resettable",
+                  "title": "Is Resettable",
                   "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
                   "type": "boolean"
                 }
@@ -820,12 +795,12 @@
               "type": "object",
               "properties": {
                 "name": {
-                  "title": "Sensor Name *",
+                  "title": "Name *",
                   "description": "Sensor name as it will be displayed in HomeKit",
                   "type": "string"
                 },
                 "type": {
-                  "title": "Sensor Type *",
+                  "title": "Type *",
                   "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
@@ -889,7 +864,6 @@
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
@@ -898,7 +872,6 @@
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
