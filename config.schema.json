@@ -66,8 +66,8 @@
             "title": "Transition Duration",
             "description": "Open & close transition duration in seconds (default: 3 seconds)",
             "type": "integer",
-            "mminimum": 0,
-            "placeholder": 3
+            "minimum": 0,
+            "maximum": 60
           }
         }
       }
