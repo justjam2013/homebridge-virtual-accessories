@@ -48,7 +48,7 @@ export class InputSource extends Accessory {
     this.states.InputSourceType = this.accessoryConfiguration.inputSource!.inputSourceType;
 
     // set accessory information
-    this.service = this.accessory.getService(this.platform.Service.InputSource) ||
+    this.service = this.accessory.getService(inputName) ||
                    this.accessory.addService(this.platform.Service.InputSource, inputName, accessory.UUID + inputName);
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, inputName);
