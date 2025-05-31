@@ -23,7 +23,6 @@ export class TelevisionSpeaker extends AudioAccessory {
   }
 
   protected getAudioAccessoryService(): WithUUID<typeof Service> {
-    this.log.info(`Returning Service.TelevisionSpeaker: ${this.platform.Service.TelevisionSpeaker.name}`);
     return this.platform.Service.TelevisionSpeaker;
   }
 

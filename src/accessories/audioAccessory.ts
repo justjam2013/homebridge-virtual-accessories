@@ -62,7 +62,6 @@ export abstract class AudioAccessory extends ExternalAccessory {
 
     // set accessory information
     const service: WithUUID<typeof Service> = this.getAudioAccessoryService();
-    this.log.info(`Retrieved Service: ${service.name}`);
     this.service = this.accessory.getService(service) || this.accessory.addService(service as unknown as Service);
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
