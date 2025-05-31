@@ -33,6 +33,7 @@ export class InputSource extends Accessory {
     InputSourceType: InputSource.HDMI,
     InputSourceIsConfigured: true,
     InputSourceCurrentVisibilityState: InputSource.SHOWN,
+    InputSourceIdentifier: 0,
   };
 
   constructor(
@@ -46,6 +47,7 @@ export class InputSource extends Accessory {
     // First configure the device based on the accessory details
     this.states.InputSourceConfiguredName = inputName;
     this.states.InputSourceType = this.accessoryConfiguration.inputSource!.inputSourceType;
+    this.states.InputSourceIdentifier = this.accessoryConfiguration.inputSource!.identifier;
 
     // set accessory information
     this.service = this.accessory.getService(inputName) ||
@@ -68,6 +70,9 @@ export class InputSource extends Accessory {
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentVisibilityState)
       .onGet(this.getCurrentVisibilityState.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.Identifier)
+      .onGet(this.getIdentifier.bind(this));
   }
 
   // Handlers
@@ -113,10 +118,17 @@ export class InputSource extends Accessory {
   async getCurrentVisibilityState(): Promise<CharacteristicValue> {
     const currentVisibilityState = this.states.InputSourceCurrentVisibilityState as number;
 
-     
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Visibility State: ${InputSource.getVisibilityName(currentVisibilityState)}`);
 
     return currentVisibilityState;
+  }
+
+  async getIdentifier(): Promise<CharacteristicValue> {
+    const identifier = this.states.InputSourceIdentifier as number;
+     
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Identifier: ${identifier}`);
+
+    return identifier;
   }
 
   protected getJsonState(): string {

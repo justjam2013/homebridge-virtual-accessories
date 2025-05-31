@@ -2,7 +2,7 @@
 
 import { Type } from 'typeserializer';
 import { InputSourceConfiguration } from './configurationInputSource.js';
-import { SpeakerConfiguration } from './configurationSpeaker.js';
+import { TelevisionSpeakerConfiguration } from './configurationTelevisionSpeaker.js';
 
 /**
  * 
@@ -11,14 +11,16 @@ export class TelevisionConfiguration {
   inputs!: string[];
   hasAudio: boolean = false;
 
-  @Type(SpeakerConfiguration)
-    speaker!: SpeakerConfiguration;
+  @Type(TelevisionSpeakerConfiguration)
+    speaker!: TelevisionSpeakerConfiguration;
 
   static prefix: string = 'television';
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {  
+  isValid(): [boolean, string[]] {
+    const speakerFieldName: string = 'speaker';
+
     const isValidInputsArray: boolean = (
       (this.inputs !== undefined) &&
       (this.inputs.length > 0)
@@ -34,13 +36,30 @@ export class TelevisionConfiguration {
       namesSet.add(input);
     });
 
+    let isValidTelevisionSpeaker: boolean = true;
+    let televisionSpeakerErrorFields: string[] = [];
+    if (this.hasAudio === true) {
+      if (this.speaker !== undefined) {
+        [isValidTelevisionSpeaker, televisionSpeakerErrorFields] = this.speaker.isValid();
+      } else {
+        [isValidTelevisionSpeaker, televisionSpeakerErrorFields] = [false, [ speakerFieldName ]];
+      }
+    }
+
     // Store fields failing validation
     if (!isValidInputsArray) this.errorFields.push(TelevisionConfiguration.prefix + '.inputs');
     if (!isValidInputNames) this.errorFields.push(TelevisionConfiguration.prefix + '.inputs');
 
+    if (!isValidTelevisionSpeaker) {
+      televisionSpeakerErrorFields.forEach( (errorField) => {
+        this.errorFields.push(TelevisionConfiguration.prefix + '.' + errorField);
+      });
+    }
+
     return [
       (isValidInputsArray &&
-        isValidInputNames),
+        isValidInputNames &&
+        isValidTelevisionSpeaker),
       this.errorFields,
     ];
   }
@@ -49,10 +68,12 @@ export class TelevisionConfiguration {
     const HDMI = 3;   // Characteristic.InputSourceType.HDMI
 
     const inputSources: InputSourceConfiguration[] = [];
-    this.inputs.forEach(name => {
+    this.inputs.forEach((name, index) => {
       const inputSource = new InputSourceConfiguration();
       inputSource.name = name;
       inputSource.inputSourceType = HDMI;
+      inputSource.identifier = index;
+
       inputSources.push(inputSource);
     });
 

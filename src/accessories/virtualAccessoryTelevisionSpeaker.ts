@@ -5,11 +5,11 @@ import { AudioAccessory } from './audioAccessory.js';
 import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
 
 /**
- * Speaker - Accessory implementation
+ * TelevisionSpeaker - Accessory implementation
  */
-export class Speaker extends AudioAccessory {
+export class TelevisionSpeaker extends AudioAccessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Speaker';
+  static readonly ACCESSORY_TYPE_NAME: string = 'TelevisionSpeaker';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -19,14 +19,15 @@ export class Speaker extends AudioAccessory {
   }
 
   protected getAudioAccessoryConfiguration(): AudioAccessoryConfiguration {
-    return this.accessoryConfiguration.speaker;
+    return this.accessoryConfiguration.television.speaker;
   }
 
   protected getAudioAccessoryService(): WithUUID<typeof Service> {
-    return this.platform.Service.Speaker;
+    this.log.info(`Returning Service.TelevisionSpeaker: ${this.platform.Service.TelevisionSpeaker.name}`);
+    return this.platform.Service.TelevisionSpeaker;
   }
 
   protected getAccessoryTypeName(): string {
-    return Speaker.ACCESSORY_TYPE_NAME;
+    return TelevisionSpeaker.ACCESSORY_TYPE_NAME;
   }
 }
