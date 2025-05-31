@@ -13,6 +13,7 @@ export abstract class OpeningAccessory extends Accessory {
   static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;  -> OPENING
   static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;     -> OPEN or CLOSED
 
+  protected static readonly MIN_TIMEOUT_SECS: number = 1;
   protected static readonly DEFAULT_TIMEOUT_SECS: number = 3;
 
   protected readonly stateStorageKey: string = 'Position';
@@ -98,12 +99,14 @@ export abstract class OpeningAccessory extends Accessory {
     const transitionDuration = this.openingAccessoryConfiguration.transitionDuration;
     const transitionDelayMillis: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS) * 1000;
 
-    const proportionalTransitionDelayMillis = transitionDelayMillis / 100 * Math.abs(this.states.TargetPosition - this.states.CurrentPosition);
+    const proportionalTransitionDelayMillis = Math.max(
+      transitionDelayMillis / 100 * Math.abs(this.states.TargetPosition - this.states.CurrentPosition),
+      OpeningAccessory.MIN_TIMEOUT_SECS * 1000);
+
+    // Reset transition timer, if running
+    clearTimeout(this.transitionTimerId);
 
     this.transitionTimerId = setTimeout(() => {
-      // Reset timer
-      clearTimeout(this.transitionTimerId);
-
       this.states.PositionState = OpeningAccessory.STOPPED;
       this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
