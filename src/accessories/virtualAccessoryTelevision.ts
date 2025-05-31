@@ -116,6 +116,7 @@ export class Television extends ExternalAccessory {
       this.accessoryConfiguration.inputSource = inputSourceConfig;
 
       const inputSource: InputSource = new InputSource(this.platform, this.accessory);
+      this.accessory.getService(this.platform.Service.Television)!.addLinkedService(inputSource.service!);
 
       // Remove configuration enrichments
       this.accessoryConfiguration.inputSource = tempHolder;
