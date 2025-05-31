@@ -4,7 +4,6 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
 import { InputSource } from './virtualAccessoryInputSource.js';
-import { TelevisionSpeaker } from './virtualAccessoryTelevisionSpeaker.js';
 import { InputSourceConfiguration } from '../configuration/accessories/configurationInputSource.js';
 
 /**
@@ -39,7 +38,6 @@ export class Television extends ExternalAccessory {
   private readonly configuredNameStorageKey: string = 'TelevisionConfiguredName';
 
   private inputSources: InputSource[] = [];
-  private speaker!: TelevisionSpeaker;
 
   private states = {
     TelevisionState: Television.INACTIVE,
@@ -123,11 +121,6 @@ export class Television extends ExternalAccessory {
 
       this.inputSources.push(inputSource);
     });
-
-
-    if (this.accessoryConfiguration.television.hasAudio) {
-      this.speaker = new TelevisionSpeaker(this.platform, this.accessory);
-    }
   }
 
   // Handlers

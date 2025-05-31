@@ -36,21 +36,6 @@
           }
         }
       },
-      "speaker": {
-        "type": "object",
-        "properties": {
-          "mute": {
-            "title": "Muted",
-            "type": "boolean"
-          },
-          "volume": {
-            "title": "Volume (0% - 100%) *",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100
-          }
-        }
-      },
       "doorAndWindowAccessory": {
         "type": "object",
         "properties": {
@@ -543,7 +528,19 @@
             },
             "speaker": {
               "title": "Speaker",
-              "$ref": "#/$defs/speaker",
+              "type": "object",
+              "properties": {
+                "mute": {
+                  "title": "Muted",
+                  "type": "boolean"
+                },
+                "volume": {
+                  "title": "Volume (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
               }
@@ -595,17 +592,6 @@
                     "type": "string",
                     "minLength": 1,
                     "placeholder": "HDMI"
-                  }
-                },
-                "hasAudio": {
-                  "title": "Has speakers",
-                  "type": "boolean"
-                },
-                "speaker": {
-                  "title": "Television Audio",
-                  "$ref": "#/$defs/speaker",
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].television && model.devices[arrayIndices].television.hasAudio === true;"
                   }
                 }
               },
