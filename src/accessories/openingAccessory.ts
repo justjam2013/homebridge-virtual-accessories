@@ -52,6 +52,7 @@ export abstract class OpeningAccessory extends Accessory {
 
     this.states.TargetPosition = this.states.CurrentPosition;
 
+    // set accessory information
     const service: WithUUID<typeof Service> = this.getOpeningAccessoryService();
     this.service = this.accessory.getService(service) || this.accessory.addService(service as unknown as Service);
 

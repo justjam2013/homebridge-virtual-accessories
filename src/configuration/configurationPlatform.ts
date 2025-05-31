@@ -433,22 +433,8 @@ export class PlatformConfiguration {
 
     this.errorFields.push(...televisionErrorFields);
 
-    // Validate Speaker
-    let isValidSpeaker: boolean = true;
-    {
-      // Enrich configuration with "television.speaker" settings
-      const tempHolder: SpeakerConfiguration = this.speaker;
-      this.speaker = this.television.speaker;
-
-      isValidSpeaker = (this.television.hasAudio) ? this.isValidSpeaker() : true;
-
-      // Remove configuration enrichments
-      this.speaker = tempHolder;
-    }
-
     return (
-      isValidTelevision &&
-      isValidSpeaker
+      isValidTelevision
     );
   }
 

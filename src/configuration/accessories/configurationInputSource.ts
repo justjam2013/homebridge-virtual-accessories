@@ -6,6 +6,7 @@
 export class InputSourceConfiguration {
   name!: string;
   inputSourceType!: number;
+  identifier!: number;
 
   static prefix: string = 'input';
 
@@ -17,11 +18,17 @@ export class InputSourceConfiguration {
       (this.name.length > 0)
     );
 
+    const isValidIdentifier: boolean = (
+      (this.identifier !== undefined)
+    );
+
     // Store fields failing validation
     if (!isValidName) this.errorFields.push(InputSourceConfiguration.prefix + '.name');
+    if (!isValidIdentifier) this.errorFields.push(InputSourceConfiguration.prefix + '.identifier');
 
     return [
-      (isValidName),
+      (isValidName &&
+        isValidIdentifier),
       this.errorFields,
     ];
   }

@@ -589,6 +589,7 @@
                   "type": "array",
                   "minItems": 1,
                   "orderable": true,
+                  "uniqueItems": true,
                   "items": {
                     "title": "{{ ' Input ' + $index }}",
                     "type": "string",

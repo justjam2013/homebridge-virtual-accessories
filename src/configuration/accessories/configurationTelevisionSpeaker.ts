@@ -6,7 +6,7 @@ import { AudioAccessoryConfiguration } from '../configurationAudioAccessoryConfi
 /**
  * 
  */
-export class SpeakerConfiguration extends AudioAccessoryConfiguration {
+export class TelevisionSpeakerConfiguration extends AudioAccessoryConfiguration {
   // volume!: number;
   // mute!: boolean;
 
@@ -18,7 +18,7 @@ export class SpeakerConfiguration extends AudioAccessoryConfiguration {
     const isValidVolume: boolean = Utils.isPercentage(this.volume);
 
     // Store fields failing validation
-    if (!isValidVolume) this.errorFields.push(SpeakerConfiguration.prefix + '.volume');
+    if (!isValidVolume) this.errorFields.push(TelevisionSpeakerConfiguration.prefix + '.volume');
 
     return [
       (isValidVolume),
