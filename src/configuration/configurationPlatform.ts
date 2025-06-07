@@ -2,6 +2,8 @@
 
 import { Categories } from 'homebridge';
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
+
 import { DoorConfiguration } from './accessories/configurationDoor.js';
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
@@ -26,6 +28,9 @@ import { SunEventsTriggerConfiguration } from './triggers/configurationSunEvents
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { InputSourceConfiguration } from './accessories/configurationInputSource.js';
 import { TimerConfiguration } from './configurationTimer.js';
+
+import { AccessoryType, TriggerType } from './configurationSchema.js';
+import { Utils } from '../utils.js';
 
 import { Type } from 'typeserializer';
 
@@ -133,20 +138,26 @@ export class PlatformConfiguration {
 
   private errorFields: string[] = [];
 
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
   isValid(): [boolean, string[]] {
     const isValidAccessoryID: boolean = (
-      (this.accessoryID !== undefined) &&
+      Utils.required(this.accessoryID) &&
       this.isValidId()
     );
-    const isValidAccessoryName: boolean = (this.accessoryName !== undefined);
-    const isValidAccessoryType: boolean = (this.accessoryType !== undefined);
+    const isValidAccessoryName: boolean = (
+      Utils.required(this.accessoryName)
+    );
+    const isValidAccessoryType: boolean = (
+      Utils.required(this.accessoryType)
+    );
 
     const isValidAccessory: boolean = (this.isValidAccessory());
 
     // Store fields failing validation
-    if (!isValidAccessoryID) this.errorFields.push('accessoryID');
-    if (!isValidAccessoryName) this.errorFields.push('accessoryName');
-    if (!isValidAccessoryType) this.errorFields.push('accessoryType');
+    if (!isValidAccessoryID) this.errorFields.push(this.fieldNames.accessoryID!);
+    if (!isValidAccessoryName) this.errorFields.push(this.fieldNames.accessoryName!);
+    if (!isValidAccessoryType) this.errorFields.push(this.fieldNames.accessoryType!);
 
     return [
       (isValidAccessoryID &&
@@ -171,40 +182,40 @@ export class PlatformConfiguration {
 
   private isValidAccessory(): boolean {
     switch (this.accessoryType) {
-    case 'door':
-      return this.isValidDoor();
-    case 'doorbell':
-      return this.isValidDoorbell();
-    case 'fan':
-      return this.isValidFan();
-    case 'garagedoor':
-      return this.isValidGarageDoor();
-    case 'heatercooler':
-      return this.isValidHeaterCooler();
-    case 'humidifierdehumidifier':
-      return this.isValidHumidifierDehumidifier();
-    case 'lightbulb':
-      return this.isValidLighbulb();
-    case 'lock':
-      return this.isValidLock();
-    case 'securitysystem':
-      return this.isValidSecuritySystem();
-    case 'sensor':
-      return this.isValidSensor();
-    case 'speaker':
+    case AccessoryType.Door:
+      return this.isErrorless(this.door, this.fieldNames.door!);
+    case AccessoryType.Doorbell:
+      return this.isErrorless(this.doorbell, this.fieldNames.doorbell!);
+    case AccessoryType.Fan:
+      return this.isErrorless(this.fan, this.fieldNames.fan!);
+    case AccessoryType.GarageDoor:
+      return this.isErrorless(this.garageDoor, this.fieldNames.garageDoor!);
+    case AccessoryType.HeaterCooler:
+      return this.isErrorless(this.heaterCooler, this.fieldNames.heaterCooler!);
+    case AccessoryType.HumidifierDehumidifier:
+      return this.isErrorless(this.humidifierDehumidifier, this.fieldNames.humidifierDehumidifier!);
+    case AccessoryType.Lightbulb:
+      return this.isErrorless(this.lightbulb, this.fieldNames.lightbulb!);
+    case AccessoryType.Lock:
+      return this.isErrorless(this.lock, this.fieldNames.lock!);
+    case AccessoryType.SecuritySystem:
+      return this.isErrorless(this.securitySystem, this.fieldNames.securitySystem!);
+    case AccessoryType.Sensor:
+      return this.isErrorlessSensor(this.sensor, this.fieldNames.sensor!);
+    case AccessoryType.Speaker:
       this.category = Categories.SPEAKER;
-      return this.isValidSpeaker();
-    case 'switch':
-      return this.isValidSwitch();
-    case 'television':
+      return this.isErrorless(this.speaker, this.fieldNames.speaker!);
+    case AccessoryType.Switch:
+      return this.isErrorlessSwitch(this.switch, this.fieldNames.switch!);
+    case AccessoryType.Television:
       this.category = Categories.TELEVISION;
-      return this.isValidTelevision();
-    case 'valve':
-      return this.isValidValve();
-    case 'window':
-      return this.isValidWindow();
-    case 'windowcovering':
-      return this.isValidWindowCovering();
+      return this.isErrorless(this.television, this.fieldNames.television!);
+    case AccessoryType.Valve:
+      return this.isErrorless(this.valve, this.fieldNames.valve!);
+    case AccessoryType.Window:
+      return this.isErrorless(this.window, this.fieldNames.window!);
+    case AccessoryType.WindowCovering:
+      return this.isErrorless(this.windowCovering, this.fieldNames.windowCovering!);
     }
 
     return false;
@@ -214,147 +225,28 @@ export class PlatformConfiguration {
    * Accessory validation
    */
 
-  private isValidDoor(): boolean {
-    let isValidDoor: boolean = false;
-    let doorErrorFields: string[] = [ DoorConfiguration.prefix ];
+  private isErrorless(accessory: AccessoryConfiguration, prefix: string): boolean {
+    let isValid: boolean = false;
+    let errorFields: string[] = [ prefix ];
 
-    if (this.door !== undefined) {
-      [isValidDoor, doorErrorFields] = this.door.isValid();
+    if (accessory !== undefined) {
+      [isValid, errorFields] = accessory.isValid(prefix);
     }
 
-    this.errorFields.push(...doorErrorFields);
+    this.errorFields.push(...errorFields);
 
     return (
-      isValidDoor
+      isValid
     );
   };
 
-  private isValidDoorbell(): boolean {
-    let isValidDoorbell: boolean = false;
-    let doorbellErrorFields: string[] = [ DoorbellConfiguration.prefix ];
 
-    if (this.doorbell !== undefined) {
-      [isValidDoorbell, doorbellErrorFields] = this.doorbell.isValid();
-    }
-
-    this.errorFields.push(...doorbellErrorFields);
-
-    return (
-      isValidDoorbell
-    );
-  };
-
-  private isValidFan(): boolean {
-    let isValidFan: boolean = false;
-    let fanErrorFields: string[] = [ FanConfiguration.prefix ];
-     
-    if (this.fan !== undefined) {
-      [isValidFan, fanErrorFields] = this.fan.isValid();
-    }
-
-    this.errorFields.push(...fanErrorFields);
-
-    return (
-      isValidFan
-    );
-  }
-
-  private isValidGarageDoor(): boolean {
-    let isValidGarageDoor: boolean = false;
-    let garageDoorErrorFields: string[] = [ GarageDoorConfiguration.prefix ];
-
-    if (this.garageDoor !== undefined) {
-      [isValidGarageDoor, garageDoorErrorFields] = this.garageDoor.isValid();
-    }
-
-    this.errorFields.push(...garageDoorErrorFields);
-
-    return (
-      isValidGarageDoor
-    );
-  };
-
-  private isValidHeaterCooler(): boolean {
-    let isValidHeaterCooler: boolean = false;
-    let heaterCoolerErrorFields: string[] = [ HeaterCoolerConfiguration.prefix ];
-
-    if (this.heaterCooler !== undefined) {
-      [isValidHeaterCooler, heaterCoolerErrorFields] = this.heaterCooler.isValid();
-    }
-
-    this.errorFields.push(...heaterCoolerErrorFields);
-
-    return (
-      isValidHeaterCooler
-    );
-  };
-
-  private isValidHumidifierDehumidifier(): boolean {
-    let isValidHumidifierDehumidifier: boolean = false;
-    let humidifierDehumidifierErrorFields: string[] = [ HumidifierDehumidifierConfiguration.prefix ];
-
-    if (this.humidifierDehumidifier !== undefined) {
-      [isValidHumidifierDehumidifier, humidifierDehumidifierErrorFields] = this.humidifierDehumidifier.isValid();
-    }
-
-    this.errorFields.push(...humidifierDehumidifierErrorFields);
-
-    return (
-      isValidHumidifierDehumidifier
-    );
-  };
-
-  private isValidLighbulb(): boolean {
-    let isValidLightbulb: boolean = false;
-    let lightbulbErrorFields: string[] = [ LightbulbConfiguration.prefix ];
-
-    if (this.lightbulb !== undefined) {
-      [isValidLightbulb, lightbulbErrorFields] = this.lightbulb.isValid();
-    }
-
-    this.errorFields.push(...lightbulbErrorFields);
-
-    return (
-      isValidLightbulb
-    );
-  }
-
-  private isValidLock(): boolean {
-    let isValidLock: boolean = false;
-    let lockErrorFields: string[] = [ LockConfiguration.prefix ];
-     
-    if (this.lock !== undefined) {
-      [isValidLock, lockErrorFields] = this.lock.isValid();
-    }
-
-    this.errorFields.push(...lockErrorFields);
-
-    return (
-      isValidLock
-    );
-  };
-
-  private isValidSecuritySystem(): boolean {
-    let isValidSecuritySystem: boolean = false;
-    let securitySystemErrorFields: string[] = [ SecuritySystemConfiguration.prefix ];
-
-    if (this.securitySystem !== undefined) {
-      [isValidSecuritySystem, securitySystemErrorFields] = this.securitySystem.isValid();
-    }
-
-    this.errorFields.push(...securitySystemErrorFields);
-
-    return (
-      isValidSecuritySystem
-    );
-  }
-
-  private isValidSensor(): boolean {
+  private isErrorlessSensor(accessory: AccessoryConfiguration, prefix: string): boolean {
     let isValidSensor: boolean = false;
-    let sensorErrorFields: string[] = [ SensorConfiguration.prefix ];
+    let sensorErrorFields: string[] = [ prefix ];
      
-    if (this.sensor !== undefined) {
-      [isValidSensor, sensorErrorFields] = this.sensor.isValid();
+    if (accessory !== undefined) {
+      [isValidSensor, sensorErrorFields] = accessory.isValid(prefix);
     }
 
     this.errorFields.push(...sensorErrorFields);
@@ -375,44 +267,29 @@ export class PlatformConfiguration {
     );
   };
 
-  private isValidSpeaker(): boolean {
-    let isValidSpeaker: boolean = false;
-    let speakerErrorFields: string[] = [ SpeakerConfiguration.prefix ];
-
-    if (this.speaker !== undefined) {
-      [isValidSpeaker, speakerErrorFields] = this.speaker.isValid();
-    }
-
-    this.errorFields.push(...speakerErrorFields);
-
-    return (
-      isValidSpeaker
-    );
-  };
-
-  private isValidSwitch(): boolean {
+  private isErrorlessSwitch(accessory: AccessoryConfiguration, prefix: string): boolean {
     let isValidSwitch: boolean = false;
-    let switchErrorFields: string[] = [ SwitchConfiguration.prefix ];
+    let switchErrorFields: string[] = [ prefix ];
 
-    if (this.switch !== undefined) {
-      [isValidSwitch, switchErrorFields] = this.switch.isValid();
+    if (accessory !== undefined) {
+      [isValidSwitch, switchErrorFields] = accessory.isValid(prefix);
     }
 
     this.errorFields.push(...switchErrorFields);
 
     // Validate ResetTimer
     let isValidResetTimer: boolean = false;
-    let resetTimerErrorFields: string[] = ['resetTimer'];
+    let resetTimerErrorFields: string[] = [this.fieldNames.resetTimer!];
 
-    [isValidResetTimer, resetTimerErrorFields] = this.isValidResetTimer();
+    [isValidResetTimer, resetTimerErrorFields] = this.isErrorlessResetTimer(this.resetTimer, this.fieldNames.resetTimer!);
 
     this.errorFields.push(...resetTimerErrorFields);
 
     // Validate CompanionSensor
     let isValidCompanionSensor: boolean = false;
-    let companionSensorErrorFields: string[] = ['companionSensor'];
+    let companionSensorErrorFields: string[] = [this.fieldNames.companionSensor!];
 
-    [isValidCompanionSensor, companionSensorErrorFields] = this.isValidCompanionSensor();
+    [isValidCompanionSensor, companionSensorErrorFields] = this.isValidCompanionSensor(this.companionSensor, this.fieldNames.companionSensor!);
 
     this.errorFields.push(...companionSensorErrorFields);
 
@@ -423,101 +300,41 @@ export class PlatformConfiguration {
     );
   };
 
-  private isValidTelevision(): boolean {
-    let isValidTelevision: boolean = false;
-    let televisionErrorFields: string[] = [ TelevisionConfiguration.prefix ];
-
-    if (this.television !== undefined) {
-      [isValidTelevision, televisionErrorFields] = this.television.isValid();
-    }
-
-    this.errorFields.push(...televisionErrorFields);
-
-    return (
-      isValidTelevision
-    );
-  }
-
-  private isValidValve(): boolean {
-    let isValidValve: boolean = false;
-    let valveErrorFields: string[] = [ ValveConfiguration.prefix ];
-
-    if (this.valve !== undefined) {
-      [isValidValve, valveErrorFields] = this.valve.isValid();
-    }
-
-    this.errorFields.push(...valveErrorFields);
-
-    return (
-      isValidValve
-    );
-  }
-
-  private isValidWindow(): boolean {
-    let isValidWindow: boolean = false;
-    let windowErrorFields: string[] = [ WindowConfiguration.prefix ];
-
-    if (this.window !== undefined) {
-      [isValidWindow, windowErrorFields] = this.window.isValid();
-    }
-
-    this.errorFields.push(...windowErrorFields);
-
-    return (
-      isValidWindow
-    );
-  }
-
-  private isValidWindowCovering(): boolean {
-    let isValidWindowCovering: boolean = false;
-    let windowCoveringErrorFields: string[] = [ WindowCoveringConfiguration.prefix ];
-
-    if (this.windowCovering !== undefined) {
-      [isValidWindowCovering, windowCoveringErrorFields] = this.windowCovering.isValid();
-    }
-
-    this.errorFields.push(...windowCoveringErrorFields);
-
-    return (
-      isValidWindowCovering
-    );
-  }
-
   /**
    * Decoration validations
    */
 
   // Validate if accessory has reset timer - default true
-  private isValidResetTimer(): [boolean, string[]] {
+  private isErrorlessResetTimer(accessory: AccessoryConfiguration, prefix: string): [boolean, string[]] {
     if (this.switch !== undefined && this.switch.hasResetTimer) {
-      let isValidResetTimer: boolean;
+      let isValid: boolean;
       let errorFields: string[];
 
-      if (this.resetTimer === undefined) {
+      if (accessory === undefined) {
         return [false, []];
       }
 
       // eslint-disable-next-line prefer-const
-      [isValidResetTimer, errorFields] = this.resetTimer.isValid();
-      return [isValidResetTimer, errorFields];
+      [isValid, errorFields] = accessory.isValid(prefix);
+      return [isValid, errorFields];
     }
 
     return [true, []];
   }
 
   // Validate if accessory has companion sensor - default true
-  private isValidCompanionSensor(): [boolean, string[]] {
+  private isValidCompanionSensor(accessory: AccessoryConfiguration, prefix: string): [boolean, string[]] {
     if (this.switch !== undefined && this.switch.hasCompanionSensor) {
-      let isValidCompanionSensor: boolean;
+      let isValid: boolean;
       let errorFields: string[];
 
-      if (this.companionSensor === undefined) {
+      if (accessory === undefined) {
         return [false, []];
       }
 
       // eslint-disable-next-line prefer-const
-      [isValidCompanionSensor, errorFields] = this.companionSensor.isValid();
-      return [isValidCompanionSensor, errorFields];
+      [isValid, errorFields] = accessory.isValid(prefix);
+      return [isValid, errorFields];
     }
 
     return [true, []];
@@ -525,36 +342,36 @@ export class PlatformConfiguration {
 
   private isValidTrigger(): [boolean, string[]] {
     if (this.sensor.trigger !== undefined) {
-      let isValidTrigger: boolean;
+      let isValid: boolean;
       let errorFields: string[];
 
       switch (this.sensor.trigger) {
-      case 'cron':
+      case TriggerType.Cron:
         if (this.cronTrigger === undefined) {
-          return [false, ['cronTrigger']];
+          return [false, [this.fieldNames.cronTrigger!]];
         }
 
-        [isValidTrigger, errorFields] = this.cronTrigger.isValid();
+        [isValid, errorFields] = this.cronTrigger.isValid(this.fieldNames.cronTrigger!);
         break;
-      case 'ping':
+      case TriggerType.Ping:
         if (this.pingTrigger === undefined) {
-          return [false, ['pingTrigger']];
+          return [false, [this.fieldNames.pingTrigger!]];
         }
 
-        [isValidTrigger, errorFields] = this.pingTrigger.isValid();
+        [isValid, errorFields] = this.pingTrigger.isValid(this.fieldNames.pingTrigger!);
         break;
-      case 'sunevents':
+      case TriggerType.SunEvents:
         if (this.sunEventsTrigger === undefined) {
-          return [false, ['sunEventsTrigger']];
+          return [false, [this.fieldNames.sunEventsTrigger!]];
         }
 
-        [isValidTrigger, errorFields] = this.sunEventsTrigger.isValid();
+        [isValid, errorFields] = this.sunEventsTrigger.isValid(this.fieldNames.sunEventsTrigger!);
         break;
       default:
         return [false, ['unknownTrigger']];
       }
 
-      return [isValidTrigger, errorFields];
+      return [isValid, errorFields];
     }
 
     return [false, ['sensorTrigger']];

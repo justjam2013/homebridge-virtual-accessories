@@ -2,8 +2,11 @@ import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
-import { OpeningAccessoryConfiguration } from '../configuration/configurationOpeningAccesory.js';
+import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
 
+/**
+ * OpeningAccessory - Abstract accessory
+ */
 export abstract class OpeningAccessory extends Accessory {
 
   static readonly CLOSED: number = 0;   // 0%
@@ -20,7 +23,7 @@ export abstract class OpeningAccessory extends Accessory {
 
   protected transitionTimerId: ReturnType<typeof setTimeout> | undefined;
 
-  private openingAccessoryConfiguration: OpeningAccessoryConfiguration;
+  private openingAccessoryConfiguration: OpenableAccessoryConfiguration;
 
   protected states = {
     TargetPosition: OpeningAccessory.CLOSED,
@@ -137,7 +140,7 @@ export abstract class OpeningAccessory extends Accessory {
     return positionState;
   }
 
-  protected abstract getOpeningAccessoryConfiguration(): OpeningAccessoryConfiguration;
+  protected abstract getOpeningAccessoryConfiguration(): OpenableAccessoryConfiguration;
 
   protected abstract getOpeningAccessoryService(): WithUUID<typeof Service>;
 

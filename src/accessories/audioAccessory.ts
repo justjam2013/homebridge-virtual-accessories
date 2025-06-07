@@ -5,7 +5,7 @@ import { ExternalAccessory } from './externalAccessory.js';
 import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
 
 /**
- * Lightbulb - Accessory implementation
+ * AudioAccessory - Abstract accessory
  */
 export abstract class AudioAccessory extends ExternalAccessory {
 

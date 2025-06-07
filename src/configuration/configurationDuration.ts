@@ -1,9 +1,13 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
+
+import { Utils } from '../utils.js';
+
 /**
  * 
  */
-export class DurationConfiguration {
+export class DurationConfiguration extends AccessoryConfiguration {
 
   static readonly SECONDS_MAX_VALUE: number = 59;
   static readonly MINUTES_MAX_VALUE: number = 59;
@@ -17,31 +21,33 @@ export class DurationConfiguration {
 
   private errorFields: string[] = [];
 
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
   isValid(prefix: string): [boolean, string[]] {
     const isValidDays: boolean = (
-      (this.days !== undefined) &&
+      Utils.required(this.days) &&
       (this.days >= 0 && this.days <= 7)
     );
 
     const isValidHours: boolean = (
-      (this.hours !== undefined) &&
+      Utils.required(this.hours) &&
       (this.hours >= 0 && this.hours <= 23)
     );
 
     const isValidMinutes: boolean = (
-      (this.minutes !== undefined) &&
+      Utils.required(this.minutes) &&
       (this.minutes >= 0 && this.minutes <= 59)
     );
 
     const isValidSeconds: boolean = (
-      (this.seconds !== undefined) &&
+      Utils.required(this.seconds) &&
       (this.seconds >= 0 && this.seconds <= 59)
     );
 
-    if (!isValidDays) this.errorFields.push(prefix + '.days');
-    if (!isValidHours) this.errorFields.push(prefix + '.hours');
-    if (!isValidMinutes) this.errorFields.push(prefix + '.minutes');
-    if (!isValidSeconds) this.errorFields.push(prefix + '.seconds');
+    if (!isValidDays) this.errorFields.push(prefix + '.' + this.fieldNames.days);
+    if (!isValidHours) this.errorFields.push(prefix + '.' + this.fieldNames.hours);
+    if (!isValidMinutes) this.errorFields.push(prefix + '.' + this.fieldNames.minutes);
+    if (!isValidSeconds) this.errorFields.push(prefix + '.' + this.fieldNames.seconds);
 
     return [
       (isValidDays && 

@@ -3,6 +3,9 @@ import { PlatformAccessory } from 'homebridge';
 
 import { Lightbulb } from '../accessories/virtualAccessoryLightbulb.js';
 
+/**
+ * CompanionLightbulb - Companion accessory
+ */
 export class CompanionLightbulb extends Lightbulb {
 
   private companionName: string;

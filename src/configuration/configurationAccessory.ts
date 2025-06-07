@@ -1,4 +1,7 @@
+/**
+ * 
+ */
 export abstract class AccessoryConfiguration {
 
-  abstract isValid(): [boolean, string[]];
+  abstract isValid(prefix: string): [boolean, string[]];
 }

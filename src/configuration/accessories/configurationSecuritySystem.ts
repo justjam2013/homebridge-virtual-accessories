@@ -1,23 +1,28 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { SecuritySystemState } from '../configurationSchema.js';
+
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
-export class SecuritySystemConfiguration {
+export class SecuritySystemConfiguration extends AccessoryConfiguration {
   defaultState!: string;
-
-  static prefix: string = 'securitySystem';
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      [ 'awayarm', 'stayarm', 'nightarm', 'disarmed' ].includes(this.defaultState)
+      Utils.required(this.defaultState) &&
+      SecuritySystemState.States.includes(this.defaultState)
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(SecuritySystemConfiguration.prefix + '.defaultState');
+    if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
 
     return [
       (isValidDefaultState),

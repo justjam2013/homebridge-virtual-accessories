@@ -1,30 +1,35 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
+import { SensorType, TriggerType } from './configurationSchema.js';
+
+import { Utils } from '../utils.js';
+
 /**
  * 
  */
-export class SensorConfiguration {
+export class SensorConfiguration extends AccessoryConfiguration {
   type!: string;
   trigger!: string;
 
-  static prefix: string = 'sensor';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidType: boolean = (
-      (this.type !== undefined) &&
-      ['carbonDioxide', 'carbonMonoxide', 'contact', 'leak', 'motion', 'occupancy', 'smoke'].includes(this.type)
+      Utils.required(this.type) &&
+      SensorType.Types.includes(this.type)
     );
 
     const isValidTrigger: boolean = (
-      (this.trigger !== undefined) &&
-      ['cron', 'ping', 'sunevents' ].includes(this.trigger)
+      Utils.required(this.trigger) &&
+      TriggerType.Types.includes(this.trigger)
     );
 
     // Store fields failing validation
-    if (!isValidType) this.errorFields.push(SensorConfiguration.prefix + '.type');
-    if (!isValidTrigger) this.errorFields.push(SensorConfiguration.prefix + '.trigger');
+    if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
+    if (!isValidTrigger) this.errorFields.push(prefix + '.' + this.fieldNames.trigger);
 
     return [
       (isValidType &&

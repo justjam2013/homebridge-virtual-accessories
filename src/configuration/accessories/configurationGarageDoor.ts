@@ -1,33 +1,36 @@
 /* eslint-disable curly */
 
+import { OpenableAccessoryConfiguration } from '../configurationOpenableAccesory.js'; 
+import { OpenableState } from '../configurationSchema.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class GarageDoorConfiguration {
-  defaultState!: string;
-  transitionDuration!: number;
-
-  static prefix: string = 'garageDoor';
+export class GarageDoorConfiguration extends OpenableAccessoryConfiguration {
+  // defaultState!: string;
+  // transitionDuration!: number;
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidDefaultState: boolean = (
-      (this.defaultState !== undefined) &&
-      [ 'closed', 'open' ].includes(this.defaultState)
+      Utils.required(this.defaultState) &&
+      OpenableState.States.includes(this.defaultState)
     );
 
     const isValidTransitionDuration: boolean = (
-      this.transitionDuration === undefined?
-        true :
-        Utils.isTransitionDuration(this.transitionDuration)
+      this.transitionDuration !== undefined?
+        Utils.isValidTransition(this.transitionDuration) :
+        true
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(GarageDoorConfiguration.prefix + '.defaultState');
-    if (!isValidTransitionDuration) this.errorFields.push(GarageDoorConfiguration.prefix + '.transitionDuration');
+    if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
+    if (!isValidTransitionDuration) this.errorFields.push(prefix + '.' + this.fieldNames.transitionDuration);
 
     return [
       (isValidDefaultState &&

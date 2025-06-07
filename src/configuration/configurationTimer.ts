@@ -1,7 +1,9 @@
  
 /* eslint-disable brace-style */
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
 import { DurationConfiguration } from './configurationDuration.js';
+
 import { Utils } from '../utils.js';
 
 import { Type } from 'typeserializer';
@@ -9,7 +11,7 @@ import { Type } from 'typeserializer';
 /**
  * 
  */
-export class TimerConfiguration {
+export class TimerConfiguration extends AccessoryConfiguration {
   durationIsRandom: boolean = false;
   @Type(DurationConfiguration)
     duration!: DurationConfiguration;
@@ -19,23 +21,19 @@ export class TimerConfiguration {
     durationRandomMax!: DurationConfiguration;
   isResettable: boolean = false;
 
-  static prefix: string = 'resetTimer';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const durationFieldName: string = 'duration';
-    const durationRandomMinFieldName: string = 'durationRandomMin';
-    const durationRandomMaxFieldName: string = 'durationRandomMax';
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
+  isValid(prefix: string): [boolean, string[]] {
     let isValidDuration: boolean = true;
     let durationErrorFields: string[] = [];
     if (this.durationIsRandom === false) {
       if (this.duration !== undefined) {
-        [isValidDuration, durationErrorFields] = this.duration.isValid(durationFieldName);
+        [isValidDuration, durationErrorFields] = this.duration.isValid(this.fieldNames.duration!);
       } 
       else {
-        [isValidDuration, durationErrorFields] = [false, [ durationFieldName ]];
+        [isValidDuration, durationErrorFields] = [false, [ this.fieldNames.duration! ]];
       }
     }
 
@@ -43,10 +41,10 @@ export class TimerConfiguration {
     let durationRandomMinErrorFields: string[] = [];
     if (this.durationIsRandom === true) {
       if (this.durationRandomMin !== undefined) {
-        [isValidDurationRandomMin, durationRandomMinErrorFields] = this.durationRandomMin.isValid(durationRandomMinFieldName);
+        [isValidDurationRandomMin, durationRandomMinErrorFields] = this.durationRandomMin.isValid(this.fieldNames.durationRandomMin!);
       }
       else {
-        [isValidDurationRandomMin, durationRandomMinErrorFields] = [false, [ durationRandomMinFieldName ]];
+        [isValidDurationRandomMin, durationRandomMinErrorFields] = [false, [ this.fieldNames.durationRandomMin! ]];
       }
     }
 
@@ -54,17 +52,18 @@ export class TimerConfiguration {
     let durationRandomMaxErrorFields: string[] = [];
     if (this.durationIsRandom === true) {
       if (this.durationRandomMax !== undefined) {
-        [isValidDurationRandomMax, durationRandomMaxErrorFields] = this.durationRandomMax.isValid(durationRandomMaxFieldName);
+        [isValidDurationRandomMax, durationRandomMaxErrorFields] = this.durationRandomMax.isValid(this.fieldNames.durationRandomMax!);
       }
       else {
-        [isValidDurationRandomMax, durationRandomMaxErrorFields] = [false, [ durationRandomMaxFieldName ]];
+        [isValidDurationRandomMax, durationRandomMaxErrorFields] = [false, [ this.fieldNames.durationRandomMax! ]];
       }
     }
 
     const isValidDurationRandomRange: boolean = (
       (this.durationIsRandom === true &&
         this.durationRandomMin !== undefined &&
-        this.durationRandomMax !== undefined) ? (
+        this.durationRandomMax !== undefined) ?
+        (
           this.convertDurationToSeconds(this.durationRandomMin) < this.convertDurationToSeconds(this.durationRandomMax)
         ) :
         true
@@ -72,22 +71,22 @@ export class TimerConfiguration {
 
     if (!isValidDuration) {
       durationErrorFields.forEach( (errorField) => {
-        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+        this.errorFields.push(prefix + '.' + errorField);
       });
     }
     if (!isValidDurationRandomMin) {
       durationRandomMinErrorFields.forEach( (errorField) => {
-        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+        this.errorFields.push(prefix + '.' + errorField);
       });
     }
     if (!isValidDurationRandomMax) {
       durationRandomMaxErrorFields.forEach( (errorField) => {
-        this.errorFields.push(TimerConfiguration.prefix + '.' + errorField);
+        this.errorFields.push(prefix + '.' + errorField);
       });
     }
     if (!isValidDurationRandomRange) {this.errorFields.push(
-      TimerConfiguration.prefix + '.' + durationRandomMinFieldName,
-      TimerConfiguration.prefix + '.' + durationRandomMaxFieldName);
+      prefix + '.' + this.fieldNames.durationRandomMin,
+      prefix + '.' + this.fieldNames.durationRandomMax);
     }
 
     return [

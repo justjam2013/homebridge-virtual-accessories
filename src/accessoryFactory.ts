@@ -33,6 +33,7 @@ import { CronTrigger } from './triggers/triggerCron.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
 
+import { AccessoryType, SensorType, TriggerType } from './configuration/configurationSchema.js';
 import { PlatformConfiguration } from './configuration/configurationPlatform.js';
 
 /**
@@ -56,52 +57,52 @@ export abstract class AccessoryFactory {
     const accessoryConfiguration: PlatformConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
-    case 'door':
+    case AccessoryType.Door:
       virtualAccessory = new Door(platform, accessory);
       break;
-    case 'doorbell':
+    case AccessoryType.Doorbell:
       virtualAccessory = new Doorbell(platform, accessory);
       break;
-    case 'fan':
+    case AccessoryType.Fan:
       virtualAccessory = new Fan(platform, accessory);
       break;
-    case 'garagedoor':
+    case AccessoryType.GarageDoor:
       virtualAccessory = new GarageDoor(platform, accessory);
       break;
-    case 'heatercooler':
+    case AccessoryType.HeaterCooler:
       virtualAccessory = new HeaterCooler(platform, accessory);
       break;
-    case 'humidifierdehumidifier':
+    case AccessoryType.HumidifierDehumidifier:
       virtualAccessory = new HumidifierDehumidifier(platform, accessory);
       break;
-    case 'lightbulb':
+    case AccessoryType.Lightbulb:
       virtualAccessory = new Lightbulb(platform, accessory);
       break;
-    case 'lock':
+    case AccessoryType.Lock:
       virtualAccessory = new Lock(platform, accessory);
       break;
-    case 'securitysystem':
+    case AccessoryType.SecuritySystem:
       virtualAccessory = new SecuritySystem(platform, accessory);
       break;
-    case 'speaker':
+    case AccessoryType.Speaker:
       virtualAccessory = new Speaker(platform, accessory);
       break;
-    case 'switch':
+    case AccessoryType.Switch:
       virtualAccessory = new Switch(platform, accessory);
       break;
-    case 'television':
+    case AccessoryType.Television:
       virtualAccessory = new Television(platform, accessory);
       break;
-    case 'valve':
+    case AccessoryType.Valve:
       virtualAccessory = new Valve(platform, accessory);
       break;
-    case 'window':
+    case AccessoryType.Window:
       virtualAccessory = new Window(platform, accessory);
       break;
-    case 'windowcovering':
+    case AccessoryType.WindowCovering:
       virtualAccessory = new WindowCovering(platform, accessory);
       break;
-    case 'sensor':
+    case AccessoryType.Sensor:
       virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
       break;
     default:
@@ -139,25 +140,25 @@ export abstract class AccessoryFactory {
     let virtualSensor: Sensor | undefined;
 
     switch (sensorType) {
-    case 'carbonDioxide':
+    case SensorType.CarbonDioxide:
       virtualSensor = new CarbonDioxideSensor(platform, accessory, companionSensorName);
       break;
-    case 'carbonMonoxide':
+    case SensorType.CarbonMonoxide:
       virtualSensor = new CarbonMonoxideSensor(platform, accessory, companionSensorName);
       break;
-    case 'contact':
+    case SensorType.Contact:
       virtualSensor = new ContactSensor(platform, accessory, companionSensorName);
       break;
-    case 'leak':
+    case SensorType.Leak:
       virtualSensor = new LeakSensor(platform, accessory, companionSensorName);
       break;
-    case 'motion':
+    case SensorType.Motion:
       virtualSensor = new MotionSensor(platform, accessory, companionSensorName);
       break;
-    case 'occupancy':
+    case SensorType.Occupancy:
       virtualSensor = new OccupancySensor(platform, accessory, companionSensorName);
       break;
-    case 'smoke':
+    case SensorType.Smoke:
       virtualSensor = new SmokeSensor(platform, accessory, companionSensorName);
       break;
     default:
@@ -175,13 +176,13 @@ export abstract class AccessoryFactory {
     let trigger: Trigger | undefined;
 
     switch (triggerType) {
-    case 'ping':
+    case TriggerType.Ping:
       trigger = new PingTrigger(sensor, name);
       break;
-    case 'cron':
+    case TriggerType.Cron:
       trigger = new CronTrigger(sensor, name);
       break;
-    case 'sunevents':
+    case TriggerType.SunEvents:
       trigger = new SunEventsTrigger(sensor, name);
       break;
     default:

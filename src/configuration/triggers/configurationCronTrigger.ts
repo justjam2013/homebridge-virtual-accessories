@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 import { LocalDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
@@ -14,20 +16,20 @@ export class CronTriggerConfiguration {
   disableTriggerEventLogging: boolean = false;
   isDisabled: boolean = false;
 
-  // private static cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';
   // 5: minutes granularity
   // 6: seconds granularity
   // 7: milliseconds granularity
   private static cronMinutesGranularityPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
-  //private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
   private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d|)$';
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const patternRegex = new RegExp(CronTriggerConfiguration.cronMinutesGranularityPattern);
     const isValidPattern: boolean = (
-      (this.pattern !== undefined) &&
+      Utils.required(this.pattern) &&
       patternRegex.test(this.pattern)
     );
 
@@ -52,11 +54,11 @@ export class CronTriggerConfiguration {
       isValidExecutionRangeDateTime = endDate.isAfter(startDate);
     }
 
-    if (!isValidPattern) this.errorFields.push('pattern');
-    if (!isValidZoneId) this.errorFields.push('zoneId');
-    if (!isValidStartDateTime) this.errorFields.push('startDateTime');
-    if (!isValidEndDateTime) this.errorFields.push('endDateTime');
-    if (!isValidExecutionRangeDateTime) this.errorFields.push('startDateTime', 'endDateTime');
+    if (!isValidPattern) this.errorFields.push(prefix + '.' + this.fieldNames.pattern!);
+    if (!isValidZoneId) this.errorFields.push(prefix + '.' + this.fieldNames.zoneId!);
+    if (!isValidStartDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.startDateTime!);
+    if (!isValidEndDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.endDateTime!);
+    if (!isValidExecutionRangeDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.startDateTime!, prefix + '.' + this.fieldNames.endDateTime!);
 
     return [
       (isValidPattern &&

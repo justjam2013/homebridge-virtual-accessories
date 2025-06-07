@@ -3,9 +3,9 @@ import { AccessoryConfiguration } from './configurationAccessory.js';
 /**
  * 
  */
-export abstract class AudioAccessoryConfiguration extends AccessoryConfiguration {
-  volume!: number;
-  mute!: boolean;
+export abstract class OpenableAccessoryConfiguration extends AccessoryConfiguration {
+  defaultState!: string;
+  transitionDuration!: number;
 
   abstract isValid(prefix: string): [boolean, string[]];
 }
