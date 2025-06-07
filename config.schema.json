@@ -614,11 +614,24 @@
                   ]
                 },
                 "duration": {
-                  "title": "Runtime *",
-                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 3600
+                  "type": "object",
+                  "properties": {
+                    "minutes": {
+                      "title": "Minutes *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60
+                    },
+                    "seconds": {
+                      "title": "Seconds",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 59,
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration.minutes < 60;"
+                      }
+                    }
+                  }
                 }
               },
               "condition": {
