@@ -1,20 +1,23 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
 import { InputSourceConfiguration } from './configurationInputSource.js';
+
+import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class TelevisionConfiguration {
+export class TelevisionConfiguration extends AccessoryConfiguration {
   inputs!: string[];
-
-  static prefix: string = 'television';
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidInputsArray: boolean = (
-      (this.inputs !== undefined) &&
+      Utils.required(this.inputs) &&
       (this.inputs.length > 0)
     );
 
@@ -29,8 +32,8 @@ export class TelevisionConfiguration {
     });
 
     // Store fields failing validation
-    if (!isValidInputsArray) this.errorFields.push(TelevisionConfiguration.prefix + '.inputs');
-    if (!isValidInputNames) this.errorFields.push(TelevisionConfiguration.prefix + '.inputs');
+    if (!isValidInputsArray) this.errorFields.push(prefix + '.' + this.fieldNames.inputs);
+    if (!isValidInputNames) this.errorFields.push(prefix + '.' + this.fieldNames.inputs);
 
     return [
       (isValidInputsArray &&

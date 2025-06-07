@@ -1,5 +1,8 @@
 /* eslint-disable curly */
 
+import { SunEvent } from '../configurationSchema.js';
+import { Utils } from '../../utils.js';
+
 import { ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
@@ -19,30 +22,32 @@ export class SunEventsTriggerConfiguration {
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidEvent = (
-      (this.event !== undefined) &&
-      [ 'sunrise', 'sunset', 'goldenhour' ].includes(this.event)
+      Utils.required(this.event) &&
+      SunEvent.Events.includes(this.event)
     );
 
     const latitudeRegex = new RegExp(SunEventsTriggerConfiguration.latitudePattern);
     const isValidLatitude: boolean = (
-      (this.latitude !== undefined) &&
+      Utils.required(this.latitude) &&
       latitudeRegex.test(this.latitude)
     );
 
     const longitudeRegex = new RegExp(SunEventsTriggerConfiguration.longitudePattern);
     const isValidLongitude: boolean = (
-      (this.longitude !== undefined) &&
+      Utils.required(this.longitude) &&
       longitudeRegex.test(this.longitude)
     );
 
     const isValidZoneId = (this.zoneId === undefined) || this.isValidZoneId(this.zoneId);
 
-    if (!isValidEvent) this.errorFields.push('event');
-    if (!isValidLatitude) this.errorFields.push('latitude');
-    if (!isValidLongitude) this.errorFields.push('longitude');
-    if (!isValidZoneId) this.errorFields.push('zoneId');
+    if (!isValidEvent) this.errorFields.push(prefix + '.' + this.fieldNames.event!);
+    if (!isValidLatitude) this.errorFields.push(prefix + '.' + this.fieldNames.latitude!);
+    if (!isValidLongitude) this.errorFields.push(prefix + '.' + this.fieldNames.longitude!);
+    if (!isValidZoneId) this.errorFields.push(prefix + '.' + this.fieldNames.zoneId!);
 
     return [
       (isValidEvent &&

@@ -1,3 +1,4 @@
+import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { Accessory } from './accessories/virtualAccessory.js';
@@ -54,7 +55,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
-    this.api.on('didFinishLaunching', () => {
+    this.api.on(APIEvent.DID_FINISH_LAUNCHING, () => {
       log.debug('Executing didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
       this.discoverDevices();
@@ -62,7 +63,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       this.log.info(`Running Virtual Accessories For Homebridge v${this.version}`);
     });
 
-    this.api.on('shutdown', () => {
+    this.api.on(APIEvent.SHUTDOWN, () => {
       log.debug('Executing shutdown callback');
       this.sensorUpdateServer?.stop();
     });

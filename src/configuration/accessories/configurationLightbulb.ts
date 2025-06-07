@@ -1,11 +1,14 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { ColorTemperature, LightbulbType, PowerState } from '../configurationSchema.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class LightbulbConfiguration {
+export class LightbulbConfiguration extends AccessoryConfiguration {
   defaultState!: string;
   type!: string;
   brightness!: number;
@@ -14,35 +17,40 @@ export class LightbulbConfiguration {
   // hue!: number;
   // saturation!: number;
 
-  static prefix: string = 'lightbulb';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
-    const isValidType: boolean = (
-      (this.type !== undefined) &&
-      [ 'white', 'ambiance', 'color' ].includes(this.type)
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidDefaultState: boolean = (
+      Utils.required(this.defaultState) &&
+      PowerState.States.includes(this.defaultState)
     );
 
-    const isValidBrightness: boolean = Utils.isPercentage(this.brightness);
+    const isValidType: boolean = (
+      Utils.required(this.type) &&
+      LightbulbType.Types.includes(this.type)
+    );
+
+    const isValidBrightness: boolean = (
+      Utils.required(this.brightness) &&
+      Utils.isPercentage(this.brightness)
+    );
 
     const isValidColorTemperature: boolean = (
-      (this.type !== 'ambiance') ?
-        true :
+      (this.type === LightbulbType.Ambiance) ?
         (
-          (this.colorTemperatureKelvin !== undefined) ?
-            (2203 <= this.colorTemperatureKelvin && this.colorTemperatureKelvin <= 6536) :
-            false
-        )
+          Utils.required(this.colorTemperatureKelvin) &&
+          (this.colorTemperatureKelvin >= ColorTemperature.TemperatureKelvinMin && this.colorTemperatureKelvin <= ColorTemperature.TemperatureKelvinMax)
+        ) :
+        true
     );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(LightbulbConfiguration.prefix + '.defaultState');
-    if (!isValidType) this.errorFields.push(LightbulbConfiguration.prefix + '.type');
-    if (!isValidBrightness) this.errorFields.push(LightbulbConfiguration.prefix + '.brightness');
-    if (!isValidColorTemperature) this.errorFields.push(LightbulbConfiguration.prefix + '.colorTemperature');
+    if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
+    if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
+    if (!isValidBrightness) this.errorFields.push(prefix + '.' + this.fieldNames.brightness);
+    if (!isValidColorTemperature) this.errorFields.push(prefix + '.' + this.fieldNames.colorTemperatureKelvin);
 
     return [
       (isValidDefaultState &&

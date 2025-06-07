@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 import { LocalDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
@@ -24,10 +26,12 @@ export class CronTriggerConfiguration {
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const patternRegex = new RegExp(CronTriggerConfiguration.cronMinutesGranularityPattern);
     const isValidPattern: boolean = (
-      (this.pattern !== undefined) &&
+      Utils.required(this.pattern) &&
       patternRegex.test(this.pattern)
     );
 
@@ -52,11 +56,11 @@ export class CronTriggerConfiguration {
       isValidExecutionRangeDateTime = endDate.isAfter(startDate);
     }
 
-    if (!isValidPattern) this.errorFields.push('pattern');
-    if (!isValidZoneId) this.errorFields.push('zoneId');
-    if (!isValidStartDateTime) this.errorFields.push('startDateTime');
-    if (!isValidEndDateTime) this.errorFields.push('endDateTime');
-    if (!isValidExecutionRangeDateTime) this.errorFields.push('startDateTime', 'endDateTime');
+    if (!isValidPattern) this.errorFields.push(prefix + '.' + this.fieldNames.pattern!);
+    if (!isValidZoneId) this.errorFields.push(prefix + '.' + this.fieldNames.zoneId!);
+    if (!isValidStartDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.startDateTime!);
+    if (!isValidEndDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.endDateTime!);
+    if (!isValidExecutionRangeDateTime) this.errorFields.push(prefix + '.' + this.fieldNames.startDateTime!, prefix + '.' + this.fieldNames.endDateTime!);
 
     return [
       (isValidPattern &&

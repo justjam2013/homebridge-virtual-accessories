@@ -5,6 +5,9 @@ import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 import { deserialize } from 'typeserializer';
 import 'reflect-metadata';
 
+/**
+ * 
+ */
 export class Configuration {
 
   private log: VirtualAccessoriesLogger;

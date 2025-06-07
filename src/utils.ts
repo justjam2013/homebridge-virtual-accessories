@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
+/**
+ * Utils
+ */
 export class Utils {
 
   static now(): ZonedDateTime {
@@ -15,11 +19,13 @@ export class Utils {
   }
 
   static secondsToHHmmss(seconds: number): string {
-    let time: number = seconds;
-    const hours = Math.floor(time / 3600);
-    time = time - (hours * 3600);
-    const mins = Math.floor(time / 60);
-    const secs = time - (mins * 60);
+    let secondsDuration: number = Math.max(seconds, 0);
+
+    const hours: number = Math.floor(secondsDuration / 3600);
+    secondsDuration = secondsDuration - (hours * 3600);
+    const mins: number = Math.floor(secondsDuration / 60);
+    secondsDuration = secondsDuration - (mins * 60);
+    const secs: number = secondsDuration;
 
     let hhmmss: string = '';
 
@@ -40,90 +46,30 @@ export class Utils {
     minutes: number,
     seconds: number,
   ) {
-    const convertedSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
+    if (days < 0 || hours < 0 || minutes < 0 || seconds < 0) {
+      return 0;
+    }
 
+    const convertedSeconds: number = (((days * 24) + hours) * 60 + minutes) * 60 + seconds;
     return convertedSeconds;
   }
 
   static secondsToDaysHoursMinutesSeconds(
     seconds: number,
   ): [number, number, number, number] {
-    if (seconds === 0) {
+    if (seconds <= 0) {
       return [0, 0, 0, 0];
     }
 
-    const convertedDays = Math.trunc(((seconds / 60) / 60) / 24);
+    const convertedDays: number = Math.trunc(((seconds / 60) / 60) / 24);
     seconds = seconds - convertedDays * 24 * 60 * 60;
-    const convertedHours = Math.trunc((seconds / 60) / 60);
+    const convertedHours: number = Math.trunc((seconds / 60) / 60);
     seconds = seconds - convertedHours * 60 * 60;
-    const convertedMinutes = Math.trunc((seconds / 60));
+    const convertedMinutes: number = Math.trunc((seconds / 60));
     seconds = seconds - convertedMinutes * 60;
-    const convertedSeconds = seconds;
+    const convertedSeconds: number = seconds;
 
     return [convertedDays, convertedHours, convertedMinutes, convertedSeconds];
-  }
-
-
-  static isPoweredState(
-    value: string,
-  ): boolean {
-    let isPowerState = false;
-
-    if ((value !== undefined) &&
-        [ 'on', 'off' ].includes(value)
-    ) {
-      isPowerState = true;
-    }
-
-    return isPowerState;
-  }
-
-  static isPercentage(
-    value: number,
-  ): boolean {
-    let isPercentage = false;
-
-    if ((value !== undefined) &&
-        (value >= 0 && value <= 100)
-    ) {
-      isPercentage = true;
-    }
-
-    return isPercentage;
-  }
-
-  static isRotationDirection(
-    value: string,
-  ): boolean {
-    let isRotation = false;
-
-    if ((value !== undefined) &&
-        [ 'clockwise', 'counterclockwise' ].includes(value)
-    ) {
-      isRotation = true;
-    }
-
-    return isRotation;
-  }
-
-  static isTransitionDuration(
-    value: number,
-  ): boolean {
-    let isTransitionDuration = false;
-
-    if ((value !== undefined) &&
-        (value >= 0)
-    ) {
-      isTransitionDuration = true;
-    }
-
-    return isTransitionDuration;
-  }
-
-  static isTimeout(
-    value: number,
-  ): boolean {
-    return Utils.isTransitionDuration(value);
   }
 
   private static readonly debounceMillis: number = 300;
@@ -145,5 +91,36 @@ export class Utils {
 
   static async delay(millis: number) {
     return new Promise(resolve => setTimeout(resolve, millis));
+  }
+
+  /**
+   * Get the field name 
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static proxiedPropertiesOf<TObj>(obj?: TObj) {
+    return new Proxy({}, {
+      get: (_, prop) => prop,
+      set: () => {
+        throw Error('Set not supported');
+      },
+    }) as {
+        [P in keyof TObj]?: P;
+    };
+  }
+
+  static required(field: number | string | string[]): boolean {
+    return (field !== undefined);
+  }
+
+  static isPercentage(value: number): boolean {
+    return (value >= 0 && value <= 100);
+  }
+
+  static isValidTransition(value: number): boolean {
+    return (value >= 0);
+  }
+
+  static isValidTimeout(value: number): boolean {
+    return (value >= 0);
   }
 }

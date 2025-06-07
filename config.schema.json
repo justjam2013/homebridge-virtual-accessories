@@ -459,8 +459,8 @@
                   "title": "Color Temperature *",
                   "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K)",
                   "type": "integer",
-                  "minimum": 2203,
-                  "maximum": 6536,
+                  "minimum": 2200,
+                  "maximum": 6500,
                   "placeholder": 2700,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"

@@ -1,33 +1,43 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
-export class InputSourceConfiguration {
+export class InputSourceConfiguration extends AccessoryConfiguration {
   name!: string;
   inputSourceType!: number;
   identifier!: number;
 
-  static prefix: string = 'input';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {  
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidName: boolean = (
-      (this.name !== undefined) &&
+      Utils.required(this.name) &&
       (this.name.length > 0)
     );
 
+    const isValidInputSourceType: boolean = (
+      Utils.required(this.inputSourceType)
+    );
+
     const isValidIdentifier: boolean = (
-      (this.identifier !== undefined)
+      Utils.required(this.identifier)
     );
 
     // Store fields failing validation
-    if (!isValidName) this.errorFields.push(InputSourceConfiguration.prefix + '.name');
-    if (!isValidIdentifier) this.errorFields.push(InputSourceConfiguration.prefix + '.identifier');
+    if (!isValidName) this.errorFields.push(prefix + '.' + this.fieldNames.name);
+    if (!isValidInputSourceType) this.errorFields.push(prefix + '.' + this.fieldNames.inputSourceType);
+    if (!isValidIdentifier) this.errorFields.push(prefix + '.' + this.fieldNames.identifier);
 
     return [
       (isValidName &&
+        isValidInputSourceType &&
         isValidIdentifier),
       this.errorFields,
     ];

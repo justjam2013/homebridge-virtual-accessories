@@ -3,6 +3,9 @@ import { VirtualAccessoriesLogger } from './virtualLogger.js';
 
 import { ZonedDateTime } from '@js-joda/core';
 
+/**
+ * 
+ */
 export class Timer {
 
   private oneSecond: number = 1000; // in milliseconds

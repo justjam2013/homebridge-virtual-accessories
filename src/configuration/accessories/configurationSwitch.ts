@@ -1,25 +1,31 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { PowerState } from '../configurationSchema.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class SwitchConfiguration {
+export class SwitchConfiguration extends AccessoryConfiguration {
   defaultState!: string;
   hasResetTimer: boolean = false;
   hasCompanionSensor: boolean = false;
   muteLogging: boolean = false;
 
-  static prefix: string = 'switch';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {  
-    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidDefaultState: boolean = (
+      Utils.required(this.defaultState) &&
+      PowerState.States.includes(this.defaultState)
+    );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(SwitchConfiguration.prefix + '.defaultState');
+    if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
 
     return [
       (isValidDefaultState),

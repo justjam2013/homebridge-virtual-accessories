@@ -1,20 +1,31 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
+
+import { Utils } from '../utils.js';
+
 /**
  * 
  */
-export class CompanionSensorConfiguration {
+export class CompanionSensorConfiguration extends AccessoryConfiguration {
   name!: string;
   type!: string;
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const isValidName: boolean = (this.name !== undefined);
-    const isValidType: boolean = (this.type !== undefined);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
-    if (!isValidName) this.errorFields.push('name');
-    if (!isValidType) this.errorFields.push('type');
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidName: boolean = (
+      Utils.required(this.name)
+    );
+
+    const isValidType: boolean = (
+      Utils.required(this.type)
+    );
+
+    if (!isValidName) this.errorFields.push(prefix + '.' + this.fieldNames.name);
+    if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
 
     return [
       (isValidName &&

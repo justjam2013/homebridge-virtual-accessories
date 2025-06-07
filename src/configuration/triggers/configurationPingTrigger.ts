@@ -1,5 +1,7 @@
 /* eslint-disable curly */
 
+import { Utils } from '../../utils.js';
+
 /**
  * 
  */
@@ -10,12 +12,19 @@ export class PingTriggerConfiguration {
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const isValidHost: boolean = (this.host !== undefined);
-    const isValidFailureRetryCount: boolean = (this.failureRetryCount !== undefined);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
-    if (!isValidHost) this.errorFields.push('host');
-    if (!isValidFailureRetryCount) this.errorFields.push('failureRetryCount');
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidHost: boolean = (
+      Utils.required(this.host)
+    );
+
+    const isValidFailureRetryCount: boolean = (
+      Utils.required(this.failureRetryCount)
+    );
+
+    if (!isValidHost) this.errorFields.push(prefix + '.' + this.fieldNames.host!);
+    if (!isValidFailureRetryCount) this.errorFields.push(prefix + '.' + this.fieldNames.failureRetryCount!);
 
     return [
       (isValidHost &&

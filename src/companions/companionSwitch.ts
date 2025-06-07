@@ -5,6 +5,9 @@ import { Switch } from '../accessories/virtualAccessorySwitch.js';
 import { Accessory } from '../accessories/virtualAccessory';
 import { AccessoryNotAllowedError } from '../errors.js';
 
+/**
+ * CompanionSwitch - Companion accessory
+ */
 export class CompanionSwitch extends Switch {
 
   private readonly postfix: string = '-switch';
