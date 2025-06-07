@@ -16,12 +16,10 @@ export class CronTriggerConfiguration {
   disableTriggerEventLogging: boolean = false;
   isDisabled: boolean = false;
 
-  // private static cronPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})$';
   // 5: minutes granularity
   // 6: seconds granularity
   // 7: milliseconds granularity
   private static cronMinutesGranularityPattern = '^((((\\d+,)+\\d+|(\\d+(\\/|-|#)\\d+)|\\d+L?|\\*(\\/\\d+)?|L(-\\d+)?|\\?|[A-Z]{3}(-[A-Z]{3})?) ?){5})$';
-  //private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$';
   private static isoTimeNoMillisPattern = '^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d|)$';
 
   private errorFields: string[] = [];
