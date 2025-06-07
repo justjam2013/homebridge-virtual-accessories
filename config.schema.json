@@ -628,7 +628,7 @@
                       "minimum": 0,
                       "maximum": 59,
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration.minutes < 60;"
+                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
                       }
                     }
                   }
@@ -694,21 +694,84 @@
                 },
                 "duration": {
                   "title": "Duration *",
-                  "$ref": "#/$defs/duration",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    }
+                  },
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
                   "title": "Min Duration *",
-                  "$ref": "#/$defs/duration",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
                   "title": "Max Duration *",
-                  "$ref": "#/$defs/duration",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
