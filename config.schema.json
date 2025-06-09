@@ -7,6 +7,12 @@
   "schema": {
     "type": "object",
     "$defs": {
+      "volume": {
+        "title": "Volume (0% - 100%) *",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
       "duration": {
         "type": "object",
         "properties": {
@@ -151,12 +157,7 @@
               "title": "Doorbell",
               "type": "object",
               "properties": {
-                "volume": {
-                  "title": "Volume (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
@@ -534,12 +535,7 @@
                   "title": "Muted",
                   "type": "boolean"
                 },
-                "volume": {
-                  "title": "Volume (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
@@ -623,10 +619,7 @@
                       "maximum": 60
                     },
                     "seconds": {
-                      "title": "Seconds",
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 59,
+                      "$ref": "#/$defs/duration/properties/seconds",
                       "condition": {
                         "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
                       }
