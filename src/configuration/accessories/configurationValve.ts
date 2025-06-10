@@ -13,8 +13,8 @@ import { Type } from 'typeserializer';
  */
 class ValveDurationConfiguration extends AccessoryConfiguration {
 
-  static readonly SECONDS_MAX_VALUE: number = 59;
   static readonly MINUTES_MAX_VALUE: number = 60;
+  static readonly SECONDS_MAX_VALUE: number = 59;
 
   minutes!: number;
   seconds!: number;
@@ -28,6 +28,11 @@ class ValveDurationConfiguration extends AccessoryConfiguration {
       Utils.required(this.minutes) &&
       (this.minutes >= 0 && this.minutes <= ValveDurationConfiguration.MINUTES_MAX_VALUE)
     );
+
+    // Do not exceed maximum value (MINUTES_MAX_VALUE)
+    if (isValidMinutes && this.minutes === ValveDurationConfiguration.MINUTES_MAX_VALUE) {
+      this.seconds = 0;
+    }
 
     const isValidSeconds: boolean = (
       Utils.required(this.seconds) &&

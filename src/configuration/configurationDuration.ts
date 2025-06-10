@@ -9,10 +9,10 @@ import { Utils } from '../utils.js';
  */
 export class DurationConfiguration extends AccessoryConfiguration {
 
-  static readonly SECONDS_MAX_VALUE: number = 59;
-  static readonly MINUTES_MAX_VALUE: number = 59;
-  static readonly HOURS_MAX_VALUE: number = 23;
   static readonly DAYS_MAX_VALUE: number = 7;
+  static readonly HOURS_MAX_VALUE: number = 23;
+  static readonly MINUTES_MAX_VALUE: number = 59;
+  static readonly SECONDS_MAX_VALUE: number = 59;
 
   days!: number;
   hours!: number;
@@ -28,6 +28,13 @@ export class DurationConfiguration extends AccessoryConfiguration {
       Utils.required(this.days) &&
       (this.days >= 0 && this.days <= DurationConfiguration.DAYS_MAX_VALUE)
     );
+
+    // Do not exceed maximum value (DAYS_MAX_VALUE)
+    if (isValidDays && this.days === DurationConfiguration.DAYS_MAX_VALUE) {
+      this.hours = 0;
+      this.minutes = 0;
+      this.seconds = 0;
+    }
 
     const isValidHours: boolean = (
       Utils.required(this.hours) &&
