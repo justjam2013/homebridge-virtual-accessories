@@ -79,7 +79,6 @@
       "name": {
         "title": "Platform Name",
         "type": "string",
-        "required": true,
         "const": "Virtual Accessories Platform",
         "readonly": true
       },
