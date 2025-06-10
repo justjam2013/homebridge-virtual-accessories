@@ -610,6 +610,8 @@
                   ]
                 },
                 "duration": {
+                  "title": "Runtime *",
+                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
                   "type": "object",
                   "properties": {
                     "minutes": {
