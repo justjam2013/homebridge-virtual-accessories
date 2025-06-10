@@ -17,29 +17,41 @@
         "type": "object",
         "properties": {
           "days": {
-            "title": "Days",
+            "title": "Days *",
             "type": "integer",
             "minimum": 0,
             "maximum": 7
           },
           "hours": {
-            "title": "Hours",
+            "title": "Hours *",
             "type": "integer",
             "minimum": 0,
             "maximum": 23
           },
           "minutes": {
-            "title": "Minutes",
+            "title": "Minutes *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           },
           "seconds": {
-            "title": "Seconds",
+            "title": "Seconds *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           }
+        }
+      },
+      "requireHoursMinutesSeconds": {
+        "if": {
+          "properties": {
+            "days": { "const": 7 }
+          },
+          "required": [ "days" ]
+        },
+        "then": {},
+        "else": {
+          "required": [ "hours", "minutes", "seconds" ]
         }
       },
       "doorAndWindowAccessory": {
@@ -68,7 +80,7 @@
         "title": "Platform Name",
         "type": "string",
         "required": true,
-        "default": "Virtual Accessories Platform",
+        "const": "Virtual Accessories Platform",
         "readonly": true
       },
       "sensorServer": {
@@ -610,8 +622,8 @@
                   ]
                 },
                 "duration": {
-                  "title": "Runtime *",
-                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
+                  "title": "Runtime",
+                  "description": "Valve auto shut-off time (1hr max - 0 = manual off)",
                   "type": "object",
                   "properties": {
                     "minutes": {
@@ -626,7 +638,21 @@
                         "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
                       }
                     }
-                  }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "minutes": { "const": 60 }
+                        },
+                        "required": [ "minutes" ]
+                      },
+                      "then": {},
+                      "else": {
+                        "required": [ "seconds" ]
+                      }
+                    }
+                  ]
                 }
               },
               "condition": {
@@ -688,7 +714,8 @@
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Duration *",
+                  "title": "Duration",
+                  "description": "Timer reset delay (7 days max)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -711,12 +738,16 @@
                       }
                     }
                   },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Min Duration *",
+                  "title": "Min Duration",
+                  "description": "Minimum timer reset delay (7 days max)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -739,12 +770,16 @@
                       }
                     }
                   },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Max Duration *",
+                  "title": "Max Duration",
+                  "description": "Maximum timer reset delay (7 days max)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -767,6 +802,17 @@
                       }
                     }
                   },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "": {
+                  "title": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "type": "object",
+                  "properties": {},
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -792,10 +838,10 @@
                     "required": [ "durationRandomMin", "durationRandomMax" ],
                     "properties": {
                       "durationRandomMin": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       },
                       "durationRandomMax": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   },
@@ -803,7 +849,7 @@
                     "required": [ "duration" ],
                     "properties": {
                       "duration": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   }
@@ -1154,7 +1200,12 @@
                 "required": [ "valve" ],
                 "properties": {
                   "valve": {
-                    "required": [ "type", "duration" ]
+                    "required": [ "type", "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "minutes" ]
+                      }
+                    }
                   }
                 }
               }
