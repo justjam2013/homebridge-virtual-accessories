@@ -4,7 +4,6 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { DurationConfiguration } from '../configuration/configurationDuration.js';
 import { Sensor } from '../sensors/virtualSensor.js';
 import { Timer } from '../timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
@@ -187,11 +186,6 @@ export class Switch extends Accessory {
     return sensorState;
   }
 
-  private convertDurationToSeconds(duration: DurationConfiguration): number {
-    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(duration.days, duration.hours, duration.minutes, duration.seconds);
-    return seconds;
-  }
-
   static getStateName(state: boolean): string {
     let stateName: string;
 
@@ -211,10 +205,10 @@ export class Switch extends Accessory {
     const duration: number = timerConfig.durationIsRandom ?
       Math.floor(
         Math.random() *
-        (this.convertDurationToSeconds(timerConfig.durationRandomMax) + 1 - this.convertDurationToSeconds(timerConfig.durationRandomMin)) +
-        this.convertDurationToSeconds(timerConfig.durationRandomMin),
+        (timerConfig.durationRandomMax.toSeconds() + 1 - timerConfig.durationRandomMin.toSeconds()) +
+       timerConfig.durationRandomMin.toSeconds(),
       ):
-      this.convertDurationToSeconds(timerConfig.duration);
+      timerConfig.duration.toSeconds();
     this.durationTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.log,

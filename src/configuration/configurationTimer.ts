@@ -64,7 +64,7 @@ export class TimerConfiguration extends AccessoryConfiguration {
         this.durationRandomMin !== undefined &&
         this.durationRandomMax !== undefined) ?
         (
-          this.convertDurationToSeconds(this.durationRandomMin) < this.convertDurationToSeconds(this.durationRandomMax)
+          this.durationRandomMin.toSeconds() < this.durationRandomMax.toSeconds()
         ) :
         true
     );
@@ -96,10 +96,5 @@ export class TimerConfiguration extends AccessoryConfiguration {
         isValidDurationRandomRange),
       this.errorFields,
     ];
-  }
-
-  private convertDurationToSeconds(duration: DurationConfiguration): number {
-    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(duration.days, duration.hours, duration.minutes, duration.seconds);
-    return seconds;
   }
 }

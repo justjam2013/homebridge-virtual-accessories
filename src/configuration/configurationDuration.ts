@@ -26,22 +26,22 @@ export class DurationConfiguration extends AccessoryConfiguration {
   isValid(prefix: string): [boolean, string[]] {
     const isValidDays: boolean = (
       Utils.required(this.days) &&
-      (this.days >= 0 && this.days <= 7)
+      (this.days >= 0 && this.days <= DurationConfiguration.DAYS_MAX_VALUE)
     );
 
     const isValidHours: boolean = (
       Utils.required(this.hours) &&
-      (this.hours >= 0 && this.hours <= 23)
+      (this.hours >= 0 && this.hours <= DurationConfiguration.HOURS_MAX_VALUE)
     );
 
     const isValidMinutes: boolean = (
       Utils.required(this.minutes) &&
-      (this.minutes >= 0 && this.minutes <= 59)
+      (this.minutes >= 0 && this.minutes <= DurationConfiguration.MINUTES_MAX_VALUE)
     );
 
     const isValidSeconds: boolean = (
       Utils.required(this.seconds) &&
-      (this.seconds >= 0 && this.seconds <= 59)
+      (this.seconds >= 0 && this.seconds <= DurationConfiguration.SECONDS_MAX_VALUE)
     );
 
     if (!isValidDays) this.errorFields.push(prefix + '.' + this.fieldNames.days);
@@ -56,5 +56,10 @@ export class DurationConfiguration extends AccessoryConfiguration {
         isValidSeconds),
       this.errorFields,
     ];
+  }
+
+  toSeconds(): number {
+    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(this.days, this.hours, this.minutes, this.seconds);
+    return seconds;
   }
 }
