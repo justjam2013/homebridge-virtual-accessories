@@ -929,7 +929,7 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 ### Edgar’s Home Tech
 
-<a href="https://www.youtube.com/@MakeSmartMatter">
+<a href="https://www.youtube.com/@EdgarsHomeTech">
     <img src="assets/mentions/youtube-EdgarsHomeTech.png" height="160">
 </a>
 <p></p>
