@@ -20,6 +20,11 @@
 
 ### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
+<br>
+
+> [!Caution]
+> **Virtual Accessories for Homevridge v3.5.11 breaks the Valve accessory.** The Valve accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.11-breaking-update-for-Valve-accessory) for details on how to update the Valve accessory configuration
+
 ## <!-- Thin separator line -->
 
 <details>
@@ -914,16 +919,27 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 People using Virtual Accessories For Homebridge!
 
+### Make Smart Matter
+
 Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. His videos are amusing to watch and it's cool to see him use this plugin to solve common day-to-day problems that most people that use HomeKit will encounter at some point.
 
 <a href="https://www.youtube.com/@MakeSmartMatter">
-    <img src="assets/mentions/youtube-video.png" height="240">
+    <img src="assets/mentions/youtube-MakeSmartMatter.png" height="240">
 </a>
 <p></p>
 
 You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
 
 He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
+
+### Edgar’s Home Tech
+
+<a href="https://www.youtube.com/@EdgarsHomeTech">
+    <img src="assets/mentions/youtube-EdgarsHomeTech.png" height="160">
+</a>
+<p></p>
+
+You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](https://www.youtube.com/watch?v=1F2kj-hftkI) video at timestamp [1:16](https://youtu.be/1F2kj-hftkI?t=76).
 
 <span align="right">
   <h6>
