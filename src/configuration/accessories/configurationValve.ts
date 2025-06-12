@@ -17,7 +17,7 @@ class ValveDurationConfiguration extends AccessoryConfiguration {
   static readonly SECONDS_MAX_VALUE: number = 59;
 
   minutes!: number;
-  seconds!: number;
+  seconds: number = 0;
 
   private errorFields: string[] = [];
 

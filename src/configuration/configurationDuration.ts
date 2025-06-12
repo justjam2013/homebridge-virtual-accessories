@@ -15,9 +15,9 @@ export class DurationConfiguration extends AccessoryConfiguration {
   static readonly SECONDS_MAX_VALUE: number = 59;
 
   days!: number;
-  hours!: number;
-  minutes!: number;
-  seconds!: number;
+  hours: number = 0;
+  minutes: number = 0;
+  seconds: number = 0;
 
   private errorFields: string[] = [];
 
