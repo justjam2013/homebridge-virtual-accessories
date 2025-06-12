@@ -7,33 +7,51 @@
   "schema": {
     "type": "object",
     "$defs": {
+      "volume": {
+        "title": "Volume (0% - 100%) *",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
       "duration": {
         "type": "object",
         "properties": {
           "days": {
-            "title": "Days",
+            "title": "Days *",
             "type": "integer",
             "minimum": 0,
             "maximum": 7
           },
           "hours": {
-            "title": "Hours",
+            "title": "Hours *",
             "type": "integer",
             "minimum": 0,
             "maximum": 23
           },
           "minutes": {
-            "title": "Minutes",
+            "title": "Minutes *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           },
           "seconds": {
-            "title": "Seconds",
+            "title": "Seconds *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           }
+        }
+      },
+      "requireHoursMinutesSeconds": {
+        "if": {
+          "properties": {
+            "days": { "const": 7 }
+          },
+          "required": [ "days" ]
+        },
+        "then": {},
+        "else": {
+          "required": [ "hours", "minutes", "seconds" ]
         }
       },
       "doorAndWindowAccessory": {
@@ -61,8 +79,7 @@
       "name": {
         "title": "Platform Name",
         "type": "string",
-        "required": true,
-        "default": "Virtual Accessories Platform",
+        "const": "Virtual Accessories Platform",
         "readonly": true
       },
       "sensorServer": {
@@ -151,12 +168,7 @@
               "title": "Doorbell",
               "type": "object",
               "properties": {
-                "volume": {
-                  "title": "Volume (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
@@ -534,12 +546,7 @@
                   "title": "Muted",
                   "type": "boolean"
                 },
-                "volume": {
-                  "title": "Volume (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
@@ -614,11 +621,37 @@
                   ]
                 },
                 "duration": {
-                  "title": "Runtime *",
-                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 3600
+                  "title": "Runtime",
+                  "description": "Valve auto shut-off time (1hr max - 0 = manual off)",
+                  "type": "object",
+                  "properties": {
+                    "minutes": {
+                      "title": "Minutes *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "minutes": { "const": 60 }
+                        },
+                        "required": [ "minutes" ]
+                      },
+                      "then": {},
+                      "else": {
+                        "required": [ "seconds" ]
+                      }
+                    }
+                  ]
                 }
               },
               "condition": {
@@ -680,22 +713,105 @@
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Duration *",
-                  "$ref": "#/$defs/duration",
+                  "title": "Duration",
+                  "description": "Timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Min Duration *",
-                  "$ref": "#/$defs/duration",
+                  "title": "Min Duration",
+                  "description": "Minimum timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Max Duration *",
-                  "$ref": "#/$defs/duration",
+                  "title": "Max Duration",
+                  "description": "Maximum timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "": {
+                  "title": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "type": "object",
+                  "properties": {},
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
@@ -721,10 +837,10 @@
                     "required": [ "durationRandomMin", "durationRandomMax" ],
                     "properties": {
                       "durationRandomMin": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       },
                       "durationRandomMax": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   },
@@ -732,7 +848,7 @@
                     "required": [ "duration" ],
                     "properties": {
                       "duration": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   }
@@ -1083,7 +1199,12 @@
                 "required": [ "valve" ],
                 "properties": {
                   "valve": {
-                    "required": [ "type", "duration" ]
+                    "required": [ "type", "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "minutes" ]
+                      }
+                    }
                   }
                 }
               }

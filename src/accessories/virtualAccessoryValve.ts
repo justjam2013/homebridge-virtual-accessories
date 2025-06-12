@@ -82,7 +82,7 @@ export class Valve extends Accessory {
       this.accessoryConfiguration.accessoryName,
       this.log,
       timerIsResettable,
-      this.accessoryConfiguration.valve.duration,
+      this.accessoryConfiguration.valve.duration.toSeconds(),
     );
 
     this.service = this.accessory.getService(this.platform.Service.Valve) || this.accessory.addService(this.platform.Service.Valve);
@@ -93,7 +93,7 @@ export class Valve extends Accessory {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${Valve.getActiveName(this.states.ValveActive)}`);
     this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.states.ValveActive));
     this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
-    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration));
+    this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration.toSeconds()));
 
     // register handlers
 
