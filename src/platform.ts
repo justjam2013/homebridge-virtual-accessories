@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
 import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
@@ -43,10 +44,33 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.log = new VirtualAccessoriesLogger(log);
 
+    // Validate platform name
+    const platformName: string | undefined = this.config.name;
+    if (platformName !== 'Virtual Accessories Platform') {
+      this.log.error(`Platform Name is invalid: '${platformName}'`);
+      this.log.error(`Platform Name must be '${platformName}'`);
+    }
+    else {
+      this.log.debug(`Platform Name is valid: '${platformName}'`);
+    }
+
     // Create sensor server
     const sensorServerConfig: SensorServerConfiguration | undefined = new Configuration(this.log).deserializeSensorServerConfig(this.config.sensorServer);
     if (sensorServerConfig?.enabled) {
-      this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+      const prefix: string = 'sensorServer';
+      let isValid: boolean = false;
+      let errorFields: string[] = [ prefix ];
+      [isValid, errorFields] = sensorServerConfig.isValid(prefix);
+
+      if (!isValid) {
+        this.log.error(`Sensor Server configuration is invalid: ${JSON.stringify(sensorServerConfig)}`);
+        this.log.error(`Invalid fields: ${errorFields.toString()}`);
+      }
+      else {
+        this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
+        
+        this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+      }
     }
     
     this.log.debug('Finished initializing platform');
@@ -135,10 +159,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           }
 
           virtualAccessories.push(virtualAccessory);
-        } else {
+        }
+        else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
-      } else {
+      }
+      else {
         // the accessory does not yet exist, so we need to create it
         this.log.info(`Adding new accessory: ${configuredAccessory.accessoryName}`);
 
@@ -158,10 +184,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
-        } else if (virtualAccessory.isExternalAccessory()) {
+        }
+        else if (virtualAccessory.isExternalAccessory()) {
           this.log.info(`Publishing new external accessory: ${configuredAccessory.accessoryName}`);
           this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-        } else {
+        }
+        else {
           // link the accessory to your platform
           this.log.info(`Publishing new accessory: ${configuredAccessory.accessoryName}`);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -191,7 +219,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           fs.unlink(storagePath, (err) => {
             if (err) {
               this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
-            } else {
+            }
+            else {
               this.log.debug(`Deleted stateful storage for: ${accessory.displayName}`);
             }
           }); 
@@ -222,10 +251,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       if (accessoryConfiguration === undefined) {
         this.log.error(`Error deserializing: ${JSON.stringify(configuredDevice)}`);
         this.log.info('Skipping accessory until configuration is fixed');
-      } else if (accessoryUUIDs.includes(accessoryConfiguration.accessoryID)) {
+      }
+      else if (accessoryUUIDs.includes(accessoryConfiguration.accessoryID)) {
         this.log.error(`Found accessory with duplicate ID: ${JSON.stringify(configuredDevice)}`);
         this.log.info('Skipping accessory until configuration is fixed');
-      } else {
+      }
+      else {
         this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
 
         let isValidAccessoryConfig: boolean = false;
@@ -234,7 +265,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         if (!isValidAccessoryConfig) {
           this.log.error(`Skipping accessory. Configuration is invalid: ${JSON.stringify(accessoryConfiguration)}`);
           this.log.error(`Invalid fields: ${errorFields.toString()}`);
-        } else {
+        }
+        else {
           this.log.debug(`Configuration is valid: ${JSON.stringify(accessoryConfiguration)}`);
           accessoryConfigurations.push(accessoryConfiguration);
 
