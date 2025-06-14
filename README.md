@@ -415,6 +415,9 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryName": "My Security System",
             "accessoryType": "securitysystem",
             "securitySystem": {
+                "armedModes": [
+                    "Away"
+                ],
                 "defaultState": "disarmed"
             }
         }
