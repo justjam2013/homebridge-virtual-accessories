@@ -153,8 +153,6 @@ export class SecuritySystem extends Accessory {
     const SecuritySystemCurrentState = this.platform.Characteristic.SecuritySystemCurrentState;
     const SecuritySystemTargetState = this.platform.Characteristic.SecuritySystemTargetState;
 
-    const reservedMax: number = 255;
-
     const currentStateValues: Set<number> = new Set([
       SecuritySystemCurrentState.STAY_ARM,
       SecuritySystemCurrentState.AWAY_ARM,
@@ -194,8 +192,6 @@ export class SecuritySystem extends Accessory {
     if (currentStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.generatePropertyValueList(currentStateValues)}`);
 
-      this.generateReservedArray(currentStateValues.size + 1, reservedMax).forEach(currentStateValues.add, currentStateValues);
-
       service.getCharacteristic(SecuritySystemCurrentState)
         .setProps({
           validValues: Array.from(currentStateValues),
@@ -207,8 +203,6 @@ export class SecuritySystem extends Accessory {
     if (targetStateValues.size > 0) {
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.generatePropertyValueList(targetStateValues)}`);
 
-      this.generateReservedArray(targetStateValues.size + 1, reservedMax).forEach(targetStateValues.add, targetStateValues);
-
       service.getCharacteristic(SecuritySystemTargetState)
         .setProps({
           validValues: Array.from(targetStateValues),
@@ -217,14 +211,6 @@ export class SecuritySystem extends Accessory {
       // eslint-disable-next-line max-len
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemTargetState).props)}`);
     }
-  }
-
-  private generateReservedArray(
-    start: number,
-    end: number,
-  ): number[] {
-    const reserved: number[] = Array(end - start + 1).fill(start).map((x, y) => x + y);
-    return reserved;
   }
 
   private generatePropertyValueList(
