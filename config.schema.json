@@ -523,20 +523,87 @@
               "title": "Security System",
               "type": "object",
               "properties": {
+                "armedModes": {
+                  "title": "Available Armed States *",
+                  "description": "Armed states available to this security system",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "Away",
+                      "Home",
+                      "Night"
+                    ]
+                  }
+                },
                 "defaultState": {
                   "title": "Default State *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Armed - Away", "enum": ["awayarm"] },
-                    { "title": "Armed - Home", "enum": ["stayarm"] },
-                    { "title": "Armed - Night", "enum": ["nightarm"] },
+                    { "title": "Armed - Away", "enum": ["armedaway"] },
+                    { "title": "Armed - Home", "enum": ["armedstay"] },
+                    { "title": "Armed - Night", "enum": ["armednight"] },
                     { "title": "Disarmed", "enum": ["disarmed"] }
                   ]
+                },
+                "": {
+                  "title": "Note: The default state **must be** either 'Disarmed' or one of the available armed states",
+                  "type": "object",
+                  "properties": {}
                 }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "defaultState": { "const": "armedaway" }
+                    },
+                    "required": [ "defaultState" ]
+                  },
+                  "then": {
+                    "properties": {
+                      "armedModes": {
+                        "contains": { "const": "Away" }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "defaultState": { "const": "armedstay" }
+                    },
+                    "required": [ "defaultState" ]
+                  },
+                  "then": {
+                    "properties": {
+                      "armedModes": {
+                        "contains": { "const": "Home" }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "defaultState": { "const": "armednight" }
+                    },
+                    "required": [ "defaultState" ]
+                  },
+                  "then": {
+                    "properties": {
+                      "armedModes": {
+                        "contains": { "const": "Night" }
+                      }
+                    }
+                  }
+                }
+              ]
             },
             "speaker": {
               "title": "Speaker",
@@ -1154,7 +1221,7 @@
                 "required": [ "securitySystem" ],
                 "properties": {
                   "securitySystem": {
-                    "required": [ "defaultState" ]
+                    "required": [ "armedModes", "defaultState" ]
                   }
                 }
               }

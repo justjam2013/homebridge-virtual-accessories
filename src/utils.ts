@@ -112,6 +112,15 @@ export class Utils {
     return (field !== undefined);
   }
 
+  static notEmpty(field: string | string[]): boolean {
+    let notEmpty = false;
+    if (Utils.required(field)) {
+      notEmpty = Array.isArray(field) ? field.length > 0 : field !== '';
+    }
+
+    return notEmpty;
+  }
+
   static isPercentage(value: number): boolean {
     return (value >= 0 && value <= 100);
   }
