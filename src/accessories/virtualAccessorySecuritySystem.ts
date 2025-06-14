@@ -2,6 +2,7 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
+import { SecuritySystemState } from '../configuration/configurationSchema.js';
 
 /**
  * SecuritySystem - Accessory implementation
@@ -31,16 +32,16 @@ export class SecuritySystem extends Accessory {
 
     // First configure the device based on the accessory details
     switch (this.accessoryConfiguration.securitySystem.defaultState) {
-    case 'stayarm':
+    case SecuritySystemState.ArmedStay:
       this.defaultState = SecuritySystem.STAY_ARM;
       break;
-    case 'awayarm':
+    case SecuritySystemState.ArmedAway:
       this.defaultState = SecuritySystem.AWAY_ARM;
       break;
-    case 'nightarm':
+    case SecuritySystemState.ArmedNight:
       this.defaultState = SecuritySystem.NIGHT_ARM;
       break;
-    case 'disarmed':
+    case SecuritySystemState.Disarmed:
       this.defaultState = SecuritySystem.DISARMED;
       break;
     default:
