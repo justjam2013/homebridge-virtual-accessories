@@ -1,4 +1,6 @@
-
+/**
+ * 
+ */
 export interface UpdatableSensor {
-  updateSensor(value: boolean | number, accessoryId: string): void;
+  updateSensor(value: number, accessoryId: string): void;
 }

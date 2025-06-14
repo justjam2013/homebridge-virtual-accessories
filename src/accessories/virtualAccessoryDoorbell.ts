@@ -3,9 +3,9 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
-import { AccessoryFactory } from '../accessoryFactory.js';
 import { AccessoryNotAllowedError } from '../errors.js';
-import { Switch } from './virtualAccessorySwitch.js';
+import { CompanionSwitch } from '../companions/companionSwitch.js';
+import { SwitchConfiguration } from '../configuration/accessories/configurationSwitch.js';
 
 /**
  * Doorbell - Accessory implementation
@@ -18,13 +18,15 @@ export class Doorbell extends Accessory {
   static readonly DOUBLE_PRESS: number = 1;  // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS
   static readonly LONG_PRESS: number = 2;    // Characteristic.ProgrammableSwitchEvent.LONG_PRESS;
 
+  private static readonly COMPANION_TIMEOUT_SECS: number = 1000;
+
   private companionSensorResetTimerId: ReturnType<typeof setTimeout> | undefined;
 
   private states = {
     Volume: 100,
   };
 
-  private companionSwitch?: Switch;
+  private companionSwitch?: CompanionSwitch;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -48,8 +50,7 @@ export class Doorbell extends Accessory {
       .onGet(this.getVolume.bind(this));
 
     // Create switch service
-    this.companionSwitch = AccessoryFactory.createVirtualCompanionSwitch(
-      this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
+    this.companionSwitch = this.createCompanionSwitch();
 
     // Overwrite the "onSet" handler to trigger doorbell
     this.companionSwitch!.service!.getCharacteristic(this.platform.Characteristic.On)
@@ -83,9 +84,9 @@ export class Doorbell extends Accessory {
 
   async setCompanionSwitchOn(value: CharacteristicValue) {
     const newState = value as boolean;
-    this.companionSwitch!.setCompanionSwitchState(newState, this);
+    this.companionSwitch!.setState(newState, this);
 
-    if (newState === Switch.ON) {
+    if (newState === CompanionSwitch.ON) {
       // this.service!.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent).updateValue(this.state);
       this.triggerDoorbellEvent(Doorbell.SINGLE_PRESS, this.companionSwitch!);
 
@@ -96,12 +97,12 @@ export class Doorbell extends Accessory {
 
       // Reset switch after timer delay
       this.companionSensorResetTimerId = setTimeout(() => {
-        this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, Switch.OFF);
-      }, 1000);
+        this.companionSwitch!.service!.setCharacteristic(this.platform.Characteristic.On, CompanionSwitch.OFF);
+      }, Doorbell.COMPANION_TIMEOUT_SECS);
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Set new reset timer: ${this.companionSensorResetTimerId}`);
     }
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(newState)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${CompanionSwitch.getStateName(newState)}`);
   }
 
   /**
@@ -137,5 +138,23 @@ export class Doorbell extends Accessory {
     }
 
     return eventName;
+  }
+
+  private createCompanionSwitch(): CompanionSwitch {
+    const confHolder: SwitchConfiguration = this.accessoryConfiguration.switch;
+
+    // Enrich configuration with "switch" settings
+    this.accessoryConfiguration.switch = new SwitchConfiguration();
+    this.accessoryConfiguration.switch.defaultState = 'off';
+    this.accessoryConfiguration.switch.hasCompanionSensor = false;
+    this.accessoryConfiguration.switch.hasResetTimer = false;
+    this.accessoryConfiguration.switch.muteLogging = false;
+
+    const companionSwitch = new CompanionSwitch(this.platform, this.accessory, this.accessoryConfiguration.accessoryName + ' Switch');
+
+    // Remove configuration enrichments
+    this.accessoryConfiguration.switch = confHolder;
+
+    return companionSwitch;
   }
 }

@@ -1,8 +1,9 @@
 import type { PlatformAccessory, Service } from 'homebridge';
+import { Categories } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 
-import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
 import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 import fs from 'fs';
@@ -16,7 +17,7 @@ export abstract class Accessory {
   readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
 
-  readonly accessoryConfiguration: AccessoryConfiguration;
+  readonly accessoryConfiguration: PlatformConfiguration;
   readonly log: VirtualAccessoriesLogger;
 
   protected accessoryName: string = '';
@@ -54,6 +55,10 @@ export abstract class Accessory {
       .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
       .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+  }
+
+  isExternalAccessory(): boolean {
+    return [Categories.SPEAKER, Categories.TELEVISION].includes(this.accessory.category);
   }
 
   updateConfiguredName() {

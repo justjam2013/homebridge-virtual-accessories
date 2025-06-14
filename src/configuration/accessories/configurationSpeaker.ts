@@ -1,23 +1,28 @@
 /* eslint-disable curly */
 
+import { AudioAccessoryConfiguration } from '../configurationAudioAccessoryConfiguration.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class SpeakerConfiguration {
-  volume!: number;
-  mute!: boolean;
-
-  static prefix: string = 'speaker';
+export class SpeakerConfiguration extends AudioAccessoryConfiguration {
+  // volume!: number;
+  // mute!: boolean;
 
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const isValidVolume: boolean = Utils.isPercentage(this.volume);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidVolume: boolean = (
+      Utils.required(this.volume) &&
+      Utils.isPercentage(this.volume)
+    );
 
     // Store fields failing validation
-    if (!isValidVolume) this.errorFields.push(SpeakerConfiguration.prefix + '.volume');
+    if (!isValidVolume) this.errorFields.push(prefix + '.' + this.fieldNames.volume);
 
     return [
       (isValidVolume),

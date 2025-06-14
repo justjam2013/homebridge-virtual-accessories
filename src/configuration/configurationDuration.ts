@@ -1,47 +1,60 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from './configurationAccessory.js';
+
+import { Utils } from '../utils.js';
+
 /**
  * 
  */
-export class DurationConfiguration {
+export class DurationConfiguration extends AccessoryConfiguration {
 
-  static readonly SECONDS_MAX_VALUE: number = 59;
-  static readonly MINUTES_MAX_VALUE: number = 59;
-  static readonly HOURS_MAX_VALUE: number = 23;
   static readonly DAYS_MAX_VALUE: number = 7;
+  static readonly HOURS_MAX_VALUE: number = 23;
+  static readonly MINUTES_MAX_VALUE: number = 59;
+  static readonly SECONDS_MAX_VALUE: number = 59;
 
   days!: number;
-  hours!: number;
-  minutes!: number;
-  seconds!: number;
+  hours: number = 0;
+  minutes: number = 0;
+  seconds: number = 0;
 
   private errorFields: string[] = [];
 
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
   isValid(prefix: string): [boolean, string[]] {
     const isValidDays: boolean = (
-      (this.days !== undefined) &&
-      (this.days >= 0 && this.days <= 7)
+      Utils.required(this.days) &&
+      (this.days >= 0 && this.days <= DurationConfiguration.DAYS_MAX_VALUE)
     );
 
+    // Do not exceed maximum value (DAYS_MAX_VALUE)
+    if (isValidDays && this.days === DurationConfiguration.DAYS_MAX_VALUE) {
+      this.hours = 0;
+      this.minutes = 0;
+      this.seconds = 0;
+    }
+
     const isValidHours: boolean = (
-      (this.hours !== undefined) &&
-      (this.hours >= 0 && this.hours <= 23)
+      Utils.required(this.hours) &&
+      (this.hours >= 0 && this.hours <= DurationConfiguration.HOURS_MAX_VALUE)
     );
 
     const isValidMinutes: boolean = (
-      (this.minutes !== undefined) &&
-      (this.minutes >= 0 && this.minutes <= 59)
+      Utils.required(this.minutes) &&
+      (this.minutes >= 0 && this.minutes <= DurationConfiguration.MINUTES_MAX_VALUE)
     );
 
     const isValidSeconds: boolean = (
-      (this.seconds !== undefined) &&
-      (this.seconds >= 0 && this.seconds <= 59)
+      Utils.required(this.seconds) &&
+      (this.seconds >= 0 && this.seconds <= DurationConfiguration.SECONDS_MAX_VALUE)
     );
 
-    if (!isValidDays) this.errorFields.push(prefix + '.days');
-    if (!isValidHours) this.errorFields.push(prefix + '.hours');
-    if (!isValidMinutes) this.errorFields.push(prefix + '.minutes');
-    if (!isValidSeconds) this.errorFields.push(prefix + '.seconds');
+    if (!isValidDays) this.errorFields.push(prefix + '.' + this.fieldNames.days);
+    if (!isValidHours) this.errorFields.push(prefix + '.' + this.fieldNames.hours);
+    if (!isValidMinutes) this.errorFields.push(prefix + '.' + this.fieldNames.minutes);
+    if (!isValidSeconds) this.errorFields.push(prefix + '.' + this.fieldNames.seconds);
 
     return [
       (isValidDays && 
@@ -50,5 +63,10 @@ export class DurationConfiguration {
         isValidSeconds),
       this.errorFields,
     ];
+  }
+
+  toSeconds(): number {
+    const seconds: number = Utils.daysHoursMinutesSecondsToSeconds(this.days, this.hours, this.minutes, this.seconds);
+    return seconds;
   }
 }

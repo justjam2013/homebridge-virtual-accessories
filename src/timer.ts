@@ -3,7 +3,12 @@ import { VirtualAccessoriesLogger } from './virtualLogger.js';
 
 import { ZonedDateTime } from '@js-joda/core';
 
+/**
+ * 
+ */
 export class Timer {
+
+  private oneSecond: number = 1000; // in milliseconds
 
   private accessoryName: string;
   private log: VirtualAccessoriesLogger;
@@ -20,6 +25,9 @@ export class Timer {
 
   private logDebugCountdown: boolean = false;
 
+  /**
+   * Set duration in seconds
+   */
   constructor(
     accessoryName: string,
     log: VirtualAccessoriesLogger,
@@ -48,6 +56,9 @@ export class Timer {
     }
   }
 
+  /**
+   * Set duration/oneOffDuration in seconds
+   */
   start(
     callback: () => void,
   ): void;
@@ -70,21 +81,21 @@ export class Timer {
 
     if (this.runtime > 0) {
       this.remainingDuration = this.runtime;
-      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime}`);
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime} seconds`);
 
       this.id = setInterval(() => {
         this.remainingDuration--;
 
         // We don't want this floodin the debug logs
         if (this.logDebugCountdown && this.remainingDuration % 10 === 0) {
-          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration}`);
+          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration} seconds`);
         }
 
         if (this.remainingDuration === 0) {
           callback();
           this.stop();
         }
-      }, 1000);
+      }, this.oneSecond);
 
       this.startTime = Utils.now();
       this.isRunning = true;
@@ -100,13 +111,16 @@ export class Timer {
 
     this.logDebugCountdown = false;
 
-    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration}`);
+    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration} seconds`);
   }
 
   getStartTime(): ZonedDateTime {
     return this.startTime;
   }
 
+  /**
+   * Returns runtime in seconds
+   */
   getRuntime(): number {
     return this.runtime;
   }
@@ -126,7 +140,7 @@ export class Timer {
   ) {
     this.defaultDuration = duration;
 
-    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.defaultDuration}`);
+    this.log.debug(`[${this.accessoryName} Timer] Set Duration: ${this.defaultDuration} seconds`);
   }
 
   /**

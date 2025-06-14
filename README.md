@@ -20,10 +20,10 @@
 
 ### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.
 
-## <!-- Thin separator line -->
+<br>
 
-> [!CAUTION]
-> Version 3.3.1 breaks the Lock accessory. You will have to delete existing Lock accessories and recreate them.
+> [!Caution]
+> **Virtual Accessories for Homevridge v3.5.13 breaks the Valve accessory.** The Valve accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.13-breaking-update-for-Valve-accessory) for details on how to update the Valve accessory configuration
 
 ## <!-- Thin separator line -->
 
@@ -41,6 +41,7 @@
     - [Synology](#synology)
   - [Configuration](#configuration)
   - [Accessory Configurations](#accessory-configurations)
+    - [Door](#door)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
     - [Garage Door](#garage-door)
@@ -51,22 +52,25 @@
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
-      - [Adding a Speaker accessory in the Home app](#adding-a-speaker-accessory-in-the-home-app)
+    - [Television](#television)
     - [Valve](#valve)
+    - [Window](#window)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Switch](#switch)
-    - [Switch with reset timer](#switch-with-reset-timer)
-    - [Switch with random reset timer](#switch-with-random-reset-timer)
-    - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+      - [Switch with reset timer](#switch-with-reset-timer)
+      - [Switch with random reset timer](#switch-with-random-reset-timer)
+      - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
+  - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
+    - [Update Garage Door obstruction detected](#update-garage-door-obstruction-detected)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -88,16 +92,19 @@ The downside to a single plugin is trading ease of accessory maintenance for a s
 
 Currently, these are the implemented virtual accessories:
 
+-   **Door.** Allows you to create a virtual door.
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
--   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white (on/off and brightness) and white ambiance (on/off, brightness, and color temperature) lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes.
 -   **Speaker.** Allows you to create a virtual speaker.
+-   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
+-   **Window.** Allows you to create a virtual window.
 -   **Window Covering.** Allows you to create virtual blinds and shades.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
@@ -210,6 +217,27 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 </span>
 
 ## Accessory Configurations
+
+### Door
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Blinds",
+            "accessoryType": "door",
+            "accessoryIsStateful": false,
+            "door": {
+                "defaultState": "closed",
+                "transitionDuration": 3
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Doorbell
 
@@ -408,18 +436,34 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 ```
 
 > [!NOTE]
-> After restarting Homebridge, you should see a similar message in the logs, with the code required to pair the speaker accessory in the Home app:
-> `Please add [My Speaker XXXX] manually in Home app. Setup Code: XXX-XX-XXX`
+> A Speaker is an external accessory and must be added separately to the Home app. Follow the instructions below in the
+> [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app) section to finish setting it up.
 
-#### Adding a Speaker accessory in the Home app
+### Television
 
-To add the speaker accessory in the Home app follow these steps:
-1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
-2. In the `Add Accessory` popup, tap `More options...` and you should see the speaker accessory listed in the `NEARBY` section
-3. Tap the speaker accessory you created
-4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
-5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
-6. Finally, tap `Done`
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Television",
+            "accessoryType": "television",
+            "television": {
+                "inputs": [
+                    "HDMI 1",
+                    "HDMI 2"
+                ]
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+> [!NOTE]
+> A Television is an external accessory and must be added separately to the Home app. Follow the instructions below in the
+> [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app) section to finish setting it up.
 
 ### Valve
 
@@ -453,6 +497,27 @@ To add the speaker accessory in the Home app follow these steps:
             "accessoryType": "windowcovering",
             "accessoryIsStateful": false,
             "windowCovering": {
+                "defaultState": "closed",
+                "transitionDuration": 3
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Window
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Blinds",
+            "accessoryType": "window",
+            "accessoryIsStateful": false,
+            "window": {
                 "defaultState": "closed",
                 "transitionDuration": 3
             }
@@ -702,6 +767,27 @@ To add the speaker accessory in the Home app follow these steps:
   </h6>
 </span>
 
+## Adding an external accessory in the Home app
+
+When you create an external accessory and restart Homebridge, you should see a similar message in the logs, with the code required to pair the accessory in the Home app:
+> Please add [My *ExtDevice* XXXX] manually in Home app. Setup Code: XXX-XX-XXX
+
+To add an external accessory in the Home app follow these steps:
+1. In the Home app, tap the + simbol in the upper left and select `Add accessory` in the dropdown menu
+2. In the `Add Accessory` popup, tap `More options...` and you should see the accessory listed in the `NEARBY` section
+3. Tap the new accessory you created
+4. In the `Uncertified Accessory` modal dialog, tap "Add anyway"
+5. In the `Setup Code` popup, enter the setup code provided in the Homebridge logs (see above) and tap `Continue`
+6. Finally, tap `Done`
+
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
 ## Webhook Service Configuration
 
 Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
@@ -745,7 +831,7 @@ The target URL (replace hostname and port per your setup) will specify the `humi
 http://localhost:60221/humidity
 ```
 
-The raw json payload will contain the accessory id of the humidifier/dehumidifier and the humidity percentage value:
+The raw json payload will contain the accessory id of the Humidifier/Dehumidifier accessory and the humidity percentage value:
 
 ```json
 {
@@ -766,7 +852,7 @@ The target URL (replace hostname and port per your setup) will specify the `temp
 http://localhost:60221/temperature
 ```
 
-The raw json payload will contain the accessory id of the heater/cooler and the temperature value:
+The raw json payload will contain the accessory id of the Heater/Cooler accessory and the temperature value:
 
 ```json
 {
@@ -777,6 +863,25 @@ The raw json payload will contain the accessory id of the heater/cooler and the 
 
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
+
+### Update Garage Door obstruction detected
+
+To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+
+```
+http://localhost:60221/obstruction
+```
+
+The raw json payload will contain the accessory id of the Garage Door accessory and the obstruction value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
 
 <span align="right">
   <h6>
@@ -814,16 +919,27 @@ So here are creative ways people have used this plugin. Maybe they might inspire
 
 People using Virtual Accessories For Homebridge!
 
+### Make Smart Matter
+
 Patrick Hunt, the content creator of the [Make Smart Matter](https://www.youtube.com/@MakeSmartMatter) YouTube channel is using Virtual Accessories For Homebridge. His videos are amusing to watch and it's cool to see him use this plugin to solve common day-to-day problems that most people that use HomeKit will encounter at some point.
 
 <a href="https://www.youtube.com/@MakeSmartMatter">
-    <img src="assets/mentions/youtube-video.png" height="240">
+    <img src="assets/mentions/youtube-MakeSmartMatter.png" height="240">
 </a>
 <p></p>
 
 You can catch a glimpse in the [Introduction to Automations in Apple Home](https://www.youtube.com/watch?v=zspT4lNZ0QE) video at timestamp [7:46](https://www.youtube.com/watch?v=zspT4lNZ0QE&t=466s).
 
 He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
+
+### Edgar’s Home Tech
+
+<a href="https://www.youtube.com/@EdgarsHomeTech">
+    <img src="assets/mentions/youtube-EdgarsHomeTech.png" height="160">
+</a>
+<p></p>
+
+You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](https://www.youtube.com/watch?v=1F2kj-hftkI) video at timestamp [1:16](https://youtu.be/1F2kj-hftkI?t=76).
 
 <span align="right">
   <h6>
@@ -837,14 +953,12 @@ He again uses Virtual Accessories for Homebridge in his latest video, [Dummies f
 
 #### Issues with Homebridge UI:
 
--   The Humidifier/Dehumidifier accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Humidifier-only, Dehumidifier-only, and Humidifier-Dehumidifier accessories, but HomeKit renders it correctly.
--   The Heater/Cooler accessory is not properly rendered in Homebridge UI. Homebrige UI currently is unable to differentiate between Heater-only, Cooler-only, and Heater-Cooler accessories, but HomeKit renders it correctly.
+-   None currently.
 
 #### Issues with underlying frameworks:
 
--   The ability to order the accessories in the config popup has been rolled back, as it makes it impossible to drag a number slider, for example to set timer values. A bug report has been opened with the underlying framework project and, once this behavior is fixed, this functionality will be restored. The temporary workaround is to manually edit the order of the accessories in the JSON configuration.
-
-**This issue has been fixed in the underlying framework and ability to order the accessories in the config popup will be available in an upcoming release.**
+-   There is an issue with the drag-and-drop reordering, where the form layout can get degraded. A bug report has been opened on the framework repo.
+-   There is an issue with checkboxes requiring two clicks to uncheck. A bug report has been opened on the framework repo.
 
 #### Issues with HomeKit:
 

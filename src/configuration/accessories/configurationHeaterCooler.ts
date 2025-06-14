@@ -1,11 +1,15 @@
+/* eslint-disable brace-style */
 /* eslint-disable curly */
+
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../configurationSchema.js';
 
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class HeaterCoolerConfiguration {
+export class HeaterCoolerConfiguration extends AccessoryConfiguration {
   type!: string;
   temperatureDisplayUnits!: string;
   heatingThresholdCelsius!: number;
@@ -13,34 +17,30 @@ export class HeaterCoolerConfiguration {
   heatingThresholdFahrenheit!: number;
   coolingThresholdFahrenheit!: number;
 
-  static prefix: string = 'heaterCooler';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidType: boolean = (
-      (this.type !== undefined) &&
-      [ 'auto', 'heater', 'cooler' ].includes(this.type)
+      Utils.required(this.type) &&
+      HeaterType.Types.includes(this.type)
     );
 
     const isValidTemperatureDisplayUnits: boolean = (
-      (this.temperatureDisplayUnits !== undefined) &&
-      [ 'celsius', 'fahrenheit' ].includes(this.temperatureDisplayUnits)
+      Utils.required(this.temperatureDisplayUnits) &&
+      TemperatureUnit.Units.includes(this.temperatureDisplayUnits)
     );
 
     const heatingThreshold: number | undefined = this.getHeatingThreshold();
     const coolingThreshold: number | undefined = this.getCoolingThreshold();
 
     const isValidHeatingThreshold: boolean = (
-      (heatingThreshold !== undefined) ?
-        Utils.isPercentage(heatingThreshold) :
-        true
+      this.isValidHeatingThreshold()
     );
 
     const isValidCoolingThreshold: boolean = (
-      (coolingThreshold !== undefined) ?
-        Utils.isPercentage(coolingThreshold):
-        true
+      this.isValidCoolingThreshold()
     );
 
     const isValidThresholdWindow: boolean = (
@@ -54,13 +54,11 @@ export class HeaterCoolerConfiguration {
     const heatingThresholdField = '.heatingThreshold' + this.capitalize(this.temperatureDisplayUnits);
     const coolingThresholdField = '.coolingThreshold' + this.capitalize(this.temperatureDisplayUnits);
 
-    if (!isValidType) this.errorFields.push(HeaterCoolerConfiguration.prefix + '.type');
-    if (!isValidTemperatureDisplayUnits) this.errorFields.push(HeaterCoolerConfiguration.prefix + '.temperatureDisplayUnits');
-    if (!isValidHeatingThreshold) this.errorFields.push(HeaterCoolerConfiguration.prefix + heatingThresholdField);
-    if (!isValidCoolingThreshold) this.errorFields.push(HeaterCoolerConfiguration.prefix + coolingThresholdField);
-    if (!isValidThresholdWindow) {
-      this.errorFields.push(HeaterCoolerConfiguration.prefix + heatingThresholdField + ' <= ' + HeaterCoolerConfiguration.prefix + coolingThresholdField);
-    }
+    if (!isValidType) this.errorFields.push(prefix + '.type');
+    if (!isValidTemperatureDisplayUnits) this.errorFields.push(prefix + '.' + this.fieldNames.temperatureDisplayUnits);
+    if (!isValidHeatingThreshold) this.errorFields.push(prefix + heatingThresholdField);
+    if (!isValidCoolingThreshold) this.errorFields.push(prefix + coolingThresholdField);
+    if (!isValidThresholdWindow) this.errorFields.push(prefix + heatingThresholdField + ' <= ' + prefix + coolingThresholdField);
 
     return [
       (isValidType &&
@@ -72,12 +70,76 @@ export class HeaterCoolerConfiguration {
     ];
   }
 
-  getHeatingThreshold() {
-    return (this.temperatureDisplayUnits === 'celsius') ? this.heatingThresholdCelsius : this.heatingThresholdFahrenheit;
+  getHeatingThreshold(): number | undefined {
+    let heatingThreshold: number | undefined = undefined;
+
+    if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+      heatingThreshold = this.heatingThresholdCelsius;
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
+      heatingThreshold = this.heatingThresholdFahrenheit;
+    }
+
+    return heatingThreshold;
   }
 
-  getCoolingThreshold() {
-    return (this.temperatureDisplayUnits === 'celsius') ? this.coolingThresholdCelsius : this.coolingThresholdFahrenheit;
+  getCoolingThreshold(): number | undefined {
+    let coolingThreshold: number | undefined = undefined;
+
+    if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+      coolingThreshold = this.coolingThresholdCelsius;
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
+      coolingThreshold = this.coolingThresholdFahrenheit;
+    }
+
+    return coolingThreshold;
+  }
+
+  private isValidHeatingThreshold(): boolean {
+    let isValidHeatingThreshold = false;
+
+    // If it's a cooler onlu, then no heating threshold is valid
+    if (this.type === HeaterType.Cooler) {
+      isValidHeatingThreshold = true;
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+      isValidHeatingThreshold =
+        Utils.required(this.heatingThresholdCelsius) &&
+        (this.heatingThresholdCelsius >= ThresholdTemperature.HeatingThresholdCelsiusMin &&
+         this.heatingThresholdCelsius <= ThresholdTemperature.HeatingThresholdCelsiusMax);
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
+      isValidHeatingThreshold =
+        Utils.required(this.heatingThresholdFahrenheit) &&
+        (this.heatingThresholdFahrenheit >= ThresholdTemperature.HeatingThresholdFahrenheitMin &&
+         this.heatingThresholdFahrenheit <= ThresholdTemperature.HeatingThresholdFahrenheitMax);
+    }
+
+    return isValidHeatingThreshold;
+  }
+
+  private isValidCoolingThreshold(): boolean {
+    let isValidCoolingThreshold = false;
+
+    // If it's a heater onlu, then no cooling threshold is valid
+    if (this.type === HeaterType.Heater) {
+      isValidCoolingThreshold = true;
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+      isValidCoolingThreshold =
+        Utils.required(this.coolingThresholdCelsius) &&
+        (this.coolingThresholdCelsius >= ThresholdTemperature.CoolingThresholdCelsiusMin &&
+         this.coolingThresholdCelsius <= ThresholdTemperature.CoolingThresholdCelsiusMax);
+    }
+    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
+      isValidCoolingThreshold =
+        Utils.required(this.coolingThresholdFahrenheit) &&
+        (this.coolingThresholdFahrenheit >= ThresholdTemperature.CoolingThresholdFahrenheitMin &&
+         this.coolingThresholdFahrenheit <= ThresholdTemperature.CoolingThresholdFahrenheitMax);
+    }
+
+    return isValidCoolingThreshold;
   }
 
   private capitalize(value: string) {

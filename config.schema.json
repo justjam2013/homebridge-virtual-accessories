@@ -6,33 +6,71 @@
   "strictValidation": true,
   "schema": {
     "type": "object",
-    "definitions": {
+    "$defs": {
+      "volume": {
+        "title": "Volume (0% - 100%) *",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
       "duration": {
         "type": "object",
         "properties": {
           "days": {
-            "title": "Days",
+            "title": "Days *",
             "type": "integer",
             "minimum": 0,
             "maximum": 7
           },
           "hours": {
-            "title": "Hours",
+            "title": "Hours *",
             "type": "integer",
             "minimum": 0,
             "maximum": 23
           },
           "minutes": {
-            "title": "Minutes",
+            "title": "Minutes *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           },
           "seconds": {
-            "title": "Seconds",
+            "title": "Seconds *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
+          }
+        }
+      },
+      "requireHoursMinutesSeconds": {
+        "if": {
+          "properties": {
+            "days": { "const": 7 }
+          },
+          "required": [ "days" ]
+        },
+        "then": {},
+        "else": {
+          "required": [ "hours", "minutes", "seconds" ]
+        }
+      },
+      "doorAndWindowAccessory": {
+        "type": "object",
+        "properties": {
+          "defaultState": {
+            "title": "Default State *",
+            "type": "string",
+            "oneOf": [
+              { "title": "Closed", "enum": ["closed"] },
+              { "title": "Open", "enum": ["open"] }
+            ]
+          },
+          "transitionDuration": {
+            "title": "Transition Duration",
+            "description": "Open & close transition duration in seconds (default: 3 seconds)",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
           }
         }
       }
@@ -41,8 +79,7 @@
       "name": {
         "title": "Platform Name",
         "type": "string",
-        "required": true,
-        "default": "Virtual Accessories Platform",
+        "const": "Virtual Accessories Platform",
         "readonly": true
       },
       "sensorServer": {
@@ -57,7 +94,7 @@
             "type": "boolean"
           },
           "port": {
-            "title": "Webhooks Port",
+            "title": "Server Port",
             "type": "string",
             "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
             "placeholder": "60221"
@@ -67,7 +104,7 @@
       "devices": {
         "title": "Accessories",
         "type": "array",
-        "orderable": false,
+        "orderable": true,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
           "title": " {{ value.accessoryName || 'New Accessory' }}",
@@ -90,10 +127,10 @@
             },
             "accessoryType": {
               "title": "Accessory Type",
-              "description": "Accessory type",
               "type": "string",
               "required": true,
               "oneOf": [
+                { "title": "Door", "enum": ["door"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
@@ -105,7 +142,9 @@
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
+                { "title": "Television", "enum": ["television"] },
                 { "title": "Valve", "enum": ["valve"] },
+                { "title": "Window", "enum": ["window"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
               ],
               "default": "switch"
@@ -115,20 +154,21 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'valve', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "door": {
+              "title": "Door",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
               }
             },
             "doorbell": {
               "title": "Doorbell",
               "type": "object",
               "properties": {
-                "volume": {
-                  "title": "Doorbell Volume *",
-                  "description": "Doorbell volume (0% - 100%)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
@@ -140,7 +180,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Fan default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -149,7 +188,6 @@
                 },
                 "rotationDirection": {
                   "title": "Rotation Direction *",
-                  "description": "Fan rotation direction",
                   "type": "string",
                   "oneOf": [
                     { "title": "Clockwise", "enum": ["clockwise"] },
@@ -157,8 +195,7 @@
                   ]
                 },
                 "rotationSpeed": {
-                  "title": "Rotation Speed *",
-                  "description": "Fan rotation speed (0% - 100%)",
+                  "title": "Rotation Speed (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -170,25 +207,7 @@
             },
             "garageDoor": {
               "title": "Garage Door",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "description": "Garage Door default state",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
@@ -199,7 +218,6 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Device type",
                   "type": "string",
                   "oneOf": [
                     { "title": "Heater", "enum": ["heater"] },
@@ -209,7 +227,6 @@
                 },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
-                  "description": "Temperature display units",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -349,7 +366,6 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Device type",
                   "type": "string",
                   "oneOf": [
                     { "title": "Humidifier", "enum": ["humidifier"] },
@@ -358,7 +374,7 @@
                   ]
                 },
                 "humidifierThreshold": {
-                  "title": "Humidifier Threshold *",
+                  "title": "Humidifying Threshold *",
                   "description": "Humidity level below which the humidifier turns on (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
@@ -368,7 +384,7 @@
                   }
                 },
                 "dehumidifierThreshold": {
-                  "title": "Dehumidifier Threshold *",
+                  "title": "Dehumidifying Threshold *",
                   "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
@@ -431,7 +447,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Lightbulb default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -439,15 +454,13 @@
                   ]
                 },
                 "brightness": {
-                  "title": "Brightness *",
-                  "description": "Lightbulb brightness (0% - 100%)",
+                  "title": "Brightness (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
                 },
                 "type": {
                   "title": "Type *",
-                  "description": "Lightbulb type",
                   "type": "string",
                   "oneOf": [
                     { "title": "White", "enum": ["white"] },
@@ -456,10 +469,10 @@
                 },
                 "colorTemperatureKelvin": {
                   "title": "Color Temperature *",
-                  "description": "Lightbulb color temperature in Kelvin (2203 K to 6536 K)",
+                  "description": "Lightbulb color temperature in Kelvin (2200 K to 6500 K)",
                   "type": "integer",
-                  "minimum": 2203,
-                  "maximum": 6536,
+                  "minimum": 2200,
+                  "maximum": 6500,
                   "placeholder": 2700,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
@@ -489,7 +502,6 @@
               "properties": {
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Lock default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Locked", "enum": ["locked"] },
@@ -528,7 +540,6 @@
                 },
                 "defaultState": {
                   "title": "Default State *",
-                  "description": "Security System default state",
                   "type": "string",
                   "oneOf": [
                     { "title": "Armed - Away", "enum": ["armedaway"] },
@@ -599,17 +610,10 @@
               "type": "object",
               "properties": {
                 "mute": {
-                  "title": "Mute",
-                  "description": "Speaker is muted",
+                  "title": "Muted",
                   "type": "boolean"
                 },
-                "volume": {
-                  "title": "Volume *",
-                  "description": "Speaker volume (0% - 100%)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                }
+                "volume": { "$ref": "#/$defs/volume" }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
@@ -620,8 +624,7 @@
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Switch Default State *",
-                  "description": "Switch default state",
+                  "title": "Default State *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Off", "enum": ["off"] },
@@ -648,13 +651,34 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
               }
             },
+            "television": {
+              "title": "Television Inputs",
+              "type": "object",
+              "properties": {
+                "inputs": {
+                  "title": " ",
+                  "type": "array",
+                  "minItems": 1,
+                  "orderable": true,
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "{{ ' Input ' + $index }}",
+                    "type": "string",
+                    "minLength": 1,
+                    "placeholder": "HDMI"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'television';"
+              }
+            },
             "valve": {
               "title": "Valve",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Valve Type *",
-                  "description": "Valve type",
+                  "title": "Type *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Generic Valve", "enum": ["generic"] },
@@ -664,38 +688,53 @@
                   ]
                 },
                 "duration": {
-                  "title": "Valve Runtime *",
-                  "description": "Valve auto shut-off time in seconds (3600 secs/1hr max - 0 = manual off)",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 3600
+                  "title": "Runtime",
+                  "description": "Valve auto shut-off time (1hr max - 0 = manual off)",
+                  "type": "object",
+                  "properties": {
+                    "minutes": {
+                      "title": "Minutes *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "minutes": { "const": 60 }
+                        },
+                        "required": [ "minutes" ]
+                      },
+                      "then": {},
+                      "else": {
+                        "required": [ "seconds" ]
+                      }
+                    }
+                  ]
                 }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
               }
             },
+            "window": {
+              "title": "Window",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
+              }
+            },
             "windowCovering": {
               "title": "Window Covering",
-              "type": "object",
-              "properties": {
-                "defaultState": {
-                  "title": "Window Covering Default State *",
-                  "description": "Window Covering default state",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Closed", "enum": ["closed"] },
-                    { "title": "Open", "enum": ["open"] }
-                  ]
-                },
-                "transitionDuration": {
-                  "title": "Transition Duration",
-                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
-                  "type": "integer",
-                  "mminimum": 0,
-                  "placeholder": 3
-                }
-              },
+              "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
@@ -720,7 +759,6 @@
                 },
                 "trigger": {
                   "title": "Trigger *",
-                  "description": "Sensor trigger source",
                   "type": "string",
                   "oneOf": [
                     { "title": "Ping Host", "enum": ["ping"] },
@@ -738,36 +776,115 @@
               "type": "object",
               "properties": {
                 "durationIsRandom": {
-                  "title": "Timer Duration is Random",
-                  "description": "The timer duration is random",
+                  "title": "Duration is Random",
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Timer Duration *",
-                  "description": "Set timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "title": "Duration",
+                  "description": "Timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Timer Min Duration *",
-                  "description": "Set minimum timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "title": "Min Duration",
+                  "description": "Minimum timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Timer Max Duration *",
-                  "description": "Set maximum timer duration for the accessory to reset to default state",
-                  "$ref": "#/definitions/duration",
+                  "title": "Max Duration",
+                  "description": "Maximum timer reset delay (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "": {
+                  "title": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "type": "object",
+                  "properties": {},
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
                   }
                 },
                 "isResettable": {
-                  "title": "Timer is Resettable",
+                  "title": "Is Resettable",
                   "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
                   "type": "boolean"
                 }
@@ -787,10 +904,10 @@
                     "required": [ "durationRandomMin", "durationRandomMax" ],
                     "properties": {
                       "durationRandomMin": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       },
                       "durationRandomMax": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   },
@@ -798,7 +915,7 @@
                     "required": [ "duration" ],
                     "properties": {
                       "duration": {
-                        "required": [ "days", "hours", "minutes", "seconds" ]
+                        "required": [ "days" ]
                       }
                     }
                   }
@@ -810,12 +927,12 @@
               "type": "object",
               "properties": {
                 "name": {
-                  "title": "Sensor Name *",
+                  "title": "Name *",
                   "description": "Sensor name as it will be displayed in HomeKit",
                   "type": "string"
                 },
                 "type": {
-                  "title": "Sensor Type *",
+                  "title": "Type *",
                   "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
                   "type": "string",
                   "oneOf": [
@@ -879,7 +996,6 @@
                 },
                 "startDateTime": {
                   "title": "Start Date-Time",
-                  "description": "Start date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
@@ -888,12 +1004,12 @@
                 },
                 "endDateTime": {
                   "title": "End Date-Time ",
-                  "description": "End date and time",
                   "type": "string",
                   "format": "date-time",
                   "x-inputAttributes": {
                     "step": 1
-                  }                },
+                  }
+                },
                 "disableTriggerEventLogging": {
                   "title": "Disable Trigger Event Logging",
                   "description": "Disable logging for high frequency trigger events",
@@ -970,6 +1086,21 @@
                 "required": [ "switch" ],
                 "properties": {
                   "switch": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "door" }
+                }
+              },
+              "then": {
+                "required": [ "door" ],
+                "properties": {
+                  "door": {
                     "required": [ "defaultState" ]
                   }
                 }
@@ -1113,6 +1244,21 @@
             {
               "if": {
                 "properties": {
+                  "accessoryType": { "const": "television" }
+                }
+              },
+              "then": {
+                "required": [ "television" ],
+                "properties": {
+                  "television": {
+                    "required": [ "inputs" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
                   "accessoryType": { "const": "valve" }
                 }
               },
@@ -1120,7 +1266,27 @@
                 "required": [ "valve" ],
                 "properties": {
                   "valve": {
-                    "required": [ "type", "duration" ]
+                    "required": [ "type", "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "minutes" ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "window" }
+                }
+              },
+              "then": {
+                "required": [ "window" ],
+                "properties": {
+                  "window": {
+                    "required": [ "defaultState" ]
                   }
                 }
               }
@@ -1257,6 +1423,12 @@
             }
           ]
         }
+      },
+      "": {
+        "title": " ",
+        "description": "Note: You can reorder accessories by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "type": "object",
+        "properties": {}
       }
     }
   },

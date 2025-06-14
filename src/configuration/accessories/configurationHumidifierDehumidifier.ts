@@ -1,23 +1,26 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { HumidifierType } from '../configurationSchema.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class HumidifierDehumidifierConfiguration {
+export class HumidifierDehumidifierConfiguration extends AccessoryConfiguration {
   type!: string;
   humidifierThreshold!: number;
   dehumidifierThreshold!: number;
 
-  static prefix: string = 'humidifierDehumidifier';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
+
+  isValid(prefix: string): [boolean, string[]] {
     const isValidType: boolean = (
-      (this.type !== undefined) &&
-      [ 'auto', 'humidifier', 'dehumidifier' ].includes(this.type)
+      Utils.required(this.type) &&
+      HumidifierType.Types.includes(this.type)
     );
 
     const isValidHumidifierThreshold: boolean = (
@@ -39,13 +42,11 @@ export class HumidifierDehumidifierConfiguration {
     );
 
     // Store fields failing validation
-    if (!isValidType) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.type');
-    if (!isValidHumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold');
-    if (!isValidDehumidifierThreshold) this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
-    if (!isValidThresholdWindow) {
-      // eslint-disable-next-line max-len
-      this.errorFields.push(HumidifierDehumidifierConfiguration.prefix + '.humidifierThreshold <= ' + HumidifierDehumidifierConfiguration.prefix + '.dehumidifierThreshold');
-    }
+    if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
+    if (!isValidHumidifierThreshold) this.errorFields.push(prefix + '.' + this.fieldNames.humidifierThreshold);
+    if (!isValidDehumidifierThreshold) this.errorFields.push(prefix + '.' + this.fieldNames.dehumidifierThreshold);
+    if (!isValidThresholdWindow) this.errorFields.push(
+      prefix + '.' + this.fieldNames.humidifierThreshold! + ' <= ' + prefix + '.' + this.fieldNames.dehumidifierThreshold);
 
     return [
       (isValidType &&

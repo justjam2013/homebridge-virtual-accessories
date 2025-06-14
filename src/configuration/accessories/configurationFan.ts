@@ -1,30 +1,42 @@
 /* eslint-disable curly */
 
+import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { PowerState, RotationDirection } from '../configurationSchema.js';
+
 import { Utils } from '../../utils.js';
 
 /**
  * 
  */
-export class FanConfiguration {
+export class FanConfiguration extends AccessoryConfiguration {
   defaultState!: string;
   rotationDirection!: string;
   rotationSpeed!: number;
 
-  static prefix: string = 'fan';
-
   private errorFields: string[] = [];
 
-  isValid(): [boolean, string[]] {
-    const isValidDefaultState: boolean = Utils.isPoweredState(this.defaultState);
+  readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
-    const isValidRotationDirection: boolean = Utils.isRotationDirection(this.rotationDirection);
+  isValid(prefix: string): [boolean, string[]] {
+    const isValidDefaultState: boolean = (
+      Utils.required(this.defaultState) &&
+      PowerState.States.includes(this.defaultState)
+    );
 
-    const isValidRotationSpeed: boolean = Utils.isPercentage(this.rotationSpeed);
+    const isValidRotationDirection: boolean = (
+      Utils.required(this.rotationDirection) &&
+      RotationDirection.Directions.includes(this.rotationDirection)
+    );
+
+    const isValidRotationSpeed: boolean = (
+      Utils.required(this.rotationSpeed) &&
+      Utils.isPercentage(this.rotationSpeed)
+    );
 
     // Store fields failing validation
-    if (!isValidDefaultState) this.errorFields.push(FanConfiguration.prefix + '.defaultState');
-    if (!isValidRotationDirection) this.errorFields.push(FanConfiguration.prefix + '.rotationDirection');
-    if (!isValidRotationSpeed) this.errorFields.push(FanConfiguration.prefix + '.rotationSpeed');
+    if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
+    if (!isValidRotationDirection) this.errorFields.push(prefix + '.' + this.fieldNames.rotationDirection);
+    if (!isValidRotationSpeed) this.errorFields.push(prefix + '.' + this.fieldNames.rotationSpeed);
 
     return [
       (isValidDefaultState &&

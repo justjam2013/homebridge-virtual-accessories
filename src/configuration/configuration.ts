@@ -1,10 +1,13 @@
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { PlatformConfiguration } from './configurationPlatform.js';
 import { SensorServerConfiguration } from './configurationSensorServer.js';
 import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 
 import { deserialize } from 'typeserializer';
 import 'reflect-metadata';
 
+/**
+ * 
+ */
 export class Configuration {
 
   private log: VirtualAccessoriesLogger;
@@ -15,12 +18,12 @@ export class Configuration {
     this.log = log;
   }
 
-  deserializeAccessoryConfig(config: string | object): AccessoryConfiguration | undefined {
-    let accessoryConfig: AccessoryConfiguration | undefined;
+  deserializeAccessoryConfig(config: string | object): PlatformConfiguration | undefined {
+    let accessoryConfig: PlatformConfiguration | undefined;
 
     const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
     try {
-      accessoryConfig = deserialize(json, AccessoryConfiguration);
+      accessoryConfig = deserialize(json, PlatformConfiguration);
     } catch (error) {
       this.log.error(`[Configuration] Error: ${JSON.stringify(error)}`);
     }

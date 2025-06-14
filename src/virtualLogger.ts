@@ -2,6 +2,9 @@
 
 import type { Logging, LogLevel } from 'homebridge';
 
+/**
+ * 
+ */
 export class VirtualAccessoriesLogger {
 
   private platformLogger: Logging;

@@ -1,8 +1,9 @@
+/* eslint-disable brace-style */
+import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
-import { Categories } from 'homebridge';
 
 import { Accessory } from './accessories/virtualAccessory.js';
-import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
+import { PlatformConfiguration } from './configuration/configurationPlatform.js';
 import { AccessoryFactory } from './accessoryFactory.js';
 import { Configuration } from './configuration/configuration.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -12,6 +13,10 @@ import { VirtualAccessoriesLogger } from './virtualLogger.js';
 
 import * as path from 'path';
 import fs from 'fs';
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore <-- TODO remove this line, unless that gives an error
+import packageInfo from '../package.json' with { type: 'json' };
 
 /**
  * HomebridgePlatform
@@ -27,6 +32,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
+  public version = packageInfo.version;
+
   constructor(
     log: Logging,
     public readonly config: PlatformConfig,
@@ -37,10 +44,33 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.log = new VirtualAccessoriesLogger(log);
 
+    // Validate platform name
+    const platformName: string | undefined = this.config.name;
+    if (platformName !== 'Virtual Accessories Platform') {
+      this.log.error(`Platform Name is invalid: '${platformName}'`);
+      this.log.error(`Platform Name must be '${platformName}'`);
+    }
+    else {
+      this.log.debug(`Platform Name is valid: '${platformName}'`);
+    }
+
     // Create sensor server
     const sensorServerConfig: SensorServerConfiguration | undefined = new Configuration(this.log).deserializeSensorServerConfig(this.config.sensorServer);
     if (sensorServerConfig?.enabled) {
-      this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+      const prefix: string = 'sensorServer';
+      let isValid: boolean = false;
+      let errorFields: string[] = [ prefix ];
+      [isValid, errorFields] = sensorServerConfig.isValid(prefix);
+
+      if (!isValid) {
+        this.log.error(`Sensor Server configuration is invalid: ${JSON.stringify(sensorServerConfig)}`);
+        this.log.error(`Invalid fields: ${errorFields.toString()}`);
+      }
+      else {
+        this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
+        
+        this.sensorUpdateServer = new SensorUpdateServer(this.log, parseInt(sensorServerConfig!.port));
+      }
     }
     
     this.log.debug('Finished initializing platform');
@@ -49,13 +79,15 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
-    this.api.on('didFinishLaunching', () => {
+    this.api.on(APIEvent.DID_FINISH_LAUNCHING, () => {
       log.debug('Executing didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
       this.discoverDevices();
+
+      this.log.info(`Running Virtual Accessories For Homebridge v${this.version}`);
     });
 
-    this.api.on('shutdown', () => {
+    this.api.on(APIEvent.SHUTDOWN, () => {
       log.debug('Executing shutdown callback');
       this.sensorUpdateServer?.stop();
     });
@@ -85,7 +117,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
     this.log.debug(`Found ${configuredDevices.length} configured accessories: ${JSON.stringify(configuredDevices)}`);
 
-    const configuredAccessories: AccessoryConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
+    const configuredAccessories: PlatformConfiguration[] = this.deserializeConfiguredAccessories(configuredDevices);
     this.log.debug(`Deserialized accessories: ${JSON.stringify(configuredAccessories)}`);
 
     const virtualAccessories: Accessory[] = [];
@@ -127,10 +159,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           }
 
           virtualAccessories.push(virtualAccessory);
-        } else {
+        }
+        else {
           this.log.error(`Error restoring existing accessory: ${configuredAccessory.accessoryName}`);
         }
-      } else {
+      }
+      else {
         // the accessory does not yet exist, so we need to create it
         this.log.info(`Adding new accessory: ${configuredAccessory.accessoryName}`);
 
@@ -150,10 +184,14 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, configuredAccessory.accessoryType);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${configuredAccessory.accessoryName}`);
-        } else if (configuredAccessory.category === Categories.SPEAKER) {
+        }
+        else if (virtualAccessory.isExternalAccessory()) {
+          this.log.info(`Publishing new external accessory: ${configuredAccessory.accessoryName}`);
           this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-        } else {
+        }
+        else {
           // link the accessory to your platform
+          this.log.info(`Publishing new accessory: ${configuredAccessory.accessoryName}`);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
           virtualAccessories.push(virtualAccessory);
@@ -181,7 +219,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           fs.unlink(storagePath, (err) => {
             if (err) {
               this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
-            } else {
+            }
+            else {
               this.log.debug(`Deleted stateful storage for: ${accessory.displayName}`);
             }
           }); 
@@ -199,23 +238,25 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   private deserializeConfiguredAccessories(
     configuredDevices,
-  ): AccessoryConfiguration[] {
-    const accessoryConfigurations: AccessoryConfiguration[] = [];
+  ): PlatformConfiguration[] {
+    const accessoryConfigurations: PlatformConfiguration[] = [];
     const accessoryUUIDs: string[] = [];
 
     for (const configuredDevice of configuredDevices) {
       // Deserialize accessory configuration
       const configuration: Configuration = new Configuration(this.log);
-      const accessoryConfiguration: AccessoryConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
+      const accessoryConfiguration: PlatformConfiguration | undefined = configuration.deserializeAccessoryConfig(configuredDevice);
 
       // Skip accessory if the configuration is invalid
       if (accessoryConfiguration === undefined) {
         this.log.error(`Error deserializing: ${JSON.stringify(configuredDevice)}`);
         this.log.info('Skipping accessory until configuration is fixed');
-      } else if (accessoryUUIDs.includes(accessoryConfiguration.accessoryID)) {
+      }
+      else if (accessoryUUIDs.includes(accessoryConfiguration.accessoryID)) {
         this.log.error(`Found accessory with duplicate ID: ${JSON.stringify(configuredDevice)}`);
         this.log.info('Skipping accessory until configuration is fixed');
-      } else {
+      }
+      else {
         this.log.debug(`Deserialized accessory: ${JSON.stringify(configuredDevice)}`);
 
         let isValidAccessoryConfig: boolean = false;
@@ -224,7 +265,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         if (!isValidAccessoryConfig) {
           this.log.error(`Skipping accessory. Configuration is invalid: ${JSON.stringify(accessoryConfiguration)}`);
           this.log.error(`Invalid fields: ${errorFields.toString()}`);
-        } else {
+        }
+        else {
           this.log.debug(`Configuration is valid: ${JSON.stringify(accessoryConfiguration)}`);
           accessoryConfigurations.push(accessoryConfiguration);
 
