@@ -20,7 +20,7 @@ export class SecuritySystemConfiguration extends AccessoryConfiguration {
     const isValidDefaultState: boolean = (
       Utils.required(this.defaultState) &&
       SecuritySystemState.States.includes(this.defaultState) &&
-      this.armedModes.includes(this.defaultState)
+      this.armedModesContainsDefaultState()
     );
 
     const isValidArmedModes: boolean = (
@@ -36,5 +36,26 @@ export class SecuritySystemConfiguration extends AccessoryConfiguration {
         isValidArmedModes),
       this.errorFields,
     ];
+  }
+
+  // TODO: remove this method once ng-formworks feature 'Feature request: Implement multi select using oneOf as set of checkboxes'
+  // (https://github.com/zahmo/ng-formworks/issues/26) is complete
+
+  /**
+   * This method is necessary becasue the values for
+   * states are: 'disarmed', 'armedaway', 'armednight', 'armedstay'
+   * while values for
+   * armed modes are: 'Away', 'Night', 'Stay'
+   */
+  private armedModesContainsDefaultState(): boolean {
+    let armedModesContainsDefaultState: boolean = false;
+    if ((this.defaultState === SecuritySystemState.ArmedAway && this.armedModes.includes('Away')) ||
+        (this.defaultState === SecuritySystemState.ArmedNight && this.armedModes.includes('Night')) ||
+        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes('Stay'))
+    ) {
+      armedModesContainsDefaultState = true;
+    }
+
+    return armedModesContainsDefaultState;
   }
 }
