@@ -1,7 +1,7 @@
 /* eslint-disable curly */
 
 import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { SecuritySystemState } from '../configurationSchema.js';
+import { SecuritySystemArmedMode, SecuritySystemState } from '../configurationSchema.js';
 
 import { Utils } from '../../utils.js';
 
@@ -49,9 +49,9 @@ export class SecuritySystemConfiguration extends AccessoryConfiguration {
    */
   private armedModesContainsDefaultState(): boolean {
     let armedModesContainsDefaultState: boolean = false;
-    if ((this.defaultState === SecuritySystemState.ArmedAway && this.armedModes.includes('Away')) ||
-        (this.defaultState === SecuritySystemState.ArmedNight && this.armedModes.includes('Night')) ||
-        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes('Stay')) ||
+    if ((this.defaultState === SecuritySystemState.ArmedAway && this.armedModes.includes(SecuritySystemArmedMode.ArmedAway)) ||
+        (this.defaultState === SecuritySystemState.ArmedNight && this.armedModes.includes(SecuritySystemArmedMode.ArmedNight)) ||
+        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes(SecuritySystemArmedMode.ArmedStay)) ||
         (this.defaultState === SecuritySystemState.Disarmed)
     ) {
       armedModesContainsDefaultState = true;

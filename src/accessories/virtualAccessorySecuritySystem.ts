@@ -1,8 +1,9 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+ 
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
-import { SecuritySystemState } from '../configuration/configurationSchema.js';
+import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/configurationSchema.js';
 
 /**
  * SecuritySystem - Accessory implementation
@@ -63,6 +64,8 @@ export class SecuritySystem extends Accessory {
     this.states.SecuritySystemTargetState = this.states.SecuritySystemCurrentState;
 
     this.service = this.accessory.getService(this.platform.Service.SecuritySystem) || this.accessory.addService(this.platform.Service.SecuritySystem);
+
+    this.setSecurityServiceProperties(this.service!);
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
@@ -139,5 +142,99 @@ export class SecuritySystem extends Accessory {
     }
 
     return stateName;
+  }
+
+  /**
+   * Ensure all the property values are set, then remove as required
+   */
+  private setSecurityServiceProperties(
+    service: Service,
+  ) {
+    const SecuritySystemCurrentState = this.platform.Characteristic.SecuritySystemCurrentState;
+    const SecuritySystemTargetState = this.platform.Characteristic.SecuritySystemTargetState;
+
+    const reservedMax: number = 255;
+
+    const currentStateValues: Set<number> = new Set([
+      SecuritySystemCurrentState.STAY_ARM,
+      SecuritySystemCurrentState.AWAY_ARM,
+      SecuritySystemCurrentState.NIGHT_ARM,
+      SecuritySystemCurrentState.DISARMED,
+      SecuritySystemCurrentState.ALARM_TRIGGERED,
+      // 5, ... 255 Reserved
+    ]);
+    const targetStateValues: Set<number> = new Set([
+      SecuritySystemTargetState.STAY_ARM,
+      SecuritySystemTargetState.AWAY_ARM,
+      SecuritySystemTargetState.NIGHT_ARM,
+      SecuritySystemTargetState.DISARM,
+      // 4, ... 255 Reserved
+    ]);
+
+    const armedModes: string[] = this.accessoryConfiguration.securitySystem.armedModes;
+    if (!armedModes.includes(SecuritySystemArmedMode.ArmedAway)) {
+      currentStateValues.delete(SecuritySystemCurrentState.AWAY_ARM);
+      targetStateValues.delete(SecuritySystemTargetState.AWAY_ARM);
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Away is not in armed modes`);
+    }
+    if (!armedModes.includes(SecuritySystemArmedMode.ArmedNight)) {
+      currentStateValues.delete(SecuritySystemCurrentState.NIGHT_ARM);
+      targetStateValues.delete(SecuritySystemTargetState.NIGHT_ARM);
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Night is not in armed modes`);
+    }
+    if (!armedModes.includes(SecuritySystemArmedMode.ArmedStay)) {
+      currentStateValues.delete(SecuritySystemCurrentState.STAY_ARM);
+      targetStateValues.delete(SecuritySystemTargetState.STAY_ARM);
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Stay is not in armed modes`);
+    }
+
+    if (currentStateValues.size > 0) {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.generatePropertyValueList(currentStateValues)}`);
+
+      this.generateReservedArray(currentStateValues.size + 1, reservedMax).forEach(currentStateValues.add, currentStateValues);
+
+      service.getCharacteristic(SecuritySystemCurrentState)
+        .setProps({
+          validValues: Array.from(currentStateValues),
+        });
+
+      // eslint-disable-next-line max-len
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemCurrentState).props)}`);
+    }
+    if (targetStateValues.size > 0) {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.generatePropertyValueList(targetStateValues)}`);
+
+      this.generateReservedArray(targetStateValues.size + 1, reservedMax).forEach(targetStateValues.add, targetStateValues);
+
+      service.getCharacteristic(SecuritySystemTargetState)
+        .setProps({
+          validValues: Array.from(targetStateValues),
+        });
+
+      // eslint-disable-next-line max-len
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemTargetState).props)}`);
+    }
+  }
+
+  private generateReservedArray(
+    start: number,
+    end: number,
+  ): number[] {
+    const reserved: number[] = Array(end - start + 1).fill(start).map((x, y) => x + y);
+    return reserved;
+  }
+
+  private generatePropertyValueList(
+    values: Set<number>,
+  ): string {
+    const names: Set<string> = new Set();
+    values.forEach((value) => {
+      names.add(SecuritySystem.getStateName(value));
+    });
+
+    return Array.from(names).join(', ');
   }
 }

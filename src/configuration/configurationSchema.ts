@@ -158,6 +158,18 @@ export class SecuritySystemState {
 /**
  * 
  */
+export class SecuritySystemArmedMode {
+
+  static ArmedAway: string = 'Away';
+  static ArmedNight: string = 'Night';
+  static ArmedStay: string = 'Stay';
+
+  static ArmedModes: string[] = [ SecuritySystemArmedMode.ArmedAway, SecuritySystemArmedMode.ArmedNight, SecuritySystemArmedMode.ArmedStay ];
+}
+
+/**
+ * 
+ */
 export class ValveType {
 
   static Generic: string = 'generic';
