@@ -416,7 +416,8 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryType": "securitysystem",
             "securitySystem": {
                 "armedModes": [
-                    "Away"
+                    "Away",
+                    "Night"
                 ],
                 "defaultState": "disarmed"
             }
