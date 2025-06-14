@@ -125,6 +125,10 @@ export class Utils {
     return (value >= 0 && value <= 100);
   }
 
+  static isDegrees(value: number): boolean {
+    return (value >= 0 && value <= 360);
+  }
+
   static isValidTransition(value: number): boolean {
     return (value >= 0);
   }
