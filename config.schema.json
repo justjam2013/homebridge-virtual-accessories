@@ -464,18 +464,37 @@
                   "type": "string",
                   "oneOf": [
                     { "title": "White", "enum": ["white"] },
-                    { "title": "White Ambiance", "enum": ["ambiance"] }
+                    { "title": "White Ambiance", "enum": ["ambiance"] },
+                    { "title": "Color", "enum": ["color"] }
                   ]
                 },
                 "colorTemperatureKelvin": {
                   "title": "Color Temperature *",
-                  "description": "Lightbulb color temperature in Kelvin (2200 K to 6500 K)",
+                  "description": "Color temperature in Kelvin (2200 K to 6500 K)",
                   "type": "integer",
                   "minimum": 2200,
                   "maximum": 6500,
                   "placeholder": 2700,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
+                  }
+                },
+                "hue": {
+                  "title": "Hue (0º to 360º) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 360,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'color';"
+                  }
+                },
+                "saturation": {
+                  "title": "Saturation (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'color';"
                   }
                 }
               },
@@ -492,6 +511,17 @@
                   },
                   "then": {
                     "required": [ "colorTemperatureKelvin" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "color" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "hue", "saturation" ]
                   }
                 }
               ]

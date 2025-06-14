@@ -13,9 +13,8 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
   type!: string;
   brightness!: number;
   colorTemperatureKelvin!: number;
-  // TODO:
-  // hue!: number;
-  // saturation!: number;
+  hue!: number;
+  saturation!: number;
 
   private errorFields: string[] = [];
 
@@ -46,17 +45,39 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
         true
     );
 
+    const isValidHue: boolean = (
+      (this.type === LightbulbType.Color) ?
+        (
+          Utils.required(this.hue) &&
+          Utils.isDegrees(this.hue)
+        ) :
+        true
+    );
+
+    const isValidSaturation: boolean = (
+      (this.type === LightbulbType.Color) ?
+        (
+          Utils.required(this.saturation) &&
+          Utils.isPercentage(this.saturation)
+        ) :
+        true
+    );
+
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
     if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
     if (!isValidBrightness) this.errorFields.push(prefix + '.' + this.fieldNames.brightness);
     if (!isValidColorTemperature) this.errorFields.push(prefix + '.' + this.fieldNames.colorTemperatureKelvin);
+    if (!isValidHue) this.errorFields.push(prefix + '.' + this.fieldNames.hue);
+    if (!isValidSaturation) this.errorFields.push(prefix + '.' + this.fieldNames.saturation);
 
     return [
       (isValidDefaultState &&
         isValidType &&
         isValidBrightness &&
-        isValidColorTemperature),
+        isValidColorTemperature &&
+        isValidHue &&
+        isValidSaturation),
       this.errorFields,
     ];
   }
