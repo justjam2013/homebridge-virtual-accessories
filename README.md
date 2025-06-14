@@ -23,11 +23,10 @@
 <br>
 
 > [!Caution]
-> **Virtual Accessories for Homevridge v3.5.13 breaks the Valve accessory.** The Valve accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.13-breaking-update-for-Valve-accessory) for details on how to update the Valve accessory configuration
-
+> **Virtual Accessories for Homevridge v3.5.16 breaks the Security System accessory.** The Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration
 
 > [!Caution]
-> **Virtual Accessories for Homevridge v3.5.16 breaks the Security System accessory.** The Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration
+> **Virtual Accessories for Homevridge v3.5.13 breaks the Valve accessory.** The Valve accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.13-breaking-update-for-Valve-accessory) for details on how to update the Valve accessory configuration
 
 ## <!-- Thin separator line -->
 
