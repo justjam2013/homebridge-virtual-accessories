@@ -51,7 +51,8 @@ export class SecuritySystemConfiguration extends AccessoryConfiguration {
     let armedModesContainsDefaultState: boolean = false;
     if ((this.defaultState === SecuritySystemState.ArmedAway && this.armedModes.includes('Away')) ||
         (this.defaultState === SecuritySystemState.ArmedNight && this.armedModes.includes('Night')) ||
-        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes('Stay'))
+        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes('Stay')) ||
+        (this.defaultState === SecuritySystemState.Disarmed)
     ) {
       armedModesContainsDefaultState = true;
     }
