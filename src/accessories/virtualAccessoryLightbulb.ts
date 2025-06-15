@@ -6,6 +6,7 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
 import { Utils } from '../utils.js';
+import { ColorHSL, Colors } from '../colors.js';
 
 /**
  * Lightbulb - Accessory implementation
@@ -47,21 +48,25 @@ export class Lightbulb extends Accessory {
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
-    const brightness = this.accessoryConfiguration.lightbulb.brightness;
-    const colorTemperatureKelvin = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
-    const hue = this.accessoryConfiguration.lightbulb.hue;
-    const saturation = this.accessoryConfiguration.lightbulb.saturation;
+    const brightness: number = this.accessoryConfiguration.lightbulb.brightness;
+    const colorTemperatureKelvin: number = this.accessoryConfiguration.lightbulb.colorTemperatureKelvin;
+    const colorHex: string = this.accessoryConfiguration.lightbulb.colorHex;
 
     this.states.LightbulbState = this.defaultState;
     this.states.LightbulbBrightness = brightness;
 
-    if (this.type === Lightbulb.AMBIANCE) {
+    if (this.type === Lightbulb.WHITE) {
+      this.states.LightbulbBrightness = brightness;
+    }
+    else if (this.type === Lightbulb.AMBIANCE) {
+      this.states.LightbulbBrightness = brightness;
       this.states.LightbulbColorTemperature = colorTemperatureKelvin;
     }
-
-    if (this.type === Lightbulb.COLOR) {
-      this.states.LightbulbHue = hue;
-      this.states.LightbulbSaturation = saturation;
+    else if (this.type === Lightbulb.COLOR) {
+      const hsl: ColorHSL = Colors.HexToHSL(colorHex)!;
+      this.states.LightbulbHue = hsl.hue;
+      this.states.LightbulbSaturation = hsl.saturation;
+      this.states.LightbulbBrightness = hsl.luminance;
     }
 
     // If the accessory is stateful retrieve stored state

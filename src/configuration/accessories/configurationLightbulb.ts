@@ -4,6 +4,7 @@ import { AccessoryConfiguration } from '../configurationAccessory.js';
 import { ColorTemperature, LightbulbType, PowerState } from '../configurationSchema.js';
 
 import { Utils } from '../../utils.js';
+import { Colors } from '../../colors.js';
 
 /**
  * 
@@ -13,8 +14,7 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
   type!: string;
   brightness!: number;
   colorTemperatureKelvin!: number;
-  hue!: number;
-  saturation!: number;
+  colorHex!: string;
 
   private errorFields: string[] = [];
 
@@ -32,8 +32,12 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
     );
 
     const isValidBrightness: boolean = (
-      Utils.required(this.brightness) &&
-      Utils.isPercentage(this.brightness)
+      ([LightbulbType.White, LightbulbType.Ambiance].includes(this.type)) ?
+        (
+          Utils.required(this.brightness) &&
+          Utils.isPercentage(this.brightness)
+        ) :
+        true
     );
 
     const isValidColorTemperature: boolean = (
@@ -45,20 +49,11 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
         true
     );
 
-    const isValidHue: boolean = (
+    const isValidColorRGB: boolean = (
       (this.type === LightbulbType.Color) ?
         (
-          Utils.required(this.hue) &&
-          Utils.isDegrees(this.hue)
-        ) :
-        true
-    );
-
-    const isValidSaturation: boolean = (
-      (this.type === LightbulbType.Color) ?
-        (
-          Utils.required(this.saturation) &&
-          Utils.isPercentage(this.saturation)
+          Utils.required(this.colorHex) &&
+          Colors.isValidHex(this.colorHex)
         ) :
         true
     );
@@ -68,16 +63,14 @@ export class LightbulbConfiguration extends AccessoryConfiguration {
     if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
     if (!isValidBrightness) this.errorFields.push(prefix + '.' + this.fieldNames.brightness);
     if (!isValidColorTemperature) this.errorFields.push(prefix + '.' + this.fieldNames.colorTemperatureKelvin);
-    if (!isValidHue) this.errorFields.push(prefix + '.' + this.fieldNames.hue);
-    if (!isValidSaturation) this.errorFields.push(prefix + '.' + this.fieldNames.saturation);
+    if (!isValidColorRGB) this.errorFields.push(prefix + '.' + this.fieldNames.colorHex);
 
     return [
       (isValidDefaultState &&
         isValidType &&
         isValidBrightness &&
         isValidColorTemperature &&
-        isValidHue &&
-        isValidSaturation),
+        isValidColorRGB),
       this.errorFields,
     ];
   }
