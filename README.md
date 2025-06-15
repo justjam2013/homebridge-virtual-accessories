@@ -376,8 +376,27 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
             "accessoryType": "lightbulb",
             "lightbulb": {
                 "defaultState": "off",
-                "brightness": 100,
-                "type": "white"
+                "type": "white",
+                "brightness": 100
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+```
+
+### Lightbulb (color)
+
+```json
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Lightbulb",
+            "accessoryType": "lightbulb",
+            "lightbulb": {
+                "defaultState": "off",
+                "type": "color",
+                "colorHex": "#006eff"
             }
         }
     ],
