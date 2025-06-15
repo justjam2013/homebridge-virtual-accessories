@@ -222,6 +222,8 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 
 ## Accessory Configurations
 
+These are example configurations for the virtual accessories and are not exhaustive of all the different permutations and provided for reference only. It is recommended that you use the UI to fully configure each accessory.
+
 ### Door
 
 ```json
