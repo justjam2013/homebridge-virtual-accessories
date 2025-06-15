@@ -22,6 +22,9 @@ import packageInfo from '../package.json' with { type: 'json' };
  * HomebridgePlatform
  */
 export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
+
+  static platformName: string = 'Virtual Accessories Platform';
+
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
 
@@ -46,9 +49,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     // Validate platform name
     const platformName: string | undefined = this.config.name;
-    if (platformName !== 'Virtual Accessories Platform') {
+    if (platformName !== VirtualAccessoriesPlatform.platformName) {
       this.log.error(`Platform Name is invalid: '${platformName}'`);
-      this.log.error(`Platform Name must be '${platformName}'`);
+      this.log.error(`Platform Name must be '${VirtualAccessoriesPlatform.platformName}'`);
     }
     else {
       this.log.debug(`Platform Name is valid: '${platformName}'`);
