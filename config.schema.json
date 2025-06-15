@@ -453,12 +453,6 @@
                     { "title": "On", "enum": ["on"] }
                   ]
                 },
-                "brightness": {
-                  "title": "Brightness (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100
-                },
                 "type": {
                   "title": "Type *",
                   "type": "string",
@@ -467,6 +461,15 @@
                     { "title": "White Ambiance", "enum": ["ambiance"] },
                     { "title": "Color", "enum": ["color"] }
                   ]
+                },
+                "brightness": {
+                  "title": "Brightness (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && ['white', 'ambiance'].includes(model.devices[arrayIndices].lightbulb.type);"
+                  }
                 },
                 "colorTemperatureKelvin": {
                   "title": "Color Temperature *",
@@ -479,20 +482,10 @@
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
                   }
                 },
-                "hue": {
-                  "title": "Hue (0º to 360º) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 360,
-                  "condition": {
-                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'color';"
-                  }
-                },
-                "saturation": {
-                  "title": "Saturation (0% - 100%) *",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 100,
+                "colorHex": {
+                  "title": "Color *",
+                  "type": "string",
+                  "format": "color",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'color';"
                   }
@@ -505,12 +498,23 @@
                 {
                   "if": {
                     "properties": {
+                      "type": { "const": "white" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "brightness" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
                       "type": { "const": "ambiance" }
                     },
                     "required": [ "type" ]
                   },
                   "then": {
-                    "required": [ "colorTemperatureKelvin" ]
+                    "required": [ "brightness", "colorTemperatureKelvin" ]
                   }
                 },
                 {
@@ -521,7 +525,7 @@
                     "required": [ "type" ]
                   },
                   "then": {
-                    "required": [ "hue", "saturation" ]
+                    "required": [ "colorHex" ]
                   }
                 }
               ]
@@ -1221,7 +1225,7 @@
                 "required": [ "lightbulb" ],
                 "properties": {
                   "lightbulb": {
-                    "required": [ "defaultState", "brightness", "type" ]
+                    "required": [ "defaultState", "type" ]
                   }
                 }
               }
