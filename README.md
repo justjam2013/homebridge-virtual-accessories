@@ -52,6 +52,7 @@
     - [Heater/Cooler (Fahrenheit)](#heatercooler-fahrenheit)
     - [Humidifier/Dehumidifier](#humidifierdehumidifier)
     - [Lightbulb](#lightbulb)
+    - [Lightbulb (color)](#lightbulb-color)
     - [Lock](#lock)
     - [Security System](#security-system)
     - [Speaker](#speaker)
