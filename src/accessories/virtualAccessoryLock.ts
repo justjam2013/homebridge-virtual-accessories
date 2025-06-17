@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
 import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -17,8 +18,13 @@ export class Lock extends Accessory {
   static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
   static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
 
+  static readonly SECURED_REMOTELY: number = 6;                 // Characteristic.LockLastKnownAction.SECURED_REMOTELY;
+  static readonly UNSECURED_REMOTELY: number = 7;               // Characteristic.LockLastKnownAction.UNSECURED_REMOTELY
+  static readonly SECURED_BY_AUTO_SECURE_TIMEOUT: number = 8;   // Characteristic.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT
+
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
+  private readonly lastKnownAction: string = 'LockLastKnownAction';
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -26,6 +32,7 @@ export class Lock extends Accessory {
     LockCurrentState: Lock.SECURED,
     LockTargetState: Lock.SECURED,
     LockManagementAutoSecurityTimeout: 0,
+    LockLastKnownAction: Lock.UNSECURED_REMOTELY,
   };
 
   constructor(
@@ -40,18 +47,23 @@ export class Lock extends Accessory {
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
+    this.states.LockLastKnownAction = Lock.UNSECURED_REMOTELY;      // There is no "unknown" value
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
+      const cachedLastKnownAction: number = accessoryState[this.lastKnownAction] as number;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
       }
       if (cachedSecurityTimeout !== undefined) {
         this.states.LockManagementAutoSecurityTimeout = cachedSecurityTimeout;
+      }
+      if (cachedLastKnownAction !== undefined) {
+        this.states.LockLastKnownAction = cachedLastKnownAction;
       }
     }
 
@@ -104,7 +116,8 @@ export class Lock extends Accessory {
         minStep: 1,
         unit: Units.SECONDS,
       });
-    ;
+    lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
+      .onGet(this.getLockLastKnownAction.bind(this));
   }
 
   // Handlers
@@ -125,23 +138,16 @@ export class Lock extends Accessory {
     this.states.LockCurrentState = this.states.LockTargetState;
     this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
 
+    this.states.LockLastKnownAction = (this.states.LockCurrentState === Lock.SECURED) ?
+      Lock.SECURED_REMOTELY :
+      Lock.UNSECURED_REMOTELY;
+
     this.storeState();
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
 
-    if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
-      const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;
-      this.securityTimerId = setTimeout(() => {
-        // Reset timer
-        clearTimeout(this.securityTimerId);
-
-        this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
-
-      }, securityTimeoutMillis);
- 
-      const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);
-    }
+    // Run auto lock timeout
+    this.startAutoSecurityTimeout();
   }
 
   async getLockTargetState(): Promise<CharacteristicValue> {
@@ -183,10 +189,19 @@ export class Lock extends Accessory {
     return lockManagementAutoSecurityTimeout;
   }
 
+  async getLockLastKnownAction(): Promise<CharacteristicValue> {
+    const lockLastKnownAction = this.states.LockLastKnownAction;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Last Known Action: ${lockLastKnownAction}`);
+
+    return lockLastKnownAction;
+  }
+
   protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LockCurrentState,
       [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
+      [this.lastKnownAction]: this.states.LockLastKnownAction,
     });
     return json;
   }
@@ -208,5 +223,25 @@ export class Lock extends Accessory {
     }
 
     return stateName;
+  }
+
+  private startAutoSecurityTimeout(): void {
+    if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
+      const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;
+      this.securityTimerId = setTimeout(() => {
+        // Reset timer
+        clearTimeout(this.securityTimerId);
+
+        this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
+
+        this.states.LockLastKnownAction = Lock.SECURED_BY_AUTO_SECURE_TIMEOUT;
+      }, securityTimeoutMillis);
+ 
+      const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);
+    }
+    else {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] No Security Timeout defined`);
+    }
   }
 }
