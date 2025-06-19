@@ -79,7 +79,8 @@
       "name": {
         "title": "Platform Name",
         "type": "string",
-        "const": "Virtual Accessories Platform",
+        "required": true,
+        "default": "Virtual Accessories Platform",
         "readonly": true
       },
       "sensorServer": {
@@ -1465,6 +1466,8 @@
         "properties": {}
       }
     }
+  },
+  "uiSchema": {
   },
   "form": [
     {
