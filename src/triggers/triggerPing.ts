@@ -48,7 +48,7 @@ export class PingTrigger extends Trigger {
     this.setup(triggerConfig);
   }
 
-  async setup(triggerConfig: PingTriggerConfiguration) {
+  private async setup(triggerConfig: PingTriggerConfiguration) {
 
     let ipProtocolVersion = net.isIP(triggerConfig.host);
     if (ipProtocolVersion === this.NOT_IP) {
@@ -126,13 +126,13 @@ export class PingTrigger extends Trigger {
         if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
           trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
 
-          trigger.sensor.triggerKeySensorState(Sensor.TRIGGERED, trigger);
+          trigger.sensor.triggerSensorState(Sensor.TRIGGERED, trigger);
         }
       } else {
         trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
-        trigger.sensor.triggerKeySensorState(Sensor.NORMAL, trigger);
+        trigger.sensor.triggerSensorState(Sensor.NORMAL, trigger);
       }
 
       session.close ();

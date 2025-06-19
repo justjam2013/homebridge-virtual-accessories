@@ -154,7 +154,7 @@ export class SunEventsTrigger extends Trigger {
     return response;
   }
 
-  desrializeSunEventsResponse(
+  private desrializeSunEventsResponse(
     dataResponse: string,
   ): SunEventsResponse | undefined {
     let response: SunEventsResponse | undefined;
@@ -218,9 +218,9 @@ export class SunEventsTrigger extends Trigger {
         const now = Utils.now().toString();
         this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
-        sensor.triggerKeySensorState(Sensor.TRIGGERED, this);
+        sensor.triggerSensorState(Sensor.TRIGGERED, this);
         await this.delay(resetDelayMillis);
-        sensor.triggerKeySensorState(Sensor.NORMAL, this);
+        sensor.triggerSensorState(Sensor.NORMAL, this);
       }),
     );
 

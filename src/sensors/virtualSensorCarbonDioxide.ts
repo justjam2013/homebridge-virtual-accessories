@@ -23,11 +23,11 @@ export class CarbonDioxideSensor extends Sensor {
     super(platform, accessory, companionSensorName);
   }
 
-  protected getSensorService(): WithUUID<typeof Service> {
+  protected getService(): WithUUID<typeof Service> {
     return this.platform.Service.CarbonDioxideSensor;
   }
 
-  protected getSensorCharacteristic(): WithUUID<{ new (): Characteristic; }> {
+  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
     return this.platform.Characteristic.CarbonDioxideDetected;
   }
 
