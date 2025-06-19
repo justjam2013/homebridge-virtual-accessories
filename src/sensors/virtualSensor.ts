@@ -25,7 +25,7 @@ export abstract class Sensor extends Accessory {
 
   private uuidPostfix: string = '-sensor';
 
-  private sensorCharacteristic: WithUUID<{ new (): Characteristic; }>;
+  private eventDetected: WithUUID<{ new (): Characteristic; }>;
 
   private isCompanionSensor: boolean = false;
 
@@ -42,13 +42,13 @@ export abstract class Sensor extends Accessory {
   ) {
     super(platform, accessory);
 
-    this.sensorCharacteristic = this.getSensorCharacteristic();
+    this.eventDetected = this.getEventDetectedCharacteristic();
 
     if (companionSensorName !== undefined) {
       this.isCompanionSensor = true;
     }
 
-    const sensorService: WithUUID<typeof Service> = this.getSensorService();
+    const sensorService: WithUUID<typeof Service> = this.getService();
     if (!this.isCompanionSensor) {
       this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService as unknown as Service);
 
@@ -62,12 +62,12 @@ export abstract class Sensor extends Accessory {
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
-    this.service.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
+    this.service.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
     // register handlers
 
-    this.service.getCharacteristic(this.sensorCharacteristic)
-      .onGet(this.handleSensorStateGet.bind(this)); // GET - bind to the `handleSensorStateGet` method below
+    this.service.getCharacteristic(this.eventDetected)
+      .onGet(this.getEventDetected.bind(this));
 
     /**
      * Creating multiple services of the same type.
@@ -80,63 +80,24 @@ export abstract class Sensor extends Accessory {
      * can use the same subtype id.)
      */
 
-    // Trigger
+    // Ceate Trigger
     if (this.accessoryConfiguration.sensor !== undefined && this.accessoryConfiguration.sensor.trigger !== undefined) {
       this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryConfiguration.accessoryName + ' Trigger');
     }
   }
 
-  protected abstract getSensorService(): WithUUID<typeof Service>;
+  protected abstract getService(): WithUUID<typeof Service>;
 
-  protected abstract getSensorCharacteristic(): WithUUID<{ new (): Characteristic; }>;
+  protected abstract getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }>;
 
-  /**
-   * Handle requests to get the current value of the "Sensor State" characteristic
-   */
-  async handleSensorStateGet(): Promise<CharacteristicValue> {
+  // Handlers
+
+  async getEventDetected(): Promise<CharacteristicValue> {
     const sensorState = this.states.SensorState;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${Sensor.getStateName(sensorState)}`);
 
     return sensorState;
-  }
-
-  /**
-   * This method is called by the accessory that has this sensor as a companion
-   */
-  async triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean = false) {
-    if (!this.isCompanionSensor) {
-      throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
-    } else if (accessory.accessory.UUID !== this.accessory.UUID) {
-      throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
-    }
-
-    this.states.SensorState = sensorState;
-
-    this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
-
-    // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
-  }
-
-  /**
-   * This method is called by the trigger to toggle the sensor
-   */
-  triggerKeySensorState(sensorState: number, trigger: Trigger, isLoggingDisabled: boolean = false) {
-    if (trigger.sensorConfig.accessoryID !== this.accessoryConfiguration.accessoryID) {
-      throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
-    }
-
-    const sensorStateChanged: boolean = (this.states.SensorState !== sensorState) ? true : false;
-
-    this.states.SensorState = sensorState;
-
-    this.service!.updateCharacteristic(this.sensorCharacteristic, (this.states.SensorState));
-
-    if (sensorStateChanged) {
-      // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
-    }
   }
 
   protected getJsonState(): string {
@@ -154,5 +115,43 @@ export abstract class Sensor extends Accessory {
     }
 
     return sensorStateName;
+  }
+
+  /**
+   * This method is called by the accessory that has this sensor as a companion
+   */
+  async triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean = false) {
+    if (!this.isCompanionSensor) {
+      throw new NotCompanionError(`${this.accessoryConfiguration.accessoryName} is not a companion sensor`);
+    } else if (accessory.accessory.UUID !== this.accessory.UUID) {
+      throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
+    }
+
+    this.states.SensorState = sensorState;
+
+    this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
+
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+  }
+
+  /**
+   * This method is called by this sensor's trigger
+   */
+  async triggerSensorState(sensorState: number, trigger: Trigger, isLoggingDisabled: boolean = false) {
+    if (trigger.sensorConfig.accessoryID !== this.accessoryConfiguration.accessoryID) {
+      throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
+    }
+
+    const sensorStateChanged: boolean = (this.states.SensorState !== sensorState) ? true : false;
+
+    this.states.SensorState = sensorState;
+
+    this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
+
+    if (sensorStateChanged) {
+      // eslint-disable-next-line max-len
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+    }
   }
 }
