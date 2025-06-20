@@ -252,5 +252,8 @@ export class SecuritySystem extends Accessory implements TriggerableSensor {
       // Only log to 'info' if setting ObstructionDetected to true
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${value}`);
     }
+    else {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
+    }
   }
 }
