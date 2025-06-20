@@ -3,6 +3,7 @@
 import { Server } from 'http';
 import { Accessory } from './accessories/virtualAccessory.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
+import { TriggerableSensor } from './triggerableSensor.js';
 import { UpdatableObstruction } from './updatableObstruction.js';
 import { UpdatableSensor } from './updatableSensor.js';
 import { VirtualAccessoriesLogger } from './virtualLogger.js';
@@ -87,6 +88,19 @@ export class SensorUpdateServer {
         this.processRequest(accessoryId, 'garagedoor', obstruction, response);
       }
     });
+
+    const routeTrigger: string = '/obstruction';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeTrigger}`);
+    this.server.post(routeTrigger, (request: Request, response: Response) => {
+      const accessoryId: string = request.body.id;
+      const trigger: boolean = request.body.value;
+
+      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+
+      if (this.accessoryIdIsValid(accessoryId, response) && this.triggerIsValid(trigger, response)) {
+        this.processRequest(accessoryId, 'securitysystem', trigger, response);
+      }
+    });
   }
 
   start() {
@@ -114,12 +128,22 @@ export class SensorUpdateServer {
   addAccessory(
     accessory: Accessory,
   ) {
+    let addedAccessory: boolean = false;
+
     if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+      addedAccessory = true;
+    }
+    else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
+      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      addedAccessory = true;
     }
     else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      addedAccessory = true;
+    }
+
+    if (addedAccessory === true) {
       this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
     }
     else {
@@ -208,6 +232,20 @@ export class SensorUpdateServer {
     return true;
   }
 
+  private triggerIsValid(
+    trigger: boolean,
+    response: Response,
+  ): boolean {
+    if (typeof trigger !== 'boolean') {
+      this.log.error(`[${this.serverName}] Bad Request: Invalid trigger value ${trigger}`);
+      response.status(HttpResponse.BadRequest).send(`Invalid trigger value: ${trigger}`);
+
+      return false;
+    }
+
+    return true;
+  }
+
   private processRequest(
     accessoryId: string,
     accessoryType: string,
@@ -223,6 +261,9 @@ export class SensorUpdateServer {
         }
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
+        }
+        else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
+          (<TriggerableSensor><unknown>accessory).triggerSensor(<boolean>value, accessoryId);
         }
 
         this.log.debug(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
