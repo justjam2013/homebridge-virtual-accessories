@@ -938,7 +938,7 @@ The raw json payload will contain the accessory id of the Security System access
 ```
 
 > [!NOTE]
-> Setting the triggered state value to `false` doesn't do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed or one of the Armed modes.
+> Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed state or one of the Armed modes.
 
 <span align="right">
   <h6>
