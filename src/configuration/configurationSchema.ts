@@ -162,7 +162,7 @@ export class SecuritySystemArmedMode {
 
   static ArmedAway: string = 'Away';
   static ArmedNight: string = 'Night';
-  static ArmedStay: string = 'Stay';
+  static ArmedStay: string = 'Home';
 
   static ArmedModes: string[] = [ SecuritySystemArmedMode.ArmedAway, SecuritySystemArmedMode.ArmedNight, SecuritySystemArmedMode.ArmedStay ];
 }

@@ -45,7 +45,7 @@ export class SecuritySystemConfiguration extends AccessoryConfiguration {
    * This method is necessary becasue the values for
    * states are: 'disarmed', 'armedaway', 'armednight', 'armedstay'
    * while values for
-   * armed modes are: 'Away', 'Night', 'Stay'
+   * armed modes are: 'Away', 'Night', 'Home'
    */
   private armedModesContainsDefaultState(): boolean {
     let armedModesContainsDefaultState: boolean = false;
