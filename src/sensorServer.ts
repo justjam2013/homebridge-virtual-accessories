@@ -89,7 +89,7 @@ export class SensorUpdateServer {
       }
     });
 
-    const routeTrigger: string = '/obstruction';
+    const routeTrigger: string = '/trigger';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTrigger}`);
     this.server.post(routeTrigger, (request: Request, response: Response) => {
       const accessoryId: string = request.body.id;
