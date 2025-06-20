@@ -253,7 +253,7 @@ export class SecuritySystem extends Accessory implements TriggerableSensor {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${value}`);
     }
     else {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
     }
   }
 }
