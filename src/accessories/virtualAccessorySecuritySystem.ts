@@ -186,7 +186,7 @@ export class SecuritySystem extends Accessory {
       currentStateValues.delete(SecuritySystemCurrentState.STAY_ARM);
       targetStateValues.delete(SecuritySystemTargetState.STAY_ARM);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Stay is not in armed modes`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Home is not in armed modes`);
     }
 
     if (currentStateValues.size > 0) {
