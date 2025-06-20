@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
  
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
@@ -5,10 +6,13 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/configurationSchema.js';
 
+import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
+import { TriggerableSensor } from '../triggerableSensor.js';
+
 /**
  * SecuritySystem - Accessory implementation
  */
-export class SecuritySystem extends Accessory {
+export class SecuritySystem extends Accessory implements TriggerableSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'SecuritySystem';
 
@@ -44,6 +48,9 @@ export class SecuritySystem extends Accessory {
       break;
     case SecuritySystemState.Disarmed:
       this.defaultState = SecuritySystem.DISARMED;
+      break;
+    case SecuritySystemState.AlarmTriggered:
+      this.defaultState = SecuritySystem.ALARM_TRIGGERED;
       break;
     default:
       this.defaultState = SecuritySystem.DISARMED;
@@ -222,5 +229,31 @@ export class SecuritySystem extends Accessory {
     });
 
     return Array.from(names).join(', ');
+  }
+
+  // Triggerable Sensor interface
+
+  triggerSensor(value: boolean, accessoryId: string): void {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update triggered state to ${value}`);
+
+    if (accessoryId !== this.accessoryConfiguration.accessoryID) {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+
+      throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
+    }
+    else if (typeof value !== 'boolean') {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Security System triggered state`);
+
+      throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
+    }
+    else if (value === true) {
+      this.states.SecuritySystemCurrentState = SecuritySystem.ALARM_TRIGGERED;
+      this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
+      // Only log to 'info' if setting ObstructionDetected to true
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${value}`);
+    }
+    else {
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
+    }
   }
 }

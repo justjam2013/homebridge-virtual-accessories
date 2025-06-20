@@ -147,12 +147,19 @@ export class LockState {
  */
 export class SecuritySystemState {
 
-  static Disarmed: string = 'disarmed';
   static ArmedAway: string = 'armedaway';
   static ArmedNight: string = 'armednight';
   static ArmedStay: string = 'armedstay';
+  static Disarmed: string = 'disarmed';
+  static AlarmTriggered: string = 'alarmtriggered';
 
-  static States: string[] = [ SecuritySystemState.Disarmed, SecuritySystemState.ArmedAway, SecuritySystemState.ArmedNight, SecuritySystemState.ArmedStay ];
+  static States: string[] = [
+    SecuritySystemState.ArmedAway,
+    SecuritySystemState.ArmedNight,
+    SecuritySystemState.ArmedStay,
+    SecuritySystemState.Disarmed,
+    SecuritySystemState.AlarmTriggered,
+  ];
 }
 
 /**
