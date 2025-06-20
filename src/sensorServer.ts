@@ -89,9 +89,9 @@ export class SensorUpdateServer {
       }
     });
 
-    const routeTrigger: string = '/trigger';
-    this.log.info(`[${this.serverName}] Setting up route: ${routeTrigger}`);
-    this.server.post(routeTrigger, (request: Request, response: Response) => {
+    const routeTriggerAlarm: string = '/triggeralarm';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerAlarm}`);
+    this.server.post(routeTriggerAlarm, (request: Request, response: Response) => {
       const accessoryId: string = request.body.id;
       const trigger: boolean = request.body.value;
 
