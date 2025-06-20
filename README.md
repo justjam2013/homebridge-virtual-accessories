@@ -102,7 +102,7 @@ Currently, these are the implemented virtual accessories:
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
--   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered via a [webhook call](#webhook-service-configuration).
+-   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration).
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
