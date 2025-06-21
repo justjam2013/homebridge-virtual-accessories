@@ -998,7 +998,7 @@ Virtual Accessories for Homebridge is one of Edgar's favourite plugins!
 </a>
 <p></p>
 
-You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](https://www.youtube.com/watch?v=1F2kj-hftkI) video at timestamp [1:16](https://youtu.be/1F2kj-hftkI?t=76). Ot in the [What I Use Homebridge For (and Why I Love It)](https://www.youtube.com/watch?v=1F2kj-hftkI) video at timestamp [1:16](https://www.youtube.com/watch?v=1F2kj-hftkI?t=76).
+You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](https://www.youtube.com/watch?v=1F2kj-hftkI) video at timestamp [1:16](https://youtu.be/1F2kj-hftkI?t=76).
 
 <span align="right">
   <h6>
