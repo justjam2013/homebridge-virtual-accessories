@@ -23,7 +23,7 @@
 <br>
 
 > [!Caution]
-> **Virtual Accessories for Homebridge v3.5.16 breaks the Security System accessory.** The Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration.
+> **Virtual Accessories for Homebridge v3.5.16 breaks the Security System accessory.** If you are updgrading from a previous version, the Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration.
 
 ## <!-- Thin separator line -->
 
