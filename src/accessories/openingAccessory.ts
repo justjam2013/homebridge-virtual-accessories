@@ -3,6 +3,7 @@ import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homeb
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
+import { Timer } from '../timer.js';
 
 /**
  * OpeningAccessory - Abstract accessory
@@ -16,18 +17,19 @@ export abstract class OpeningAccessory extends Accessory {
   static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;  -> OPENING
   static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;     -> OPEN or CLOSED
 
-  protected static readonly MIN_TIMEOUT_SECS: number = 1;
-  protected static readonly DEFAULT_TIMEOUT_SECS: number = 3;
+  private static readonly MIN_TIMEOUT_SECS: number = 1;
+  private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
 
-  protected readonly stateStorageKey: string = 'Position';
+  private readonly stateStorageKey: string = 'Position';
 
-  protected transitionTimerId: ReturnType<typeof setTimeout> | undefined;
+  private transitionTimer: Timer;
+  private transitionSteps: number = 0;
 
   private openingAccessoryConfiguration: OpenableAccessoryConfiguration;
 
   protected states = {
-    TargetPosition: OpeningAccessory.CLOSED,
-    CurrentPosition: OpeningAccessory.CLOSED,
+    TargetPosition: OpeningAccessory.CLOSED,  // %
+    CurrentPosition: OpeningAccessory.CLOSED, // %
     PositionState: OpeningAccessory.STOPPED,
   };
 
@@ -54,6 +56,15 @@ export abstract class OpeningAccessory extends Accessory {
     }
 
     this.states.TargetPosition = this.states.CurrentPosition;
+
+    // Timer is resettable
+    const timerIsResettable: boolean = true;
+    this.transitionTimer = new Timer(
+      this.accessoryConfiguration.accessoryName,
+      this.log,
+      timerIsResettable,
+      // No default timer duration
+    );
 
     // set accessory information
     const service: WithUUID<typeof Service> = this.getOpeningAccessoryService();
@@ -84,6 +95,11 @@ export abstract class OpeningAccessory extends Accessory {
   // Handlers
 
   async getCurrentPosition(): Promise<CharacteristicValue> {
+    if (this.transitionTimer.isTimerRunning()) {
+      const runtimeMillis: number = this.transitionTimer.getRuntime() * 1000;
+      const remainingSteps: number = Math.ceil(this.transitionTimer.getRemainingDurationMillis() / runtimeMillis * this.transitionSteps);
+      this.states.CurrentPosition = this.states.TargetPosition + remainingSteps;
+    }
     const currentPosition = this.states.CurrentPosition;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${OpeningAccessory.getStateName(currentPosition)}`);
@@ -101,27 +117,37 @@ export abstract class OpeningAccessory extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
 
     const transitionDuration = this.openingAccessoryConfiguration.transitionDuration;
-    const transitionDelayMillis: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS) * 1000;
+    const transitionDelay: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS);
 
-    const proportionalTransitionDelayMillis = Math.max(
-      transitionDelayMillis / 100 * Math.abs(this.states.TargetPosition - this.states.CurrentPosition),
-      OpeningAccessory.MIN_TIMEOUT_SECS * 1000);
+    this.transitionSteps = this.states.TargetPosition - this.states.CurrentPosition;
+    const proportionalTransitionDelay: number = Math.max(
+      // Round up to the nearest second
+      Math.ceil(transitionDelay / 100 * Math.abs(this.transitionSteps)),
+      OpeningAccessory.MIN_TIMEOUT_SECS);
 
-    // Reset transition timer, if running
-    clearTimeout(this.transitionTimerId);
+    const intervalMillis = 10;
 
-    this.transitionTimerId = setTimeout(() => {
-      this.states.PositionState = OpeningAccessory.STOPPED;
-      this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
+    // Stop transition timer, if running
+    this.transitionTimer.stop();
 
-      this.states.CurrentPosition = this.states.TargetPosition;
-      this.service!.setCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
+    this.transitionTimer.start(
+      () => {
+        this.states.PositionState = OpeningAccessory.STOPPED;
+        this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
 
-      this.storeState();
+        this.states.CurrentPosition = this.states.TargetPosition;
+        this.service!.setCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
 
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
-    }, proportionalTransitionDelayMillis);
+        this.transitionSteps = 0;
+
+        this.storeState();
+
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
+      },
+      proportionalTransitionDelay,
+      intervalMillis,
+    );
   }
 
   async getTargetPosition(): Promise<CharacteristicValue> {
