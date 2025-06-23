@@ -128,7 +128,7 @@ export abstract class OpeningAccessory extends Accessory {
       OpeningAccessory.MIN_TIMEOUT_SECS);
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
 
-    const intervalMillis = 10;
+    const updateIntervalMillis = 100;
 
     // Stop transition timer, if running
     this.transitionTimer.stop();
@@ -149,7 +149,7 @@ export abstract class OpeningAccessory extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
       },
       proportionalTransitionDelay,
-      intervalMillis,
+      updateIntervalMillis,
     );
   }
 

@@ -17,7 +17,7 @@ export class Timer {
 
   private id: ReturnType<typeof setInterval> | undefined;
   private defaultDuration: number = 0;
-  private intervalMillis = this.oneSecond;
+  private updateIntervalMillis = this.oneSecond;
   private startTime: ZonedDateTime;
 
   private isRunning: boolean = false;
@@ -70,12 +70,12 @@ export class Timer {
   start(
     callback: () => void,
     duration: number,
-    intervalMillis: number,
+    updateIntervalMillis: number,
   ): void;
   start(
     callback: () => void,
     oneOffDuration?: number,
-    intervalMillis?: number,
+    updateIntervalMillis?: number,
   ): void {
     if (this.isRunning && !this.timerIsResettable) {
       return;
@@ -86,14 +86,14 @@ export class Timer {
 
     // Now setup new run
     this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
-    this.intervalMillis = (intervalMillis === undefined) ? this.oneSecond : intervalMillis;
+    this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
 
     if (this.runtime > 0) {
       this.remainingDurationMillis = this.runtime * 1000;
       this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime} seconds`);
 
       this.id = setInterval(() => {
-        this.remainingDurationMillis -= this.intervalMillis;
+        this.remainingDurationMillis -= this.updateIntervalMillis;
 
         // We don't want this flooding the debug logs
         if (this.logDebugCountdown && this.remainingDurationMillis % 1000 === 0) {
@@ -104,7 +104,7 @@ export class Timer {
           callback();
           this.stop();
         }
-      }, this.intervalMillis);
+      }, this.updateIntervalMillis);
 
       this.startTime = Utils.now();
       this.isRunning = true;
@@ -117,7 +117,7 @@ export class Timer {
     this.isRunning = false;
     this.runtime = 0;
     this.remainingDurationMillis = 0;
-    this.intervalMillis = this.oneSecond;
+    this.updateIntervalMillis = this.oneSecond;
 
     this.logDebugCountdown = false;
 
@@ -138,8 +138,8 @@ export class Timer {
   /**
    * Returns interval in milliseconds
    */
-  getIntervalMillis(): number {
-    return this.intervalMillis;
+  getUpdateIntervalMillis(): number {
+    return this.updateIntervalMillis;
   }
 
   /**
