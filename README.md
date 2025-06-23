@@ -23,7 +23,7 @@
 <br>
 
 > [!Caution]
-> **Virtual Accessories for Homebridge v3.5.16 breaks the Security System accessory.** The Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration.
+> **Virtual Accessories for Homebridge v3.5.16 breaks the Security System accessory.** If you are updgrading from a previous version, the Security System accessory configuration will need to be manually updated. Please refer to this [Wiki page](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.5.16-breaking-update-for-Security-System-accessory) for details on how to update the Security System accessory configuration.
 
 ## <!-- Thin separator line -->
 
@@ -72,6 +72,7 @@
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
     - [Update Garage Door obstruction detected](#update-garage-door-obstruction-detected)
+    - [Update Security System triggered state](#update-security-system-triggered-state)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
   - [Known Issues](#known-issues)
@@ -101,7 +102,7 @@ Currently, these are the implemented virtual accessories:
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
--   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes.
+-   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration).
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
@@ -894,7 +895,7 @@ The raw json payload will contain the accessory id of the Heater/Cooler accessor
 
 To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
 
-The target URL (replace hostname and port per your setup) will specify the `temperature` path:
+The target URL (replace hostname and port per your setup) will specify the `obstruction` path:
 
 ```
 http://localhost:60221/obstruction
@@ -908,6 +909,36 @@ The raw json payload will contain the accessory id of the Garage Door accessory 
     "value": true
 }
 ```
+
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
+### Update Security System triggered state
+
+To update a Security System triggered state, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `triggeralarm` path:
+
+```
+http://localhost:60221/triggeralarm
+```
+
+The raw json payload will contain the accessory id of the Security System accessory and the triggered state value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
+
+> [!NOTE]
+> Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed state or one of the Armed modes.
 
 <span align="right">
   <h6>
@@ -959,6 +990,8 @@ You can catch a glimpse in the [Introduction to Automations in Apple Home](https
 He again uses Virtual Accessories for Homebridge in his latest video, [Dummies for Dummies Who Use the HomePod](https://www.youtube.com/watch?v=US5NCnXidYI).
 
 ### Edgar’s Home Tech
+
+Virtual Accessories for Homebridge is one of Edgar's favourite plugins!
 
 <a href="https://www.youtube.com/@EdgarsHomeTech">
     <img src="assets/mentions/youtube-EdgarsHomeTech.png" height="160">
