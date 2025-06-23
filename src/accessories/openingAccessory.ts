@@ -98,7 +98,7 @@ export abstract class OpeningAccessory extends Accessory {
     if (this.transitionTimer.isTimerRunning()) {
       const runtimeMillis: number = this.transitionTimer.getRuntime() * 1000;
       const remainingSteps: number = Math.ceil(this.transitionTimer.getRemainingDurationMillis() / runtimeMillis * this.transitionSteps);
-      this.states.CurrentPosition = this.states.TargetPosition + remainingSteps;
+      this.states.CurrentPosition = this.states.TargetPosition - remainingSteps;
     }
     const currentPosition = this.states.CurrentPosition;
 
@@ -120,10 +120,12 @@ export abstract class OpeningAccessory extends Accessory {
     const transitionDelay: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS);
 
     this.transitionSteps = this.states.TargetPosition - this.states.CurrentPosition;
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Transition Steps: ${this.transitionSteps}`);
     const proportionalTransitionDelay: number = Math.max(
       // Round up to the nearest second
       Math.ceil(transitionDelay / 100 * Math.abs(this.transitionSteps)),
       OpeningAccessory.MIN_TIMEOUT_SECS);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
 
     const intervalMillis = 10;
 
