@@ -95,6 +95,7 @@ export abstract class OpeningAccessory extends Accessory {
   // Handlers
 
   async getCurrentPosition(): Promise<CharacteristicValue> {
+    // If timer is running, then blinds are moving, so calculate the interim position
     if (this.transitionTimer.isTimerRunning()) {
       const runtimeMillis: number = this.transitionTimer.getRuntime() * 1000;
       const remainingSteps: number = Math.ceil(this.transitionTimer.getRemainingDurationMillis() / runtimeMillis * this.transitionSteps);
