@@ -8,7 +8,7 @@ import { ZonedDateTime } from '@js-joda/core';
  */
 export class Timer {
 
-  private oneSecond: number = 1000; // in milliseconds
+  private readonly oneSecond: number = 1000; // in milliseconds
 
   private accessoryName: string;
   private log: VirtualAccessoriesLogger;
@@ -17,11 +17,12 @@ export class Timer {
 
   private id: ReturnType<typeof setInterval> | undefined;
   private defaultDuration: number = 0;
+  private updateIntervalMillis = this.oneSecond;
   private startTime: ZonedDateTime;
 
   private isRunning: boolean = false;
   private runtime: number = 0;
-  private remainingDuration: number = 0;
+  private remainingDurationMillis: number = 0;
 
   private logDebugCountdown: boolean = false;
 
@@ -37,13 +38,13 @@ export class Timer {
     accessoryName: string,
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean,
-    duration: number,
+    duration: number,       // seconds
   );
   constructor(
     accessoryName: string,
     log: VirtualAccessoriesLogger,
     timerIsResettable: boolean = false,
-    duration?: number,
+    duration?: number,       // seconds
   ) {
     this.accessoryName = accessoryName;
     this.log = log;
@@ -68,7 +69,13 @@ export class Timer {
   ): void;
   start(
     callback: () => void,
+    duration: number,
+    updateIntervalMillis: number,
+  ): void;
+  start(
+    callback: () => void,
     oneOffDuration?: number,
+    updateIntervalMillis?: number,
   ): void {
     if (this.isRunning && !this.timerIsResettable) {
       return;
@@ -77,25 +84,27 @@ export class Timer {
     // In case timer is running, stop it
     this.stop();
 
+    // Now setup new run
     this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
+    this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
 
     if (this.runtime > 0) {
-      this.remainingDuration = this.runtime;
+      this.remainingDurationMillis = this.runtime * 1000;
       this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime} seconds`);
 
       this.id = setInterval(() => {
-        this.remainingDuration--;
+        this.remainingDurationMillis -= this.updateIntervalMillis;
 
-        // We don't want this floodin the debug logs
-        if (this.logDebugCountdown && this.remainingDuration % 10 === 0) {
-          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDuration} seconds`);
+        // We don't want this flooding the debug logs
+        if (this.logDebugCountdown && this.remainingDurationMillis % 1000 === 0) {
+          this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDurationMillis} seconds`);
         }
 
-        if (this.remainingDuration === 0) {
+        if (this.remainingDurationMillis <= 0) {
           callback();
           this.stop();
         }
-      }, this.oneSecond);
+      }, this.updateIntervalMillis);
 
       this.startTime = Utils.now();
       this.isRunning = true;
@@ -107,11 +116,12 @@ export class Timer {
 
     this.isRunning = false;
     this.runtime = 0;
-    this.remainingDuration = 0;
+    this.remainingDurationMillis = 0;
+    this.updateIntervalMillis = this.oneSecond;
 
     this.logDebugCountdown = false;
 
-    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.remainingDuration} seconds`);
+    this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.getRemainingDuration()} seconds`);
   }
 
   getStartTime(): ZonedDateTime {
@@ -123,6 +133,13 @@ export class Timer {
    */
   getRuntime(): number {
     return this.runtime;
+  }
+
+  /**
+   * Returns interval in milliseconds
+   */
+  getUpdateIntervalMillis(): number {
+    return this.updateIntervalMillis;
   }
 
   /**
@@ -147,7 +164,14 @@ export class Timer {
    * Returns remaining duration in seconds
    */
   getRemainingDuration(): number {
-    return this.remainingDuration;
+    return Math.ceil(this.remainingDurationMillis / 1000);
+  }
+
+  /**
+   * Returns remaining duration in milliseconds
+   */
+  getRemainingDurationMillis(): number {
+    return this.remainingDurationMillis;
   }
 
   isTimerRunning(): boolean {
