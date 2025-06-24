@@ -24,6 +24,7 @@ import { WindowCoveringConfiguration } from './accessories/configurationWindowCo
 import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
+import { WebhookTriggerConfiguration } from './triggers/configurationWebhookTriggerConfiguration.js';
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { InputSourceConfiguration } from './accessories/configurationInputSource.js';
@@ -132,6 +133,9 @@ export class PlatformConfiguration {
 
   @Type(SunEventsTriggerConfiguration)
     sunEventsTrigger!: SunEventsTriggerConfiguration;
+
+  @Type(WebhookTriggerConfiguration)
+    webhookTrigger!: WebhookTriggerConfiguration;
 
   // Only used for enriching Television configuration
   inputSource!: InputSourceConfiguration;
@@ -367,8 +371,18 @@ export class PlatformConfiguration {
 
         [isValid, errorFields] = this.sunEventsTrigger.isValid(this.fieldNames.sunEventsTrigger!);
         break;
+      case TriggerType.Webhook:
+        // This can be undefined, as it is only a checkbox, so just create it here for now
+        this.webhookTrigger = (this.webhookTrigger === undefined ? new WebhookTriggerConfiguration() : this.webhookTrigger);
+
+        if (this.webhookTrigger === undefined) {
+          return [false, [this.fieldNames.webhookTrigger!]];
+        }
+
+        [isValid, errorFields] = this.webhookTrigger.isValid(this.fieldNames.webhookTrigger!);
+        break;
       default:
-        return [false, ['unknownTrigger']];
+        return [false, ['trigger']];
       }
 
       return [isValid, errorFields];

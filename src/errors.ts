@@ -42,6 +42,16 @@ export class SensorValueUpdateNotAllowed extends Error {
   }
 }
 
+export class InvalidSensorValue extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}
+
 export class InvalidSensorValueType extends Error {
 
   constructor(

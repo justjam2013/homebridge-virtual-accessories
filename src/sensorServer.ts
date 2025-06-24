@@ -2,7 +2,9 @@
 
 import { Server } from 'http';
 import { Accessory } from './accessories/virtualAccessory.js';
+import { Sensor } from './sensors/virtualSensor.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
+import { Trigger } from './triggers/trigger.js';
 import { TriggerableSensor } from './triggerableSensor.js';
 import { UpdatableObstruction } from './updatableObstruction.js';
 import { UpdatableSensor } from './updatableSensor.js';
@@ -101,6 +103,19 @@ export class SensorUpdateServer {
         this.processRequest(accessoryId, 'securitysystem', trigger, response);
       }
     });
+
+    const routeTriggerSensor: string = '/triggersensor';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerSensor}`);
+    this.server.post(routeTriggerSensor, (request: Request, response: Response) => {
+      const accessoryId: string = request.body.id;
+      const trigger: boolean = request.body.value;
+
+      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+
+      if (this.accessoryIdIsValid(accessoryId, response) && this.triggerIsValid(trigger, response)) {
+        this.processRequest(accessoryId, 'sensor', trigger, response);
+      }
+    });
   }
 
   start() {
@@ -141,6 +156,13 @@ export class SensorUpdateServer {
     else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
+    }
+    else if (accessory instanceof Sensor) {
+      const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+      if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
+        this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+        addedAccessory = true;
+      }
     }
 
     if (addedAccessory === true) {
@@ -264,6 +286,12 @@ export class SensorUpdateServer {
         }
         else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
           (<TriggerableSensor><unknown>accessory).triggerSensor(<boolean>value, accessoryId);
+        }
+        else if (accessory instanceof Sensor) {
+          const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+          if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
+            this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+          }
         }
 
         this.log.debug(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);

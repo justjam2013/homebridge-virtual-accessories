@@ -32,6 +32,7 @@ import { Trigger } from './triggers/trigger.js';
 import { CronTrigger } from './triggers/triggerCron.js';
 import { PingTrigger } from './triggers/triggerPing.js';
 import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
+import { WebhookTrigger } from './triggers/triggerWebhook.js';
 
 import { AccessoryType, SensorType, TriggerType } from './configuration/configurationSchema.js';
 import { PlatformConfiguration } from './configuration/configurationPlatform.js';
@@ -112,54 +113,34 @@ export abstract class AccessoryFactory {
     return virtualAccessory;
   }
 
-  static createVirtualCompanionSensor(
-    platform: VirtualAccessoriesPlatform,
-    accessory: PlatformAccessory,
-    sensorType: string,
-    companionSensorName: string,
-  ): Sensor | undefined {
-    const companionSensor = AccessoryFactory.createSensor(platform, accessory, sensorType, companionSensorName);
-    return companionSensor;
-  }
-
   static createVirtualSensor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     sensorType: string,     
   ): Sensor | undefined {
-    const companionSensor = AccessoryFactory.createSensor(platform, accessory, sensorType);
-    return companionSensor;
-  }
-
-  private static createSensor(
-    platform: VirtualAccessoriesPlatform,
-    accessory: PlatformAccessory,
-    sensorType: string,     
-    companionSensorName?: string,
-  ): Sensor | undefined {
     let virtualSensor: Sensor | undefined;
 
     switch (sensorType) {
     case SensorType.CarbonDioxide:
-      virtualSensor = new CarbonDioxideSensor(platform, accessory, companionSensorName);
+      virtualSensor = new CarbonDioxideSensor(platform, accessory);
       break;
     case SensorType.CarbonMonoxide:
-      virtualSensor = new CarbonMonoxideSensor(platform, accessory, companionSensorName);
+      virtualSensor = new CarbonMonoxideSensor(platform, accessory);
       break;
     case SensorType.Contact:
-      virtualSensor = new ContactSensor(platform, accessory, companionSensorName);
+      virtualSensor = new ContactSensor(platform, accessory);
       break;
     case SensorType.Leak:
-      virtualSensor = new LeakSensor(platform, accessory, companionSensorName);
+      virtualSensor = new LeakSensor(platform, accessory);
       break;
     case SensorType.Motion:
-      virtualSensor = new MotionSensor(platform, accessory, companionSensorName);
+      virtualSensor = new MotionSensor(platform, accessory);
       break;
     case SensorType.Occupancy:
-      virtualSensor = new OccupancySensor(platform, accessory, companionSensorName);
+      virtualSensor = new OccupancySensor(platform, accessory);
       break;
     case SensorType.Smoke:
-      virtualSensor = new SmokeSensor(platform, accessory, companionSensorName);
+      virtualSensor = new SmokeSensor(platform, accessory);
       break;
     default:
       platform.log.error(`Error creating sensor. Invalid sensor type: ${sensorType}`);
@@ -184,6 +165,9 @@ export abstract class AccessoryFactory {
       break;
     case TriggerType.SunEvents:
       trigger = new SunEventsTrigger(sensor, name);
+      break;
+    case TriggerType.Webhook:
+      trigger = new WebhookTrigger(sensor, name);
       break;
     default:
       sensor.log.error('Error creating trigger. Invalid trigger type:', [triggerType]);

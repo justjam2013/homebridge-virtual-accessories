@@ -1,6 +1,6 @@
-import { VirtualAccessoriesPlatform } from '../platform.js';
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
+import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Switch } from '../accessories/virtualAccessorySwitch.js';
 import { TriggerableEventAccessory } from '../accessories/triggerableEventAccessory.js';
 
