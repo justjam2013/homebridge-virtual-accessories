@@ -932,14 +932,6 @@ The raw json payload will contain the accessory id of the Garage Door accessory 
 }
 ```
 
-<span align="right">
-  <h6>
-    
-  [Back to top](#top)
-
-  </h6>
-</span>
-
 ### Update Security System triggered state
 
 To update a Security System triggered state, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
@@ -961,14 +953,6 @@ The raw json payload will contain the accessory id of the Security System access
 
 > [!NOTE]
 > Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed state or one of the Armed modes.
-
-<span align="right">
-  <h6>
-    
-  [Back to top](#top)
-
-  </h6>
-</span>
 
 ### Update Sensor with webhook state
 
