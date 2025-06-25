@@ -290,11 +290,11 @@ export class SensorUpdateServer {
         else if (accessory instanceof Sensor) {
           const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
-            this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+            (<TriggerableSensor><unknown>trigger).triggerSensor(<boolean>value, accessoryId);
           }
         }
 
-        this.log.debug(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
+        this.log.info(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
         response.status(HttpResponse.Ok).send(`Set accessory with id: ${accessoryId} to value: ${value}`);
       }
       catch (error) {
