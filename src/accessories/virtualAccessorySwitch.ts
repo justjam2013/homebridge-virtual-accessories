@@ -3,8 +3,8 @@ import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Accessory } from './virtualAccessory.js';
 
-import { AccessoryFactory } from '../accessoryFactory.js';
 import { Sensor } from '../sensors/virtualSensor.js';
+import { CompanionSensor, TriggerableCompanionSensor } from '../companions/companionSensors.js';
 import { Timer } from '../timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Utils } from '../utils.js';
@@ -28,7 +28,7 @@ export class Switch extends Accessory {
 
   protected resetTimer?: Timer;
 
-  protected companionSensor?: Sensor;
+  protected companionSensor?: TriggerableCompanionSensor;
 
   protected muteLogging: boolean;
 
@@ -220,7 +220,7 @@ export class Switch extends Accessory {
   }
 
   private createCompanionSensor(): void {
-    this.companionSensor = AccessoryFactory.createVirtualCompanionSensor(
+    this.companionSensor = CompanionSensor.getTriggerableCompanionSensor(
       this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
 
     // Set initial sensor state

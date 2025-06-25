@@ -53,11 +53,13 @@ export class TriggerType {
   static Cron: string = 'cron';
   static Ping: string = 'ping';
   static SunEvents: string = 'sunevents';
+  static Webhook: string = 'webhook';
 
   static Types: string[] = [
     TriggerType.Cron,
     TriggerType.Ping,
     TriggerType.SunEvents,
+    TriggerType.Webhook,
   ];
 }
 

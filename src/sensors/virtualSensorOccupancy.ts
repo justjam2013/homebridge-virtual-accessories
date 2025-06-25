@@ -18,9 +18,8 @@ export class OccupancySensor extends Sensor {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    companionSensorName?: string,
   ) {
-    super(platform, accessory, companionSensorName);
+    super(platform, accessory);
   }
 
   protected getService(): WithUUID<typeof Service> {
