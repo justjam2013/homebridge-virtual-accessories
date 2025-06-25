@@ -116,7 +116,7 @@ Currently, these are the implemented virtual accessories:
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by a cron expression. The sensor resets after a brief delay.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
-    - **Webhook trigger.** The sensor can be triggered via a [webhook call](#webhook-service-configuration).
+    - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call.
  
 <span align="right">
   <h6>
