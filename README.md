@@ -120,6 +120,7 @@ Currently, these are the implemented virtual accessories:
     - **Cron trigger.** Activates the sensor when the time and date match the schedule deascribed by a cron expression. The sensor resets after a brief delay.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
+    - **Webhook trigger.** The sensor can be triggered via a [webhook call](#webhook-service-configuration).
  
 <span align="right">
   <h6>
@@ -783,6 +784,29 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
+### Sensor with webhook trigger
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Webhook Sensor",
+            "accessoryType": "sensor",
+            "sensor": {
+                "type": "contact",
+                "trigger": "webhook"
+            },
+            "webhookTrigger": {
+                "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
 > [!NOTE]
 > Due to limitations in the current version of one of Homebridge UI's dependencies, the Homebridge UI may save additional fields to the JSON config that may not be relevant to a particular accessory. The JSON config for each individual accessory is validated on startup and extranous fields are ignored. In a future release, the startup validation may perform a config cleanup. However. this does not affect the behavior of the accessories, nor does it hurt to manually remove those fields from the JSON config.
 
@@ -939,6 +963,33 @@ The raw json payload will contain the accessory id of the Security System access
 
 > [!NOTE]
 > Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed state or one of the Armed modes.
+
+<span align="right">
+  <h6>
+    
+  [Back to top](#top)
+
+  </h6>
+</span>
+
+### Update Sensor with webhook state
+
+To update the state of a Sensor with a webhook trigger, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `triggersensor` path:
+
+```
+http://localhost:60221/triggersensor
+```
+
+The raw json payload will contain the accessory id of the Sensor accessory and the triggered state value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
 
 <span align="right">
   <h6>
