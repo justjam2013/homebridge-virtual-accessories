@@ -81,7 +81,8 @@
     "sunrise",
     "sunset",
     "golden hour",
-    "dummy"
+    "dummy",
+    "webhook"
   ],
   "main": "dist/index.js",
   "engines": {
