@@ -199,8 +199,9 @@ export class SensorUpdateServer {
     );
 
     if (!isValidAccessoryId) {
-      this.log.error(`[${this.serverName}] Bad Request: Invalid accessory id ${accessoryId}`);
-      response.status(HttpResponse.BadRequest).send(`Invalid accessory id: ${accessoryId}`);
+      const errorMsg: string = `Invalid accessory id: ${accessoryId}`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
       return false;
     }
@@ -215,8 +216,9 @@ export class SensorUpdateServer {
     const humidityPercent = Number(humidity);
 
     if (isNaN(humidityPercent) || humidityPercent < 0 || humidityPercent > 100) {
-      this.log.error(`[${this.serverName}] Bad Request: Invalid humidity value ${humidity}`);
-      response.status(HttpResponse.BadRequest).send(`Invalid humidity value: ${humidity}`);
+      const errorMsg: string = `Invalid humidity value: ${humidity}. Value must be a percentage`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
       return false;
     }
@@ -231,8 +233,9 @@ export class SensorUpdateServer {
     const temperatureDegrees = Number(temperature);
 
     if (isNaN(temperatureDegrees)) {
-      this.log.error(`[${this.serverName}] Bad Request: Invalid temperature value ${temperature}`);
-      response.status(HttpResponse.BadRequest).send(`Invalid temperature value: ${temperature}`);
+      const errorMsg: string = `Invalid temperature value: ${temperature}. Value must be a number`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
       return false;
     }
@@ -245,8 +248,9 @@ export class SensorUpdateServer {
     response: Response,
   ): boolean {
     if (typeof obstruction !== 'boolean') {
-      this.log.error(`[${this.serverName}] Bad Request: Invalid obstruction value ${obstruction}`);
-      response.status(HttpResponse.BadRequest).send(`Invalid obstruction value: ${obstruction}`);
+      const errorMsg: string = `Invalid obstruction value: ${obstruction}. Value must be a boolean`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
       return false;
     }
@@ -259,8 +263,9 @@ export class SensorUpdateServer {
     response: Response,
   ): boolean {
     if (typeof trigger !== 'boolean') {
-      this.log.error(`[${this.serverName}] Bad Request: Invalid trigger value ${trigger}`);
-      response.status(HttpResponse.BadRequest).send(`Invalid trigger value: ${trigger}`);
+      const errorMsg: string = `Invalid trigger value: ${trigger}. Value must be a boolean`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
       return false;
     }
@@ -294,21 +299,23 @@ export class SensorUpdateServer {
           }
         }
 
-        this.log.info(`[${this.serverName}] Set accessory with id: ${accessoryId} to value: ${value}`);
-        response.status(HttpResponse.Ok).send(`Set accessory with id: ${accessoryId} to value: ${value}`);
+        const message: string = `Set accessory with id: ${accessoryId} to value: ${value}`;
+        this.log.info(`[${this.serverName}] ${message}`);
+        response.status(HttpResponse.Ok).send(`${message}`);
       }
       catch (error) {
-        let message: string = error as string;
+        let errorMsg: string = error as string;
         if (error instanceof SensorValueUpdateNotAllowed) {
-          message = error.message;
+          errorMsg = error.message;
         }
 
-        this.log.error(`[${this.serverName}] Bad Request: ${message}`);
-        response.status(HttpResponse.BadRequest).send(`${message}`);
+        this.log.error(`[${this.serverName}] ${errorMsg}`);
+        response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
       }
     } else {
-      this.log.error(`[${this.serverName}] Not Found: No accessory found with type '${accessoryType}' and id '${accessoryId}`);
-      response.status(HttpResponse.NotFound).send(`No accessory found with type '${accessoryType}' and id '${accessoryId}'`);
+      const errorMsg: string = `No accessory found with type '${accessoryType}' and id '${accessoryId}'`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.NotFound).send(`${errorMsg}`);
     }
   }
 }
