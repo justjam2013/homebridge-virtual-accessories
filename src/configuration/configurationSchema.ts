@@ -6,6 +6,7 @@ export class AccessoryType {
   static Door: string = 'door';
   static Doorbell: string = 'doorbell';
   static Fan: string = 'fan';
+  static FilterMaintenance: string = 'filtermaintenance';
   static GarageDoor: string = 'garagedoor';
   static HeaterCooler: string = 'heatercooler';
   static HumidifierDehumidifier: string = 'humidifierdehumidifier';

@@ -7,6 +7,7 @@ import { AccessoryConfiguration } from './configurationAccessory.js';
 import { DoorConfiguration } from './accessories/configurationDoor.js';
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
+import { FilterMaintenanceConfiguration } from './accessories/configurationFilterMaintenance.js';
 import { GarageDoorConfiguration } from './accessories/configurationGarageDoor.js';
 import { HeaterCoolerConfiguration } from './accessories/configurationHeaterCooler.js';
 import { HumidifierDehumidifierConfiguration } from './accessories/configurationHumidifierDehumidifier.js';
@@ -60,6 +61,10 @@ export class PlatformConfiguration {
   // Fan
   @Type(FanConfiguration)
     fan!: FanConfiguration;
+
+  // Filter Maintenance
+  @Type(FilterMaintenanceConfiguration)
+    filterMaintenance!: FilterMaintenanceConfiguration;
 
   // Garage Door
   @Type(GarageDoorConfiguration)
@@ -192,6 +197,8 @@ export class PlatformConfiguration {
       return this.isErrorless(this.doorbell, this.fieldNames.doorbell!);
     case AccessoryType.Fan:
       return this.isErrorless(this.fan, this.fieldNames.fan!);
+    case AccessoryType.FilterMaintenance:
+      return this.isErrorless(this.filterMaintenance, this.fieldNames.filterMaintenance!);
     case AccessoryType.GarageDoor:
       return this.isErrorless(this.garageDoor, this.fieldNames.garageDoor!);
     case AccessoryType.HeaterCooler:
