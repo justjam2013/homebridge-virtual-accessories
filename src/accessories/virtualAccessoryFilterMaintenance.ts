@@ -1,3 +1,5 @@
+/* eslint-disable brace-style */
+
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -42,7 +44,6 @@ export class FilterMaintenance extends Accessory {
       this.accessoryConfiguration.filterMaintenance.lifespan.seconds,
     );
 
-    // Timer is resettable
     const timerIsResettable: boolean = true;
     this.lifespanTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
@@ -51,30 +52,38 @@ export class FilterMaintenance extends Accessory {
       this.lifespan,
     );
 
-    this.filterChangeIndicator = this.lifespanTimer?.isTimerRunning() ? FilterMaintenance.FILTER_OK : FilterMaintenance.CHANGE_FILTER;
-
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
-
-    const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
-    const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
-    const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
-
-    // If the timer was running, calculate elapsed time and set timer for remaining duration
-    if (cachedTimerIsRunning) {
-      Utils.restoreRunningTimer(
-        this.lifespanTimer,
-        cachedTimerStartTime,
-        cachedTimerDuration,
-        this.onTimerExpired,
-        this.accessoryConfiguration.accessoryName,
-        this.log,
-      );
+    if (this.isEmptyAccessoryState(accessoryState)) {
+      // No stored state -> First run
+      this.lifespanTimer.start(this.onTimerExpired);
       this.storeState();
     }
+    else {
+      const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
+      const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
+      const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
+
+      // If the timer was running, calculate elapsed time and set timer for remaining duration
+      if (cachedTimerIsRunning) {
+        Utils.restoreRunningTimer(
+          this.lifespanTimer,
+          cachedTimerStartTime,
+          cachedTimerDuration,
+          this.onTimerExpired,
+          this.accessoryConfiguration.accessoryName,
+          this.log,
+        );
+
+        // Do not store state if the timer was restored!
+        // Store state only when the timer started or reset
+      }
+    }
+
+    this.filterChangeIndicator = this.lifespanTimer?.isTimerRunning() ? FilterMaintenance.FILTER_OK : FilterMaintenance.CHANGE_FILTER;
 
     this.service = this.accessory.getService(this.platform.Service.FilterMaintenance) || this.accessory.addService(this.platform.Service.FilterMaintenance);
 
@@ -101,9 +110,12 @@ export class FilterMaintenance extends Accessory {
   }
 
   async getFilterLifeLevel(): Promise<CharacteristicValue> {
-    const lifeLevel = this.lifespanTimer.getRemainingDuration() / this.lifespanTimer.getRuntime() * 100;
+    const lifeLevel =
+      (this.lifespanTimer.getRuntime() === 0) ?
+        0 :
+        this.lifespanTimer.getRemainingDuration() / this.lifespanTimer.getRuntime() * 100;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Life Level: ${lifeLevel}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Life Level: ${lifeLevel.toFixed(2)}`);
 
     return lifeLevel;
   }
@@ -117,11 +129,13 @@ export class FilterMaintenance extends Accessory {
         this.onTimerExpired,
       );
       this.filterChangeIndicator = FilterMaintenance.FILTER_OK;
+      this.storeState();
+
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Reset Filter Indication`);
     }
-
-    this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Reset Filter Indication`);
+    else {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Reset Filter Indication called with invalid value ${reset}`);
+    }
   }
 
   protected getJsonState(): string {
@@ -159,5 +173,6 @@ export class FilterMaintenance extends Accessory {
 
   private onTimerExpired(): void {
     this.filterChangeIndicator = FilterMaintenance.CHANGE_FILTER;
+    this.storeState();
   }
 }

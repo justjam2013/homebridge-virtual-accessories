@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PlatformAccessory, Service } from 'homebridge';
 import { Categories } from 'homebridge';
 
@@ -68,10 +69,16 @@ export abstract class Accessory {
     }
   }
 
+  private readonly EMPTY_ACCESSORY_STATE = '{}';
+
+  protected isEmptyAccessoryState(json: any) {
+    return JSON.stringify(json) === this.EMPTY_ACCESSORY_STATE;
+  }
+
   protected loadAccessoryState(
     storagePath: string,
-  ): string {
-    let contents = '{}';
+  ): any {
+    let contents = this.EMPTY_ACCESSORY_STATE;
     if (fs.existsSync(storagePath)) {
       contents = fs.readFileSync(storagePath, 'utf8');
     }
