@@ -23,14 +23,26 @@ export class DurationConfiguration extends AccessoryConfiguration {
 
   readonly fieldNames = Utils.proxiedPropertiesOf(this);
 
-  isValid(prefix: string): [boolean, string[]] {
+  isValid(
+    prefix: string
+  ): [boolean, string[]];
+  isValid(
+    prefix: string,
+    maxDays: number,
+  ): [boolean, string[]];
+  isValid(
+    prefix: string,
+    maxDays?: number,
+  ): [boolean, string[]] {
+    const DAYS_MAX_VALUE: number = (maxDays !== undefined) ? maxDays : DurationConfiguration.DAYS_MAX_VALUE;
+
     const isValidDays: boolean = (
       Utils.required(this.days) &&
-      (this.days >= 0 && this.days <= DurationConfiguration.DAYS_MAX_VALUE)
+      (this.days >= 0 && this.days <= DAYS_MAX_VALUE)
     );
 
     // Do not exceed maximum value (DAYS_MAX_VALUE)
-    if (isValidDays && this.days === DurationConfiguration.DAYS_MAX_VALUE) {
+    if (isValidDays && this.days === DAYS_MAX_VALUE) {
       this.hours = 0;
       this.minutes = 0;
       this.seconds = 0;

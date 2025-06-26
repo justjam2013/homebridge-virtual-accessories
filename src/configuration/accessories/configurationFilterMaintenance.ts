@@ -12,6 +12,9 @@ import { Type } from 'typeserializer';
  * 
  */
 export class FilterMaintenanceConfiguration extends AccessoryConfiguration {
+
+  static readonly DAYS_MAX_VALUE: number = 30;
+
   @Type(DurationConfiguration)
     lifespan!: DurationConfiguration;
 
@@ -23,7 +26,7 @@ export class FilterMaintenanceConfiguration extends AccessoryConfiguration {
     let isValidLifespan: boolean = true;
     let lifespanErrorFields: string[] = [];
     if (this.lifespan !== undefined) {
-      [isValidLifespan, lifespanErrorFields] = this.lifespan.isValid(this.fieldNames.lifespan!);
+      [isValidLifespan, lifespanErrorFields] = this.lifespan.isValid(this.fieldNames.lifespan!, FilterMaintenanceConfiguration.DAYS_MAX_VALUE);
     } 
     else {
       [isValidLifespan, lifespanErrorFields] = [false, [ this.fieldNames.lifespan! ]];
