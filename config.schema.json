@@ -225,19 +225,19 @@
                     "hours": {
                       "$ref": "#/$defs/duration/properties/hours",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
                       }
                     },
                     "minutes": {
                       "$ref": "#/$defs/duration/properties/minutes",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
                       }
                     },
                     "seconds": {
                       "$ref": "#/$defs/duration/properties/seconds",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
                       }
                     }
                   },
@@ -245,7 +245,7 @@
                     {
                       "if": {
                         "properties": {
-                          "days": { "const": 31 }
+                          "days": { "const": 30 }
                         },
                         "required": [ "days" ]
                       },
@@ -1251,7 +1251,7 @@
                 "required": [ "filtermaintenance" ],
                 "properties": {
                   "filtermaintenance": {
-                    "required": [ "lifetime" ],
+                    "required": [ "lifespan" ],
                     "properties": {
                       "lifetime": {
                         "required": [ "days" ]
