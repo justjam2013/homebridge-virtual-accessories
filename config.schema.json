@@ -134,6 +134,7 @@
                 { "title": "Door", "enum": ["door"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
+                { "title": "Filter Maintenance", "enum": ["filtermaintenance"] },
                 { "title": "Garage Door", "enum": ["garagedoor"] },
                 { "title": "Heater/Cooler (AC)", "enum": ["heatercooler"] },
                 { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
@@ -204,6 +205,60 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'fan';"
+              }
+            },
+            "filtermaintenance": {
+              "title": "Filter Maintenance",
+              "type": "object",
+              "description": "Filter Lifetime (31 days max)",
+              "properties": {
+                "lifespan": {
+                  "title": " ",
+                  "type": "object",
+                  "properties": {
+                    "days": {
+                      "title": "Days *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifetime && model.devices[arrayIndices].filtermaintenance.lifetime.days < 30;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "days": { "const": 31 }
+                        },
+                        "required": [ "days" ]
+                      },
+                      "then": {},
+                      "else": {
+                        "required": [ "hours", "minutes", "seconds" ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'filtermaintenance';"
               }
             },
             "garageDoor": {
@@ -1182,6 +1237,26 @@
                 "properties": {
                   "fan": {
                     "required": [ "defaultState", "rotationDirection", "rotationSpeed" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "filtermaintenance" }
+                }
+              },
+              "then": {
+                "required": [ "filtermaintenance" ],
+                "properties": {
+                  "filtermaintenance": {
+                    "required": [ "lifetime" ],
+                    "properties": {
+                      "lifetime": {
+                        "required": [ "days" ]
+                      }
+                    }
                   }
                 }
               }

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
+import { Timer } from './timer.js';
+import { VirtualAccessoriesLogger } from './virtualLogger.js';
+
+import { Duration, Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
 /**
@@ -135,5 +138,36 @@ export class Utils {
 
   static isValidTimeout(value: number): boolean {
     return (value >= 0);
+  }
+
+  static restoreRunningTimer(
+    timer: Timer,
+    cachedTimerStartTime: string,
+    cachedTimerDuration: number,
+    callback: () => void,
+    accessoryName: string,
+    log: VirtualAccessoriesLogger,
+  ): void {
+    // eslint-disable-next-line max-len
+    const elapsedTimeSinceTimerStart: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedTimerStartTime), Utils.now()).toMillis() / 1000); // seconds
+    const timeDifferential: number = (cachedTimerDuration - elapsedTimeSinceTimerStart);
+
+    log.debug(`[${accessoryName}] Elapsed Time Since Timer Start: ${elapsedTimeSinceTimerStart}`);
+    log.debug(`[${accessoryName}] Time Differential: ${timeDifferential}`);
+
+    // If the timer is expired, set timer to 1 second to issue trigger switch off
+    const remainingTimerDuration: number = (timeDifferential <= 0) ? 1 : timeDifferential;
+
+    if (remainingTimerDuration === 1) {
+      log.debug(`[${accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
+    } else {
+      log.debug(`[${accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+    }
+
+    timer.stop();
+    timer.start(
+      callback,
+      remainingTimerDuration,
+    );
   }
 }

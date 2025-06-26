@@ -6,6 +6,7 @@ import { Accessory } from './accessories/virtualAccessory.js';
 import { Door } from './accessories/virtualAccessoryDoor.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { Fan } from './accessories/virtualAccessoryFan.js';
+import { FilterMaintenance } from './accessories/virtualAccessoryFilterMaintenance.js';
 import { GarageDoor } from './accessories/virtualAccessoryGarageDoor.js';
 import { HeaterCooler } from './accessories/virtualAccessoryHeaterCooler.js';
 import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifierDehumidifier.js';
@@ -66,6 +67,9 @@ export abstract class AccessoryFactory {
       break;
     case AccessoryType.Fan:
       virtualAccessory = new Fan(platform, accessory);
+      break;
+    case AccessoryType.FilterMaintenance:
+      virtualAccessory = new FilterMaintenance(platform, accessory);
       break;
     case AccessoryType.GarageDoor:
       virtualAccessory = new GarageDoor(platform, accessory);
