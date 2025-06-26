@@ -207,7 +207,7 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'fan';"
               }
             },
-            "filtermaintenance": {
+            "filterMaintenance": {
               "title": "Filter Maintenance",
               "type": "object",
               "description": "Filter Lifetime (31 days max)",
