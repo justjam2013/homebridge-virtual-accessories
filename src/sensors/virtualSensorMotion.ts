@@ -4,9 +4,7 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { Sensor } from './virtualSensor.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * MotionSensor - Sensor implementation
  */
 export class MotionSensor extends Sensor {
 

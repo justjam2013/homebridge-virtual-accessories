@@ -13,9 +13,9 @@ export abstract class OpeningAccessory extends Accessory {
   static readonly CLOSED: number = 0;   // 0%
   static readonly OPEN: number = 100;   // 100%
 
-  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING;  -> CLOSING
-  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING;  -> OPENING
-  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED;     -> OPEN or CLOSED
+  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING   -> CLOSING
+  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING   -> OPENING
+  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED      -> OPEN or CLOSED
 
   private static readonly MIN_TIMEOUT_SECS: number = 1;
   private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
@@ -57,7 +57,6 @@ export abstract class OpeningAccessory extends Accessory {
 
     this.states.TargetPosition = this.states.CurrentPosition;
 
-    // Timer is resettable
     const timerIsResettable: boolean = true;
     this.transitionTimer = new Timer(
       this.accessoryConfiguration.accessoryName,

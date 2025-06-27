@@ -16,11 +16,11 @@ export class SecuritySystem extends Accessory implements TriggerableSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'SecuritySystem';
 
-  static readonly STAY_ARM: number = 0;         // Characteristic.SecuritySystemCurrentState.STAY_ARM;
-  static readonly AWAY_ARM: number = 1;         // Characteristic.SecuritySystemCurrentState.AWAY_ARM;
-  static readonly NIGHT_ARM: number = 2;        // Characteristic.SecuritySystemCurrentState.NIGHT_ARM;
-  static readonly DISARMED: number = 3;         // Characteristic.SecuritySystemCurrentState.DISARMED;
-  static readonly ALARM_TRIGGERED: number = 4;  // Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED;
+  static readonly STAY_ARM: number = 0;         // Characteristic.SecuritySystemCurrentState.STAY_ARM
+  static readonly AWAY_ARM: number = 1;         // Characteristic.SecuritySystemCurrentState.AWAY_ARM
+  static readonly NIGHT_ARM: number = 2;        // Characteristic.SecuritySystemCurrentState.NIGHT_ARM
+  static readonly DISARMED: number = 3;         // Characteristic.SecuritySystemCurrentState.DISARMED
+  static readonly ALARM_TRIGGERED: number = 4;  // Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED
 
   private readonly stateStorageKey: string = 'SecuritySystemState';
 

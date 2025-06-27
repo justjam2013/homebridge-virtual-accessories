@@ -1,4 +1,5 @@
 /* eslint-disable brace-style */
+
 import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
@@ -13,12 +14,12 @@ export class Lock extends Accessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Lock';
 
-  static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED;
-  static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED;
-  static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED;
-  static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN;
+  static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED
+  static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED
+  static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED
+  static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN
 
-  static readonly SECURED_REMOTELY: number = 6;                 // Characteristic.LockLastKnownAction.SECURED_REMOTELY;
+  static readonly SECURED_REMOTELY: number = 6;                 // Characteristic.LockLastKnownAction.SECURED_REMOTELY
   static readonly UNSECURED_REMOTELY: number = 7;               // Characteristic.LockLastKnownAction.UNSECURED_REMOTELY
   static readonly SECURED_BY_AUTO_SECURE_TIMEOUT: number = 8;   // Characteristic.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT
 

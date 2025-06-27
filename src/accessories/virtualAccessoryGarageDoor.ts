@@ -18,9 +18,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
   static readonly OPEN: number = 0;     // Characteristic.CurrentDoorState.OPEN   - Characteristic.TargetDoorState.OPEN
   static readonly CLOSED: number = 1;   // Characteristic.CurrentDoorState.CLOSED - Characteristic.TargetDoorState.CLOSED
-  static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING;
-  static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING;
-  static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED;
+  static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING
+  static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING
+  static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED
 
   private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
 

@@ -1,5 +1,4 @@
 /* eslint-disable brace-style */
- 
 
 import { AccessoryConfiguration } from '../configurationAccessory.js';
 import { DurationConfiguration } from '../configurationDuration.js';

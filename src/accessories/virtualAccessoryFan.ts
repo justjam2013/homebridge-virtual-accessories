@@ -13,8 +13,8 @@ export class Fan extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
-  static readonly CLOCKWISE: number = 0;          // Characteristic.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE;
-  static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE;
+  static readonly CLOCKWISE: number = 0;          // Characteristic.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE
+  static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE
 
   private readonly stateStorageKey: string = 'FanState';
   private readonly rotatioDirectionStorageKey: string = 'FanRotationDirection';

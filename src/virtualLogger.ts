@@ -3,7 +3,7 @@
 import type { Logging, LogLevel } from 'homebridge';
 
 /**
- * 
+ * VirtualAccessoriesLogger
  */
 export class VirtualAccessoriesLogger {
 
