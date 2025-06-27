@@ -142,32 +142,31 @@ export class Utils {
 
   static restoreRunningTimer(
     timer: Timer,
-    cachedTimerStartTime: string,
-    cachedTimerDuration: number,
+    cachedStartTime: string,
+    cachedDuration: number,
     callback: () => void,
     accessoryName: string,
     log: VirtualAccessoriesLogger,
   ): void {
-    // eslint-disable-next-line max-len
-    const elapsedTimeSinceTimerStart: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedTimerStartTime), Utils.now()).toMillis() / 1000); // seconds
-    const timeDifferential: number = (cachedTimerDuration - elapsedTimeSinceTimerStart);
+    const elapsedTime: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedStartTime), Utils.now()).toMillis() / 1000); // seconds
+    let timeRemaining: number = (cachedDuration - elapsedTime);
 
-    log.debug(`[${accessoryName}] Elapsed Time Since Timer Start: ${elapsedTimeSinceTimerStart}`);
-    log.debug(`[${accessoryName}] Time Differential: ${timeDifferential}`);
+    log.debug(`[${accessoryName}] Elapsed Time: ${elapsedTime}`);
+    log.debug(`[${accessoryName}] Time Remaining: ${timeRemaining}`);
 
     // If the timer is expired, set timer to 1 second to issue trigger switch off
-    const remainingTimerDuration: number = (timeDifferential <= 0) ? 1 : timeDifferential;
+    timeRemaining = (timeRemaining <= 0) ? 1 : timeRemaining;
 
-    if (remainingTimerDuration === 1) {
+    if (timeRemaining === 1) {
       log.debug(`[${accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
     } else {
-      log.debug(`[${accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
+      log.debug(`[${accessoryName}] Setting Timer for remaining time of (${timeRemaining} seconds)`);
     }
 
     timer.stop();
     timer.start(
       callback,
-      remainingTimerDuration,
+      timeRemaining,
     );
   }
 }

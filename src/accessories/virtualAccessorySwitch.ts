@@ -127,9 +127,7 @@ export class Switch extends Accessory {
         this.resetTimer!.stop();
       } else {
         this.resetTimer!.start(
-          () => {
-            this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-          },
+          this.onTimerExpired.bind(this),
         );
       }
     }
@@ -250,10 +248,12 @@ export class Switch extends Accessory {
 
     this.resetTimer!.debugCountdown();
     this.resetTimer!.start(
-      () => {
-        this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
-      },
+      this.onTimerExpired.bind(this),
       remainingTimerDuration,
     );
+  }
+
+  private onTimerExpired(): void {
+    this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
   }
 }

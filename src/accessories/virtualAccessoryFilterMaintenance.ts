@@ -55,7 +55,9 @@ export class FilterMaintenance extends Accessory {
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
     if (this.isEmptyAccessoryState(accessoryState)) {
       // No stored state -> First run
-      this.lifespanTimer.start(this.onTimerExpired);
+      this.lifespanTimer.start(
+        this.onTimerExpired.bind(this),
+      );
       this.storeState();
     }
     else {
@@ -73,7 +75,7 @@ export class FilterMaintenance extends Accessory {
           this.lifespanTimer,
           cachedTimerStartTime,
           cachedTimerDuration,
-          this.onTimerExpired,
+          this.onTimerExpired.bind(this),
           this.accessoryConfiguration.accessoryName,
           this.log,
         );
@@ -110,14 +112,11 @@ export class FilterMaintenance extends Accessory {
   }
 
   async getFilterLifeLevel(): Promise<CharacteristicValue> {
-    const lifeLevel =
-      (this.lifespanTimer.getRuntime() === 0) ?
-        0 :
-        this.lifespanTimer.getRemainingDuration() / this.lifespanTimer.getRuntime() * 100;
+    const filterLifeLevel = this.lifespanTimer.getRemainingDuration() / this.lifespan * 100;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Life Level: ${lifeLevel.toFixed(2)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Life Level: ${filterLifeLevel.toFixed(2)}%`);
 
-    return lifeLevel;
+    return filterLifeLevel;
   }
 
   async setResetFilterIndication(value: CharacteristicValue) {
@@ -126,7 +125,7 @@ export class FilterMaintenance extends Accessory {
     if (reset === 1) {
       this.lifespanTimer.stop();
       this.lifespanTimer.start(
-        this.onTimerExpired,
+        this.onTimerExpired.bind(this),
       );
       this.filterChangeIndicator = FilterMaintenance.FILTER_OK;
       this.storeState();
@@ -174,5 +173,7 @@ export class FilterMaintenance extends Accessory {
   private onTimerExpired(): void {
     this.filterChangeIndicator = FilterMaintenance.CHANGE_FILTER;
     this.storeState();
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Filter lifetime expired`);
   }
 }
