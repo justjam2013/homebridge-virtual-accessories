@@ -198,6 +198,7 @@ export class PlatformConfiguration {
     case AccessoryType.Fan:
       return this.isErrorless(this.fan, this.fieldNames.fan!);
     case AccessoryType.FilterMaintenance:
+      this.accessoryIsStateful = true;
       return this.isErrorless(this.filterMaintenance, this.fieldNames.filterMaintenance!);
     case AccessoryType.GarageDoor:
       return this.isErrorless(this.garageDoor, this.fieldNames.garageDoor!);

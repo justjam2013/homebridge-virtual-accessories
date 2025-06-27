@@ -101,8 +101,8 @@ export class Timer {
         }
 
         if (this.remainingDurationMillis <= 0) {
-          callback();
           this.stop();
+          callback();
         }
       }, this.updateIntervalMillis);
 
