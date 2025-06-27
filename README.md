@@ -39,6 +39,7 @@
     - [Door](#door)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
+    - [Filter Maintenance](#filter-maintenance)
     - [Garage Door](#garage-door)
     - [Heater/Cooler (Celsius)](#heatercooler-celsius)
     - [Heater/Cooler (Fahrenheit)](#heatercooler-fahrenheit)
@@ -93,6 +94,7 @@ Currently, these are the implemented virtual accessories:
 -   **Door.** Allows you to create a virtual door.
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
+-   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
@@ -279,6 +281,31 @@ These are example configurations of the virtual accessories and provided for ref
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
+### Filter Maintenance
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Filter Maintenance",
+            "accessoryType": "filtermaintenance",
+            "filterMaintenance": {
+                "lifespan": {
+                    "days": 30,
+                    "hours": 0,
+                    "minutes": 0,
+                    "seconds": 0
+                }
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
 
 ### Garage Door
 
