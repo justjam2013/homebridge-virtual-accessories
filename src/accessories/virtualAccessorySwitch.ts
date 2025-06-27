@@ -80,6 +80,7 @@ export class Switch extends Accessory {
         // If the timer was running, calculate elapsed time and set timer for remaining duration
         if (cachedTimerIsRunning) {
           this.restoreRunningTimer(cachedTimerStartTime, cachedTimerDuration);
+          this.storeState();
         }
       }
     }
