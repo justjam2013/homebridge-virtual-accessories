@@ -120,6 +120,8 @@ Currently, these are the implemented virtual accessories:
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
     - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call.
  
+- **Timer.** To create a timer, create a timed switch.
+ 
 <span align="right">
   <h6>
     
