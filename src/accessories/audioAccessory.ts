@@ -9,11 +9,11 @@ import { AudioAccessoryConfiguration } from '../configuration/configurationAudio
  */
 export abstract class AudioAccessory extends ExternalAccessory {
 
-  static readonly INACTIVE: number = 0;       //	Characteristic.Active.INACTIVE;
-  static readonly ACTIVE: number = 1;         //	Characteristic.Active.ACTIVE;
+  static readonly INACTIVE: number = 0;       //	Characteristic.Active.INACTIVE
+  static readonly ACTIVE: number = 1;         //	Characteristic.Active.ACTIVE
 
-  static readonly MUTED: boolean = true;      //	Characteristic.Mute;
-  static readonly UNMUTED: boolean = false;   //	Characteristic.Mute;
+  static readonly MUTED: boolean = true;      //	Characteristic.Mute
+  static readonly UNMUTED: boolean = false;   //	Characteristic.Mute
 
   private readonly stateStorageKey: string = 'SpeakerState';
   private readonly muteStorageKey: string = 'SpeakerMuteState';

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { PlatformAccessory, Service } from 'homebridge';
 import { Categories } from 'homebridge';
 

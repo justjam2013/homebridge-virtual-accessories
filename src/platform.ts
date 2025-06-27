@@ -1,4 +1,5 @@
 /* eslint-disable brace-style */
+
 import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
