@@ -175,7 +175,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
       throw new ObstructionValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'boolean') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Garage Door obstruction detected`);
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Garage Door obstruction detected`);
 
       throw new InvalidObstructionValueType(`Invalid sensor value: ${value}`);
     }

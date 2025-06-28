@@ -492,7 +492,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Heater/Cooler sensor`);
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Heater/Cooler sensor`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }

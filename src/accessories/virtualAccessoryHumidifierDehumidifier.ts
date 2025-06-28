@@ -419,7 +419,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Humidifier/Dehumidifier sensor`);
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Humidifier/Dehumidifier sensor`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
