@@ -47,7 +47,6 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
     this.service.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent)
       .onGet(this.getProgrammableSwitchEvent.bind(this));
 
-    // TODO: Figure out how to change the volume
     this.service.getCharacteristic(this.platform.Characteristic.Volume)
       .onSet(this.setVolume.bind(this))
       .onGet(this.getVolume.bind(this));
@@ -59,7 +58,6 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   // Handlers
 
   async getProgrammableSwitchEvent(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
     const pressEvent = Doorbell.SINGLE_PRESS;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(pressEvent)}`);
