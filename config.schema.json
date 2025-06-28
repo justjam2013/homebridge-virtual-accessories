@@ -210,7 +210,7 @@
             "filterMaintenance": {
               "title": "Filter Maintenance",
               "type": "object",
-              "description": "Filter Lifetime (31 days max)",
+              "description": "Filter Lifetime (30 days max)",
               "properties": {
                 "lifespan": {
                   "title": " ",
@@ -225,19 +225,19 @@
                     "hours": {
                       "$ref": "#/$defs/duration/properties/hours",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
                       }
                     },
                     "minutes": {
                       "$ref": "#/$defs/duration/properties/minutes",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
                       }
                     },
                     "seconds": {
                       "$ref": "#/$defs/duration/properties/seconds",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].filtermaintenance && model.devices[arrayIndices].filtermaintenance.lifespan && model.devices[arrayIndices].filtermaintenance.lifespan.days < 30;"
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
                       }
                     }
                   },
@@ -1248,9 +1248,9 @@
                 }
               },
               "then": {
-                "required": [ "filtermaintenance" ],
+                "required": [ "filterMaintenance" ],
                 "properties": {
-                  "filtermaintenance": {
+                  "filterMaintenance": {
                     "required": [ "lifespan" ],
                     "properties": {
                       "lifetime": {
