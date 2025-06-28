@@ -31,6 +31,17 @@ export class FilterMaintenanceConfiguration extends AccessoryConfiguration {
       [isValidLifespan, lifespanErrorFields] = [false, [ this.fieldNames.lifespan! ]];
     }
 
+    if (this.lifespan !== undefined &&
+      Utils.daysHoursMinutesSecondsToSeconds(
+        this.lifespan.days,
+        this.lifespan.hours,
+        this.lifespan.minutes,
+        this.lifespan.seconds) === 0
+    ) {
+      isValidLifespan = false;
+      lifespanErrorFields.push(this.fieldNames.lifespan!);
+    }
+
     // Store fields failing validation
     if (!isValidLifespan) {
       lifespanErrorFields.forEach( (errorField) => {

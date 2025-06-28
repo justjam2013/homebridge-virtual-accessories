@@ -39,9 +39,9 @@ export class FilterMaintenance extends Accessory {
 
     this.lifespan = Utils.daysHoursMinutesSecondsToSeconds(
       this.accessoryConfiguration.filterMaintenance.lifespan.days,
-      this.accessoryConfiguration.filterMaintenance.lifespan.hours,
-      this.accessoryConfiguration.filterMaintenance.lifespan.minutes,
-      this.accessoryConfiguration.filterMaintenance.lifespan.seconds,
+      (this.accessoryConfiguration.filterMaintenance.lifespan.hours ??= 0),
+      (this.accessoryConfiguration.filterMaintenance.lifespan.minutes ??= 0),
+      (this.accessoryConfiguration.filterMaintenance.lifespan.seconds ??= 0),
     );
 
     const timerIsResettable: boolean = true;
