@@ -81,3 +81,23 @@ export class InvalidObstructionValueType extends Error {
     this.message = message;
   }
 }
+
+export class ChargingStateUpdateNotAllowed extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}
+
+export class InvalidChargingStateType extends Error {
+
+  constructor(
+    message: string,
+  ) {
+    super();
+    this.message = message;
+  }
+}

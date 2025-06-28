@@ -3,6 +3,7 @@ import type { PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from './platform.js';
 
 import { Accessory } from './accessories/virtualAccessory.js';
+import { Battery } from './accessories/virtualAccessoryBattery.js';
 import { Door } from './accessories/virtualAccessoryDoor.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
 import { Fan } from './accessories/virtualAccessoryFan.js';
@@ -59,6 +60,9 @@ export abstract class AccessoryFactory {
     const accessoryConfiguration: PlatformConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
+    case AccessoryType.Battery:
+      virtualAccessory = new Battery(platform, accessory);
+      break;
     case AccessoryType.Door:
       virtualAccessory = new Door(platform, accessory);
       break;
