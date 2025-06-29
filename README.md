@@ -36,6 +36,7 @@
     - [Synology](#synology)
   - [Configuration](#configuration)
   - [Accessory Configurations](#accessory-configurations)
+    - [Battery](#battery)
     - [Door](#door)
     - [Doorbell](#doorbell)
     - [Fan](#fan)
@@ -66,9 +67,10 @@
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
     - [Enable webhook service with custom port](#enable-webhook-service-with-custom-port)
-    - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
-    - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
+    - [Update Battery charging state and charge level](#update-battery-charging-state-and-charge-level)
     - [Update Garage Door obstruction detected](#update-garage-door-obstruction-detected)
+    - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
+    - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Security System triggered state](#update-security-system-triggered-state)
   - [Creative Uses](#creative-uses)
   - [Mentions](#mentions)
@@ -91,6 +93,7 @@ The downside to a single plugin is trading ease of accessory maintenance for a s
 
 Currently, these are the implemented virtual accessories:
 
+-   **Battery.** Allows you to create a virtual battery service. The "charging state" and "battery level" properties can be set via a [webhook call](#webhook-service-configuration).
 -   **Door.** Allows you to create a virtual door.
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
@@ -222,6 +225,26 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 ## Accessory Configurations
 
 These are example configurations of the virtual accessories and provided for reference only. They are not intended to be exhaustive of all the different permutations and it is recommended that you use the UI to fully explore each accessory's setup.
+
+### Battery
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Battery",
+            "accessoryType": "battery",
+            "battery": {
+                "isRechargeable": true,
+                "lowLevelThreshold": 10
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Door
 
@@ -899,26 +922,55 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
 > [!NOTE]
 > The default port value is `60221`, if no value is specified in the configuratiom. If another service is running on this port, please make sure to select a different port.
 
-### Update Humidifier/Dehumidifier humidity sensor
+Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
 
-To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+### Update Battery charging state and charge level
 
-The target URL (replace hostname and port per your setup) will specify the `humidity` path:
+To update a Battery charging state and charge level, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `chargingstate` path:
 
 ```
-http://localhost:60221/humidity
+http://localhost:60221/chargingstate
 ```
 
-The raw json payload will contain the accessory id of the Humidifier/Dehumidifier accessory and the humidity percentage value:
+The raw json payload will contain the accessory id of the Security System accessory and the charging state and/or the charge level % value:
 
 ```json
 {
     "id": "1234567",
-    "value": 35
+    "charging": true,
+    "charge": 95
 }
 ```
 
-Check out the Wiki page [Updating the Humidifier‐Dehumidifier humidity sensor via webhooks](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-the-Humidifier%E2%80%90Dehumidifier-humidity-sensor-via-webhooks) for detailed steps for setting up a link between a real humidity sensor and the virtual sensor in a virtual humidifer/dehumidifier accessory.
+> [!NOTE]
+> The JSON payload does not have to provide values for both "charging" and "charge". You can specify "charging" only, "charge" only, or both "charging" and "charge". If you do not want to provide one of the values, leave it out of the JSON payload. Ex:
+> ```json
+> {
+>     "id": "1234567",
+>     "charge": 95
+> }
+> ```
+
+### Update Garage Door obstruction detected
+
+To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+
+The target URL (replace hostname and port per your setup) will specify the `obstruction` path:
+
+```
+http://localhost:60221/obstruction
+```
+
+The raw json payload will contain the accessory id of the Garage Door accessory and the obstruction value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
 
 ### Update Heater/Cooler temperature sensor
 
@@ -942,22 +994,22 @@ The raw json payload will contain the accessory id of the Heater/Cooler accessor
 > [!NOTE]
 > The temperature value must be specified in the same temperature units (Celsius or Fahrenheit) as specified by the accessory's configuration.
 
-### Update Garage Door obstruction detected
+### Update Humidifier/Dehumidifier humidity sensor
 
-To update a Garage Door obstruction detected, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
+To update a Humidifier/Dehumidifier humidity sensor, issue a `POST` request with a raw json payload in the request body. Make sure `Content-Type: application/json` is added to the request headers.
 
-The target URL (replace hostname and port per your setup) will specify the `obstruction` path:
+The target URL (replace hostname and port per your setup) will specify the `humidity` path:
 
 ```
-http://localhost:60221/obstruction
+http://localhost:60221/humidity
 ```
 
-The raw json payload will contain the accessory id of the Garage Door accessory and the obstruction value:
+The raw json payload will contain the accessory id of the Humidifier/Dehumidifier accessory and the humidity percentage value:
 
 ```json
 {
     "id": "1234567",
-    "value": true
+    "value": 35
 }
 ```
 
