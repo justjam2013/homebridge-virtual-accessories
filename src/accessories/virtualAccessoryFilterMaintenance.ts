@@ -65,13 +65,7 @@ export class FilterMaintenance extends Accessory {
       const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
       const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
 
-      console.info(`***** lifespan: ${this.lifespan}`);
-      console.info(`***** cachedTimerDuration: ${cachedTimerDuration}`);
       if (this.lifespan === cachedTimerDuration) {
-        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
-        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
-        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
-
         // If the timer was running, calculate elapsed time and set timer for remaining duration
         if (cachedTimerIsRunning) {
           Utils.restoreRunningTimer(
