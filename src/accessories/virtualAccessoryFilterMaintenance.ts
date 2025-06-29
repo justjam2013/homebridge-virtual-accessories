@@ -65,23 +65,37 @@ export class FilterMaintenance extends Accessory {
       const cachedTimerDuration = accessoryState[this.timerDurationStorageKey] as number;
       const cachedTimerIsRunning = accessoryState[this.timerIsRunningStorageKey] as boolean;
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
+      console.info(`***** lifespan: ${this.lifespan}`);
+      console.info(`***** cachedTimerDuration: ${cachedTimerDuration}`);
+      if (this.lifespan === cachedTimerDuration) {
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Start Time: ${cachedTimerStartTime}`);
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Duration: ${cachedTimerDuration}`);
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Cached Timer Is Running: ${cachedTimerIsRunning}`);
 
-      // If the timer was running, calculate elapsed time and set timer for remaining duration
-      if (cachedTimerIsRunning) {
-        Utils.restoreRunningTimer(
-          this.lifespanTimer,
-          cachedTimerStartTime,
-          cachedTimerDuration,
-          this.onTimerExpired.bind(this),
-          this.accessoryConfiguration.accessoryName,
-          this.log,
-        );
+        // If the timer was running, calculate elapsed time and set timer for remaining duration
+        if (cachedTimerIsRunning) {
+          Utils.restoreRunningTimer(
+            this.lifespanTimer,
+            cachedTimerStartTime,
+            cachedTimerDuration,
+            this.onTimerExpired.bind(this),
+            this.accessoryConfiguration.accessoryName,
+            this.log,
+          );
 
         // Do not store state if the timer was restored!
         // Store state only when the timer started or reset
+        }
+      }
+      else {
+        // eslint-disable-next-line max-len
+        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Lifespan was changed from: ${cachedTimerDuration} to: ${this.lifespan}. Restart the timer`);
+
+        // The lifetime was changed, restart the timer
+        this.lifespanTimer.start(
+          this.onTimerExpired.bind(this),
+        );
+        this.storeState();
       }
     }
 
