@@ -131,6 +131,7 @@
               "type": "string",
               "required": true,
               "oneOf": [
+                { "title": "Battery", "enum": ["battery"] },
                 { "title": "Door", "enum": ["door"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
                 { "title": "Fan", "enum": ["fan"] },
@@ -157,6 +158,25 @@
               "type": "boolean",
               "condition": {
                 "functionBody": "return ['door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "battery": {
+              "title": "Battery",
+              "type": "object",
+              "properties": {
+                "isRechargeable": {
+                  "title": "Is Rechargeable",
+                  "type": "boolean"
+                },
+                "lowLevelThreshold": {
+                  "title": "Battery low threshold (5% - 25%) *",
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 25
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'battery';"
               }
             },
             "door": {
@@ -1192,6 +1212,21 @@
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "battery" }
+                }
+              },
+              "then": {
+                "required": [ "battery" ],
+                "properties": {
+                  "battery": {
+                    "required": [ "lowLevelThreshold" ]
                   }
                 }
               }

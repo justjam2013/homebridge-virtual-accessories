@@ -6,6 +6,7 @@ import { Sensor } from './sensors/virtualSensor.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
 import { Trigger } from './triggers/trigger.js';
 import { TriggerableSensor } from './triggerableSensor.js';
+import { UpdatableChargingState } from './updatableChargingState.js';
 import { UpdatableObstruction } from './updatableObstruction.js';
 import { UpdatableSensor } from './updatableSensor.js';
 import { VirtualAccessoriesLogger } from './virtualLogger.js';
@@ -116,6 +117,21 @@ export class SensorUpdateServer {
         this.processRequest(accessoryId, 'sensor', trigger, response);
       }
     });
+
+    const routeChargingState: string = '/chargingstate';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeChargingState}`);
+    this.server.post(routeChargingState, (request: Request, response: Response) => {
+      const accessoryId: string = request.body.id;
+      const charging: boolean = request.body.charging;
+      const charge: number = request.body.charge;
+
+      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+
+      const chargingState: ChargingState = new ChargingState(charging, charge);
+      if (this.accessoryIdIsValid(accessoryId, response) && this.chargingStateIsValid(chargingState, response)) {
+        this.processRequest(accessoryId, 'battery', chargingState, response);
+      }
+    });
   }
 
   start() {
@@ -154,6 +170,10 @@ export class SensorUpdateServer {
       addedAccessory = true;
     }
     else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
+      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      addedAccessory = true;
+    }
+    else if ((<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
     }
@@ -273,10 +293,43 @@ export class SensorUpdateServer {
     return true;
   }
 
+  private chargingStateIsValid(
+    chargingState: ChargingState,
+    response: Response,
+  ): boolean {
+    if (chargingState.isEmpty()) {
+      const errorMsg: string = 'No values provided for chargeable, charging, or charge';
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
+
+      return false;
+    }
+
+    const charging: boolean = chargingState.charging;
+    const charge: number = chargingState.charge;
+
+    if ((charging !== undefined) && typeof charging !== 'boolean') {
+      const errorMsg: string = `Invalid charging value: ${charging}. Value must be a boolean`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
+
+      return false;
+    }
+    if ((charge !== undefined) && (isNaN(charge) || charge < 0 || charge > 100)) {
+      const errorMsg: string = `Invalid charge value: ${charge}. Value must be a percentage`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
+
+      return false;
+    }
+
+    return true;
+  }
+
   private processRequest(
     accessoryId: string,
     accessoryType: string,
-    value: number | boolean,
+    value: number | boolean | ChargingState,
     response: Response,
   ) {
     const accessory: Accessory | undefined = this.accessories.get(accessoryId);
@@ -292,6 +345,10 @@ export class SensorUpdateServer {
         else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
           (<TriggerableSensor><unknown>accessory).triggerSensor(<boolean>value, accessoryId);
         }
+        else if ((<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined) {
+          const chargingState: ChargingState = (<ChargingState>value);
+          (<UpdatableChargingState><unknown>accessory).updateChargingState(chargingState.charging, chargingState.charge, accessoryId);
+        }
         else if (accessory instanceof Sensor) {
           const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
@@ -299,7 +356,11 @@ export class SensorUpdateServer {
           }
         }
 
-        const message: string = `Set accessory with id: ${accessoryId} to value: ${value}`;
+        const msgValue: string = 
+          (typeof value === 'number' || typeof value === 'boolean') ?
+            value.toString() :
+            JSON.stringify(value);
+        const message: string = `Set accessory with id: ${accessoryId} to value: ${msgValue}`;
         this.log.info(`[${this.serverName}] ${message}`);
         response.status(HttpResponse.Ok).send(`${message}`);
       }
@@ -325,4 +386,23 @@ class HttpResponse {
   static Ok: number = 200;
   static BadRequest: number = 400;
   static NotFound: number = 404;
+}
+
+class ChargingState {
+
+  charging: boolean;
+  charge: number;
+
+  constructor(
+    charging: boolean,
+    charge: number,
+  ) {
+    this.charging = charging;
+    this.charge = charge;
+  }
+
+  isEmpty() {
+    return (this.charging === undefined &&
+      this.charge === undefined);
+  }
 }

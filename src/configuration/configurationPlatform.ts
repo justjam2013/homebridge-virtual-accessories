@@ -4,6 +4,7 @@ import { Categories } from 'homebridge';
 
 import { AccessoryConfiguration } from './configurationAccessory.js';
 
+import { BatteryConfiguration } from './accessories/configurationBattery.js';
 import { DoorConfiguration } from './accessories/configurationDoor.js';
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
 import { FanConfiguration } from './accessories/configurationFan.js';
@@ -49,6 +50,10 @@ export class PlatformConfiguration {
   accessoryIsStateful: boolean = false;
 
   category?: Categories;
+
+  // Battery
+  @Type(BatteryConfiguration)
+    battery!: BatteryConfiguration;
 
   // Door
   @Type(DoorConfiguration)
@@ -191,6 +196,9 @@ export class PlatformConfiguration {
 
   private isValidAccessory(): boolean {
     switch (this.accessoryType) {
+    case AccessoryType.Battery:
+      this.accessoryIsStateful = true;
+      return this.isErrorless(this.battery, this.fieldNames.battery!);
     case AccessoryType.Door:
       return this.isErrorless(this.door, this.fieldNames.door!);
     case AccessoryType.Doorbell:
