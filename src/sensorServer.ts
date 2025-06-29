@@ -129,7 +129,7 @@ export class SensorUpdateServer {
 
       const chargingState: ChargingState = new ChargingState(charging, charge);
       if (this.accessoryIdIsValid(accessoryId, response) && this.chargingStateIsValid(chargingState, response)) {
-        this.processRequest(accessoryId, 'sensor', chargingState, response);
+        this.processRequest(accessoryId, 'battery', chargingState, response);
       }
     });
   }
@@ -356,7 +356,11 @@ export class SensorUpdateServer {
           }
         }
 
-        const message: string = `Set accessory with id: ${accessoryId} to value: ${value}`;
+        const msgValue: string = 
+          (typeof value === 'number' || typeof value === 'boolean') ?
+            value.toString() :
+            JSON.stringify(value);
+        const message: string = `Set accessory with id: ${accessoryId} to value: ${msgValue}`;
         this.log.info(`[${this.serverName}] ${message}`);
         response.status(HttpResponse.Ok).send(`${message}`);
       }

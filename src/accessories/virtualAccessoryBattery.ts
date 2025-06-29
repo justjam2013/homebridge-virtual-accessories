@@ -44,7 +44,7 @@ export class Battery extends Accessory implements UpdatableChargingState {
     this.lowLevelThreshold = this.accessoryConfiguration.battery.lowLevelThreshold;
 
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
-    if (this.isEmptyAccessoryState(accessoryState)) {
+    if (!this.isEmptyAccessoryState(accessoryState)) {
       const cachedBatteryLevel = accessoryState[this.batteryLevelStorageKey] as number;
       const cachedChargingState = accessoryState[this.chargingStateStorageKey] as number;
 
@@ -155,27 +155,27 @@ export class Battery extends Accessory implements UpdatableChargingState {
       throw new ChargingStateUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
 
-    if (typeof charging !== 'boolean') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${charging} is not valid for Battery charging state`);
+    if (charging !== undefined) {
+      if (typeof charging !== 'boolean') {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${charging} is not valid for Battery charging state`);
 
-      throw new InvalidChargingStateType(`Invalid charging value: ${charging}`);
-    }
-    else {
-      if (this.states.ChargingState !== Battery.NOT_CHARGEABLE) {
-        this.states.ChargingState = charging ? Battery.CHARGING : Battery.NOT_CHARGING;
+        throw new InvalidChargingStateType(`Invalid charging value: ${charging}`);
+      }
+      else {
+        if (this.states.ChargingState !== Battery.NOT_CHARGEABLE) {
+          this.states.ChargingState = charging ? Battery.CHARGING : Battery.NOT_CHARGING;
+        }
       }
     }
 
-    if (typeof charge !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${charge} is not valid for Battery charge state`);
+    if (charge !== undefined) {
+      if (typeof charge !== 'number') {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${charge} is not valid for Battery charge state`);
 
-      throw new InvalidChargingStateType(`Invalid charge value: ${charge}`);
-    }
-    else {
-      this.states.BatteryLevelStatus = Math.min(charge, 100);
-
-      if (this.states.BatteryLevelStatus === 100) {
-        this.states.ChargingState = Battery.NOT_CHARGING;
+        throw new InvalidChargingStateType(`Invalid charge value: ${charge}`);
+      }
+      else {
+        this.states.BatteryLevelStatus = Math.min(charge, 100);
       }
     }
 
