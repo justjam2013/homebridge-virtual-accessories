@@ -104,11 +104,14 @@ export abstract class Sensor extends Accessory {
       throw new InvalidSensorValue(`Sensor value ${Sensor.getStateName(sensorState)} is not a valid state`);
     }
 
-    this.states.SensorState = sensorState;
+    // Only update the sensor if the state has changed
+    if (this.states.SensorState !== sensorState) {
+      this.states.SensorState = sensorState;
 
-    this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
+      this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
-    // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      // eslint-disable-next-line max-len
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+    }
   }
 }

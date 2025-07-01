@@ -1,3 +1,5 @@
+/* eslint-disable brace-style */
+
 import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
 import { PingTriggerConfiguration } from '../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
@@ -73,7 +75,7 @@ export class PingTrigger extends Trigger {
     }
     this.log.debug(`[${this.sensorConfig.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
-    const pingTimeoutMillis = 10 * 1000;    // trigger.pingTimeout: 10 seconds
+    const pingTimeoutMillis = 10 * 1000;            // trigger.pingTimeout: 10 seconds
     const intervalBetweenPingsMillis = 60 * 1000;   // trigger.intervalBetweenPings: 60 seconds
 
     setInterval(
@@ -128,7 +130,8 @@ export class PingTrigger extends Trigger {
 
           trigger.sensor.triggerSensorState(Sensor.TRIGGERED, trigger);
         }
-      } else {
+      }
+      else {
         trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
