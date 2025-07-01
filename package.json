@@ -2,10 +2,16 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
+  "funding": [
+    {
+      "type": "kofi",
+      "url": "https://ko-fi.com/justjam2013"
+    }
+  ],
   "homepage": "https://github.com/justjam2013/homebridge-virtual-accessories#readme",
   "repository": {
     "type": "git",
@@ -89,7 +95,7 @@
   ],
   "main": "dist/index.js",
   "engines": {
-    "node": "^18.20.4 || ^20.18.0 || ^22.10.0",
+    "node": "^18 || ^20 || ^22",
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "scripts": {
