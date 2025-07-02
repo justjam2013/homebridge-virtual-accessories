@@ -53,66 +53,66 @@ export abstract class AccessoryFactory {
   static createVirtualAccessory(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    accessoryType: string,
+    accessoryConfiguration: AccessoryConfiguration,
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;
 
-    const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
+    const accessoryType = accessoryConfiguration.accessoryType;
 
     switch (accessoryType) {
     case AccessoryType.Battery:
-      virtualAccessory = new Battery(platform, accessory);
+      virtualAccessory = new Battery(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Door:
-      virtualAccessory = new Door(platform, accessory);
+      virtualAccessory = new Door(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Doorbell:
-      virtualAccessory = new Doorbell(platform, accessory);
+      virtualAccessory = new Doorbell(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Fan:
-      virtualAccessory = new Fan(platform, accessory);
+      virtualAccessory = new Fan(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.FilterMaintenance:
-      virtualAccessory = new FilterMaintenance(platform, accessory);
+      virtualAccessory = new FilterMaintenance(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.GarageDoor:
-      virtualAccessory = new GarageDoor(platform, accessory);
+      virtualAccessory = new GarageDoor(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.HeaterCooler:
-      virtualAccessory = new HeaterCooler(platform, accessory);
+      virtualAccessory = new HeaterCooler(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.HumidifierDehumidifier:
-      virtualAccessory = new HumidifierDehumidifier(platform, accessory);
+      virtualAccessory = new HumidifierDehumidifier(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Lightbulb:
-      virtualAccessory = new Lightbulb(platform, accessory);
+      virtualAccessory = new Lightbulb(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Lock:
-      virtualAccessory = new Lock(platform, accessory);
+      virtualAccessory = new Lock(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.SecuritySystem:
-      virtualAccessory = new SecuritySystem(platform, accessory);
+      virtualAccessory = new SecuritySystem(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Speaker:
-      virtualAccessory = new Speaker(platform, accessory);
+      virtualAccessory = new Speaker(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Switch:
-      virtualAccessory = new Switch(platform, accessory);
+      virtualAccessory = new Switch(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Television:
-      virtualAccessory = new Television(platform, accessory);
+      virtualAccessory = new Television(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Valve:
-      virtualAccessory = new Valve(platform, accessory);
+      virtualAccessory = new Valve(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Window:
-      virtualAccessory = new Window(platform, accessory);
+      virtualAccessory = new Window(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.WindowCovering:
-      virtualAccessory = new WindowCovering(platform, accessory);
+      virtualAccessory = new WindowCovering(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Sensor:
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration.sensor.type);
+      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration);
       break;
     default:
       platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
@@ -124,31 +124,33 @@ export abstract class AccessoryFactory {
   static createVirtualSensor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
-    sensorType: string,     
+    accessoryConfiguration: AccessoryConfiguration,
   ): Sensor | undefined {
+    const sensorType: string = accessoryConfiguration.sensor.type;
+
     let virtualSensor: Sensor | undefined;
 
     switch (sensorType) {
     case SensorType.CarbonDioxide:
-      virtualSensor = new CarbonDioxideSensor(platform, accessory);
+      virtualSensor = new CarbonDioxideSensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.CarbonMonoxide:
-      virtualSensor = new CarbonMonoxideSensor(platform, accessory);
+      virtualSensor = new CarbonMonoxideSensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.Contact:
-      virtualSensor = new ContactSensor(platform, accessory);
+      virtualSensor = new ContactSensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.Leak:
-      virtualSensor = new LeakSensor(platform, accessory);
+      virtualSensor = new LeakSensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.Motion:
-      virtualSensor = new MotionSensor(platform, accessory);
+      virtualSensor = new MotionSensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.Occupancy:
-      virtualSensor = new OccupancySensor(platform, accessory);
+      virtualSensor = new OccupancySensor(platform, accessory, accessoryConfiguration);
       break;
     case SensorType.Smoke:
-      virtualSensor = new SmokeSensor(platform, accessory);
+      virtualSensor = new SmokeSensor(platform, accessory, accessoryConfiguration);
       break;
     default:
       platform.log.error(`Error creating sensor. Invalid sensor type: ${sensorType}`);

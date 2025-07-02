@@ -1,6 +1,7 @@
 import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Sensor } from './sensor.js';
 
 /**
@@ -16,8 +17,9 @@ export class MotionSensor extends Sensor {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
   }
 
   protected getService(): WithUUID<typeof Service> {

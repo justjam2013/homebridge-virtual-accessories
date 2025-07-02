@@ -1,9 +1,9 @@
 /* eslint-disable brace-style */
- 
 
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
 import { UpdatableChargingState } from './updatableChargingState.js';
@@ -36,8 +36,9 @@ export class Battery extends Accessory implements UpdatableChargingState {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
     this.states.ChargingState = this.accessoryConfiguration.battery.isRechargeable ? Battery.NOT_CHARGING : Battery.NOT_CHARGEABLE;

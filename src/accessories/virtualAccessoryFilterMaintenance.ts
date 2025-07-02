@@ -3,7 +3,9 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
+
 import { Timer } from '../utils/timer.js';
 import { Utils } from '../utils/utils.js';
 
@@ -32,8 +34,9 @@ export class FilterMaintenance extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
 

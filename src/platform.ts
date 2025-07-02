@@ -8,9 +8,9 @@ import { AccessoryConfiguration } from './configuration/configurationAccessory.j
 import { AccessoryFactory } from './accessoryFactory.js';
 import { ConfigurationUtils } from './configuration/utils.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+import { VirtualLogger } from './utils/virtualLogger.js';
 import { WebhookServerConfiguration } from './configuration/configurationWebhookServer.js';
 import { WebhookServer } from './webhookServer.js';
-import { VirtualLogger } from './utils/virtualLogger.js';
 
 import * as path from 'path';
 import fs from 'fs';
@@ -143,7 +143,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.info(`Restoring existing accessory: ${accessoryConfiguration.accessoryName}`);
 
         // update the device configuration in the `accessory.context`
-        registeredAccessory.context.deviceConfiguration = accessoryConfiguration;
         registeredAccessory.context.firmwareVersion = this.version;
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
@@ -152,8 +151,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        // eslint-disable-next-line max-len
-        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, registeredAccessory, accessoryConfiguration.accessoryType);
+         
+        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, registeredAccessory, accessoryConfiguration);
 
         if (virtualAccessory !== undefined) {
           if (registeredAccessory.displayName !== accessoryConfiguration.accessoryName) {
@@ -180,7 +179,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.deviceConfiguration = accessoryConfiguration;
         accessory.context.firmwareVersion = this.version;
 
         const storagePath: string = path.join(this.api.user.persistPath(), `VA4HB_${accessoryConfiguration.accessoryID}.json`);
@@ -189,7 +187,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, accessoryConfiguration.accessoryType);
+        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, accessoryConfiguration);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${accessoryConfiguration.accessoryName}`);
         }

@@ -3,10 +3,11 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
-import { Utils } from '../utils/utils.js';
 import { ColorHSL, Colors } from '../utils/colorUtils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * Lightbulb - Accessory implementation
@@ -41,8 +42,9 @@ export class Lightbulb extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     this.type = this.accessoryConfiguration.lightbulb.type;
 

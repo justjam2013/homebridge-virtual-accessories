@@ -1,6 +1,7 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
 import { InputSource } from './virtualAccessoryInputSource.js';
@@ -49,8 +50,9 @@ export class Television extends ExternalAccessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     this.states.TelevisionConfiguredName = this.accessoryConfiguration.accessoryName;
 
@@ -113,7 +115,7 @@ export class Television extends ExternalAccessory {
       const tempHolder: InputSourceConfiguration = this.accessoryConfiguration.inputSource;
       this.accessoryConfiguration.inputSource = inputSourceConfig;
 
-      const inputSource: InputSource = new InputSource(this.platform, this.accessory);
+      const inputSource: InputSource = new InputSource(this.platform, this.accessory, this.accessoryConfiguration);
       this.accessory.getService(this.platform.Service.Television)!.addLinkedService(inputSource.service!);
 
       // Remove configuration enrichments

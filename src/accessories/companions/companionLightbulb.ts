@@ -1,5 +1,7 @@
-import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { PlatformAccessory } from 'homebridge';
+
+import { VirtualAccessoriesPlatform } from '../../platform.js';
+import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
 
 import { Lightbulb } from '../virtualAccessoryLightbulb.js';
 
@@ -13,9 +15,10 @@ export class CompanionLightbulb extends Lightbulb {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
     companionName: string,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     this.companionName = companionName;
   }
