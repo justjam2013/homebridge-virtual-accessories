@@ -1,6 +1,8 @@
 /* eslint-disable curly */
 
-import { Utils } from '../../utils.js';
+import { Validatable } from '../validatable.js';
+
+import { Utils } from '../../utils/utils.js';
 
 import { LocalDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
@@ -8,7 +10,7 @@ import '@js-joda/timezone';
 /**
  * 
  */
-export class CronTriggerConfiguration {
+export class CronTriggerConfiguration implements Validatable {
   pattern!: string;
   zoneId!: string;
   startDateTime!: string;

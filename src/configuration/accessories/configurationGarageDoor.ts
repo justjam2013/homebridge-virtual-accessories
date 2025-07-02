@@ -1,9 +1,9 @@
 /* eslint-disable curly */
 
 import { OpenableAccessoryConfiguration } from '../configurationOpenableAccesory.js'; 
-import { OpenableState } from '../configurationSchema.js';
+import { OpenableState } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 

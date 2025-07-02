@@ -1,7 +1,9 @@
 /* eslint-disable curly */
 
-import { SunEvent } from '../configurationSchema.js';
-import { Utils } from '../../utils.js';
+import { Validatable } from '../validatable.js';
+import { SunEvent } from '../schema.js';
+
+import { Utils } from '../../utils/utils.js';
 
 import { ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
@@ -9,7 +11,7 @@ import '@js-joda/timezone';
 /**
  * 
  */
-export class SunEventsTriggerConfiguration {
+export class SunEventsTriggerConfiguration implements Validatable {
   event!: string;
   offset: number = 0;
   latitude!: string;

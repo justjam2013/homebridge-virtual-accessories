@@ -1,15 +1,15 @@
 /* eslint-disable brace-style */
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class HeaterCoolerConfiguration extends AccessoryConfiguration {
+export class HeaterCoolerConfiguration implements Validatable {
   type!: string;
   temperatureDisplayUnits!: string;
   heatingThresholdCelsius!: number;

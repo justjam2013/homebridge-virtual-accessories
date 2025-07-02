@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Timer } from './timer.js';
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
+import { VirtualLogger } from './virtualLogger.js';
 
 import { Duration, Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
@@ -146,7 +146,7 @@ export class Utils {
     cachedDuration: number,
     callback: () => void,
     accessoryName: string,
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
   ): void {
     const elapsedTime: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedStartTime), Utils.now()).toMillis() / 1000); // seconds
     let timeRemaining: number = (cachedDuration - elapsedTime);

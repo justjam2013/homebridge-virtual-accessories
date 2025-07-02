@@ -1,7 +1,7 @@
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { PlatformAccessory } from 'homebridge';
 
-import { Lightbulb } from '../accessories/virtualAccessoryLightbulb.js';
+import { Lightbulb } from '../virtualAccessoryLightbulb.js';
 
 /**
  * CompanionLightbulb - Companion accessory

@@ -1,7 +1,7 @@
 import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Sensor } from './virtualSensor.js';
+import { Sensor } from './sensor.js';
 
 /**
  * ContactSensor - Sensor implementation

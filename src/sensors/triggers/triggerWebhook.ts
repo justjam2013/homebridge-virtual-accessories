@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 
-import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { Sensor } from '../sensors/virtualSensor.js';
+import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../../errors.js';
+import { Sensor } from '../sensor.js';
 import { TriggerableSensor } from '../triggerableSensor.js';
 import { Trigger } from './trigger.js';
 

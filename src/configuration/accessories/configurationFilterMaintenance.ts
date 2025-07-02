@@ -1,16 +1,16 @@
 /* eslint-disable brace-style */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { Validatable } from '../validatable.js';
 import { DurationConfiguration } from '../configurationDuration.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 import { Type } from 'typeserializer';
 
 /**
  * 
  */
-export class FilterMaintenanceConfiguration extends AccessoryConfiguration {
+export class FilterMaintenanceConfiguration implements Validatable {
 
   static readonly DAYS_MAX_VALUE: number = 30;
 

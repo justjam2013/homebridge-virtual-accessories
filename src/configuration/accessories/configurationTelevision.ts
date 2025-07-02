@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { Validatable } from '../validatable.js';
 import { InputSourceConfiguration } from './configurationInputSource.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class TelevisionConfiguration extends AccessoryConfiguration {
+export class TelevisionConfiguration implements Validatable {
   inputs!: string[];
 
   private errorFields: string[] = [];

@@ -3,10 +3,10 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
-import { Utils } from '../utils.js';
-import { ColorHSL, Colors } from '../colors.js';
+import { Utils } from '../utils/utils.js';
+import { ColorHSL, Colors } from '../utils/colorUtils.js';
 
 /**
  * Lightbulb - Accessory implementation

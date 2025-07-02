@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { SecuritySystemArmedMode, SecuritySystemState } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { SecuritySystemArmedMode, SecuritySystemState } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class SecuritySystemConfiguration extends AccessoryConfiguration {
+export class SecuritySystemConfiguration implements Validatable {
   defaultState!: string;
   armedModes!: string[];
 

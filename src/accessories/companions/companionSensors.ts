@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PlatformAccessory, Service, WithUUID } from 'homebridge';
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { VirtualAccessoriesPlatform } from '../../platform.js';
 
-import { Sensor } from '../sensors/virtualSensor.js';
-import { SensorType } from '../configuration/configurationSchema.js';
-import { Accessory } from '../accessories/virtualAccessory.js';
-import { AccessoryNotAllowedError } from '../errors.js';
+import { Sensor } from '../../sensors/sensor.js';
+import { SensorType } from '../../configuration/schema.js';
+import { Accessory } from '../accessory.js';
+import { AccessoryNotAllowedError } from '../../errors.js';
 
-import { MotionSensor } from '../sensors/virtualSensorMotion.js';
-import { CarbonDioxideSensor } from '../sensors/virtualSensorCarbonDioxide.js';
-import { CarbonMonoxideSensor } from '../sensors/virtualSensorCarbonMonoxide.js';
-import { ContactSensor } from '../sensors/virtualSensorContact.js';
-import { LeakSensor } from '../sensors/virtualSensorLeak.js';
-import { OccupancySensor } from '../sensors/virtualSensorOccupancy.js';
-import { SmokeSensor } from '../sensors/virtualSensorSmoke.js';
+import { MotionSensor } from '../../sensors/virtualSensorMotion.js';
+import { CarbonDioxideSensor } from '../../sensors/virtualSensorCarbonDioxide.js';
+import { CarbonMonoxideSensor } from '../../sensors/virtualSensorCarbonMonoxide.js';
+import { ContactSensor } from '../../sensors/virtualSensorContact.js';
+import { LeakSensor } from '../../sensors/virtualSensorLeak.js';
+import { OccupancySensor } from '../../sensors/virtualSensorOccupancy.js';
+import { SmokeSensor } from '../../sensors/virtualSensorSmoke.js';
 
 export interface TriggerableCompanionSensor {
   triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean): void;

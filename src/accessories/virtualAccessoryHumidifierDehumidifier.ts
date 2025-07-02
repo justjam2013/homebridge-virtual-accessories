@@ -4,10 +4,10 @@
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { UpdatableSensor } from '../updatableSensor.js';
+import { UpdatableSensor } from '../sensors/updatableSensor.js';
 
 /**
  * HumidifierDehumidifier - Accessory implementation

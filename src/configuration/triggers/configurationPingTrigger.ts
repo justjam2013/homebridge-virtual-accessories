@@ -1,11 +1,13 @@
 /* eslint-disable curly */
 
-import { Utils } from '../../utils.js';
+import { Validatable } from '../validatable.js';
+
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class PingTriggerConfiguration {
+export class PingTriggerConfiguration implements Validatable {
   host!: string;
   failureRetryCount!: number;
   isDisabled: boolean = false;

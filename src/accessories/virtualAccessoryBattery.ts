@@ -4,9 +4,9 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
-import { UpdatableChargingState } from '../updatableChargingState.js';
+import { UpdatableChargingState } from './updatableChargingState.js';
 import { ChargingStateUpdateNotAllowed, InvalidChargingStateType } from '../errors.js';
 
 /**

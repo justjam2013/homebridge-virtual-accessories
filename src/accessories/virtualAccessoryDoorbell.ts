@@ -1,11 +1,11 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
 import { TriggerableEventAccessory } from './triggerableEventAccessory.js';
 import { AccessoryNotAllowedError } from '../errors.js';
-import { CompanionSwitch } from '../companions/companionSwitch.js';
+import { CompanionSwitch } from './companions/companionSwitch.js';
 import { SwitchConfiguration } from '../configuration/accessories/configurationSwitch.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';

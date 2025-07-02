@@ -1,17 +1,17 @@
 /* eslint-disable brace-style */
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { ValveType } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { ValveType } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 import { Type } from 'typeserializer';
 
 /**
  * 
  */
-class ValveDurationConfiguration extends AccessoryConfiguration {
+class ValveDurationConfiguration implements Validatable {
 
   static readonly MINUTES_MAX_VALUE: number = 60;
   static readonly SECONDS_MAX_VALUE: number = 59;
@@ -58,7 +58,7 @@ class ValveDurationConfiguration extends AccessoryConfiguration {
 /**
  * 
  */
-export class ValveConfiguration extends AccessoryConfiguration {
+export class ValveConfiguration implements Validatable {
   type!: string;
   @Type(ValveDurationConfiguration)
     duration!: ValveDurationConfiguration;

@@ -4,10 +4,10 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
 import { InvalidObstructionValueType, ObstructionValueUpdateNotAllowed } from '../errors.js';
-import { UpdatableObstruction } from '../updatableObstruction.js';
+import { UpdatableObstruction } from './updatableObstruction.js';
 
 /**
  * GarageDoor - Accessory implementation

@@ -1,9 +1,9 @@
 import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
-import { Timer } from '../timer.js';
+import { Timer } from '../utils/timer.js';
 
 /**
  * OpeningAccessory - Abstract accessory

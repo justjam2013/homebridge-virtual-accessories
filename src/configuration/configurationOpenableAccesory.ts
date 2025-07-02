@@ -1,9 +1,9 @@
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { Validatable } from './validatable.js';
 
 /**
  * 
  */
-export abstract class OpenableAccessoryConfiguration extends AccessoryConfiguration {
+export abstract class OpenableAccessoryConfiguration implements Validatable {
   defaultState!: string;
   transitionDuration!: number;
 

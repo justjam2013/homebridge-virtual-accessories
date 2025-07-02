@@ -1,6 +1,6 @@
-import { PlatformConfiguration } from './configurationPlatform.js';
-import { SensorServerConfiguration } from './configurationSensorServer.js';
-import { VirtualAccessoriesLogger } from '../virtualLogger.js';
+import { AccessoryConfiguration } from './configurationAccessory.js';
+import { WebhookServerConfiguration } from './configurationWebhookServer.js';
+import { VirtualLogger } from '../utils/virtualLogger.js';
 
 import { deserialize } from 'typeserializer';
 import 'reflect-metadata';
@@ -8,22 +8,22 @@ import 'reflect-metadata';
 /**
  * 
  */
-export class Configuration {
+export class ConfigurationUtils {
 
-  private log: VirtualAccessoriesLogger;
+  private log: VirtualLogger;
 
   constructor(
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
   ) {
     this.log = log;
   }
 
-  deserializeAccessoryConfig(config: string | object): PlatformConfiguration | undefined {
-    let accessoryConfig: PlatformConfiguration | undefined;
+  deserializeAccessoryConfig(config: string | object): AccessoryConfiguration | undefined {
+    let accessoryConfig: AccessoryConfiguration | undefined;
 
     const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
     try {
-      accessoryConfig = deserialize(json, PlatformConfiguration);
+      accessoryConfig = deserialize(json, AccessoryConfiguration);
     } catch (error) {
       this.log.error(`[Configuration] Error: ${JSON.stringify(error)}`);
     }
@@ -31,13 +31,13 @@ export class Configuration {
     return accessoryConfig;
   }
 
-  deserializeSensorServerConfig(config: string | object): SensorServerConfiguration | undefined {
-    let sensorServerConfig: SensorServerConfiguration | undefined;
+  deserializeWebhookServerConfig(config: string | object): WebhookServerConfiguration | undefined {
+    let sensorServerConfig: WebhookServerConfiguration | undefined;
 
     if (config !== undefined) {
       const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
       try {
-        sensorServerConfig = deserialize(json, SensorServerConfiguration);
+        sensorServerConfig = deserialize(json, WebhookServerConfiguration);
       } catch (error) {
         this.log.error(`[Configuration] SensorServer configuration error: ${JSON.stringify(error)}`);
       }

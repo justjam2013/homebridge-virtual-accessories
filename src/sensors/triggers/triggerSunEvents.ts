@@ -1,7 +1,7 @@
-import { Sensor } from '../sensors/virtualSensor.js';
-import { SunEventsTriggerConfiguration } from '../configuration/triggers/configurationSunEventsTrigger.js';
+import { Sensor } from '../sensor.js';
+import { SunEventsTriggerConfiguration } from '../../configuration/triggers/configurationSunEventsTrigger.js';
 import { Trigger } from './trigger.js';
-import { Utils } from '../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 import { Cron } from 'croner';
 import { DateTimeFormatter, LocalDate, LocalDateTime } from '@js-joda/core';

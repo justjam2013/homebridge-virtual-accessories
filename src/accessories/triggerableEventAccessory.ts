@@ -1,8 +1,9 @@
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
 /**
  * 
  */
 export interface TriggerableEventAccessory {
+
   triggerEvent(companionAccessory: Accessory);
 }

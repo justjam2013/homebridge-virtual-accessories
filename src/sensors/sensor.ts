@@ -1,10 +1,10 @@
 import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from '../accessories/virtualAccessory.js';
+import { Accessory } from '../accessories/accessory.js';
 
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { Trigger } from '../triggers/trigger.js';
+import { Trigger } from './triggers/trigger.js';
 import { TriggerNotAllowedError, InvalidSensorValue } from '../errors.js';
 
 /**

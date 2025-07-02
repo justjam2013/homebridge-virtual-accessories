@@ -1,13 +1,13 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
-import { Sensor } from '../sensors/virtualSensor.js';
-import { CompanionSensor, TriggerableCompanionSensor } from '../companions/companionSensors.js';
-import { Timer } from '../timer.js';
+import { Sensor } from '../sensors/sensor.js';
+import { CompanionSensor, TriggerableCompanionSensor } from './companions/companionSensors.js';
+import { Timer } from '../utils/timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 import { Duration } from '@js-joda/core';
 

@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { LockState } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { LockState } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class LockConfiguration extends AccessoryConfiguration {
+export class LockConfiguration implements Validatable {
   defaultState!: string;
   autoSecurityTimeout!: number;
 

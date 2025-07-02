@@ -1,11 +1,11 @@
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { Validatable } from './validatable.js';
 
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * 
  */
-export class SensorServerConfiguration extends AccessoryConfiguration {
+export class WebhookServerConfiguration implements Validatable {
   enabled: boolean = false;
   port: string = '60221';
 

@@ -1,15 +1,13 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
+import { Validatable } from '../validatable.js';
 
-import { Utils } from '../../utils.js';
-
-// This class is just a placeholder for consistency with all other accessories
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class BatteryConfiguration extends AccessoryConfiguration {
+export class BatteryConfiguration implements Validatable {
   isRechargeable: boolean = false;
   lowLevelThreshold!: number;
 

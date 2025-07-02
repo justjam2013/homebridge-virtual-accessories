@@ -2,7 +2,7 @@ import type { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from './platform.js';
 
-import { Accessory } from './accessories/virtualAccessory.js';
+import { Accessory } from './accessories/accessory.js';
 import { Battery } from './accessories/virtualAccessoryBattery.js';
 import { Door } from './accessories/virtualAccessoryDoor.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
@@ -21,7 +21,7 @@ import { Valve } from './accessories/virtualAccessoryValve.js';
 import { Window } from './accessories/virtualAccessoryWindow.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
-import { Sensor } from './sensors/virtualSensor.js';
+import { Sensor } from './sensors/sensor.js';
 import { ContactSensor } from './sensors/virtualSensorContact.js';
 import { LeakSensor } from './sensors/virtualSensorLeak.js';
 import { MotionSensor } from './sensors/virtualSensorMotion.js';
@@ -30,14 +30,14 @@ import { SmokeSensor } from './sensors/virtualSensorSmoke.js';
 import { CarbonDioxideSensor } from './sensors/virtualSensorCarbonDioxide.js';
 import { CarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
 
-import { Trigger } from './triggers/trigger.js';
-import { CronTrigger } from './triggers/triggerCron.js';
-import { PingTrigger } from './triggers/triggerPing.js';
-import { SunEventsTrigger } from './triggers/triggerSunEvents.js';
-import { WebhookTrigger } from './triggers/triggerWebhook.js';
+import { Trigger } from './sensors/triggers/trigger.js';
+import { CronTrigger } from './sensors/triggers/triggerCron.js';
+import { PingTrigger } from './sensors/triggers/triggerPing.js';
+import { SunEventsTrigger } from './sensors/triggers/triggerSunEvents.js';
+import { WebhookTrigger } from './sensors/triggers/triggerWebhook.js';
 
-import { AccessoryType, SensorType, TriggerType } from './configuration/configurationSchema.js';
-import { PlatformConfiguration } from './configuration/configurationPlatform.js';
+import { AccessoryType, SensorType, TriggerType } from './configuration/schema.js';
+import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
 /**
  * Virtual Accessory Factory
@@ -57,7 +57,7 @@ export abstract class AccessoryFactory {
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;
 
-    const accessoryConfiguration: PlatformConfiguration = accessory.context.deviceConfiguration;
+    const accessoryConfiguration: AccessoryConfiguration = accessory.context.deviceConfiguration;
 
     switch (accessoryType) {
     case AccessoryType.Battery:

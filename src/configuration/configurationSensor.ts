@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from './configurationAccessory.js';
-import { SensorType, TriggerType } from './configurationSchema.js';
+import { Validatable } from './validatable.js';
+import { SensorType, TriggerType } from './schema.js';
 
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * 
  */
-export class SensorConfiguration extends AccessoryConfiguration {
+export class SensorConfiguration implements Validatable {
   type!: string;
   trigger!: string;
 

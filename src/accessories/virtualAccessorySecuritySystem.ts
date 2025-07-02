@@ -3,11 +3,11 @@
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
-import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/configurationSchema.js';
+import { Accessory } from './accessory.js';
+import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/schema.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { TriggerableSensor } from '../triggerableSensor.js';
+import { TriggerableSensor } from '../sensors/triggerableSensor.js';
 
 /**
  * SecuritySystem - Accessory implementation

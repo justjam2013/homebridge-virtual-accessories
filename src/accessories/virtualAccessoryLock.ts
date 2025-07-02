@@ -3,9 +3,9 @@
 import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { Accessory } from './accessory.js';
 
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * Lock - Accessory implementation
