@@ -1,10 +1,11 @@
 import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from '../accessories/virtualAccessory.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Accessory } from '../accessories/accessory.js';
 
 import { AccessoryFactory } from '../accessoryFactory.js';
-import { Trigger } from '../triggers/trigger.js';
+import { Trigger } from './triggers/trigger.js';
 import { TriggerNotAllowedError, InvalidSensorValue } from '../errors.js';
 
 /**
@@ -32,8 +33,9 @@ export abstract class Sensor extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     this.eventDetected = this.getEventDetectedCharacteristic();
 

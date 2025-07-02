@@ -1,9 +1,9 @@
 /* eslint-disable brace-style */
 
-import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
-import { PingTriggerConfiguration } from '../configuration/triggers/configurationPingTrigger.js';
+import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
+import { PingTriggerConfiguration } from '../../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
-import { Sensor } from '../sensors/virtualSensor.js';
+import { Sensor } from '../sensor.js';
 
 import dns from 'dns';
 import net from 'net';
@@ -111,7 +111,7 @@ export class PingTrigger extends Trigger {
       ttl: 128,
     };
 
-    const sensorConfig: PlatformConfiguration = trigger.sensor.accessoryConfiguration;
+    const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
 
     const session = ping.createSession(options);
 

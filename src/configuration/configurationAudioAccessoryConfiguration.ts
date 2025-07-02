@@ -1,9 +1,9 @@
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { Validatable } from './validatable.js';
 
 /**
  * 
  */
-export abstract class AudioAccessoryConfiguration extends AccessoryConfiguration {
+export abstract class AudioAccessoryConfiguration implements Validatable {
   volume!: number;
   mute!: boolean;
 

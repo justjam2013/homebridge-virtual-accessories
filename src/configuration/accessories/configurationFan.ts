@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { PowerState, RotationDirection } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { PowerState, RotationDirection } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class FanConfiguration extends AccessoryConfiguration {
+export class FanConfiguration implements Validatable {
   defaultState!: string;
   rotationDirection!: string;
   rotationSpeed!: number;

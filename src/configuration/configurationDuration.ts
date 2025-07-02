@@ -1,13 +1,13 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { Validatable } from './validatable.js';
 
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * 
  */
-export class DurationConfiguration extends AccessoryConfiguration {
+export class DurationConfiguration implements Validatable {
 
   static readonly DAYS_MAX_VALUE: number = 7;
   static readonly HOURS_MAX_VALUE: number = 23;

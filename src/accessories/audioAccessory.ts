@@ -1,7 +1,9 @@
 import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
+
 import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
 
 /**
@@ -30,8 +32,9 @@ export abstract class AudioAccessory extends ExternalAccessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
     this.audioAccessoryConfiguration = this.getAudioAccessoryConfiguration();

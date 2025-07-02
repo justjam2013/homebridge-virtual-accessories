@@ -1,27 +1,27 @@
 /* eslint-disable brace-style */
 
 import { Server } from 'http';
-import { Accessory } from './accessories/virtualAccessory.js';
-import { Sensor } from './sensors/virtualSensor.js';
+import { Accessory } from './accessories/accessory.js';
+import { Sensor } from './sensors/sensor.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
-import { Trigger } from './triggers/trigger.js';
-import { TriggerableSensor } from './triggerableSensor.js';
-import { UpdatableChargingState } from './updatableChargingState.js';
-import { UpdatableObstruction } from './updatableObstruction.js';
-import { UpdatableSensor } from './updatableSensor.js';
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
+import { Trigger } from './sensors/triggers/trigger.js';
+import { TriggerableSensor } from './sensors/triggerableSensor.js';
+import { UpdatableChargingState } from './accessories/updatableChargingState.js';
+import { UpdatableObstruction } from './accessories/updatableObstruction.js';
+import { UpdatableSensor } from './sensors/updatableSensor.js';
+import { VirtualLogger } from './utils/virtualLogger.js';
 
 import express, { Express, Request, Response } from 'express';
 
 /**
- * Create server to accept sensor events
+ * WebhookServer
  */
-export class SensorUpdateServer {
+export class WebhookServer {
 
   private static accessoryIdPattern = '^[A-Za-z0-9\\-]{5,}$';
 
   private readonly accessories = new Map<string, Accessory>();
-  private readonly log: VirtualAccessoriesLogger;
+  private readonly log: VirtualLogger;
 
   private readonly serverName: string = 'Sensor Server';
 
@@ -30,11 +30,11 @@ export class SensorUpdateServer {
   readonly port: number;
 
   constructor(
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
     port: number
   );
   constructor(
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
     port: number,
     accessories?: Accessory[],
   ) {
@@ -212,7 +212,7 @@ export class SensorUpdateServer {
     accessoryId: string,
     response: Response,
   ): boolean {
-    const patternRegex = new RegExp(SensorUpdateServer.accessoryIdPattern);
+    const patternRegex = new RegExp(WebhookServer.accessoryIdPattern);
     const isValidAccessoryId: boolean = (
       (accessoryId !== undefined) &&
       patternRegex.test(accessoryId)

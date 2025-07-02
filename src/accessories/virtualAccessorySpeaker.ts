@@ -1,7 +1,9 @@
 import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { AudioAccessory } from './audioAccessory.js';
+
 import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
 
 /**
@@ -14,8 +16,9 @@ export class Speaker extends AudioAccessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
   }
 
   protected getAudioAccessoryConfiguration(): AudioAccessoryConfiguration {

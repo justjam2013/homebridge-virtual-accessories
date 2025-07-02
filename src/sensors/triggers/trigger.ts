@@ -1,6 +1,6 @@
-import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
-import { Sensor } from '../sensors/virtualSensor.js';
-import { VirtualAccessoriesLogger } from '../virtualLogger.js';
+import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
+import { Sensor } from '../sensor.js';
+import { VirtualLogger } from '../../utils/virtualLogger.js';
 
 /**
  * Abstract Trigger
@@ -8,11 +8,11 @@ import { VirtualAccessoriesLogger } from '../virtualLogger.js';
 export abstract class Trigger {
 
   protected sensor: Sensor;
-  readonly sensorConfig: PlatformConfiguration;
+  readonly sensorConfig: AccessoryConfiguration;
 
   readonly name: string;
 
-  protected log: VirtualAccessoriesLogger;
+  protected log: VirtualLogger;
 
   constructor(
     sensor: Sensor,

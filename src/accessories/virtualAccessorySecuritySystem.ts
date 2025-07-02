@@ -3,11 +3,12 @@
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
-import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/configurationSchema.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { TriggerableSensor } from '../triggerableSensor.js';
+import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/schema.js';
+import { TriggerableSensor } from '../sensors/triggerableSensor.js';
 
 /**
  * SecuritySystem - Accessory implementation
@@ -32,8 +33,9 @@ export class SecuritySystem extends Accessory implements TriggerableSensor {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
     switch (this.accessoryConfiguration.securitySystem.defaultState) {

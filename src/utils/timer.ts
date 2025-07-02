@@ -1,5 +1,5 @@
 import { Utils } from './utils.js';
-import { VirtualAccessoriesLogger } from './virtualLogger.js';
+import { VirtualLogger } from './virtualLogger.js';
 
 import { ZonedDateTime } from '@js-joda/core';
 
@@ -11,7 +11,7 @@ export class Timer {
   private readonly oneSecond: number = 1000; // in milliseconds
 
   private accessoryName: string;
-  private log: VirtualAccessoriesLogger;
+  private log: VirtualLogger;
 
   private timerIsResettable: boolean = false;
 
@@ -31,18 +31,18 @@ export class Timer {
    */
   constructor(
     accessoryName: string,
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
     timerIsResettable: boolean,
   );
   constructor(
     accessoryName: string,
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
     timerIsResettable: boolean,
     duration: number,       // seconds
   );
   constructor(
     accessoryName: string,
-    log: VirtualAccessoriesLogger,
+    log: VirtualLogger,
     timerIsResettable: boolean = false,
     duration?: number,       // seconds
   ) {

@@ -1,7 +1,8 @@
 import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Sensor } from './virtualSensor.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Sensor } from './sensor.js';
 
 /**
  * CarbonMonoxideSensor - Sensor implementation
@@ -16,8 +17,9 @@ export class CarbonMonoxideSensor extends Sensor {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
   }
 
   protected getService(): WithUUID<typeof Service> {

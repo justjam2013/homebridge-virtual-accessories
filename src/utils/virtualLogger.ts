@@ -3,9 +3,9 @@
 import type { Logging, LogLevel } from 'homebridge';
 
 /**
- * VirtualAccessoriesLogger
+ * VirtualLogger
  */
-export class VirtualAccessoriesLogger {
+export class VirtualLogger {
 
   private platformLogger: Logging;
 

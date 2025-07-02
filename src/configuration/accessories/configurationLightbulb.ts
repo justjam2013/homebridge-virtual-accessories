@@ -1,15 +1,15 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { ColorTemperature, LightbulbType, PowerState } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { ColorTemperature, LightbulbType, PowerState } from '../schema.js';
 
-import { Utils } from '../../utils.js';
-import { Colors } from '../../colors.js';
+import { Utils } from '../../utils/utils.js';
+import { Colors } from '../../utils/colorUtils.js';
 
 /**
  * 
  */
-export class LightbulbConfiguration extends AccessoryConfiguration {
+export class LightbulbConfiguration implements Validatable {
   defaultState!: string;
   type!: string;
   brightness!: number;

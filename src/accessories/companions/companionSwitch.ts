@@ -1,8 +1,10 @@
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Switch } from '../accessories/virtualAccessorySwitch.js';
-import { TriggerableEventAccessory } from '../accessories/triggerableEventAccessory.js';
+import { VirtualAccessoriesPlatform } from '../../platform.js';
+import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
+
+import { Switch } from '../virtualAccessorySwitch.js';
+import { TriggerableEventAccessory } from '../triggerableEventAccessory.js';
 
 /**
  * CompanionSwitch - Companion accessory
@@ -17,10 +19,11 @@ export class CompanionSwitch extends Switch {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
     companionName: string,
     partnerAccessory: TriggerableEventAccessory,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     this.companionName = companionName;
     this.partnerAccessory = partnerAccessory;

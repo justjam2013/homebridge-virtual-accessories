@@ -1,13 +1,14 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Accessory } from './accessory.js';
 
-import { Sensor } from '../sensors/virtualSensor.js';
-import { CompanionSensor, TriggerableCompanionSensor } from '../companions/companionSensors.js';
-import { Timer } from '../timer.js';
+import { CompanionSensor, TriggerableCompanionSensor } from '../sensors/companions/companionSensors.js';
+import { Sensor } from '../sensors/sensor.js';
+import { Timer } from '../utils/timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 import { Duration } from '@js-joda/core';
 
@@ -40,8 +41,9 @@ export class Switch extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
@@ -220,7 +222,9 @@ export class Switch extends Accessory {
 
   private createCompanionSensor(): void {
     this.companionSensor = CompanionSensor.getTriggerableCompanionSensor(
-      this.platform, this.accessory, this.accessoryConfiguration.companionSensor.type, this.accessoryConfiguration.companionSensor.name);
+      this.platform,
+      this.accessory,
+      this.accessoryConfiguration);
 
     // Set initial sensor state
     this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.muteLogging);

@@ -4,9 +4,9 @@ import type { PlatformAccessory, Service } from 'homebridge';
 import { Categories } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
-import { PlatformConfiguration } from '../configuration/configurationPlatform.js';
-import { VirtualAccessoriesLogger } from '../virtualLogger.js';
+import { VirtualLogger } from '../utils/virtualLogger.js';
 
 import fs from 'fs';
 
@@ -19,8 +19,8 @@ export abstract class Accessory {
   readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
 
-  readonly accessoryConfiguration: PlatformConfiguration;
-  readonly log: VirtualAccessoriesLogger;
+  readonly accessoryConfiguration: AccessoryConfiguration;
+  readonly log: VirtualLogger;
 
   protected accessoryName: string = '';
 
@@ -33,12 +33,13 @@ export abstract class Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
     this.accessory = accessory;
     this.platform = platform;
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
-    this.accessoryConfiguration = accessory.context.deviceConfiguration;
+    this.accessoryConfiguration = accessoryConfiguration;
     this.accessoryName = this.accessoryConfiguration.accessoryName;
     this.log = this.platform.log;
 
@@ -56,7 +57,8 @@ export abstract class Accessory {
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
       .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
-      .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+      .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName)
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.accessory.context.firmwareVersion);
   }
 
   isExternalAccessory(): boolean {

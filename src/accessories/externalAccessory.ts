@@ -1,7 +1,8 @@
 import { PlatformAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
-import { Accessory } from './virtualAccessory.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
+import { Accessory } from './accessory.js';
 
 /**
  * ExternalAccessory - Abstract accessory
@@ -11,8 +12,9 @@ export abstract class ExternalAccessory extends Accessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
   }
 
   getExternalAccessoryCategory(): number {

@@ -2,7 +2,7 @@
 
 import { AudioAccessoryConfiguration } from '../configurationAudioAccessoryConfiguration.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 

@@ -1,9 +1,11 @@
-import { Utils } from '../../utils.js';
+import { Validatable } from '../validatable.js';
+
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class WebhookTriggerConfiguration {
+export class WebhookTriggerConfiguration implements Validatable {
   isDisabled: boolean = false;
 
   private errorFields: string[] = [];

@@ -1,13 +1,13 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from './configurationAccessory.js';
+import { Validatable } from './validatable.js';
 
-import { Utils } from '../utils.js';
+import { Utils } from '../utils/utils.js';
 
 /**
  * 
  */
-export class CompanionSensorConfiguration extends AccessoryConfiguration {
+export class CompanionSensorConfiguration implements Validatable {
   name!: string;
   type!: string;
 

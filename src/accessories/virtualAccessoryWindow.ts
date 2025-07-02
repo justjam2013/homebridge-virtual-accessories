@@ -1,7 +1,9 @@
 import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
+import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { OpeningAccessory } from './openingAccessory.js';
+
 import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
 
 /**
@@ -14,8 +16,9 @@ export class Window extends OpeningAccessory {
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory);
+    super(platform, accessory, accessoryConfiguration);
   }
 
   protected getOpeningAccessoryConfiguration(): OpenableAccessoryConfiguration {

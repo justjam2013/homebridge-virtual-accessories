@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { PowerState } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { PowerState } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class SwitchConfiguration extends AccessoryConfiguration {
+export class SwitchConfiguration implements Validatable {
   defaultState!: string;
   hasResetTimer: boolean = false;
   hasCompanionSensor: boolean = false;

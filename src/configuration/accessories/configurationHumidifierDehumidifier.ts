@@ -1,14 +1,14 @@
 /* eslint-disable curly */
 
-import { AccessoryConfiguration } from '../configurationAccessory.js';
-import { HumidifierType } from '../configurationSchema.js';
+import { Validatable } from '../validatable.js';
+import { HumidifierType } from '../schema.js';
 
-import { Utils } from '../../utils.js';
+import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class HumidifierDehumidifierConfiguration extends AccessoryConfiguration {
+export class HumidifierDehumidifierConfiguration implements Validatable {
   type!: string;
   humidifierThreshold!: number;
   dehumidifierThreshold!: number;
