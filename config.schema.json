@@ -301,6 +301,10 @@
                     { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
                   ]
                 },
+                "manualOperation": {
+                  "title": "Is manual operation only",
+                  "type": "boolean"
+                },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
                   "type": "string",
@@ -316,7 +320,7 @@
                   "minimum": 0,
                   "maximum": 25,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.manualOperation !== true && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "coolingThresholdCelsius": {
@@ -326,7 +330,7 @@
                   "minimum": 10,
                   "maximum": 35,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.manualOperation !== true && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "heatingThresholdFahrenheit": {
@@ -336,7 +340,7 @@
                   "minimum": 32,
                   "maximum": 77,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.manualOperation !== true && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "coolingThresholdFahrenheit": {
@@ -346,7 +350,7 @@
                   "minimum": 50,
                   "maximum": 95,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.manualOperation !== true && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "": {
@@ -354,7 +358,7 @@
                   "type": "object",
                   "properties": {},
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.type === 'auto';"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.manualOperation !== true && model.devices[arrayIndices].heaterCooler.type === 'auto';"
                   }
                 }
               },
@@ -371,7 +375,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThresholdCelsius" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "heatingThresholdCelsius" ]
+                    }
                   }
                 },
                 {
@@ -383,7 +396,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "coolingThresholdCelsius" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "coolingThresholdCelsius" ]
+                    }
                   }
                 },
                 {
@@ -395,7 +417,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                    }
                   }
                 },
                 {
@@ -407,7 +438,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThresholdFahrenheit" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "heatingThresholdFahrenheit" ]
+                    }
                   }
                 },
                 {
@@ -419,7 +459,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "coolingThresholdFahrenheit" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "coolingThresholdFahrenheit" ]
+                    }
                   }
                 },
                 {
@@ -431,7 +480,16 @@
                     "required": [ "type", "temperatureDisplayUnits" ]
                   },
                   "then": {
-                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                    "if": {
+                      "properties": {
+                        "manualOperation": { "const": true }
+                      },
+                      "required": [ "manualOperation" ]
+                    },
+                    "then": {},
+                    "else": {
+                      "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                    }
                   }
                 }
               ]

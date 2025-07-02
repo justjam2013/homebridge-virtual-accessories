@@ -38,6 +38,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
   private readonly temperatureDisplayUnitsStorageKey: string = 'TemperatureDisplayUnits';
 
   private deviceType: string;
+  private manualOperation: boolean;
 
   private states = {
     HeaterCoolerActive: HeaterCooler.INACTIVE,
@@ -59,9 +60,18 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     // First configure the device based on the accessory details
     this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
     this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
+
+    const heatingThreshold: number | undefined = this.accessoryConfiguration.heaterCooler.getHeatingThreshold();
+    if (heatingThreshold !== undefined) {
+      this.states.HeatingThreshold = this.toCelsius(heatingThreshold);
+    }
+    const coolingThreshold: number | undefined = this.accessoryConfiguration.heaterCooler.getCoolingThreshold();
+    if (coolingThreshold !== undefined) {
+      this.states.CoolingThreshold = this.toCelsius(coolingThreshold);
+    }
+
+    this.manualOperation = this.accessoryConfiguration.heaterCooler.manualOperation;
     this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === 'celsius' ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
-    this.states.HeatingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getHeatingThreshold() as number);
-    this.states.CoolingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getCoolingThreshold() as number);
 
     // set to 22ºC or 71ºF
     this.states.CurrentTemperature = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? 22 : this.toCelsius(71);
@@ -86,16 +96,18 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
       if (cachedTemperatureDisplayUnits !== undefined) {
         this.states.TemperatureDisplayUnits = cachedTemperatureDisplayUnits;
       }
-      if (this.cools()) {
-        const cachedCoolingThreshold: number = accessoryState[this.coolingThresholdStorageKey] as number;
-        if (cachedCoolingThreshold !== undefined) {
-          this.states.CoolingThreshold = cachedCoolingThreshold;
+      if (this.manualOperation === false) {
+        if (this.canCool()) {
+          const cachedCoolingThreshold: number = accessoryState[this.coolingThresholdStorageKey] as number;
+          if (cachedCoolingThreshold !== undefined) {
+            this.states.CoolingThreshold = cachedCoolingThreshold;
+          }
         }
-      }
-      if (this.heats()) {
-        const cachedHeatingThreshold: number = accessoryState[this.heatingThresholdStorageKey] as number;
-        if (cachedHeatingThreshold !== undefined) {
-          this.states.HeatingThreshold = cachedHeatingThreshold;
+        if (this.canHeat()) {
+          const cachedHeatingThreshold: number = accessoryState[this.heatingThresholdStorageKey] as number;
+          if (cachedHeatingThreshold !== undefined) {
+            this.states.HeatingThreshold = cachedHeatingThreshold;
+          }
         }
       }
     }
@@ -104,9 +116,6 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
     // get the HeaterCooler service if it exists, otherwise create a new LightBulb service
     this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
-    // These characteristics will be added back as needed
-    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature));
-    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature));
 
     this.setHeaterCoolerServiceProperties(this.service!);
 
@@ -134,18 +143,24 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
       .onGet(this.getCurrentTemperature.bind(this));
 
-    if (this.cools()) {
-      // Characteristic was removed when adding the Service
-      this.service.addCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
-        .onSet(this.setCoolingThresholdTemperature.bind(this))
-        .onGet(this.getCoolingThresholdTemperature.bind(this));
-    }
+    if (this.manualOperation === false) {
+      if (this.canCool()) {
+        this.service.addCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
+          .onSet(this.setCoolingThresholdTemperature.bind(this))
+          .onGet(this.getCoolingThresholdTemperature.bind(this));
+      }
+      else {
+        this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature));
+      }
 
-    if (this.heats()) {
-      // Characteristic was removed when adding the Service
-      this.service.addCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
-        .onSet(this.setHeatingThresholdTemperature.bind(this))
-        .onGet(this.getHeatingThresholdTemperature.bind(this));
+      if (this.canHeat()) {
+        this.service.addCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
+          .onSet(this.setHeatingThresholdTemperature.bind(this))
+          .onGet(this.getHeatingThresholdTemperature.bind(this));
+      }
+      else {
+        this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature));
+      }
     }
 
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
@@ -279,11 +294,11 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     return ['cooler'].includes(this.deviceType);
   }
 
-  private heats(): boolean {
+  private canHeat(): boolean {
     return ['auto', 'heater'].includes(this.deviceType);
   }
 
-  private cools(): boolean {
+  private canCool(): boolean {
     return ['auto', 'cooler'].includes(this.deviceType);
   }
 
@@ -299,14 +314,19 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
         this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_COOLING;
       }
       else {  // (this.states.HeaterCoolerTargetState === HeaterCooler.AUTO)
-        if (this.states.CurrentTemperature < this.states.HeatingThreshold) {
-          if (this.heats()) {
-            this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_HEATING;
+        if (this.manualOperation === false) {
+          if (this.states.CurrentTemperature < this.states.HeatingThreshold) {
+            if (this.canHeat()) {
+              this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_HEATING;
+            }
           }
-        }
-        else if (this.states.CurrentTemperature > this.states.CoolingThreshold) {
-          if (this.cools()) {
-            this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_COOLING;
+          else if (this.states.CurrentTemperature > this.states.CoolingThreshold) {
+            if (this.canCool()) {
+              this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_COOLING;
+            }
+          }
+          else {
+            this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_IDLE;
           }
         }
         else {
@@ -456,7 +476,9 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     return labels;
   }
 
-  private toCelsius(temperature: number): number {
+  private toCelsius(
+    temperature: number = 0,
+  ): number {
     const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
 
     return Math.round(temperatureCelsius * 10) / 10;

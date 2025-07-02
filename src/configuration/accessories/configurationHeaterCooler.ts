@@ -11,6 +11,7 @@ import { Utils } from '../../utils.js';
  */
 export class HeaterCoolerConfiguration extends AccessoryConfiguration {
   type!: string;
+  manualOperation: boolean = false;
   temperatureDisplayUnits!: string;
   heatingThresholdCelsius!: number;
   coolingThresholdCelsius!: number;
@@ -36,15 +37,19 @@ export class HeaterCoolerConfiguration extends AccessoryConfiguration {
     const coolingThreshold: number | undefined = this.getCoolingThreshold();
 
     const isValidHeatingThreshold: boolean = (
-      this.isValidHeatingThreshold()
+      (this.manualOperation === false) ?
+        this.isValidHeatingThreshold() :
+        true
     );
 
     const isValidCoolingThreshold: boolean = (
-      this.isValidCoolingThreshold()
+      (this.manualOperation === false) ?
+        this.isValidCoolingThreshold() :
+        true
     );
 
     const isValidThresholdWindow: boolean = (
-      (heatingThreshold !== undefined) && (coolingThreshold !== undefined) ?
+      (this.manualOperation === false) && (heatingThreshold !== undefined) && (coolingThreshold !== undefined) ?
         (coolingThreshold > heatingThreshold) :
         true
     );
