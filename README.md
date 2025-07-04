@@ -87,7 +87,9 @@
 
 This plugin is inspired by Nick Farina's most excellent 🎸 [`homebridge-dummy`](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. As `homebridge-dummy` was no longer being maintained, I was motivated to create a new solution.
 
-But the purpose of this plugin is also to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. It also became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change. The drama!
+[**Update:** `homebridge-dummy` has found a new maintainer and is being updated, so check it out.]
+
+But the purpose of this plugin is also to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. It also became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted or needed to make a change. The drama!
 
 The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be releasing bug fixes and updates. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
