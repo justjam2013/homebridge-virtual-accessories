@@ -14,7 +14,8 @@ import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifier
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
-import { Speaker } from './accessories/virtualAccessorySpeaker.js';
+import { SmartSpeaker } from './accessories/virtualAccessorySmartSpeaker.js';
+//import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Television } from './accessories/virtualAccessoryTelevision.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
@@ -94,7 +95,7 @@ export abstract class AccessoryFactory {
       virtualAccessory = new SecuritySystem(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Speaker:
-      virtualAccessory = new Speaker(platform, accessory, accessoryConfiguration);
+      virtualAccessory = new SmartSpeaker(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Switch:
       virtualAccessory = new Switch(platform, accessory, accessoryConfiguration);
