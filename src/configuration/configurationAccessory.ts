@@ -41,6 +41,9 @@ import { Type } from 'typeserializer';
  * 
  */
 export class AccessoryConfiguration {
+
+  // ****************************** Schema fields ******************************
+
   // Required
   accessoryID!: string;
   accessoryName!: string;
@@ -49,7 +52,7 @@ export class AccessoryConfiguration {
   // Optional
   accessoryIsStateful: boolean = false;
 
-  category?: Categories;
+  // Accessories
 
   // Battery
   @Type(BatteryConfiguration)
@@ -147,8 +150,15 @@ export class AccessoryConfiguration {
   @Type(WebhookTriggerConfiguration)
     webhookTrigger!: WebhookTriggerConfiguration;
 
-  // Only used for enriching Television configuration
+  // ********************* Configuration enrichment fields *********************
+
+  // External accessory category
+  category?: Categories;
+
+  // Television input source
   inputSource!: InputSourceConfiguration;
+
+  // ***************************************************************************
 
   private errorFields: string[] = [];
 
@@ -183,9 +193,9 @@ export class AccessoryConfiguration {
   }
 
   private isValidId(): boolean {
-    const accessoryIdPattern = '^[A-Za-z0-9\\-]{5,}$';
+    const accessoryIdPattern: string = '^[A-Za-z0-9\\-]{5,}$';
 
-    const patternRegex = new RegExp(accessoryIdPattern);
+    const patternRegex: RegExp = new RegExp(accessoryIdPattern);
     const isValidId: boolean = (
       (this.accessoryID !== undefined) &&
         patternRegex.test(this.accessoryID)

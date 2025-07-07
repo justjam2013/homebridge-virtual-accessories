@@ -17,7 +17,7 @@ export class Timer {
 
   private id: ReturnType<typeof setInterval> | undefined;
   private defaultDuration: number = 0;
-  private updateIntervalMillis = this.oneSecond;
+  private updateIntervalMillis: number = this.oneSecond;
   private startTime: ZonedDateTime;
 
   private isRunning: boolean = false;

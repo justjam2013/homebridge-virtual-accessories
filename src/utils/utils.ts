@@ -12,12 +12,12 @@ import '@js-joda/timezone';
 export class Utils {
 
   static now(): ZonedDateTime {
-    const now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
+    const now: ZonedDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
     return now;
   }
 
   static zonedDateTime(datetime: string): ZonedDateTime {
-    const zonedDateTime = ZonedDateTime.parse(datetime);
+    const zonedDateTime: ZonedDateTime = ZonedDateTime.parse(datetime);
     return zonedDateTime;
   }
 
@@ -116,7 +116,7 @@ export class Utils {
   }
 
   static notEmpty(field: string | string[]): boolean {
-    let notEmpty = false;
+    let notEmpty: boolean = false;
     if (Utils.required(field)) {
       notEmpty = Array.isArray(field) ? field.length > 0 : field !== '';
     }
