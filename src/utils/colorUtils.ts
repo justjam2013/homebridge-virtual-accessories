@@ -41,7 +41,7 @@ export class Colors {
   static isValidHex(
     value: string,
   ): boolean {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value);
+    const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value);
 
     return (result !== undefined);
   }
@@ -71,7 +71,7 @@ export class Colors {
   static HexToHSL(
     hex: string,
   ): ColorHSL | undefined {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
     if (!result) {
       return undefined;
@@ -89,7 +89,7 @@ export class Colors {
     let luminance: number = hue;
 
     if (max === min) {
-    // Achromatic
+      // Achromatic
       return new ColorHSL(0, 0, luminance);
     }
 
@@ -175,7 +175,7 @@ export class Colors {
     const luminance: number = hue;
 
     if (max === min) {
-    // Achromatic
+      // Achromatic
       return new ColorHSL(0, 0, luminance);
     }
 

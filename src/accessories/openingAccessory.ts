@@ -30,8 +30,8 @@ export abstract class OpeningAccessory extends Accessory {
   private openingAccessoryConfiguration: OpenableAccessoryConfiguration;
 
   protected states = {
-    TargetPosition: OpeningAccessory.CLOSED,  // %
     CurrentPosition: OpeningAccessory.CLOSED, // %
+    TargetPosition: OpeningAccessory.CLOSED,  // %
     PositionState: OpeningAccessory.STOPPED,
   };
 

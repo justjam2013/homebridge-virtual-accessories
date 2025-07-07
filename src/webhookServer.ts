@@ -18,9 +18,9 @@ import express, { Express, Request, Response } from 'express';
  */
 export class WebhookServer {
 
-  private static accessoryIdPattern = '^[A-Za-z0-9\\-]{5,}$';
+  private static accessoryIdPattern: string = '^[A-Za-z0-9\\-]{5,}$';
 
-  private readonly accessories = new Map<string, Accessory>();
+  private readonly accessories: Map<string, Accessory> = new Map<string, Accessory>();
   private readonly log: VirtualLogger;
 
   private readonly serverName: string = 'Sensor Server';
@@ -212,7 +212,7 @@ export class WebhookServer {
     accessoryId: string,
     response: Response,
   ): boolean {
-    const patternRegex = new RegExp(WebhookServer.accessoryIdPattern);
+    const patternRegex: RegExp = new RegExp(WebhookServer.accessoryIdPattern);
     const isValidAccessoryId: boolean = (
       (accessoryId !== undefined) &&
       patternRegex.test(accessoryId)
@@ -233,7 +233,7 @@ export class WebhookServer {
     humidity: string,
     response: Response,
   ): boolean {
-    const humidityPercent = Number(humidity);
+    const humidityPercent: number = Number(humidity);
 
     if (isNaN(humidityPercent) || humidityPercent < 0 || humidityPercent > 100) {
       const errorMsg: string = `Invalid humidity value: ${humidity}. Value must be a percentage`;
@@ -250,7 +250,7 @@ export class WebhookServer {
     temperature: string,
     response: Response,
   ): boolean {
-    const temperatureDegrees = Number(temperature);
+    const temperatureDegrees: number = Number(temperature);
 
     if (isNaN(temperatureDegrees)) {
       const errorMsg: string = `Invalid temperature value: ${temperature}. Value must be a number`;

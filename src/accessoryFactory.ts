@@ -57,7 +57,7 @@ export abstract class AccessoryFactory {
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;
 
-    const accessoryType = accessoryConfiguration.accessoryType;
+    const accessoryType: string = accessoryConfiguration.accessoryType;
 
     switch (accessoryType) {
     case AccessoryType.Battery:

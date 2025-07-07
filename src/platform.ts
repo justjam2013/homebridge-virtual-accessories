@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 
 import { APIEvent } from 'homebridge';
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
 
 import { Accessory } from './accessories/accessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -34,9 +34,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   private readonly sensorUpdateServer?: WebhookServer;
 
   // this is used to track restored cached accessories
-  public readonly accessories: PlatformAccessory[] = [];
+  public readonly cachedAccessories: PlatformAccessory[] = [];
 
-  public version = packageInfo.version;
+  public version: string = packageInfo.version;
 
   constructor(
     log: Logging,
@@ -59,8 +59,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
 
     // Create webhook server
-    // eslint-disable-next-line max-len
-    const sensorServerConfig: WebhookServerConfiguration | undefined = new ConfigurationUtils(this.log).deserializeWebhookServerConfig(this.config.sensorServer);
+    const sensorServerConfig: WebhookServerConfiguration | undefined = new ConfigurationUtils(this.log)
+      .deserializeWebhookServerConfig(this.config.sensorServer);
     if (sensorServerConfig?.enabled) {
       const prefix: string = 'sensorServer';
       let isValid: boolean = false;
@@ -106,7 +106,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     this.log.info(`Loading accessory from cache: ${accessory.displayName}`);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
-    this.accessories.push(accessory);
+    this.cachedAccessories.push(accessory);
   }
 
   /**
@@ -132,18 +132,18 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      const uuid = this.api.hap.uuid.generate(accessoryConfiguration.accessoryID);
+      const uuid: string = this.api.hap.uuid.generate(accessoryConfiguration.accessoryID);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
-      const registeredAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+      const cachedAccessory: PlatformAccessory<UnknownContext> | undefined = this.cachedAccessories.find(accessory => accessory.UUID === uuid);
 
-      if (registeredAccessory) {
+      if (cachedAccessory) {
         // the accessory already exists
         this.log.info(`Restoring existing accessory: ${accessoryConfiguration.accessoryName}`);
 
-        // update the device configuration in the `accessory.context`
-        registeredAccessory.context.firmwareVersion = this.version;
+        // update the device firmware version in the `accessory.context`
+        cachedAccessory.context.firmwareVersion = this.version;
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // registeredAccessory.context.device = device;
@@ -151,18 +151,18 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-         
-        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, registeredAccessory, accessoryConfiguration);
+        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, cachedAccessory, accessoryConfiguration);
 
         if (virtualAccessory !== undefined) {
-          if (registeredAccessory.displayName !== accessoryConfiguration.accessoryName) {
-            this.log.info(`Updating accessory name from ${registeredAccessory.displayName} to ${accessoryConfiguration.accessoryName}`);
+          if (cachedAccessory.displayName !== accessoryConfiguration.accessoryName) {
+            this.log.info(`Updating accessory name from ${cachedAccessory.displayName} to ${accessoryConfiguration.accessoryName}`);
 
             virtualAccessory.updateConfiguredName();
-            registeredAccessory.updateDisplayName(accessoryConfiguration.accessoryName);
-
-            this.api.updatePlatformAccessories([registeredAccessory]);
+            cachedAccessory.updateDisplayName(accessoryConfiguration.accessoryName);
           }
+          // Just update all the cached accessories
+          this.api.updatePlatformAccessories([cachedAccessory]);
+          this.log.debug(`Updating cache: ${accessoryConfiguration.accessoryName}`);
 
           virtualAccessories.push(virtualAccessory);
         }
@@ -175,7 +175,11 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.info(`Adding new accessory: ${accessoryConfiguration.accessoryName}`);
 
         // create a new accessory
-        const accessory = new this.api.platformAccessory(accessoryConfiguration.accessoryName, uuid, accessoryConfiguration.category);
+        const accessory: PlatformAccessory<UnknownContext> = new this.api.platformAccessory(
+          accessoryConfiguration.accessoryName,
+          uuid,
+          accessoryConfiguration.category,
+        );
 
         // store a copy of the device configuration in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
@@ -209,25 +213,25 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
 
     // loop over the cached accessories and unregister each one if it is not in the config
-    for (const accessory of this.accessories) {
-      const configuredDevice = configDevices.find(device => this.api.hap.uuid.generate(device.accessoryID) === accessory.UUID);
+    for (const cachedAccessory of this.cachedAccessories) {
+      const configuredDevice = configDevices.find(device => this.api.hap.uuid.generate(device.accessoryID) === cachedAccessory.UUID);
 
       // If there is no configured device for this cached accessory
       if (!configuredDevice) {
-        this.log.info(`Removing deleted accessory: ${accessory.displayName}`);
+        this.log.info(`Removing deleted accessory: ${cachedAccessory.displayName}`);
 
         // Unregister the accessory from the platform
-        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
 
         // Delete any stateful info, if it exists
-        const storagePath = accessory.context.storagePath;
+        const storagePath: string = cachedAccessory.context.storagePath as string;
         if (fs.existsSync(storagePath)) {
           fs.unlink(storagePath, (err) => {
             if (err) {
-              this.log.debug(`No stateful storage found for: ${accessory.displayName}`);
+              this.log.debug(`No stateful storage found for: ${cachedAccessory.displayName}`);
             }
             else {
-              this.log.debug(`Deleted stateful storage for: ${accessory.displayName}`);
+              this.log.debug(`Deleted stateful storage for: ${cachedAccessory.displayName}`);
             }
           }); 
         }
@@ -235,9 +239,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     }
 
     // Start sensor server
-
-    // TODO: check configuration
-
     this.sensorUpdateServer?.addAccessories(virtualAccessories);
     this.sensorUpdateServer?.start();
   }
