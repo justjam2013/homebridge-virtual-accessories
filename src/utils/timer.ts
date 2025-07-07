@@ -1,3 +1,4 @@
+ 
 import { Utils } from './utils.js';
 import { VirtualLogger } from './virtualLogger.js';
 
@@ -74,8 +75,15 @@ export class Timer {
   ): void;
   start(
     callback: () => void,
+    duration: number,
+    updateIntervalMillis: number,
+    intervalCallback: () => void,
+  ): void;
+  start(
+    callback: () => void,
     oneOffDuration?: number,
     updateIntervalMillis?: number,
+    intervalCallback?: () => void,
   ): void {
     if (this.isRunning && !this.timerIsResettable) {
       return;
@@ -98,6 +106,10 @@ export class Timer {
         // We don't want this flooding the debug logs
         if (this.logDebugCountdown && this.remainingDurationMillis % 1000 === 0) {
           this.log.debug(`[${this.accessoryName} Timer] Remaining Duration: ${this.remainingDurationMillis} seconds`);
+        }
+
+        if (intervalCallback !== undefined) {
+          intervalCallback();
         }
 
         if (this.remainingDurationMillis <= 0) {

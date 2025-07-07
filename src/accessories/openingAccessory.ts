@@ -116,10 +116,10 @@ export abstract class OpeningAccessory extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${OpeningAccessory.getStateName(this.states.TargetPosition)}`);
 
     this.states.PositionState = (this.states.TargetPosition > this.states.CurrentPosition) ? OpeningAccessory.INCREASING : OpeningAccessory.DECREASING;
-    this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
+    this.service!.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
 
-    const transitionDuration = this.openingAccessoryConfiguration.transitionDuration;
+    const transitionDuration: number = this.openingAccessoryConfiguration.transitionDuration;
     const transitionDelay: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS);
 
     this.transitionSteps = this.states.TargetPosition - this.states.CurrentPosition;
@@ -130,7 +130,8 @@ export abstract class OpeningAccessory extends Accessory {
       OpeningAccessory.MIN_TIMEOUT_SECS);
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
 
-    const updateIntervalMillis = 100;
+    const updateIntervalMillis: number = 100;
+    // const transitionStepsPerSecond: number = (this.transitionSteps / proportionalTransitionDelay) * (1000 / updateIntervalMillis);
 
     // Stop transition timer, if running
     this.transitionTimer.stop();
@@ -138,20 +139,26 @@ export abstract class OpeningAccessory extends Accessory {
     this.transitionTimer.start(
       () => {
         this.states.PositionState = OpeningAccessory.STOPPED;
-        this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
+        this.service!.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
 
         this.states.CurrentPosition = this.states.TargetPosition;
-        this.service!.setCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
+        this.service!.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
 
         this.transitionSteps = 0;
 
         this.storeState();
-
-        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
       },
       proportionalTransitionDelay,
       updateIntervalMillis,
+      () => {
+        // this.transitionSteps = (this.transitionSteps > 0) ? this.transitionSteps - 1 : this.transitionSteps + 1;
+        // this.states.CurrentPosition = this.states.TargetPosition - this.transitionSteps;
+        // this.service!.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
+        // eslint-disable-next-line max-len
+        // this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
+      },
     );
   }
 
