@@ -85,9 +85,11 @@
 
 ## About Virtual Accessories For Homebridge
 
-This plugin is inspired by Nick Farina's most excellent 🎸 [homebridge-dummy](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. This plugin is Homebridge Verified and is ready for Homebridge 2.0.
+This plugin is inspired by Nick Farina's most excellent 🎸 [`homebridge-dummy`](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. As `homebridge-dummy` was no longer being maintained, I was motivated to create a new solution.
 
-The purpose of this plugin is to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. Also, it became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted to make a change.
+[**Update:** `homebridge-dummy` has found a new maintainer and is being updated, so check it out.]
+
+But the purpose of this plugin is also to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. It also became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted or needed to make a change. The drama!
 
 The downside to a single plugin is trading ease of accessory maintenance for a single point of failure. However, this is work in progress so I will be releasing bug fixes and updates. Also, I will slowly add new accessories and functionality, either as I need them, or, more likely, in response to requests by users who find this plugin useful.
 
@@ -95,7 +97,7 @@ Currently, these are the implemented virtual accessories:
 
 -   **Battery.** Allows you to create a virtual battery service. The "charging state" and "battery level" properties can be set via a [webhook call](#webhook-service-configuration).
 -   **Door.** Allows you to create a virtual door.
--   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods.
+-   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. [**](#issues-with-homekit)
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
@@ -104,7 +106,7 @@ Currently, these are the implemented virtual accessories:
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration).
--   **Speaker.** Allows you to create a virtual speaker.
+-   **Speaker.** Allows you to create a virtual speaker. [**](#issues-with-homekit)
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window.** Allows you to create a virtual window.
@@ -1136,6 +1138,7 @@ You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](h
 #### Issues with HomeKit:
 
 -   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there and the companion switch allows you to interact with it, leading HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. You can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), however it will not affect the HomePod volume.
+-   The Speaker accessory is not recognized by the Home app. This is a limitation of Homekit. The [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf) shows it as a secondary service for an IP Camera or a Video Doorbell accessory. Unfortunately it is not clear about a standalone Speaker accessory, but the Home app flags it as an unrecognized device. However, the Eve app (and supposedly Home+ app) do dislay the service, so you may be able to control the Speaker through automations setup with the help of the Eve app.
 
 > [!NOTE]
 > I considered creating a virtual Video Doorbell accessory, however I ruled it out due to the amount of work required. Also, this functionality is easily implemented with the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
