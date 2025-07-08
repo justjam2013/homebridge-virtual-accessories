@@ -4,8 +4,6 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
-import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
-
 /**
  * SmartSpeaker - Accessory implementation
  */
@@ -25,12 +23,12 @@ export class SmartSpeaker extends ExternalAccessory {
   private readonly stateStorageKey: string = 'SmartSpeakerState';
   private readonly muteStorageKey: string = 'SmartSpeakerMuteState';
   private readonly volumeStorageKey: string = 'SmartSpeakerVolume';
-
-  private audioAccessoryConfiguration: AudioAccessoryConfiguration;
+  private readonly configuredNameStorageKey: string = 'SmartSpeakerConfiguredName';
 
   private states = {
     CurrentMediaState: SmartSpeaker.STOP,
     TargetMediaState: SmartSpeaker.STOP,
+    ConfiguredName: '',
     Mute: SmartSpeaker.UNMUTED,
     Volume: 100,
   };
@@ -43,13 +41,10 @@ export class SmartSpeaker extends ExternalAccessory {
     super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
-    this.audioAccessoryConfiguration = this.accessoryConfiguration.speaker;
-    const mute: boolean = (this.audioAccessoryConfiguration.mute !== undefined) ? this.audioAccessoryConfiguration.mute : SmartSpeaker.UNMUTED;
-    const volume: number = this.audioAccessoryConfiguration.volume;
-
     this.states.CurrentMediaState = SmartSpeaker.STOP;
-    this.states.Mute = mute;
-    this.states.Volume = volume;
+    this.states.ConfiguredName = this.accessoryConfiguration.accessoryName;
+    this.states.Mute = (this.accessoryConfiguration.speaker.mute !== undefined) ? this.accessoryConfiguration.speaker.mute : SmartSpeaker.UNMUTED;
+    this.states.Volume = this.accessoryConfiguration.speaker.volume;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -57,6 +52,7 @@ export class SmartSpeaker extends ExternalAccessory {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedMute: boolean = accessoryState[this.muteStorageKey] as boolean;
       const cachedVolume: number = accessoryState[this.volumeStorageKey] as number;
+      const cachedConfiguredName: string = accessoryState[this.configuredNameStorageKey] as string;
 
       if (cachedState !== undefined) {
         this.states.CurrentMediaState = cachedState;
@@ -66,6 +62,9 @@ export class SmartSpeaker extends ExternalAccessory {
       }
       if (cachedVolume !== undefined) {
         this.states.Volume = cachedVolume;
+      }
+      if (cachedConfiguredName !== undefined) {
+        this.states.ConfiguredName = cachedConfiguredName;
       }
     }
 
@@ -84,6 +83,10 @@ export class SmartSpeaker extends ExternalAccessory {
     this.service.getCharacteristic(this.platform.Characteristic.TargetMediaState)
       .onSet(this.setTargetMediaState.bind(this))
       .onGet(this.getTargetMediaState.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
+      .onSet(this.setConfiguredName.bind(this))
+      .onGet(this.getConfiguredName.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Mute)
       .onSet(this.setMute.bind(this))
@@ -121,6 +124,22 @@ export class SmartSpeaker extends ExternalAccessory {
     return speakerState;
   }
 
+  async setConfiguredName(value: CharacteristicValue) {
+    this.states.ConfiguredName = value as string;
+
+    this.storeState();
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Configured Name: ${this.states.ConfiguredName}`);
+  }
+
+  async getConfiguredName(): Promise<CharacteristicValue> {
+    const configuredName = this.states.ConfiguredName;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configured Name: ${configuredName}`);
+
+    return configuredName;
+  }
+
   async setVolume(value: CharacteristicValue) {
     this.states.Volume = value as number;
 
@@ -152,6 +171,7 @@ export class SmartSpeaker extends ExternalAccessory {
   protected getJsonState(): string {
     const jsonState = {
       [this.stateStorageKey]: this.states.CurrentMediaState,
+      [this.configuredNameStorageKey]: this.states.ConfiguredName,
       [this.muteStorageKey]: this.states.Mute,
       [this.volumeStorageKey]: this.states.Volume,
     };
