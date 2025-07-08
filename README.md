@@ -106,7 +106,7 @@ Currently, these are the implemented virtual accessories:
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration).
--   **Speaker.** Allows you to create a virtual speaker. [**](#issues-with-homekit)
+-   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window.** Allows you to create a virtual window.
@@ -1138,7 +1138,6 @@ You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](h
 #### Issues with HomeKit:
 
 -   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there and the companion switch allows you to interact with it, leading HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. You can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), however it will not affect the HomePod volume.
--   The Speaker accessory is not recognized by the Home app. This is a limitation of Homekit. The [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf) shows it as a secondary service for an IP Camera or a Video Doorbell accessory. Unfortunately it is not clear about a standalone Speaker accessory, but the Home app flags it as an unrecognized device. However, the Eve app (and supposedly Home+ app) do dislay the service, so you may be able to control the Speaker through automations setup with the help of the Eve app.
 
 > [!NOTE]
 > I considered creating a virtual Video Doorbell accessory, however I ruled it out due to the amount of work required. Also, this functionality is easily implemented with the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
