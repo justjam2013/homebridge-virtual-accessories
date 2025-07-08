@@ -212,6 +212,7 @@ export class AccessoryConfiguration {
     case AccessoryType.Door:
       return this.isErrorless(this.door, this.fieldNames.door!);
     case AccessoryType.Doorbell:
+      this.accessoryIsStateful = true;
       return this.isErrorless(this.doorbell, this.fieldNames.doorbell!);
     case AccessoryType.Fan:
       return this.isErrorless(this.fan, this.fieldNames.fan!);
