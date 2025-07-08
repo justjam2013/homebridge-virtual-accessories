@@ -1,15 +1,13 @@
 /* eslint-disable curly */
 
-import { AudioAccessoryConfiguration } from '../configurationAudioAccessoryConfiguration.js';
-
 import { Utils } from '../../utils/utils.js';
 
 /**
  * 
  */
-export class SpeakerConfiguration extends AudioAccessoryConfiguration {
-  // volume!: number;
-  // mute!: boolean;
+export class SpeakerConfiguration {
+  volume!: number;
+  mute!: boolean;
 
   private errorFields: string[] = [];
 
