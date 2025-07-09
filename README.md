@@ -97,7 +97,7 @@ Currently, these are the implemented virtual accessories:
 
 -   **Battery.** Allows you to create a virtual battery service. The "charging state" and "battery level" properties can be set via a [webhook call](#webhook-service-configuration).
 -   **Door.** Allows you to create a virtual door.
--   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. [**](#issues-with-homekit)
+-   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. Due to [issues with HomeKit](#issues-with-homekit), you will need the free [Eve app](https://www.evehome.com/en-us/eve-app) to control its settings.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
 -   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
