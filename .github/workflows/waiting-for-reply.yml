@@ -23,8 +23,12 @@ jobs:
           stale-issue-label: abandoned
           stale-issue-message: "This issue is abandoned because there has been no reply for 7 days."
 
-          days-before-pr-stale: -1
-          days-before-pr-close: -1
+          days-before-pr-stale: 7
+          days-before-pr-close: 3
+          any-of-pr-labels: 'waiting for reply'
+
+          stale-pr-label: abandoned
+          stale-pr-message: "This issue is abandoned because there has been no reply for 7 days."
 
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
