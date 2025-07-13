@@ -748,7 +748,7 @@
                 },
                 "hasCompanionSensor": {
                   "title": "Has a Companion Sensor",
-                  "description": "Switch triggers a sensor when its state changes",
+                  "description": "Switch triggers a sensor when its state changes. Supports optional delay for triggered state.",
                   "type": "boolean"
                 },
                 "muteLogging" : {
@@ -1054,6 +1054,35 @@
                     { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
                     { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
                     { "title": "Smoke (critical)", "enum": ["smoke"] }
+                  ]
+                },
+                "delay": {
+                  "title": "Trigger Delay",
+                  "description": "Time to wait before triggering the sensor (7 days max)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].companionSensor && model.devices[arrayIndices].companionSensor.delay && model.devices[arrayIndices].companionSensor.delay.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].companionSensor && model.devices[arrayIndices].companionSensor.delay && model.devices[arrayIndices].companionSensor.delay.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].companionSensor && model.devices[arrayIndices].companionSensor.delay && model.devices[arrayIndices].companionSensor.delay.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
                   ]
                 }
               },
