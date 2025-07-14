@@ -350,7 +350,8 @@
                   }
                 },
                 "": {
-                  "title": "Note: The heating threshold value **must be lower** than the cooling threshold value",
+                  "title": "",
+                  "description": "Note: The heating threshold value **must be lower** than the cooling threshold value",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -470,7 +471,8 @@
                   }
                 },
                 "": {
-                  "title": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
+                  "title": "",
+                  "description": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -650,6 +652,7 @@
                 },
                 "defaultState": {
                   "title": "Default State *",
+                  "description": "The default state **must be** either 'Disarmed' or one of the available armed states",
                   "type": "string",
                   "oneOf": [
                     { "title": "Armed - Away", "enum": ["armedaway"] },
@@ -657,11 +660,6 @@
                     { "title": "Armed - Night", "enum": ["armednight"] },
                     { "title": "Disarmed", "enum": ["disarmed"] }
                   ]
-                },
-                "": {
-                  "title": "Note: The default state **must be** either 'Disarmed' or one of the available armed states",
-                  "type": "object",
-                  "properties": {}
                 }
               },
               "condition": {
@@ -987,7 +985,8 @@
                   }
                 },
                 "": {
-                  "title": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "title": "",
+                  "description": "Note: The minimum duration value **must be shorter** than the maximum duration value",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -1586,7 +1585,7 @@
       },
       "": {
         "title": " ",
-        "description": "Note: You can reorder accessories by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "description": "Note: You can change the accessory order by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
         "type": "object",
         "properties": {}
       }
