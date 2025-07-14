@@ -254,11 +254,12 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
     ) {
       this.states.SecuritySystemCurrentState = SecuritySystem.ALARM_TRIGGERED;
       this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
-      // Only log to 'info' if setting ObstructionDetected to true
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${value}`);
+
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current state: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
   }
 }
@@ -282,9 +283,9 @@ export class SecurityServiceTriggerType {
 
     switch (state) {
     case undefined: { name = 'undefined'; break; }
-    case SecurityServiceTriggerType.None: { name = 'STAY_ARM'; break; }
-    case SecurityServiceTriggerType.TriggerAlarm: { name = 'AWAY_ARM'; break; }
-    case SecurityServiceTriggerType.TriggerPanic: { name = 'NIGHT_ARM'; break; }
+    case SecurityServiceTriggerType.None: { name = 'NONE'; break; }
+    case SecurityServiceTriggerType.TriggerAlarm: { name = 'TRIGGER ALARM'; break; }
+    case SecurityServiceTriggerType.TriggerPanic: { name = 'TRIGGER PANIC'; break; }
     default: { name = state.toString(); }
     }
 
