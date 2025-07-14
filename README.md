@@ -105,7 +105,7 @@ Currently, these are the implemented virtual accessories:
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
--   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration).
+-   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration). A [webhook endpoint](#webhook-service-configuration) is also available for a panic alarm.
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
@@ -1034,8 +1034,25 @@ The raw json payload will contain the accessory id of the Security System access
 }
 ```
 
+The Security System also provides a webhook endpoint for a panic alarm. A normal alarm trigger will not do anything if the alarm is `Disabled`. A panic alarm will set the Security System in a `Triggered` state whether it is `Armed` or `Disarmed`.
+
+The target URL (replace hostname and port per your setup) will specify the `triggerpanic` path:
+
+```
+http://localhost:60221/triggerpanic
+```
+
+The raw json payload will contain the accessory id of the Security System accessory and the triggered state value:
+
+```json
+{
+    "id": "1234567",
+    "value": true
+}
+```
+
 > [!NOTE]
-> Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to Disarmed state or one of the Armed modes.
+> Setting the triggered state value to `false` will not do anything. To get the Security System out of the triggered state you will have to switch it to the `Disarmed` state or any one of the `Armed` modes.
 
 ### Update Sensor with webhook state
 
