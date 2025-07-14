@@ -8,12 +8,12 @@ import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/schema.js';
-import { TriggerableSensor } from '../sensors/triggerableSensor.js';
+import { TriggerableAlarm } from './triggerableAlarm.js';
 
 /**
  * SecuritySystem - Accessory implementation
  */
-export class SecuritySystem extends Accessory implements TriggerableSensor {
+export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'SecuritySystem';
 
@@ -233,29 +233,62 @@ export class SecuritySystem extends Accessory implements TriggerableSensor {
     return Array.from(names).join(', ');
   }
 
-  // Triggerable Sensor interface
+  // Triggerable Alarm interface
 
-  triggerSensor(value: boolean, accessoryId: string): void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update triggered state to ${value}`);
+  triggerAlarm(value: number, accessoryId: string): void {
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update triggered state to ${SecurityServiceTriggerType.getName(value)}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
-    else if (typeof value !== 'boolean') {
+    else if (typeof value !== 'number' || !SecurityServiceTriggerType.isValid(value)) {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Security System triggered state`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
-    else if (value === true) {
+
+    if (value === SecurityServiceTriggerType.TriggerPanic ||
+       (value === SecurityServiceTriggerType.TriggerAlarm && this.states.SecuritySystemCurrentState !== SecuritySystem.DISARMED)
+    ) {
       this.states.SecuritySystemCurrentState = SecuritySystem.ALARM_TRIGGERED;
       this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
-      // Only log to 'info' if setting ObstructionDetected to true
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${value}`);
+
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${value}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current state: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
+  }
+}
+
+export class SecurityServiceTriggerType {
+
+  static None: number = 0;
+  static TriggerAlarm: number = 1;
+  static TriggerPanic: number = 2;
+
+  static isValid(value: number) {
+    return (
+      value === SecurityServiceTriggerType.None ||
+      value === SecurityServiceTriggerType.TriggerAlarm ||
+      value === SecurityServiceTriggerType.TriggerPanic
+    );
+  }
+
+  static getName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case SecurityServiceTriggerType.None: { name = 'NONE'; break; }
+    case SecurityServiceTriggerType.TriggerAlarm: { name = 'TRIGGER ALARM'; break; }
+    case SecurityServiceTriggerType.TriggerPanic: { name = 'TRIGGER PANIC'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
   }
 }
