@@ -2,14 +2,18 @@
 
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
+import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
 import { Sensor } from './sensors/sensor.js';
-import { SensorValueUpdateNotAllowed } from './errors.js';
 import { Trigger } from './sensors/triggers/trigger.js';
+import { VirtualLogger } from './utils/virtualLogger.js';
+
+import { TriggerableAlarm } from './accessories/triggerableAlarm.js';
 import { TriggerableSensor } from './sensors/triggerableSensor.js';
 import { UpdatableChargingState } from './accessories/updatableChargingState.js';
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
 import { UpdatableSensor } from './sensors/updatableSensor.js';
-import { VirtualLogger } from './utils/virtualLogger.js';
+
+import { SensorValueUpdateNotAllowed } from './errors.js';
 
 import express, { Express, Request, Response } from 'express';
 
@@ -61,7 +65,7 @@ export class WebhookServer {
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.humidityIsValid(humidity, response)) {
+      if (this.accessoryIdIsValid(accessoryId, response) && this.percentageIsValid(humidity, response)) {
         this.processRequest(accessoryId, 'humidifierdehumidifier', Number(humidity), response);
       }
     });
@@ -74,7 +78,7 @@ export class WebhookServer {
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.temperatureIsValid(temperature, response)) {
+      if (this.accessoryIdIsValid(accessoryId, response) && this.numberIsValid(temperature, response)) {
         this.processRequest(accessoryId, 'heatercooler', Number(temperature), response);
       }
     });
@@ -87,7 +91,7 @@ export class WebhookServer {
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.obstructionIsValid(obstruction, response)) {
+      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(obstruction, response)) {
         this.processRequest(accessoryId, 'garagedoor', obstruction, response);
       }
     });
@@ -100,8 +104,21 @@ export class WebhookServer {
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.triggerIsValid(trigger, response)) {
-        this.processRequest(accessoryId, 'securitysystem', trigger, response);
+      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
+        this.processRequest(accessoryId, 'securitysystem', trigger ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None, response);
+      }
+    });
+
+    const routeTriggerPanic: string = '/triggerpanic';
+    this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerPanic}`);
+    this.server.post(routeTriggerPanic, (request: Request, response: Response) => {
+      const accessoryId: string = request.body.id;
+      const trigger: boolean = request.body.value;
+
+      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+
+      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
+        this.processRequest(accessoryId, 'securitysystem', trigger ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None, response);
       }
     });
 
@@ -113,7 +130,7 @@ export class WebhookServer {
 
       this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.triggerIsValid(trigger, response)) {
+      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
         this.processRequest(accessoryId, 'sensor', trigger, response);
       }
     });
@@ -161,19 +178,13 @@ export class WebhookServer {
   ) {
     let addedAccessory: boolean = false;
 
-    if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      addedAccessory = true;
-    }
-    else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
-      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      addedAccessory = true;
-    }
-    else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
-      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
-      addedAccessory = true;
-    }
-    else if ((<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined) {
+    if (
+      (<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined ||
+      (<TriggerableSensor><unknown>accessory).triggerSensor !== undefined ||
+      (<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined ||
+      (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
+      (<UpdatableSensor><unknown>accessory).updateSensor !== undefined
+    ) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
     }
@@ -229,14 +240,14 @@ export class WebhookServer {
     return true;
   }
 
-  private humidityIsValid(
-    humidity: string,
+  private percentageIsValid(
+    value: string,
     response: Response,
   ): boolean {
-    const humidityPercent: number = Number(humidity);
+    const valuePercent: number = Number(value);
 
-    if (isNaN(humidityPercent) || humidityPercent < 0 || humidityPercent > 100) {
-      const errorMsg: string = `Invalid humidity value: ${humidity}. Value must be a percentage`;
+    if (isNaN(valuePercent) || valuePercent < 0 || valuePercent > 100) {
+      const errorMsg: string = `Invalid value: ${value}. Value must be a percentage`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
@@ -246,14 +257,14 @@ export class WebhookServer {
     return true;
   }
 
-  private temperatureIsValid(
-    temperature: string,
+  private numberIsValid(
+    value: string,
     response: Response,
   ): boolean {
-    const temperatureDegrees: number = Number(temperature);
+    const valueNumber: number = Number(value);
 
-    if (isNaN(temperatureDegrees)) {
-      const errorMsg: string = `Invalid temperature value: ${temperature}. Value must be a number`;
+    if (isNaN(valueNumber)) {
+      const errorMsg: string = `Invalid value: ${value}. Value must be a number`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
@@ -263,27 +274,12 @@ export class WebhookServer {
     return true;
   }
 
-  private obstructionIsValid(
-    obstruction: boolean,
+  private booleanIsValid(
+    value: boolean,
     response: Response,
   ): boolean {
-    if (typeof obstruction !== 'boolean') {
-      const errorMsg: string = `Invalid obstruction value: ${obstruction}. Value must be a boolean`;
-      this.log.error(`[${this.serverName}] ${errorMsg}`);
-      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
-
-      return false;
-    }
-
-    return true;
-  }
-
-  private triggerIsValid(
-    trigger: boolean,
-    response: Response,
-  ): boolean {
-    if (typeof trigger !== 'boolean') {
-      const errorMsg: string = `Invalid trigger value: ${trigger}. Value must be a boolean`;
+    if (typeof value !== 'boolean') {
+      const errorMsg: string = `Invalid value: ${value}. Value must be a boolean`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
@@ -336,11 +332,8 @@ export class WebhookServer {
 
     if (accessory !== undefined && accessory.accessoryConfiguration.accessoryType === accessoryType) {
       try {
-        if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
-        }
-        else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
-          (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
+        if ((<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined) {
+          (<TriggerableAlarm><unknown>accessory).triggerAlarm(<number>value, accessoryId);
         }
         else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
           (<TriggerableSensor><unknown>accessory).triggerSensor(<boolean>value, accessoryId);
@@ -348,6 +341,12 @@ export class WebhookServer {
         else if ((<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined) {
           const chargingState: ChargingState = (<ChargingState>value);
           (<UpdatableChargingState><unknown>accessory).updateChargingState(chargingState.charging, chargingState.charge, accessoryId);
+        }
+        else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
+          (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
+        }
+        else if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
+          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
         }
         else if (accessory instanceof Sensor) {
           const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
