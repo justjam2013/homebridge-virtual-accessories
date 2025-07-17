@@ -1,3 +1,5 @@
+/* eslint-disable brace-style */
+
 import { Utils } from './utils.js';
 import { VirtualLogger } from './virtualLogger.js';
 
@@ -108,6 +110,9 @@ export class Timer {
 
       this.startTime = Utils.now();
       this.isRunning = true;
+    }
+    else {
+      callback();
     }
   }
 
