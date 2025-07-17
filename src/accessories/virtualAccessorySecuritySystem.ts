@@ -9,6 +9,7 @@ import { Accessory } from './accessory.js';
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/schema.js';
 import { TriggerableAlarm } from './triggerableAlarm.js';
+import { Timer } from '../utils/timer.js';
 
 /**
  * SecuritySystem - Accessory implementation
@@ -24,6 +25,8 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
   static readonly ALARM_TRIGGERED: number = 4;  // Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED
 
   private readonly stateStorageKey: string = 'SecuritySystemState';
+
+  private armingDelayTimer: Timer;
 
   private states = {
     SecuritySystemCurrentState: SecuritySystem.DISARMED,
@@ -59,6 +62,14 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
     }
 
     this.states.SecuritySystemCurrentState = this.defaultState;
+
+    // Timer is not resettable
+    const timerIsResettable: boolean = false;
+    this.armingDelayTimer = new Timer(
+      this.accessoryConfiguration.accessoryName,
+      this.log,
+      timerIsResettable,
+    );
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -109,13 +120,24 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
 
-    this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
-    this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
+    // No delay when disarming or switching betweem armed modes
+    const delayTime: number = (this.states.SecuritySystemTargetState === SecuritySystem.DISARMED ||
+      (this.states.SecuritySystemTargetState !== SecuritySystem.DISARMED && this.states.SecuritySystemCurrentState !== SecuritySystem.DISARMED)
+    ) ?
+      0 :
+      this.accessoryConfiguration.securitySystem.armingDelay;
+    this.armingDelayTimer.start(
+      () => {
+        this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
+        this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
 
-    this.storeState();
+        // eslint-disable-next-line max-len
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
 
-    // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
+        this.storeState();
+      },
+      delayTime,
+    );
   }
 
   async getSecuritySystemTargetState(): Promise<CharacteristicValue> {

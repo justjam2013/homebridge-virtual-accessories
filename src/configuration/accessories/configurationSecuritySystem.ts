@@ -11,6 +11,7 @@ import { Utils } from '../../utils/utils.js';
 export class SecuritySystemConfiguration implements Validatable {
   defaultState!: string;
   armedModes!: string[];
+  armingDelay: number = 0;
 
   private errorFields: string[] = [];
 
@@ -27,13 +28,20 @@ export class SecuritySystemConfiguration implements Validatable {
       Utils.notEmpty(this.armedModes)
     );
 
+    const isValidArmingDelay: boolean = (
+      Utils.required(this.armingDelay) &&
+      (this.armingDelay >= 0 && this.armingDelay <= 60)
+    );
+
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
     if (!isValidArmedModes) this.errorFields.push(prefix + '.' + this.fieldNames.armedModes);
+    if (!isValidArmingDelay) this.errorFields.push(prefix + '.' + this.fieldNames.armingDelay);
 
     return [
       (isValidDefaultState &&
-        isValidArmedModes),
+        isValidArmedModes &&
+        isValidArmingDelay),
       this.errorFields,
     ];
   }

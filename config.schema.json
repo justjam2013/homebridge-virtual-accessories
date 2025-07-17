@@ -660,6 +660,13 @@
                     { "title": "Armed - Night", "enum": ["armednight"] },
                     { "title": "Disarmed", "enum": ["disarmed"] }
                   ]
+                },
+                "armingDelay": {
+                  "title": "Arming Delay",
+                  "description": "Security System arming delay in seconds (default 0 = immediate)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 60
                 }
               },
               "condition": {
