@@ -1,0 +1,13 @@
+# This is a manually triggered workfow to test action-version-updater workflow
+
+name: Test Action Version Updater
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch
+
+jobs:
+  run-action-version-updater:
+    name: Action Version Updater
+
+    uses: justjam2013/homebridge-virtual-accessories/.github/workflows/action-version-updater.yml@latest
