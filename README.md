@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> **Versions of `homebridge-config-ui-x` greater than `v5.3.1-beta.9` use a broken version of an underlying framework, which breaks this plugin.**
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
