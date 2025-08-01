@@ -144,7 +144,7 @@ export class Valve extends Accessory {
       this.durationTimer.stop();
     }
     // Valve was turned on: try to start timer
-    if (this.states.ValveActive === Valve.ACTIVE) {
+    if (this.states.ValveActive === Valve.ACTIVE && this.accessoryConfiguration.valve.duration.toSeconds() > 0) {
       this.durationTimer.start(
         () => {
           this.service!.setCharacteristic(this.platform.Characteristic.Active, Valve.INACTIVE);
