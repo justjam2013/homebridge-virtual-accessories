@@ -1114,7 +1114,8 @@
                 "startDateTime": {
                   "title": "Start Date-Time",
                   "type": "string",
-                  "format": "date-time",
+                  "format": "iso-date-time",
+                  "widget":"datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
@@ -1122,7 +1123,8 @@
                 "endDateTime": {
                   "title": "End Date-Time ",
                   "type": "string",
-                  "format": "date-time",
+                  "format": "iso-date-time",
+                  "widget":"datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
