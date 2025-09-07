@@ -13,6 +13,7 @@ import { HeaterCooler } from './accessories/virtualAccessoryHeaterCooler.js';
 import { HumidifierDehumidifier } from './accessories/virtualAccessoryHumidifierDehumidifier.js';
 import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
+import { Microphone } from './accessories/virtualAccessoryMicrophone.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
 import { SmartSpeaker } from './accessories/virtualAccessorySmartSpeaker.js';
 //import { Speaker } from './accessories/virtualAccessorySpeaker.js';
@@ -90,6 +91,9 @@ export abstract class AccessoryFactory {
       break;
     case AccessoryType.Lock:
       virtualAccessory = new Lock(platform, accessory, accessoryConfiguration);
+      break;
+    case AccessoryType.Microphone:
+      virtualAccessory = new Microphone(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.SecuritySystem:
       virtualAccessory = new SecuritySystem(platform, accessory, accessoryConfiguration);

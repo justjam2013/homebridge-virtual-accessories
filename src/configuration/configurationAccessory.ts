@@ -36,6 +36,7 @@ import { AccessoryType, TriggerType } from './schema.js';
 import { Utils } from '../utils/utils.js';
 
 import { Type } from 'typeserializer';
+import { MicrophoneConfiguration } from './accessories/configurationMicrophone.js';
 
 /**
  * 
@@ -93,6 +94,10 @@ export class AccessoryConfiguration {
   // Lock
   @Type(LockConfiguration)
     lock!: LockConfiguration;
+
+  // Microphone
+  @Type(MicrophoneConfiguration)
+    microphone!: MicrophoneConfiguration;
 
   // SecuritySystem
   @Type(SecuritySystemConfiguration)
@@ -229,6 +234,9 @@ export class AccessoryConfiguration {
       return this.isErrorless(this.lightbulb, this.fieldNames.lightbulb!);
     case AccessoryType.Lock:
       return this.isErrorless(this.lock, this.fieldNames.lock!);
+    case AccessoryType.Microphone:
+      this.accessoryIsStateful = true;
+      return this.isErrorless(this.microphone, this.fieldNames.microphone!);
     case AccessoryType.SecuritySystem:
       return this.isErrorless(this.securitySystem, this.fieldNames.securitySystem!);
     case AccessoryType.Sensor:

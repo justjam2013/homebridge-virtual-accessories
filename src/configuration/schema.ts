@@ -13,6 +13,7 @@ export class AccessoryType {
   static HumidifierDehumidifier: string = 'humidifierdehumidifier';
   static Lightbulb: string = 'lightbulb';
   static Lock: string = 'lock';
+  static Microphone: string = 'microphone';
   static SecuritySystem: string = 'securitysystem';
   static Sensor: string = 'sensor';
   static Speaker: string = 'speaker';
