@@ -141,6 +141,7 @@
                 { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
                 { "title": "Lightbulb", "enum": ["lightbulb"] },
                 { "title": "Lock", "enum": ["lock"] },
+                { "title": "Microphone", "enum": ["microphone"] },
                 { "title": "Security System", "enum": ["securitysystem"] },
                 { "title": "Sensor", "enum": ["sensor"] },
                 { "title": "Speaker", "enum": ["speaker"] },
@@ -629,6 +630,16 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "microphone": {
+              "title": "Microphone",
+              "type": "object",
+              "properties": {
+                "volume": { "$ref": "#/$defs/volume" }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'microphone';"
               }
             },
             "securitySystem": {
@@ -1375,6 +1386,21 @@
                 "properties": {
                   "lock": {
                     "required": [ "defaultState", "autoSecurityTimeout" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "microphone" }
+                }
+              },
+              "then": {
+                "required": [ "microphone" ],
+                "properties": {
+                  "microphone": {
+                    "required": [ "volume" ]
                   }
                 }
               }
