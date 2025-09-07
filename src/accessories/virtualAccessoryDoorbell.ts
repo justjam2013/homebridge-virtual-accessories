@@ -92,7 +92,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   async getMute(): Promise<CharacteristicValue> {
     const mute: boolean = this.states.Mute;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${mute}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Mute: ${mute}`);
 
     return mute;
   }
