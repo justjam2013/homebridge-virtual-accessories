@@ -48,6 +48,7 @@
     - [Lightbulb](#lightbulb)
     - [Lightbulb (color)](#lightbulb-color)
     - [Lock](#lock)
+    - [Microphone](#microphone)
     - [Security System](#security-system)
     - [Speaker](#speaker)
     - [Television](#television)
@@ -105,6 +106,7 @@ Currently, these are the implemented virtual accessories:
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
 -   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
+-   **Microphone.** Allows you to create a virtual microphone.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration). A [webhook endpoint](#webhook-service-configuration) is also available for a panic alarm.
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
@@ -469,6 +471,25 @@ These are example configurations of the virtual accessories and provided for ref
             "lock": {
                 "defaultState": "locked",
                 "autoSecurityTimeout": 5
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Microphone
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Microphone",
+            "accessoryType": "microphone",
+            "microphone": {
+                "volume": 100
             }
         }
     ],
