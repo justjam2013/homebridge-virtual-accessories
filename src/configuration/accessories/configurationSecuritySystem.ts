@@ -1,7 +1,6 @@
 /* eslint-disable curly */
 
 import { Validatable } from '../validatable.js';
-import { SecuritySystemArmedMode, SecuritySystemState } from '../schema.js';
 
 import { Utils } from '../../utils/utils.js';
 
@@ -10,8 +9,8 @@ import { Utils } from '../../utils/utils.js';
  */
 export class SecuritySystemConfiguration implements Validatable {
   defaultState!: string;
-  armedModes!: string[];
-  armingDelay: number = 0;
+  hasNightMode: boolean = false;
+  awayArmingDelay: number = 0;
 
   private errorFields: string[] = [];
 
@@ -19,52 +18,22 @@ export class SecuritySystemConfiguration implements Validatable {
 
   isValid(prefix: string): [boolean, string[]] {
     const isValidDefaultState: boolean = (
-      Utils.required(this.defaultState) &&
-      SecuritySystemState.States.includes(this.defaultState) &&
-      this.armedModesContainsDefaultState()
+      Utils.required(this.defaultState)
     );
 
-    const isValidArmedModes: boolean = (
-      Utils.notEmpty(this.armedModes)
-    );
-
-    const isValidArmingDelay: boolean = (
-      Utils.required(this.armingDelay) &&
-      (this.armingDelay >= 0 && this.armingDelay <= 60)
+    const isValidAwayArmingDelay: boolean = (
+      Utils.required(this.awayArmingDelay) &&
+      (this.awayArmingDelay >= 0 && this.awayArmingDelay <= 60)
     );
 
     // Store fields failing validation
     if (!isValidDefaultState) this.errorFields.push(prefix + '.' + this.fieldNames.defaultState);
-    if (!isValidArmedModes) this.errorFields.push(prefix + '.' + this.fieldNames.armedModes);
-    if (!isValidArmingDelay) this.errorFields.push(prefix + '.' + this.fieldNames.armingDelay);
+    if (!isValidAwayArmingDelay) this.errorFields.push(prefix + '.' + this.fieldNames.awayArmingDelay);
 
     return [
       (isValidDefaultState &&
-        isValidArmedModes &&
-        isValidArmingDelay),
+        isValidAwayArmingDelay),
       this.errorFields,
     ];
-  }
-
-  // TODO: remove this method once ng-formworks feature 'Feature request: Implement multi select using oneOf as set of checkboxes'
-  // (https://github.com/zahmo/ng-formworks/issues/26) is complete
-
-  /**
-   * This method is necessary becasue the values for
-   * states are: 'disarmed', 'armedaway', 'armednight', 'armedstay'
-   * while values for
-   * armed modes are: 'Away', 'Night', 'Home'
-   */
-  private armedModesContainsDefaultState(): boolean {
-    let armedModesContainsDefaultState: boolean = false;
-    if ((this.defaultState === SecuritySystemState.ArmedAway && this.armedModes.includes(SecuritySystemArmedMode.ArmedAway)) ||
-        (this.defaultState === SecuritySystemState.ArmedNight && this.armedModes.includes(SecuritySystemArmedMode.ArmedNight)) ||
-        (this.defaultState === SecuritySystemState.ArmedStay && this.armedModes.includes(SecuritySystemArmedMode.ArmedStay)) ||
-        (this.defaultState === SecuritySystemState.Disarmed)
-    ) {
-      armedModesContainsDefaultState = true;
-    }
-
-    return armedModesContainsDefaultState;
   }
 }
