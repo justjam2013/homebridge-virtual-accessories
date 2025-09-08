@@ -7,7 +7,7 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { SecuritySystemArmedMode, SecuritySystemState } from '../configuration/schema.js';
+import { SecuritySystemState } from '../configuration/schema.js';
 import { TriggerableAlarm } from './triggerableAlarm.js';
 import { Timer } from '../utils/timer.js';
 
@@ -26,7 +26,7 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
   private readonly stateStorageKey: string = 'SecuritySystemState';
 
-  private armingDelayTimer: Timer;
+  private awayArmingDelayTimer: Timer;
 
   private states = {
     SecuritySystemCurrentState: SecuritySystem.DISARMED,
@@ -65,7 +65,7 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
     // Timer is not resettable
     const timerIsResettable: boolean = false;
-    this.armingDelayTimer = new Timer(
+    this.awayArmingDelayTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.log,
       timerIsResettable,
@@ -121,12 +121,10 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
 
     // No delay when disarming or switching betweem armed modes
-    const delayTime: number = (this.states.SecuritySystemTargetState === SecuritySystem.DISARMED ||
-      (this.states.SecuritySystemTargetState !== SecuritySystem.DISARMED && this.states.SecuritySystemCurrentState !== SecuritySystem.DISARMED)
-    ) ?
-      0 :
-      this.accessoryConfiguration.securitySystem.armingDelay;
-    this.armingDelayTimer.start(
+    const delayTime: number = (this.states.SecuritySystemTargetState === SecuritySystem.AWAY_ARM) ?
+      this.accessoryConfiguration.securitySystem.awayArmingDelay :
+      0;
+    this.awayArmingDelayTimer.start(
       () => {
         this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
         this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
@@ -200,24 +198,11 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
       // 4, ... 255 Reserved
     ]);
 
-    const armedModes: string[] = this.accessoryConfiguration.securitySystem.armedModes;
-    if (!armedModes.includes(SecuritySystemArmedMode.ArmedAway)) {
-      currentStateValues.delete(SecuritySystemCurrentState.AWAY_ARM);
-      targetStateValues.delete(SecuritySystemTargetState.AWAY_ARM);
-
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Away is not in armed modes`);
-    }
-    if (!armedModes.includes(SecuritySystemArmedMode.ArmedNight)) {
+    if (!this.accessoryConfiguration.securitySystem.hasNightMode) {
       currentStateValues.delete(SecuritySystemCurrentState.NIGHT_ARM);
       targetStateValues.delete(SecuritySystemTargetState.NIGHT_ARM);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Night is not in armed modes`);
-    }
-    if (!armedModes.includes(SecuritySystemArmedMode.ArmedStay)) {
-      currentStateValues.delete(SecuritySystemCurrentState.STAY_ARM);
-      targetStateValues.delete(SecuritySystemTargetState.STAY_ARM);
-
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Home is not in armed modes`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Night Arm is not an available armed mode`);
     }
 
     if (currentStateValues.size > 0) {
