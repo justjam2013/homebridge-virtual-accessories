@@ -45,12 +45,11 @@
       "requireHoursMinutesSeconds": {
         "if": {
           "properties": {
-            "days": { "const": 7 }
+            "days": { "maximum": 6 }
           },
           "required": [ "days" ]
         },
-        "then": {},
-        "else": {
+        "then": {
           "required": [ "hours", "minutes", "seconds" ]
         }
       },
@@ -266,12 +265,11 @@
                     {
                       "if": {
                         "properties": {
-                          "days": { "const": 30 }
+                          "days": { "maximum": 29 }
                         },
                         "required": [ "days" ]
                       },
-                      "then": {},
-                      "else": {
+                      "then": {
                         "required": [ "hours", "minutes", "seconds" ]
                       }
                     }
@@ -646,8 +644,25 @@
               "title": "Security System",
               "type": "object",
               "properties": {
+                "": {
+                  "title": "Armed Modes",
+                  "description": "Security system modes (Away and Home are required)",
+                  "type": "null"
+                },
+                "hasAwayMode": {
+                  "title": "Away Mode",
+                  "type": "boolean",
+                  "disabled": true,
+                  "default": true
+                },
+                "hasHomeMode": {
+                  "title": "Home Mode",
+                  "type": "boolean",
+                  "disabled": true,
+                  "default": true
+                },
                 "hasNightMode": {
-                  "title": "Has Night Mode",
+                  "title": "Night Mode",
                   "description": "Night mode is a custom armed mode",
                   "type": "boolean"
                 },
@@ -777,12 +792,11 @@
                     {
                       "if": {
                         "properties": {
-                          "minutes": { "const": 60 }
+                          "minutes": { "maximum": 59 }
                         },
                         "required": [ "minutes" ]
                       },
-                      "then": {},
-                      "else": {
+                      "then": {
                         "required": [ "seconds" ]
                       }
                     }
@@ -921,19 +935,19 @@
                     "hours": {
                       "$ref": "#/$defs/duration/properties/hours",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
                       }
                     },
                     "minutes": {
                       "$ref": "#/$defs/duration/properties/minutes",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
                       }
                     },
                     "seconds": {
                       "$ref": "#/$defs/duration/properties/seconds",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
                       }
                     }
                   },
@@ -1249,7 +1263,7 @@
                   "filterMaintenance": {
                     "required": [ "lifespan" ],
                     "properties": {
-                      "lifetime": {
+                      "lifespan": {
                         "required": [ "days" ]
                       }
                     }
