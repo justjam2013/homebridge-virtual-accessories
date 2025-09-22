@@ -4,6 +4,7 @@ import { Categories } from 'homebridge';
 
 import { Validatable } from './validatable.js';
 
+import { AirPurifierConfiguration } from './accessories/configurationAirPurifier.js';
 import { BatteryConfiguration } from './accessories/configurationBattery.js';
 import { DoorConfiguration } from './accessories/configurationDoor.js';
 import { DoorbellConfiguration } from './accessories/configurationDoorbell.js';
@@ -14,6 +15,7 @@ import { HeaterCoolerConfiguration } from './accessories/configurationHeaterCool
 import { HumidifierDehumidifierConfiguration } from './accessories/configurationHumidifierDehumidifier.js';
 import { LightbulbConfiguration } from './accessories/configurationLightbulb.js';
 import { LockConfiguration } from './accessories/configurationLock.js';
+import { MicrophoneConfiguration } from './accessories/configurationMicrophone.js';
 import { SecuritySystemConfiguration } from './accessories/configurationSecuritySystem.js';
 import { SensorConfiguration } from './configurationSensor.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
@@ -36,7 +38,6 @@ import { AccessoryType, TriggerType } from './schema.js';
 import { Utils } from '../utils/utils.js';
 
 import { Type } from 'typeserializer';
-import { MicrophoneConfiguration } from './accessories/configurationMicrophone.js';
 
 /**
  * 
@@ -54,6 +55,10 @@ export class AccessoryConfiguration {
   accessoryIsStateful: boolean = false;
 
   // Accessories
+
+  // Battery
+  @Type(AirPurifierConfiguration)
+    airPurifier!: AirPurifierConfiguration;
 
   // Battery
   @Type(BatteryConfiguration)
@@ -211,6 +216,8 @@ export class AccessoryConfiguration {
 
   private isValidAccessory(): boolean {
     switch (this.accessoryType) {
+    case AccessoryType.AirPurifier:
+      return this.isErrorless(this.airPurifier, this.fieldNames.airPurifier!);
     case AccessoryType.Battery:
       this.accessoryIsStateful = true;
       return this.isErrorless(this.battery, this.fieldNames.battery!);

@@ -130,6 +130,7 @@
               "type": "string",
               "required": true,
               "oneOf": [
+                { "title": "Air Purifier", "enum": ["airpurifier"] },
                 { "title": "Battery", "enum": ["battery"] },
                 { "title": "Door", "enum": ["door"] },
                 { "title": "Doorbell", "enum": ["doorbell"] },
@@ -158,6 +159,21 @@
               "type": "boolean",
               "condition": {
                 "functionBody": "return ['door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "airPurifier": {
+              "title": "Air Purifier",
+              "type": "object",
+              "properties": {
+                "rotationSpeed": {
+                  "title": "Rotation Speed (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'airpurifier';"
               }
             },
             "battery": {
