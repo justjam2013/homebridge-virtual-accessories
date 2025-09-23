@@ -644,11 +644,6 @@
               "title": "Security System",
               "type": "object",
               "properties": {
-                "": {
-                  "title": "Armed Modes",
-                  "description": "Security system modes (Away and Home are required)",
-                  "type": "null"
-                },
                 "hasAwayMode": {
                   "title": "Away Mode",
                   "type": "boolean",
