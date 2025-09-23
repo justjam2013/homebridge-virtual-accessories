@@ -58,12 +58,14 @@ export class TriggerType {
   static Ping: string = 'ping';
   static SunEvents: string = 'sunevents';
   static Webhook: string = 'webhook';
+  static Startup: string = 'startup';
 
   static Types: string[] = [
     TriggerType.Cron,
     TriggerType.Ping,
     TriggerType.SunEvents,
     TriggerType.Webhook,
+    TriggerType.Startup,
   ];
 }
 

@@ -27,8 +27,9 @@ import { WindowCoveringConfiguration } from './accessories/configurationWindowCo
 
 import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
+import { StartupTriggerConfiguration } from './triggers/configurationStartupTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
-import { WebhookTriggerConfiguration } from './triggers/configurationWebhookTriggerConfiguration.js';
+import { WebhookTriggerConfiguration } from './triggers/configurationWebhookTrigger.js';
 
 import { CompanionSensorConfiguration } from './configurationCompanionSensor.js';
 import { InputSourceConfiguration } from './accessories/configurationInputSource.js';
@@ -159,6 +160,9 @@ export class AccessoryConfiguration {
 
   @Type(WebhookTriggerConfiguration)
     webhookTrigger!: WebhookTriggerConfiguration;
+
+  @Type(StartupTriggerConfiguration)
+    startupTrigger!: StartupTriggerConfiguration;
 
   // ********************* Configuration enrichment fields *********************
 
@@ -405,6 +409,13 @@ export class AccessoryConfiguration {
         }
 
         [isValid, errorFields] = this.pingTrigger.isValid(this.fieldNames.pingTrigger!);
+        break;
+      case TriggerType.Startup:
+        if (this.startupTrigger === undefined) {
+          return [false, [this.fieldNames.startupTrigger!]];
+        }
+
+        [isValid, errorFields] = this.startupTrigger.isValid(this.fieldNames.startupTrigger!);
         break;
       case TriggerType.SunEvents:
         if (this.sunEventsTrigger === undefined) {

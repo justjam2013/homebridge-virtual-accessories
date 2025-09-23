@@ -36,6 +36,7 @@ import { CarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
 import { Trigger } from './sensors/triggers/trigger.js';
 import { CronTrigger } from './sensors/triggers/triggerCron.js';
 import { PingTrigger } from './sensors/triggers/triggerPing.js';
+import { StartupTrigger } from './sensors/triggers/triggerStartup.js';
 import { SunEventsTrigger } from './sensors/triggers/triggerSunEvents.js';
 import { WebhookTrigger } from './sensors/triggers/triggerWebhook.js';
 
@@ -176,11 +177,14 @@ export abstract class AccessoryFactory {
     let trigger: Trigger | undefined;
 
     switch (triggerType) {
+    case TriggerType.Cron:
+      trigger = new CronTrigger(sensor, name);
+      break;
     case TriggerType.Ping:
       trigger = new PingTrigger(sensor, name);
       break;
-    case TriggerType.Cron:
-      trigger = new CronTrigger(sensor, name);
+    case TriggerType.Startup:
+      trigger = new StartupTrigger(sensor, name);
       break;
     case TriggerType.SunEvents:
       trigger = new SunEventsTrigger(sensor, name);
