@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> Virtual Accessories for Homebridge v3.9.2 is a breaking update for the Security System accessory. Please refer to the [wiki document](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.9.2-breaking-update-for-Security-System-accessory) for configuration changes.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
@@ -91,9 +86,7 @@
 
 ## About Virtual Accessories For Homebridge
 
-This plugin is inspired by Nick Farina's most excellent 🎸 [`homebridge-dummy`](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. As `homebridge-dummy` was no longer being maintained, I was motivated to create a new solution.
-
-[**Update:** `homebridge-dummy` has found a new maintainer and is being updated, so check it out.]
+This plugin is inspired by Nick Farina's most excellent 🎸 [`homebridge-dummy`](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. At the time `homebridge-dummy` was no longer being maintained, so I was motivated to create a new solution. Since then `homebridge-dummy` has found a new maintainer and gone through a rewrite, so definitely worth checking out.
 
 But the purpose of this plugin is also to provide a single solution for creating different types of virtual HomeKit accessories. In my automations it has replaced seven separate plugins, each of which provided part of the functionality I needed, and all of which had gone unmaintained or abandoned. It also became annoying to have to figure out which plugin provided what functionality, or managed which accessory, each time I wanted or needed to make a change. The drama!
 
