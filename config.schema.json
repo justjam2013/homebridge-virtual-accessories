@@ -846,7 +846,8 @@
                     { "title": "Ping Host", "enum": ["ping"] },
                     { "title": "Cron Schedule", "enum": ["cron"] },
                     { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] },
-                    { "title": "Webhook", "enum": ["webhook"] }
+                    { "title": "Webhook", "enum": ["webhook"] },
+                    { "title": "Homebridge Startup Trigger", "enum": ["startup"] }
                   ]
                 }
               },
@@ -1172,6 +1173,20 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'webhook';"
+              }
+            },
+            "startupTrigger": {
+              "title": "Homebridge Startup Trigger",
+              "type": "object",
+              "properties": {
+                "isDisabled": {
+                  "title": "Disable Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'startup';"
               }
             }
           },
