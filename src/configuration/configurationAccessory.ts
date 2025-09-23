@@ -403,6 +403,13 @@ export class AccessoryConfiguration {
 
         [isValid, errorFields] = this.pingTrigger.isValid(this.fieldNames.pingTrigger!);
         break;
+      case TriggerType.Startup:
+        if (this.startupTrigger === undefined) {
+          return [false, [this.fieldNames.startupTrigger!]];
+        }
+
+        [isValid, errorFields] = this.startupTrigger.isValid(this.fieldNames.startupTrigger!);
+        break;
       case TriggerType.SunEvents:
         if (this.sunEventsTrigger === undefined) {
           return [false, [this.fieldNames.sunEventsTrigger!]];
