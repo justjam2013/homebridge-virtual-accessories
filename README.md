@@ -22,11 +22,6 @@
 
 ## <!-- Thin separator line -->
 
-> [!CAUTION]
-> Virtual Accessories for Homebridge v3.9.2 is a breaking update for the Security System accessory. Please refer to the [wiki document](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Virtual-Accessories-For-Homebridge-v3.9.2-breaking-update-for-Security-System-accessory) for configuration changes.
-
-## <!-- Thin separator line -->
-
 <details>
   <summary>
     
