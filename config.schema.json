@@ -1285,7 +1285,7 @@
                 "required": [ "fan" ],
                 "properties": {
                   "fan": {
-                    "required": [ "defaultState", "rotationDirection", "rotationSpeed" ]
+                    "required": [ "rotationDirection", "rotationSpeed" ]
                   }
                 }
               }
