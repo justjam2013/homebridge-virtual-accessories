@@ -36,6 +36,7 @@
     - [Synology](#synology)
   - [Configuration](#configuration)
   - [Accessory Configurations](#accessory-configurations)
+    - [Air Purifier](#air-purifier)
     - [Battery](#battery)
     - [Door](#door)
     - [Doorbell](#doorbell)
@@ -94,6 +95,7 @@ The downside to a single plugin is trading ease of accessory maintenance for a s
 
 Currently, these are the implemented virtual accessories:
 
+-   **Air Purifier.** Allows you to create a virtual air purifier.
 -   **Battery.** Allows you to create a virtual battery service. The "charging state" and "battery level" properties can be set via a [webhook call](#webhook-service-configuration).
 -   **Door.** Allows you to create a virtual door.
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. Due to [issues with HomeKit](#issues-with-homekit), you will need the free [Eve app](https://www.evehome.com/en-us/eve-app) to control its settings.
@@ -231,6 +233,26 @@ It is recommended to use the Homebridge UI to configure this plugin, as the requ
 ## Accessory Configurations
 
 These are example configurations of the virtual accessories and provided for reference only. They are not intended to be exhaustive of all the different permutations and it is recommended that you use the UI to fully explore each accessory's setup.
+
+### Air Purifier
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Air Purifier",
+            "accessoryType": "airpurifier",
+            "accessoryIsStateful": false,
+            "airPurifier": {
+                "rotationSpeed": 32
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
 
 ### Battery
 
