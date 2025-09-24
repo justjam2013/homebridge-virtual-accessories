@@ -3,6 +3,7 @@
  */
 export class AccessoryType {
 
+  static AirPurifier: string = 'airpurifier';
   static Battery: string = 'battery';
   static Door: string = 'door';
   static Doorbell: string = 'doorbell';

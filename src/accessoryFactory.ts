@@ -3,6 +3,7 @@ import type { PlatformAccessory } from 'homebridge';
 import { VirtualAccessoriesPlatform } from './platform.js';
 
 import { Accessory } from './accessories/accessory.js';
+import { AirPurifier } from './accessories/virtualAccessoryAirPurifier.js';
 import { Battery } from './accessories/virtualAccessoryBattery.js';
 import { Door } from './accessories/virtualAccessoryDoor.js';
 import { Doorbell } from './accessories/virtualAccessoryDoorbell.js';
@@ -63,6 +64,9 @@ export abstract class AccessoryFactory {
     const accessoryType: string = accessoryConfiguration.accessoryType;
 
     switch (accessoryType) {
+    case AccessoryType.AirPurifier:
+      virtualAccessory = new AirPurifier(platform, accessory, accessoryConfiguration);
+      break;
     case AccessoryType.Battery:
       virtualAccessory = new Battery(platform, accessory, accessoryConfiguration);
       break;
