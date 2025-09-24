@@ -325,7 +325,6 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryName": "My Fan",
             "accessoryType": "fan",
             "fan": {
-                "defaultState": "off",
                 "rotationDirection": "clockwise",
                 "rotationSpeed": 80
             }
