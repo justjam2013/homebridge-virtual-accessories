@@ -216,14 +216,6 @@
               "title": "Fan",
               "type": "object",
               "properties": {
-                "defaultState": {
-                  "title": "Default State *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Off", "enum": ["off"] },
-                    { "title": "On", "enum": ["on"] }
-                  ]
-                },
                 "rotationDirection": {
                   "title": "Rotation Direction *",
                   "type": "string",

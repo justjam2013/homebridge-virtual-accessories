@@ -35,11 +35,10 @@ export class Fan extends Accessory {
     super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.fan.defaultState === 'on' ? Fan.ON : Fan.OFF;
     const rotationDirection: number = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
     const rotationSpeed: number = this.accessoryConfiguration.fan.rotationSpeed as number;
 
-    this.states.FanState = this.defaultState;
+    this.states.FanState = Fan.OFF;
     this.states.FanRotationDirection = rotationDirection;
     this.states.FanRotationSpeed = rotationSpeed;
 
