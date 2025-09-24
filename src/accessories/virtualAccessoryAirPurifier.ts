@@ -43,9 +43,12 @@ export class AirPurifier extends Accessory {
     super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
+    const rotationSpeed: number = this.accessoryConfiguration.airPurifier.rotationSpeed as number;
+
     this.states.AirPurifierActive = AirPurifier.INACTIVE;
     this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_INACTIVE;
     this.states.AirPurifierTargetState = AirPurifier.MANUAL;
+    this.states.AirPurifierRotationSpeed = rotationSpeed;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -169,15 +172,15 @@ export class AirPurifier extends Accessory {
   }
 
   private setDeviceOperationalCondition() {
-    if (this.states.AirPurifierActive === AirPurifier.INACTIVE) {
-      this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_INACTIVE;
+    if (this.states.AirPurifierActive === AirPurifier.ACTIVE) {
+      this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_PURIFYING_AIR;
     }
-    else {  // (this.states.AirPurifierActive === AirPurifier.ACTIVE)
+    else {  // (this.states.AirPurifierActive === AirPurifier.INACTIVE)
       if (this.states.AirPurifierTargetState === AirPurifier.AUTO) {
-        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_PURIFYING_AIR;
+        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_IDLE;
       }
       else if (this.states.AirPurifierTargetState === AirPurifier.MANUAL) {
-        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_IDLE;
+        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_INACTIVE;
       }
     }
 
