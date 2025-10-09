@@ -2,7 +2,7 @@
 /* eslint-disable curly */
 
 import { Validatable } from '../validatable.js';
-import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../schema.js';
+import { HeaterType, OperationMode, TemperatureUnit, ThresholdTemperature } from '../schema.js';
 
 import { Utils } from '../../utils/utils.js';
 
@@ -11,6 +11,7 @@ import { Utils } from '../../utils/utils.js';
  */
 export class HeaterCoolerConfiguration implements Validatable {
   type!: string;
+  operationMode!: string;
   temperatureDisplayUnits!: string;
   heatingThresholdCelsius!: number;
   coolingThresholdCelsius!: number;
@@ -25,6 +26,11 @@ export class HeaterCoolerConfiguration implements Validatable {
     const isValidType: boolean = (
       Utils.required(this.type) &&
       HeaterType.Types.includes(this.type)
+    );
+
+    const isValidOperationMode: boolean = (
+      Utils.required(this.operationMode) &&
+      OperationMode.Modes.includes(this.operationMode)
     );
 
     const isValidTemperatureDisplayUnits: boolean = (
@@ -55,6 +61,7 @@ export class HeaterCoolerConfiguration implements Validatable {
     const coolingThresholdField = '.coolingThreshold' + this.capitalize(this.temperatureDisplayUnits);
 
     if (!isValidType) this.errorFields.push(prefix + '.type');
+    if (!isValidOperationMode) this.errorFields.push(prefix + '.operationMode');
     if (!isValidTemperatureDisplayUnits) this.errorFields.push(prefix + '.' + this.fieldNames.temperatureDisplayUnits);
     if (!isValidHeatingThreshold) this.errorFields.push(prefix + heatingThresholdField);
     if (!isValidCoolingThreshold) this.errorFields.push(prefix + coolingThresholdField);
@@ -62,6 +69,7 @@ export class HeaterCoolerConfiguration implements Validatable {
 
     return [
       (isValidType &&
+        isValidOperationMode &&
         isValidTemperatureDisplayUnits &&
         isValidHeatingThreshold &&
         isValidCoolingThreshold &&

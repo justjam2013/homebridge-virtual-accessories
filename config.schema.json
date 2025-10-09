@@ -308,6 +308,17 @@
                     { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
                   ]
                 },
+                "operationMode": {
+                  "title": "Operation Mode *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Manual", "enum": ["manual"] },
+                    { "title": "Auto", "enum": ["auto"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'cooler'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
                   "type": "string",
@@ -323,7 +334,7 @@
                   "minimum": 0,
                   "maximum": 25,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.operationMode === 'auto' && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "coolingThresholdCelsius": {
@@ -333,7 +344,7 @@
                   "minimum": 10,
                   "maximum": 35,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.operationMode === 'auto' && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "heatingThresholdFahrenheit": {
@@ -343,7 +354,7 @@
                   "minimum": 32,
                   "maximum": 77,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.operationMode === 'auto' && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "coolingThresholdFahrenheit": {
@@ -353,7 +364,7 @@
                   "minimum": 50,
                   "maximum": 95,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.operationMode === 'auto' && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "": {
@@ -374,6 +385,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "heater" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "celsius" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -386,6 +398,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "cooler" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "celsius" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -398,6 +411,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "auto" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "celsius" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -410,6 +424,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "heater" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "fahrenheit" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -422,6 +437,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "cooler" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "fahrenheit" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -434,6 +450,7 @@
                   "if": {
                     "properties": {
                       "type": { "const": "auto" },
+                      "operationMode": { "const": "auto" },
                       "temperatureDisplayUnits": { "const": "fahrenheit" }
                     },
                     "required": [ "type", "temperatureDisplayUnits" ]
@@ -1335,7 +1352,7 @@
                 "required": [ "heaterCooler" ],
                 "properties": {
                   "heaterCooler": {
-                    "required": [ "type", "temperatureDisplayUnits" ]
+                    "required": [ "type", "operationMode", "temperatureDisplayUnits" ]
                   }
                 }
               }

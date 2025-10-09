@@ -106,6 +106,17 @@ export class TemperatureUnit {
 /**
  * 
  */
+export class OperationMode {
+
+  static Manual: string = 'manual';
+  static Auto: string = 'auto';
+
+  static Modes: string[] = [ OperationMode.Manual, OperationMode.Auto ];
+}
+
+/**
+ * 
+ */
 export class HeaterType {
 
   static Auto: string = 'auto';
