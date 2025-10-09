@@ -735,7 +735,7 @@
                 },
                 "muteLogging" : {
                   "title": "Mute Logging",
-                  "description": "Log information will only be visible when runninhg in debug mode",
+                  "description": "Log information will only be visible when running in debug mode",
                   "type": "boolean"
                 }
               },
