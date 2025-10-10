@@ -28,6 +28,19 @@ export class Lock extends Accessory {
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
   private readonly lastKnownAction: string = 'LockLastKnownAction';
 
+  // https://github.com/kupa22/apple-homekey#characteristic-nfc-access-supported-configuration
+  // base64 encoded hex "010110020110"; 16 keys each
+  private readonly NFCAccessSupportedConfiguration: string = 'AQEQAgEQ';
+
+  // https://github.com/kupa22/apple-homekey#characteristic-hardware-finish
+  // base64 encoded hex
+  private readonly lockHardwareFinish: Record<string, string> = {
+    'tan': 'AQTO1doA',      // 0104CED5DA00
+    'gold': 'AQSq1uwA',     // 0104AAD6EC00
+    'silver': 'AQTj4+MA',   // 0104E3E3E300
+    'black': 'AQQAAAAA',    // 010400000000
+  };
+
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
   private states = {
@@ -47,6 +60,7 @@ export class Lock extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
+    const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor;
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
@@ -71,6 +85,8 @@ export class Lock extends Accessory {
     }
 
     this.states.LockTargetState = this.states.LockCurrentState;
+
+    this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor]);
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
 
@@ -121,6 +137,19 @@ export class Lock extends Accessory {
       });
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
+
+    // Creating Nfc Access service
+    const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
+    const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
+      || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
+
+    nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
+      .onGet(this.getConfigurationState.bind(this));
+    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+      .onSet(this.setNFCAccessControlPoint.bind(this))
+      .onGet(this.getNFCAccessControlPoint.bind(this));
+    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
+      .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
   }
 
   // Handlers
@@ -198,6 +227,38 @@ export class Lock extends Accessory {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Last Known Action: ${lockLastKnownAction}`);
 
     return lockLastKnownAction;
+  }
+
+  // NFC Service handlers
+
+  async getConfigurationState(): Promise<CharacteristicValue> {
+    const configurationState = 0;   // Successful
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Configuration State: ${configurationState}`);
+
+    return configurationState;
+  }
+
+  async setNFCAccessControlPoint(value: CharacteristicValue) {
+    const nfcAccessControlPoint = value;
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+  }
+
+  async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
+    const nfcAccessControlPoint = '';
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
+
+    return nfcAccessControlPoint;
+  }
+
+  async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
+    const nfcAccessSupportedConfiguration = 'AQEQAgEQ';
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
+
+    return nfcAccessSupportedConfiguration;
   }
 
   protected getJsonState(): string {

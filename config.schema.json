@@ -632,6 +632,17 @@
                   "description": "Lock auto-lock time in seconds (0 = off)",
                   "type": "integer",
                   "minimum": 0
+                },
+                "walletKeyColor": {
+                  "title": "Wallet Key Color",
+                  "description": "HomeKey card color in Wallet app (default: Tan)",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Tan", "enum": ["tan"] },
+                    { "title": "Gold", "enum": ["gold"] },
+                    { "title": "Silver", "enum": ["silver"] },
+                    { "title": "Black", "enum": ["black"] }
+                  ]
                 }
               },
               "condition": {
