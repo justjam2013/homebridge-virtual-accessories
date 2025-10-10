@@ -90,7 +90,7 @@
         "properties": {
           "enabled": {
             "title": "Enabled",
-            "description": "Enable updating humidity sensors via web calls",
+            "description": "Update sensors via web calls",
             "type": "boolean"
           },
           "port": {
