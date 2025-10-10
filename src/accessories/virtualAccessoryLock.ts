@@ -30,7 +30,7 @@ export class Lock extends Accessory {
 
   // https://github.com/kupa22/apple-homekey#characteristic-nfc-access-supported-configuration
   // base64 encoded hex "010110020110"; 16 keys each
-  private readonly NFCAccessSupportedConfiguration: string = 'AQEQAgEQ';
+  private readonly nfcAccessSupportedConfiguration: string = 'AQEQAgEQ';
 
   // https://github.com/kupa22/apple-homekey#characteristic-hardware-finish
   // base64 encoded hex
@@ -254,7 +254,7 @@ export class Lock extends Accessory {
   }
 
   async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
-    const nfcAccessSupportedConfiguration = 'AQEQAgEQ';
+    const nfcAccessSupportedConfiguration = this.nfcAccessSupportedConfiguration;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
 

@@ -29,6 +29,11 @@
 
   </summary>
 
+- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
+    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual HomeKit accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-homekit-accessories)
+  - [](#)
+  - [📝 Table Of Contents](#-table-of-contents)
+  - [](#-1)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -54,17 +59,18 @@
     - [Speaker](#speaker)
     - [Television](#television)
     - [Valve](#valve)
-    - [Window](#window)
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
+    - [Window](#window)
     - [Switch](#switch)
-      - [Switch with reset timer](#switch-with-reset-timer)
-      - [Switch with random reset timer](#switch-with-random-reset-timer)
-      - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+    - [Switch with reset timer](#switch-with-reset-timer)
+    - [Switch with random reset timer](#switch-with-random-reset-timer)
+    - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
     - [Sensor with ping trigger](#sensor-with-ping-trigger)
     - [Sensor with cron trigger](#sensor-with-cron-trigger)
     - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
     - [Sensor with webhook trigger](#sensor-with-webhook-trigger)
+  - [](#-2)
   - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
@@ -74,12 +80,16 @@
     - [Update Heater/Cooler temperature sensor](#update-heatercooler-temperature-sensor)
     - [Update Humidifier/Dehumidifier humidity sensor](#update-humidifierdehumidifier-humidity-sensor)
     - [Update Security System triggered state](#update-security-system-triggered-state)
+    - [Update Sensor with webhook state](#update-sensor-with-webhook-state)
   - [Creative Uses](#creative-uses)
+- [](#-3)
   - [Mentions](#mentions)
+    - [Make Smart Matter](#make-smart-matter)
+    - [Edgar’s Home Tech](#edgars-home-tech)
   - [Known Issues](#known-issues)
-    - [Issues with Homebridge UI](#issues-with-homebridge-ui)
-    - [Issues with underlying frameworks](#issues-with-underlying-frameworks)
-    - [Issues with HomeKit](#issues-with-homekit)
+      - [Issues with Homebridge UI:](#issues-with-homebridge-ui)
+      - [Issues with underlying frameworks:](#issues-with-underlying-frameworks)
+      - [Issues with HomeKit:](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
 
@@ -493,7 +503,8 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryIsStateful": false,
             "lock": {
                 "defaultState": "locked",
-                "autoSecurityTimeout": 5
+                "autoSecurityTimeout": 5,
+                "walletKeyColor": "tan"
             }
         }
     ],
