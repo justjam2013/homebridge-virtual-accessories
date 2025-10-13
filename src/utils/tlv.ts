@@ -69,7 +69,7 @@ export class TLVUtils {
 
       tlvs.add(tlv);
 
-      hexString = hexString.substring(4 + valueLength);
+      hexString = hexString.substring(4 + valueLength * 2);
     }
 
     return tlvs;
