@@ -246,12 +246,19 @@ export class Lock extends Accessory {
   async setNFCAccessControlPoint(value: CharacteristicValue) {
     const nfcAccessControlPoint = value as string;
 
-    const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
+    try {
+      const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: ${response}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
 
-    return response;
+      return response;
+    }
+    catch (error) {
+      this.log.error(`Caught error ${error}`);
+    }
+
+    return '';
   }
 
   async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
@@ -318,11 +325,13 @@ export class Lock extends Accessory {
     }
   }
 
-  private processAccessControlPointRequest(base64TlvObject: string) {
-    const tlvHexObject: string = Buffer.from(base64TlvObject, 'base64').toString('hex');
-    const tlvRequest: TLVRequest = new TLVRequest(tlvHexObject);
+  private processAccessControlPointRequest(base64TlvRequest: string) {
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] base64TlvObject: "${base64TlvRequest}"`);
+    const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
+    const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
 
-    let tlvResponse: string = '';
+    let hexTlvResponse: string = '';
 
     switch (tlvRequest.operation.value) {
     case TLVUtils.OPERATION_GET: {
@@ -334,7 +343,7 @@ export class Lock extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation('');
-        tlvResponse = response.toString();
+        hexTlvResponse = response.toHexString();
         break;
       }
       case TLVUtils.READER_KEY_REQUEST: {
@@ -344,7 +353,7 @@ export class Lock extends Accessory {
           const key: string = this.readerPrivateKeys.keys().next().value!;
           const value: string = this.readerPrivateKeys.get(key)!;
           const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(value));
-          tlvResponse = response.toString();
+          hexTlvResponse = response.toHexString();
         }
         break;
       }
@@ -364,7 +373,7 @@ export class Lock extends Accessory {
         //const keyState: number = request.keyState!.value as number;
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, TLVUtils.STATUS_SUCCESS);
-        tlvResponse = response.toString();
+        hexTlvResponse = response.toHexString();
         break;
       }
       case TLVUtils.READER_KEY_REQUEST: {
@@ -375,7 +384,7 @@ export class Lock extends Accessory {
         //const unknown: string = request.unknown!.value as string;
 
         const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
-        tlvResponse = response.toHexString();
+        hexTlvResponse = response.toHexString();
         break;
       }
       }
@@ -395,7 +404,7 @@ export class Lock extends Accessory {
         //const keyState: number = request.keyState!.value as number;
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
-        tlvResponse = response.toString();
+        hexTlvResponse = response.toHexString();
         break;
       }
       case TLVUtils.READER_KEY_REQUEST: {
@@ -406,7 +415,7 @@ export class Lock extends Accessory {
         //const unknown: string = request.unknown!.value as string;
 
         const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
-        tlvResponse = response.toHexString();
+        hexTlvResponse = response.toHexString();
         break;
       }
       }
@@ -414,6 +423,7 @@ export class Lock extends Accessory {
     }
     }
 
-    return tlvResponse;
+    const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
+    return base64TlvResponse;
   }
 }

@@ -11,6 +11,18 @@ import '@js-joda/timezone';
  */
 export class Utils {
 
+  static base64DecodeToHexString(base64String: string): string {
+    const hexString: string = Buffer.from(base64String, 'base64').toString('hex');
+
+    return hexString;
+  }
+
+  static hexStringEncodeToBase64(hexString: string): string {
+    const base64String: string = Buffer.from(hexString, 'hex').toString('base64');
+
+    return base64String;
+  }
+
   static now(): ZonedDateTime {
     const now: ZonedDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
     return now;
