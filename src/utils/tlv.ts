@@ -62,24 +62,16 @@ export class TLVUtils {
     let hexString = tlvString;
     const tlvs: Set<TLV> = new Set<TLV>();
 
-    console.log(`hexString: ${hexString}`);
     while (hexString.length > 0) {
-      const hexLength = hexString.substring(2, 4);
       const valueLength: number = parseInt(hexString.substring(2, 4), 16);
-      console.log(`valueLength: ${hexLength} -> ${valueLength}`);
-
       const splitIndex: number = 4 + (valueLength * 2);   // hex values are two characters
-      console.log(`splitIndex: ${splitIndex}`);
 
       const tlvHexObject: string = hexString.substring(0, splitIndex);
-      console.log(`tlvHexObject: ${tlvHexObject}`);
       const tlv: TLV = TLV.fromHexString(tlvHexObject);
-      console.log(`tlv hex: ${tlv.toFormattedHexString()}`);
 
       tlvs.add(tlv);
 
       hexString = hexString.substring(splitIndex);
-      console.log(`hexString: ${hexString}`);
     }
 
     return tlvs;
@@ -118,8 +110,6 @@ export class TLV {
     const length = tlvHexString.substring(2, 4);
     const value = tlvHexString.substring(4);
 
-    console.log(`Build TLV from: ${tlvHexString} - ${type} ${length} ${value}`);
-
     const tlv = new TLV();
     tlv.type = parseInt(type, 16);
     tlv.length = parseInt(length, 16);
@@ -138,7 +128,14 @@ export class TLV {
   toHexString() {
     const type = TLVUtils.toHexString(this.type);
     const length = TLVUtils.toHexString(this.length);
-    const value = '';
+    let value = '';
+
+    if (typeof this.value === 'string') {
+      value = this.value;
+    }
+    else if (typeof this.value === 'number') {
+      value = TLVUtils.toHexString(this.value);
+    }
 
     return `${type}${length}${value}`;
   }
@@ -146,7 +143,14 @@ export class TLV {
   toFormattedHexString() {
     const type = TLVUtils.toHexString(this.type);
     const length = TLVUtils.toHexString(this.length);
-    const value = '';
+    let value = '';
+
+    if (typeof this.value === 'string') {
+      value = this.value;
+    }
+    else if (typeof this.value === 'number') {
+      value = TLVUtils.toHexString(this.value);
+    }
 
     return `${type} ${length} ${value}`;
   }
