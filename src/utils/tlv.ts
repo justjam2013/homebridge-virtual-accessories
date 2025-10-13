@@ -65,9 +65,8 @@ export class TLVUtils {
     while (hexString.length > 0) {
       console.log(`hexString: ${hexString}`);
       const hexLength = hexString.substring(2, 4);
-      console.log(`hexLength: ${hexLength}`);
       const valueLength: number = parseInt(hexString.substring(2, 4), 16);
-      console.log(`valueLength: ${valueLength}`);
+      console.log(`valueLength: ${hexLength} -> ${valueLength}`);
       const tlvHexObject: string = hexString.substring(0, 4 + (valueLength * 2));   // hex values are two characters
       console.log(`tlvHexObject: ${tlvHexObject}`);
       const tlv: TLV = TLV.fromHexString(tlvHexObject);
@@ -75,7 +74,7 @@ export class TLVUtils {
 
       tlvs.add(tlv);
 
-      hexString = hexString.substring(4 + valueLength * 2);
+      hexString = hexString.substring(4 + (valueLength * 2));
     }
 
     return tlvs;
