@@ -69,6 +69,7 @@ export class TLVUtils {
       const tlvHexObject: string = hexString.substring(0, 4 + (valueLength * 2));   // hex values are two characters
       console.log(`tlvHexObject: ${tlvHexObject}`);
       const tlv: TLV = TLV.fromHexString(tlvHexObject);
+      console.log(`tlv hex: ${tlv.toFormattedHexString()}`);
 
       tlvs.add(tlv);
 
@@ -132,6 +133,14 @@ export class TLV {
     const value = '';
 
     return `${type}${length}${value}`;
+  }
+
+  toFormattedHexString() {
+    const type = TLVUtils.toHexString(this.type);
+    const length = TLVUtils.toHexString(this.length);
+    const value = '';
+
+    return `${type} ${length} ${value}`;
   }
 }
 
