@@ -258,6 +258,10 @@ export class Lock extends Accessory {
     }
     catch (error) {
       this.log.error(`Caught error ${error}`);
+      if (error instanceof Error) {
+        this.log.error(`Error message: ${error.message}`);
+        this.log.error(`Error stack: ${error.stack}`);
+      }
     }
 
     return '';
@@ -332,9 +336,14 @@ export class Lock extends Accessory {
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: type: "${tlvRequest.operation.type}", length: "${tlvRequest.operation.length}", value: "${tlvRequest.operation.value}`);
+    // eslint-disable-next-line max-len
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest request: type: "${tlvRequest.request.type}", length: "${tlvRequest.request.length}", value: "${tlvRequest.request.value}`);
 
     let hexTlvResponse: string = '';
 
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: "${tlvRequest.operation.value}"`);
     switch (tlvRequest.operation.value) {
     case TLVUtils.OPERATION_GET: {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET`);
@@ -422,6 +431,9 @@ export class Lock extends Accessory {
       }
       }
       break;
+    }
+    default: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
     }
     }
 
