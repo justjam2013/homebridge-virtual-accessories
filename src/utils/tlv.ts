@@ -63,8 +63,11 @@ export class TLVUtils {
     const tlvs: Set<TLV> = new Set<TLV>();
 
     while (hexString.length > 0) {
+      console.log(`hexString: ${hexString}`);
       const valueLength: number = parseInt(hexString.substring(2, 4));
+      console.log(`valueLength: ${valueLength}`);
       const tlvHexObject: string = hexString.substring(0, 4 + (valueLength * 2));   // hex values are two characters
+      console.log(`tlvHexObject: ${tlvHexObject}`);
       const tlv: TLV = TLV.fromHexString(tlvHexObject);
 
       tlvs.add(tlv);
