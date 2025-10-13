@@ -337,9 +337,9 @@ export class Lock extends Accessory {
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
     // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: type: "${tlvRequest.operation.type}", length: "${tlvRequest.operation.length}", value: "${tlvRequest.operation.value}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: type: "${tlvRequest.operation.type}", length: "${tlvRequest.operation.length}", value: "${tlvRequest.operation.value}"`);
     // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest request: type: "${tlvRequest.request.type}", length: "${tlvRequest.request.length}", value: "${tlvRequest.request.value}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest request: type: "${tlvRequest.request.type}", length: "${tlvRequest.request.length}", value: "${tlvRequest.request.value}"`);
 
     let hexTlvResponse: string = '';
 

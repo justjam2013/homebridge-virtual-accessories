@@ -64,8 +64,8 @@ export class TLVUtils {
 
     while (hexString.length > 0) {
       const valueLength: number = parseInt(hexString.substring(2, 4));
-      const tlvHexObject: string = hexString.substring(0, 4 + valueLength);
-      const tlv = TLV.fromHexString(tlvHexObject);
+      const tlvHexObject: string = hexString.substring(0, 4 + (valueLength * 2));   // hex values are two characters
+      const tlv: TLV = TLV.fromHexString(tlvHexObject);
 
       tlvs.add(tlv);
 
