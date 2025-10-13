@@ -7,6 +7,7 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { Utils } from '../utils/utils.js';
+import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRequest, TLVReaderKeyResponse, TLVRequest, TLVUtils } from '../utils/tlv.js';
 
 /**
  * Lock - Accessory implementation
@@ -49,6 +50,9 @@ export class Lock extends Accessory {
     LockManagementAutoSecurityTimeout: 0,
     LockLastKnownAction: Lock.UNSECURED_REMOTELY,
   };
+
+  private deviceCredentialPublicKeys = new Map<string, string>();
+  private readerPrivateKeys = new Map<string, string>();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -240,9 +244,14 @@ export class Lock extends Accessory {
   }
 
   async setNFCAccessControlPoint(value: CharacteristicValue) {
-    const nfcAccessControlPoint = value;
+    const nfcAccessControlPoint = value as string;
+
+    const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: ${response}`);
+
+    return response;
   }
 
   async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
@@ -307,5 +316,104 @@ export class Lock extends Accessory {
     else {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] No Security Timeout defined`);
     }
+  }
+
+  private processAccessControlPointRequest(base64TlvObject: string) {
+    const tlvHexObject: string = Buffer.from(base64TlvObject, 'base64').toString('hex');
+    const tlvRequest: TLVRequest = new TLVRequest(tlvHexObject);
+
+    let tlvResponse: string = '';
+
+    switch (tlvRequest.operation.value) {
+    case TLVUtils.OPERATION_GET: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET`);
+
+      switch (tlvRequest.request.value) {
+      // Not called
+      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
+
+        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation('');
+        tlvResponse = response.toString();
+        break;
+      }
+      case TLVUtils.READER_KEY_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
+
+        if (this.readerPrivateKeys.size !== 0) {
+          const key: string = this.readerPrivateKeys.keys().next().value!;
+          const value: string = this.readerPrivateKeys.get(key)!;
+          const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(value));
+          tlvResponse = response.toString();
+        }
+        break;
+      }
+      }
+      break;
+    }
+    case TLVUtils.OPERATION_ADD: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point ADD`);
+
+      switch (tlvRequest.request.value) {
+      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
+
+        const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
+        this.deviceCredentialPublicKeys.set(request.issuerKeyIdentifier!.value as string, request.deviceCredentialPublicKey!.value as string);
+        const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
+        //const keyState: number = request.keyState!.value as number;
+
+        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, TLVUtils.STATUS_SUCCESS);
+        tlvResponse = response.toString();
+        break;
+      }
+      case TLVUtils.READER_KEY_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
+
+        const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
+        this.readerPrivateKeys.set(request.keyIdentifier!.value as string, request.readerPrivateKey!.value as string);
+        //const unknown: string = request.unknown!.value as string;
+
+        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
+        tlvResponse = response.toHexString();
+        break;
+      }
+      }
+      break;
+    }
+    case TLVUtils.OPERATION_REMOVE: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point REMOVE`);
+
+      switch (tlvRequest.request.value) {
+      // Not called
+      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
+
+        const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
+        this.deviceCredentialPublicKeys.delete(request.issuerKeyIdentifier!.value as string);
+        //const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
+        //const keyState: number = request.keyState!.value as number;
+
+        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
+        tlvResponse = response.toString();
+        break;
+      }
+      case TLVUtils.READER_KEY_REQUEST: {
+        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
+
+        const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
+        this.readerPrivateKeys.delete(request.keyIdentifier!.value as string);
+        //const unknown: string = request.unknown!.value as string;
+
+        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
+        tlvResponse = response.toHexString();
+        break;
+      }
+      }
+      break;
+    }
+    }
+
+    return tlvResponse;
   }
 }
