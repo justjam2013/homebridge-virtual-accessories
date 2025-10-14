@@ -384,6 +384,7 @@ export class Lock extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
+        this.log.info(`TLVReaderKeyRequest: ${JSON.stringify(request)}`);
         this.readerPrivateKeys.set(request.keyIdentifier!.value as string, request.readerPrivateKey!.value as string);
         //const unknown: string = request.unknown!.value as string;
 
