@@ -86,7 +86,7 @@ export class TLVUtils {
     const sha256hash: string = createHash('sha256')
       .update(`${KEY_IDENTIFIER}${readerPrivateKey}`)
       .digest('hex');
-    return sha256hash.substring(16);
+    return sha256hash.substring(0, 8);   // first 8 Bytes is the Reader Identifier
   }
 }
 

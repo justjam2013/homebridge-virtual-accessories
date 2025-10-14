@@ -414,7 +414,7 @@ export class Lock extends Accessory {
         this.readerPrivateKey = '';
         //const unknown: string = request.unknown!.value as string;
 
-        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
+        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
         hexTlvResponse = response.toHexString();
       }
       else {
