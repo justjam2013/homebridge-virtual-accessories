@@ -247,9 +247,7 @@ export class Lock extends Accessory {
     const nfcAccessControlPoint = value as string;
 
     try {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] setNFCAccessControlPoint request: ${nfcAccessControlPoint}`);
       const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] setNFCAccessControlPoint response: ${response}`);
 
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
@@ -344,20 +342,17 @@ export class Lock extends Accessory {
     let hexTlvResponse: string = '';
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: "${tlvRequest.operation.value}"`);
-    switch (tlvRequest.operation.value) {
-    case TLVUtils.OPERATION_GET: {
+    if (tlvRequest.operation.value === TLVUtils.OPERATION_GET) {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET`);
 
-      switch (tlvRequest.request.value) {
       // Not called
-      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+      if (tlvRequest.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation('');
         hexTlvResponse = response.toHexString();
-        break;
       }
-      case TLVUtils.READER_KEY_REQUEST: {
+      else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         if (this.readerPrivateKeys.size !== 0) {
@@ -366,16 +361,15 @@ export class Lock extends Accessory {
           const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(value));
           hexTlvResponse = response.toHexString();
         }
-        break;
       }
+      else {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
       }
-      break;
     }
-    case TLVUtils.OPERATION_ADD: {
+    else if (tlvRequest.operation.value === TLVUtils.OPERATION_ADD) {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point ADD`);
 
-      switch (tlvRequest.request.value) {
-      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+      if (tlvRequest.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
@@ -385,9 +379,8 @@ export class Lock extends Accessory {
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, TLVUtils.STATUS_SUCCESS);
         hexTlvResponse = response.toHexString();
-        break;
       }
-      case TLVUtils.READER_KEY_REQUEST: {
+      else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
@@ -396,17 +389,16 @@ export class Lock extends Accessory {
 
         const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
         hexTlvResponse = response.toHexString();
-        break;
       }
+      else {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
       }
-      break;
     }
-    case TLVUtils.OPERATION_REMOVE: {
+    else if (tlvRequest.operation.value === TLVUtils.OPERATION_REMOVE) {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point REMOVE`);
 
-      switch (tlvRequest.request.value) {
       // Not called
-      case TLVUtils.DEVICE_CREDENTIAL_REQUEST: {
+      if (tlvRequest.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
@@ -416,9 +408,8 @@ export class Lock extends Accessory {
 
         const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
         hexTlvResponse = response.toHexString();
-        break;
       }
-      case TLVUtils.READER_KEY_REQUEST: {
+      else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
@@ -427,14 +418,13 @@ export class Lock extends Accessory {
 
         const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
         hexTlvResponse = response.toHexString();
-        break;
       }
+      else {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
       }
-      break;
     }
-    default: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
-    }
+    else {
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
     }
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
