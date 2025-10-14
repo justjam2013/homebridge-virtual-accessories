@@ -380,7 +380,6 @@ export class Lock extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
-        this.log.info(`TLVReaderKeyRequest: ${JSON.stringify(request)}`);
         this.readerPrivateKey = request.readerPrivateKey!.value as string;
         //const unknown: string = request.unknown!.value as string;
 
@@ -427,8 +426,8 @@ export class Lock extends Accessory {
     }
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
+
     const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] base64TlvResponse: "${base64TlvResponse}"`);
     return base64TlvResponse;
   }
 }

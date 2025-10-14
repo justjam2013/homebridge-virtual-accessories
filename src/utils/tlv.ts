@@ -254,7 +254,7 @@ export class TLVDeviceCredentialResponse {
     }
 
     const responseType: string = TLVUtils.toHexString(TLVUtils.READER_KEY_RESPONSE);
-    const responseLength = TLVUtils.toHexString(responseValue.length);
+    const responseLength = TLVUtils.toHexString(responseValue.length / 2);   // hex values are two characters
 
     return `${responseType}${responseLength}${responseValue}`;
   }
@@ -344,7 +344,7 @@ export class TLVReaderKeyResponse {
     }
 
     const responseType: string = TLVUtils.toHexString(TLVUtils.READER_KEY_RESPONSE);
-    const responseLength = TLVUtils.toHexString(responseValue.length);
+    const responseLength = TLVUtils.toHexString(responseValue.length / 2);   // hex values are two characters
 
     return `${responseType}${responseLength}${responseValue}`;
   }
