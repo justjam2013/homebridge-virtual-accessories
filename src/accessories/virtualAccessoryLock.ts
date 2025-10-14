@@ -330,7 +330,6 @@ export class Lock extends Accessory {
   }
 
   private processAccessControlPointRequest(base64TlvRequest: string) {
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] base64TlvRequest: "${base64TlvRequest}"`);
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
@@ -341,7 +340,6 @@ export class Lock extends Accessory {
 
     let hexTlvResponse: string = '';
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] tlvRequest operation: "${tlvRequest.operation.value}"`);
     if (tlvRequest.operation.value === TLVUtils.OPERATION_GET) {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET`);
 
@@ -355,8 +353,10 @@ export class Lock extends Accessory {
       else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
-        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(this.readerPrivateKey));
-        hexTlvResponse = response.toHexString();
+        if (this.readerPrivateKey !== '') {
+          const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(this.readerPrivateKey));
+          hexTlvResponse = response.toHexString();
+        }
       }
       else {
         this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
