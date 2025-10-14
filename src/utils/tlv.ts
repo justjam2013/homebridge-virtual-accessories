@@ -177,14 +177,19 @@ export class TLVRequest {
       }
     });    
 
+    console.log(`operation type: ${this.operation.type}`);
+    console.log(`request type: ${this.request.type}`);
+
     if (this.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
+      console.log('Creating a TLVDeviceCredentialRequest');
       this.requestPayload = new TLVDeviceCredentialRequest(this.request.value as string);
     }
     else if (this.request.type === TLVUtils.READER_KEY_REQUEST) {
+      console.log('Creating a TLVReaderKeyRequest');
       this.requestPayload = new TLVReaderKeyRequest(this.request.value as string);
     }
     else {
-      // This should not happen
+      console.log(`Invalid request type: ${this.request.type}`);
     }
   }
 }
@@ -203,24 +208,32 @@ export class TLVDeviceCredentialRequest {
     tlvs.forEach(tlv => {
       switch (tlv.type) {
       case TLVUtils.DEVICE_CREDENTIAL_REQUEST_KEY_TYPE: {
+        console.log('Adding Key Type');
         this.keyType = tlv;
         break;
       }
       case TLVUtils.DEVICE_CREDENTIAL_REQUEST_DEVICE_CREDENTIAL_PUBLIC_KEY: {
+        console.log('Adding Device Credential Public Key');
         this.deviceCredentialPublicKey = tlv;
         break;
       }
       case TLVUtils.DEVICE_CREDENTIAL_REQUEST_ISSUER_KEY_IDENTIFIER: {
+        console.log('Adding Issuer Key Identifier');
         this.issuerKeyIdentifier = tlv;
         break;
       }
       case TLVUtils.DEVICE_CREDENTIAL_REQUEST_KEY_STATE: {
+        console.log('Adding Key State');
         this.keyState = tlv;
         break;
       }
       case TLVUtils.DEVICE_CREDENTIAL_REQUEST_KEY_IDENTIFIER: {
+        console.log('Adding Key Identifier');
         this.keyIdentifier = tlv;
         break;
+      }
+      default: {
+        console.log(`Invalid TLVDeviceCredentialRequest sub tlv: ${tlv.type}`);
       }
       }
     });
@@ -298,20 +311,27 @@ export class TLVReaderKeyRequest {
     tlvs.forEach(tlv => {
       switch (tlv.type) {
       case TLVUtils.READER_KEY_REQUEST_KEY_TYPE: {
+        console.log('Adding Key Type');
         this.keyType = tlv;
         break;
       }
       case TLVUtils.READER_KEY_REQUEST_READER_PRIVATE_KEY: {
+        console.log('Adding Reader Private Key');
         this.readerPrivateKey = tlv;
         break;
       }
       case TLVUtils.READER_KEY_REQUEST_UNKNOWN: {
+        console.log('Adding Unknown');
         this.unknown = tlv;
         break;
       }
       case TLVUtils.READER_KEY_REQUEST_KEY_IDENTIFIER: {
+        console.log('Adding Key Identifier');
         this.keyIdentifier = tlv;
         break;
+      }
+      default: {
+        console.log(`Invalid TLVReaderKeyRequest sub tlv: ${tlv.type}`);
       }
       }
     });
