@@ -86,7 +86,7 @@ export class TLVUtils {
     const sha256hash: string = createHash('sha256')
       .update(`${KEY_IDENTIFIER}${readerPrivateKey}`)
       .digest('hex');
-    return sha256hash.substring(0, 8);   // first 8 Bytes is the Reader Identifier
+    return sha256hash.substring(0, 16);   // first 8 Bytes is the Reader Identifier
   }
 }
 
@@ -261,7 +261,7 @@ export class TLVDeviceCredentialResponse {
 
   static getResponseForGetOperation(keyIdentifier: string): TLVDeviceCredentialResponse {
     const response = new TLVDeviceCredentialResponse();
-    response.keyIdentifier = TLV.new(TLVUtils.DEVICE_CREDENTIAL_RESPONSE_KEY_IDENTIFIER, keyIdentifier.length, keyIdentifier);
+    response.keyIdentifier = TLV.new(TLVUtils.DEVICE_CREDENTIAL_RESPONSE_KEY_IDENTIFIER, keyIdentifier.length / 2, keyIdentifier);
 
     response.operation = TLVUtils.OPERATION_GET;
 
@@ -270,7 +270,7 @@ export class TLVDeviceCredentialResponse {
 
   static getResponseForAddOperation(issuerKeyIdentifier: string, status: number): TLVDeviceCredentialResponse {
     const response = new TLVDeviceCredentialResponse();
-    response.issuerKeyIdentifier = TLV.new(TLVUtils.DEVICE_CREDENTIAL_RESPONSE_ISSUER_KEY_IDENTIFIER, issuerKeyIdentifier.length, issuerKeyIdentifier);
+    response.issuerKeyIdentifier = TLV.new(TLVUtils.DEVICE_CREDENTIAL_RESPONSE_ISSUER_KEY_IDENTIFIER, issuerKeyIdentifier.length / 2, issuerKeyIdentifier);
     response.status = TLV.new(TLVUtils.DEVICE_CREDENTIAL_RESPONSE_STATUS, 1, status);
 
     response.operation = TLVUtils.OPERATION_ADD;
@@ -351,7 +351,7 @@ export class TLVReaderKeyResponse {
 
   static getResponseForGetOperation(keyIdentifier: string): TLVReaderKeyResponse {
     const response = new TLVReaderKeyResponse();
-    response.keyIdentifier = TLV.new(TLVUtils.READER_KEY_RESPONSE_KEY_IDENTIFIER, keyIdentifier.length, keyIdentifier);
+    response.keyIdentifier = TLV.new(TLVUtils.READER_KEY_RESPONSE_KEY_IDENTIFIER, keyIdentifier.length / 2, keyIdentifier);
 
     response.operation = TLVUtils.OPERATION_GET;
 
