@@ -29,11 +29,14 @@ export class Lock extends Accessory {
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
   private readonly lastKnownActionKey: string = 'LockLastKnownAction';
 
-  // https://github.com/kupa22/apple-homekey#characteristic-nfc-access-supported-configuration
   // base64 encoded hex "010110020110"; 16 keys each
+  private readonly deviceCredentialPublicKeysCount: number = 16;
+  private readonly readerPrivateKeysCount: number = 16;
   private readonly nfcAccessSupportedConfiguration: string = 'AQEQAgEQ';
 
-  // https://github.com/kupa22/apple-homekey#characteristic-hardware-finish
+  private deviceCredentialPublicKeys = new Map<string, string>();   // Issuer Key Identifier - Device Credential Public Key
+  private readerPrivateKeys = new Map<string, string>();   // Key Identifier - Reader Private Key
+
   // base64 encoded hex
   private readonly lockHardwareFinish: Record<string, string> = {
     'tan': 'AQTO1doA',      // 0104CED5DA00
@@ -50,9 +53,6 @@ export class Lock extends Accessory {
     LockManagementAutoSecurityTimeout: 0,
     LockLastKnownAction: Lock.UNSECURED_REMOTELY,
   };
-
-  private deviceCredentialPublicKeys = new Map<string, string>();
-  private readerPrivateKey: string = '';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -347,15 +347,25 @@ export class Lock extends Accessory {
       if (tlvRequest.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
-        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation('');
-        hexTlvResponse = response.toHexString();
+        if (this.deviceCredentialPublicKeys.size > 0) {
+          const issuerKeyIdentifier = this.deviceCredentialPublicKeys.keys().next().value;
+
+          if (issuerKeyIdentifier !== undefined) {
+            const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation(issuerKeyIdentifier);
+            hexTlvResponse = response.toHexString();
+          }
+        }
       }
       else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
-        if (this.readerPrivateKey !== '') {
-          const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(TLVUtils.getReaderIdentifier(this.readerPrivateKey));
-          hexTlvResponse = response.toHexString();
+        if (this.readerPrivateKeys.size > 0) {
+          const readerKeyIdentifier = this.readerPrivateKeys.keys().next().value;
+
+          if (readerKeyIdentifier !== undefined) {
+            const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(readerKeyIdentifier);
+            hexTlvResponse = response.toHexString();
+          }
         }
       }
       else {
@@ -369,21 +379,46 @@ export class Lock extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
-        this.deviceCredentialPublicKeys.set(request.issuerKeyIdentifier!.value as string, request.deviceCredentialPublicKey!.value as string);
         const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
-        //const keyState: number = request.keyState!.value as number;
+        const deviceCredentialPublicKey = request.deviceCredentialPublicKey!.value as string;
+        // const keyState: number = request.keyState!.value as number;
+        // const keyType: number = request.keyType!.value as number;
 
-        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, TLVUtils.STATUS_SUCCESS);
+        let status = TLVUtils.STATUS_SUCCESS;
+        if (this.deviceCredentialPublicKeys.size >= this.deviceCredentialPublicKeysCount) {
+          status = TLVUtils.STATUS_OUT_OF_RESOURCES;
+        }
+        else if (this.deviceCredentialPublicKeys.get(issuerKeyIdentifier) !== undefined) {
+          status = TLVUtils.STATUS_DUPLICATE;
+        }
+        else {
+          this.deviceCredentialPublicKeys.set(issuerKeyIdentifier, deviceCredentialPublicKey);
+        }
+
+        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, status);
         hexTlvResponse = response.toHexString();
       }
       else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
-        this.readerPrivateKey = request.readerPrivateKey!.value as string;
-        //const unknown: string = request.unknown!.value as string;
+        const readerPrivateKey = request.readerPrivateKey!.value as string;
+        // const keyType: number = request.keyType!.value as number;
+        // const unknown: string = request.unknown!.value as string;
 
-        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(TLVUtils.STATUS_SUCCESS);
+        const readerKeyIdentifier = TLVUtils.getReaderIdentifier(readerPrivateKey);
+        let status = TLVUtils.STATUS_SUCCESS;
+        if (this.readerPrivateKeys.size >= this.readerPrivateKeysCount) {
+          status = TLVUtils.STATUS_OUT_OF_RESOURCES;
+        }
+        else if (this.readerPrivateKeys.get(readerKeyIdentifier) !== undefined) {
+          status = TLVUtils.STATUS_DUPLICATE;
+        }
+        else {
+          this.readerPrivateKeys.set(readerKeyIdentifier, readerPrivateKey);
+        }
+
+        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(status);
         hexTlvResponse = response.toHexString();
       }
       else {
@@ -398,23 +433,36 @@ export class Lock extends Accessory {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Device Credential`);
 
         const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
-        this.deviceCredentialPublicKeys.delete(request.issuerKeyIdentifier!.value as string);
-        //const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
-        //const keyState: number = request.keyState!.value as number;
+        const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
+        //const keyIdentifier: number = request.keyIdentifier!.value as number;
 
-        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
+        let status = TLVUtils.STATUS_SUCCESS;
+        if (this.deviceCredentialPublicKeys.get(issuerKeyIdentifier) === undefined) {
+          status = TLVUtils.STATUS_DOES_NOT_EXIST;
+        }
+        else {
+          this.deviceCredentialPublicKeys.delete(issuerKeyIdentifier);
+        }
+
+        const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(status);
         hexTlvResponse = response.toHexString();
       }
       // Not called
       else if (tlvRequest.request.type === TLVUtils.READER_KEY_REQUEST) {
         this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: Reader Key`);
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
-        this.readerPrivateKey = '';
-        //const unknown: string = request.unknown!.value as string;
+        const keyIdentifier = request.keyIdentifier!.value as string;
 
-        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForRemoveOperation(TLVUtils.STATUS_SUCCESS);
+        let status = TLVUtils.STATUS_SUCCESS;
+        if (this.readerPrivateKeys.get(keyIdentifier) === undefined) {
+          status = TLVUtils.STATUS_DOES_NOT_EXIST;
+        }
+        else {
+          this.readerPrivateKeys.delete(keyIdentifier);
+        }
+
+        const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForRemoveOperation(status);
         hexTlvResponse = response.toHexString();
       }
       else {
