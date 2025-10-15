@@ -82,11 +82,16 @@ export class TLVUtils {
   }
 
   static getReaderIdentifier(readerPrivateKey: string) {
-    const KEY_IDENTIFIER = '6B65792D6964656E746966696572';
-    const sha256hash: string = createHash('sha256')
-      .update(`${KEY_IDENTIFIER}${readerPrivateKey}`)
-      .digest('hex');
-    return sha256hash.substring(0, 16);   // first 8 Bytes is the Reader Identifier
+    const KEY_IDENTIFIER = '6B65792D6964656E746966696572';    // hex encoding of "key-identifier"
+
+    const prefixBuffer = Buffer.from(KEY_IDENTIFIER, 'hex');
+    const readerPrivateKeyBuffer = Buffer.from(readerPrivateKey, 'hex');
+    const valueBuffer = Buffer.concat([prefixBuffer, readerPrivateKeyBuffer]);
+
+    const sha256hash: Buffer = createHash('sha256').update(valueBuffer).digest();
+    const first8Bytes: Buffer = sha256hash.subarray(0, 8);
+
+    return first8Bytes.toString('hex');
   }
 }
 
