@@ -79,8 +79,12 @@ export class Lock extends Accessory {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
       const cachedLastKnownAction: number = accessoryState[this.lastKnownActionStorageKey] as number;
-      const cachedDeviceCredentialPublicKeys: Map<string, string> = new Map(JSON.parse(accessoryState[this.deviceCredentialPublicKeysStorageKey]));
-      const cachedReaderPrivateKeys: Map<string, string> = new Map(JSON.parse(accessoryState[this.readerPrivateKeysStorageKey]));
+
+      const jsonDeviceCredentialPublicKeys: string = accessoryState[this.deviceCredentialPublicKeysStorageKey];
+      // eslint-disable-next-line max-len
+      const cachedDeviceCredentialPublicKeys = (jsonDeviceCredentialPublicKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonDeviceCredentialPublicKeys)) : undefined;
+      const jsonReaderPrivateKeys: string = accessoryState[this.readerPrivateKeysStorageKey];
+      const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonReaderPrivateKeys)) : undefined;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
