@@ -15,11 +15,13 @@ export class TLVUtils {
   public static readonly DEVICE_CREDENTIAL_RESPONSE: number = 5;
   public static readonly READER_KEY_REQUEST: number = 6;
   public static readonly READER_KEY_RESPONSE: number = 7;
+  public static readonly REQUESTS: number[] = [TLVUtils.DEVICE_CREDENTIAL_REQUEST, TLVUtils.READER_KEY_REQUEST];
 
   // Operation value
   public static readonly OPERATION_GET: number = 1;
   public static readonly OPERATION_ADD: number = 2;
   public static readonly OPERATION_REMOVE: number = 3;
+  public static readonly OPERATIONS: number[] = [TLVUtils.OPERATION_GET, TLVUtils.OPERATION_ADD, TLVUtils.OPERATION_REMOVE];
 
   // Device Credential Request
   public static readonly DEVICE_CREDENTIAL_REQUEST_KEY_TYPE: number = 1;                        // Add

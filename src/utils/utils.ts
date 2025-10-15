@@ -23,6 +23,10 @@ export class Utils {
     return base64String;
   }
 
+  static concatenate(num1: number, num2: number): number {
+    return (num1 * 100) + num2;
+  }
+
   static now(): ZonedDateTime {
     const now: ZonedDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.SYSTEM);
     return now;
