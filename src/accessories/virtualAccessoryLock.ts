@@ -39,6 +39,7 @@ export class Lock extends Accessory {
 
   // base64 encoded hex
   private readonly lockHardwareFinish: Record<string, string> = {
+    'default': 'AQT///8A',  // 0104FFFFFF00
     'tan': 'AQTO1doA',      // 0104CED5DA00
     'gold': 'AQSq1uwA',     // 0104AAD6EC00
     'silver': 'AQTj4+MA',   // 0104E3E3E300
@@ -64,7 +65,7 @@ export class Lock extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
-    const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor;
+    const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
