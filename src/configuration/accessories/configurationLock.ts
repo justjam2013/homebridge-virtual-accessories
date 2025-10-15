@@ -11,7 +11,8 @@ import { Utils } from '../../utils/utils.js';
 export class LockConfiguration implements Validatable {
   defaultState!: string;
   autoSecurityTimeout!: number;
-  walletKeyColor: string = 'tan';
+  // walletKeyColor: string = 'tan';
+  walletKeyColor!: string;
 
   private errorFields: string[] = [];
 
@@ -28,9 +29,14 @@ export class LockConfiguration implements Validatable {
       Utils.isValidTimeout(this.autoSecurityTimeout)
     );
 
+    // const isValidWalletKeyColor: boolean = (
+    //   Utils.required(this.walletKeyColor) &&
+    //   WalletKeyColor.Colors.includes(this.walletKeyColor)
+    // );
     const isValidWalletKeyColor: boolean = (
-      Utils.required(this.walletKeyColor) &&
-      WalletKeyColor.Colors.includes(this.walletKeyColor)
+      this.walletKeyColor !== undefined?
+        WalletKeyColor.Colors.includes(this.walletKeyColor) :
+        true
     );
 
     // Store fields failing validation

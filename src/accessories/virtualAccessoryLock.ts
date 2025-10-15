@@ -67,7 +67,9 @@ export class Lock extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
-    const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
+    // const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
+    // HomeKey appears to be broken right now, so temporarily leaving NFC out if no HomeKey card color is selected
+    const walletKeyColor = (this.accessoryConfiguration.lock.walletKeyColor !== undefined) ? this.accessoryConfiguration.lock.walletKeyColor : undefined;
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
@@ -105,7 +107,9 @@ export class Lock extends Accessory {
 
     this.states.LockTargetState = this.states.LockCurrentState;
 
-    this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor]);
+    if (walletKeyColor !== undefined) {
+      this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor]);
+    }
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
 
@@ -157,18 +161,20 @@ export class Lock extends Accessory {
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
 
+    if (walletKeyColor !== undefined) {
     // Creating Nfc Access service
-    const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
-    const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
-      || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
+      const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
+      const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
+        || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
 
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
-      .onGet(this.getConfigurationState.bind(this));
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
-      .onSet(this.setNFCAccessControlPoint.bind(this))
-      .onGet(this.getNFCAccessControlPoint.bind(this));
-    nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
-      .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
+        .onGet(this.getConfigurationState.bind(this));
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+        .onSet(this.setNFCAccessControlPoint.bind(this))
+        .onGet(this.getNFCAccessControlPoint.bind(this));
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
+        .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
+    }
   }
 
   // Handlers

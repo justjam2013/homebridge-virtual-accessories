@@ -634,7 +634,7 @@
                   "minimum": 0
                 },
                 "walletKeyColor": {
-                  "title": "Wallet Key Color",
+                  "title": "HomeKey Color",
                   "description": "HomeKey card color in Wallet app (default: Tan)",
                   "type": "string",
                   "oneOf": [
@@ -643,6 +643,11 @@
                     { "title": "Silver", "enum": ["silver"] },
                     { "title": "Black", "enum": ["black"] }
                   ]
+                },
+                "": {
+                  "description": "Note: HomeKey appears to currently be brokem. If you are experiencing issues, set HomeKey Color to None.",
+                  "type": "object",
+                  "properties": {}
                 }
               },
               "condition": {
