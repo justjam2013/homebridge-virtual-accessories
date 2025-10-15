@@ -28,7 +28,7 @@ export abstract class Accessory {
 
   protected storagePath: string;
 
-  private accessoryInformationService?: Service;
+  protected accessoryInformationService?: Service;
 
   constructor(
     platform: VirtualAccessoriesPlatform,

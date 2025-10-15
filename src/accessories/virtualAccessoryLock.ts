@@ -7,6 +7,7 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { Utils } from '../utils/utils.js';
+import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRequest, TLVReaderKeyResponse, TLVRequest, TLVUtils } from '../utils/tlv.js';
 
 /**
  * Lock - Accessory implementation
@@ -26,7 +27,26 @@ export class Lock extends Accessory {
 
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
-  private readonly lastKnownAction: string = 'LockLastKnownAction';
+  private readonly lastKnownActionStorageKey: string = 'LockLastKnownAction';
+  private readonly deviceCredentialPublicKeysStorageKey = 'DeviceCredentialPublicKeys';
+  private readonly readerPrivateKeysStorageKey = 'readerPrivateKeys';
+
+  // base64 encoded hex "010110020110"; 16 keys each
+  private readonly deviceCredentialPublicKeysCount: number = 16;
+  private readonly readerPrivateKeysCount: number = 16;
+  private readonly nfcAccessSupportedConfiguration: string = 'AQEQAgEQ';
+
+  private deviceCredentialPublicKeys = new Map<string, string>();   // Issuer Key Identifier - Device Credential Public Key
+  private readerPrivateKeys = new Map<string, string>();   // Key Identifier - Reader Private Key
+
+  // base64 encoded hex
+  private readonly lockHardwareFinish: Record<string, string> = {
+    'default': 'AQT///8A',  // 0104FFFFFF00
+    'tan': 'AQTO1doA',      // 0104CED5DA00
+    'gold': 'AQSq1uwA',     // 0104AAD6EC00
+    'silver': 'AQTj4+MA',   // 0104E3E3E300
+    'black': 'AQQAAAAA',    // 010400000000
+  };
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -47,6 +67,9 @@ export class Lock extends Accessory {
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
+    // const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
+    // HomeKey appears to be broken right now, so temporarily leaving NFC out if no HomeKey card color is selected
+    const walletKeyColor = (this.accessoryConfiguration.lock.walletKeyColor !== undefined) ? this.accessoryConfiguration.lock.walletKeyColor : undefined;
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
@@ -57,7 +80,13 @@ export class Lock extends Accessory {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
-      const cachedLastKnownAction: number = accessoryState[this.lastKnownAction] as number;
+      const cachedLastKnownAction: number = accessoryState[this.lastKnownActionStorageKey] as number;
+
+      const jsonDeviceCredentialPublicKeys: string = accessoryState[this.deviceCredentialPublicKeysStorageKey];
+      // eslint-disable-next-line max-len
+      const cachedDeviceCredentialPublicKeys = (jsonDeviceCredentialPublicKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonDeviceCredentialPublicKeys)) : undefined;
+      const jsonReaderPrivateKeys: string = accessoryState[this.readerPrivateKeysStorageKey];
+      const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonReaderPrivateKeys)) : undefined;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
@@ -68,9 +97,19 @@ export class Lock extends Accessory {
       if (cachedLastKnownAction !== undefined) {
         this.states.LockLastKnownAction = cachedLastKnownAction;
       }
+      if (cachedDeviceCredentialPublicKeys !== undefined) {
+        this.deviceCredentialPublicKeys = cachedDeviceCredentialPublicKeys;
+      }
+      if (cachedReaderPrivateKeys !== undefined) {
+        this.readerPrivateKeys = cachedReaderPrivateKeys;
+      }
     }
 
     this.states.LockTargetState = this.states.LockCurrentState;
+
+    if (walletKeyColor !== undefined) {
+      this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor]);
+    }
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
 
@@ -121,6 +160,21 @@ export class Lock extends Accessory {
       });
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
+
+    if (walletKeyColor !== undefined) {
+    // Creating Nfc Access service
+      const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
+      const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
+        || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
+
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
+        .onGet(this.getConfigurationState.bind(this));
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+        .onSet(this.setNFCAccessControlPoint.bind(this))
+        .onGet(this.getNFCAccessControlPoint.bind(this));
+      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
+        .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
+    }
   }
 
   // Handlers
@@ -200,11 +254,61 @@ export class Lock extends Accessory {
     return lockLastKnownAction;
   }
 
+  // NFC Service handlers
+
+  async getConfigurationState(): Promise<CharacteristicValue> {
+    const configurationState = 0;   // Successful
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Configuration State: ${configurationState}`);
+
+    return configurationState;
+  }
+
+  async setNFCAccessControlPoint(value: CharacteristicValue) {
+    const nfcAccessControlPoint = value as string;
+
+    try {
+      const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
+
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
+
+      return response;
+    }
+    catch (error) {
+      this.log.error(`Caught error ${error}`);
+      if (error instanceof Error) {
+        this.log.error(`Error message: ${error.message}`);
+        this.log.error(`Error stack: ${error.stack}`);
+      }
+    }
+
+    return '';
+  }
+
+  async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
+    const nfcAccessControlPoint = '';
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
+
+    return nfcAccessControlPoint;
+  }
+
+  async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
+    const nfcAccessSupportedConfiguration = this.nfcAccessSupportedConfiguration;
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
+
+    return nfcAccessSupportedConfiguration;
+  }
+
   protected getJsonState(): string {
     const json = JSON.stringify({
       [this.stateStorageKey]: this.states.LockCurrentState,
       [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
-      [this.lastKnownAction]: this.states.LockLastKnownAction,
+      [this.lastKnownActionStorageKey]: this.states.LockLastKnownAction,
+      [this.deviceCredentialPublicKeysStorageKey]: JSON.stringify(this.deviceCredentialPublicKeys),
+      [this.readerPrivateKeysStorageKey]: JSON.stringify(this.readerPrivateKeys),
     });
     return json;
   }
@@ -246,5 +350,158 @@ export class Lock extends Accessory {
     else {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] No Security Timeout defined`);
     }
+  }
+
+  private readonly GET_DEVICE_CREDENTIAL_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_GET, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
+  private readonly GET_READER_KEY_REQUEST: number =             Utils.concatenate(TLVUtils.OPERATION_GET, TLVUtils.READER_KEY_REQUEST);
+  private readonly ADD_DEVICE_CREDENTIAL_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_ADD, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
+  private readonly ADD_GET_READER_KEY_REQUEST: number =         Utils.concatenate(TLVUtils.OPERATION_ADD, TLVUtils.READER_KEY_REQUEST);
+  private readonly RFEMOVE_DEVICE_CREDENTIAL_REQUEST: number =  Utils.concatenate(TLVUtils.OPERATION_REMOVE, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
+  private readonly REMOVE_GET_READER_KEY_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_REMOVE, TLVUtils.READER_KEY_REQUEST);
+
+  private processAccessControlPointRequest(base64TlvRequest: string) {
+    const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
+    const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
+
+    let hexTlvResponse: string = '';
+
+    const controlPointRequest: number = Utils.concatenate(tlvRequest.operation.value as number, tlvRequest.request.type);
+
+    switch (controlPointRequest) {
+    // Not called
+    case this.GET_DEVICE_CREDENTIAL_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Device Credential`);
+
+      if (this.deviceCredentialPublicKeys.size > 0) {
+        const issuerKeyIdentifier = this.deviceCredentialPublicKeys.keys().next().value;
+
+        if (issuerKeyIdentifier !== undefined) {
+          const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForGetOperation(issuerKeyIdentifier);
+          hexTlvResponse = response.toHexString();
+        }
+      }
+
+      break;
+    }
+    case this.GET_READER_KEY_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Reader Key`);
+
+      if (this.readerPrivateKeys.size > 0) {
+        const readerKeyIdentifier = this.readerPrivateKeys.keys().next().value;
+
+        if (readerKeyIdentifier !== undefined) {
+          const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForGetOperation(readerKeyIdentifier);
+          hexTlvResponse = response.toHexString();
+        }
+      }
+
+      break;
+    }
+    case this.ADD_DEVICE_CREDENTIAL_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Device Credential`);
+
+      const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
+      const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
+      const deviceCredentialPublicKey = request.deviceCredentialPublicKey!.value as string;
+      // const keyState: number = request.keyState!.value as number;
+      // const keyType: number = request.keyType!.value as number;
+
+      let status = TLVUtils.STATUS_SUCCESS;
+      if (this.deviceCredentialPublicKeys.size >= this.deviceCredentialPublicKeysCount) {
+        status = TLVUtils.STATUS_OUT_OF_RESOURCES;
+      }
+      else if (this.deviceCredentialPublicKeys.get(issuerKeyIdentifier) !== undefined) {
+        status = TLVUtils.STATUS_DUPLICATE;
+      }
+      else {
+        this.deviceCredentialPublicKeys.set(issuerKeyIdentifier, deviceCredentialPublicKey);
+      }
+
+      const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForAddOperation(issuerKeyIdentifier, status);
+      hexTlvResponse = response.toHexString();
+
+      break;
+    }
+    case this.ADD_GET_READER_KEY_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Reader Key`);
+
+      const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
+      const readerPrivateKey = request.readerPrivateKey!.value as string;
+      // const keyType: number = request.keyType!.value as number;
+      // const unknown: string = request.unknown!.value as string;
+
+      const readerKeyIdentifier = TLVUtils.getReaderIdentifier(readerPrivateKey);
+      let status = TLVUtils.STATUS_SUCCESS;
+      if (this.readerPrivateKeys.size >= this.readerPrivateKeysCount) {
+        status = TLVUtils.STATUS_OUT_OF_RESOURCES;
+      }
+      else if (this.readerPrivateKeys.get(readerKeyIdentifier) !== undefined) {
+        status = TLVUtils.STATUS_DUPLICATE;
+      }
+      else {
+        this.readerPrivateKeys.set(readerKeyIdentifier, readerPrivateKey);
+      }
+
+      const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForAddOperation(status);
+      hexTlvResponse = response.toHexString();
+
+      break;
+    }
+    // Not called
+    case this.RFEMOVE_DEVICE_CREDENTIAL_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Device Credential`);
+
+      const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
+      const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
+      //const keyIdentifier: number = request.keyIdentifier!.value as number;
+
+      let status = TLVUtils.STATUS_SUCCESS;
+      if (this.deviceCredentialPublicKeys.get(issuerKeyIdentifier) === undefined) {
+        status = TLVUtils.STATUS_DOES_NOT_EXIST;
+      }
+      else {
+        this.deviceCredentialPublicKeys.delete(issuerKeyIdentifier);
+      }
+
+      const response: TLVDeviceCredentialResponse = TLVDeviceCredentialResponse.getResponseForRemoveOperation(status);
+      hexTlvResponse = response.toHexString();
+
+      break;
+    }
+    case this.REMOVE_GET_READER_KEY_REQUEST: {
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Reader Key`);
+
+      const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
+      const keyIdentifier = request.keyIdentifier!.value as string;
+
+      let status = TLVUtils.STATUS_SUCCESS;
+      if (this.readerPrivateKeys.get(keyIdentifier) === undefined) {
+        status = TLVUtils.STATUS_DOES_NOT_EXIST;
+      }
+      else {
+        this.readerPrivateKeys.delete(keyIdentifier);
+      }
+
+      const response: TLVReaderKeyResponse = TLVReaderKeyResponse.getResponseForRemoveOperation(status);
+      hexTlvResponse = response.toHexString();
+
+      break;
+    }
+    default: {
+      if (!TLVUtils.OPERATIONS.includes(tlvRequest.operation.type)) {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
+      }
+      if (!TLVUtils.REQUESTS.includes(tlvRequest.request.type)) {
+        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
+      }
+    }
+    }
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
+
+    const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
+    return base64TlvResponse;
   }
 }

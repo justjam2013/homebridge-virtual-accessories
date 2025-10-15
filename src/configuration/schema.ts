@@ -252,3 +252,16 @@ export class ValveDuration {
   static DurationMin: number = 0;
   static DurationMax: number = 3600;
 }
+
+/**
+ * 
+ */
+export class WalletKeyColor {
+
+  static Tan: string = 'tan';
+  static Gold: string = 'gold';
+  static Silver: string = 'silver';
+  static Black: string = 'black';
+
+  static Colors: string[] = [ WalletKeyColor.Black, WalletKeyColor.Gold, WalletKeyColor.Silver, WalletKeyColor.Tan ];
+}
