@@ -270,8 +270,8 @@ export class Lock extends Accessory {
     try {
       const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
 
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
 
       return response;
     }
@@ -361,8 +361,9 @@ export class Lock extends Accessory {
 
   private processAccessControlPointRequest(base64TlvRequest: string) {
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
+
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
 
     let hexTlvResponse: string = '';
 
@@ -498,7 +499,7 @@ export class Lock extends Accessory {
     }
     }
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
 
     const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
     return base64TlvResponse;
