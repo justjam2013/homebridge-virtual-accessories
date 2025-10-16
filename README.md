@@ -82,7 +82,7 @@
   - [Known Issues](#known-issues)
     - [Issues with Homebridge UI:](#issues-with-homebridge-ui)
     - [Issues with underlying frameworks:](#issues-with-underlying-frameworks)
-    - [Issues with HomeKit:](#issues-with-homekit)
+    - [Issues with HomeKit](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
 
@@ -108,7 +108,7 @@ Currently, these are the implemented virtual accessories:
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
--   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes.
+-   **Lock.** Allows you to create a virtual lock. Generates a HomeKit notification when the accessory's state changes. This will also create a HomeKey card in the Wallet app. This card is non-functional as it requires some piece of hardware to complete the loop. Also see the [note below](#issues-with-homekit) regarding issues with HomeKey.
 -   **Microphone.** Allows you to create a virtual microphone.
 -   **Security System.** Allows you to create a virtual security system. Generates a HomeKit notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration). A [webhook endpoint](#webhook-service-configuration) is also available for a panic alarm.
 -   **Speaker.** Allows you to create a virtual speaker.
@@ -1197,12 +1197,13 @@ You can catch a glimpse in the [What I Use Homebridge For (and Why I Love It)](h
 
 #### Issues with underlying frameworks:
 
--   There is an issue with the drag-and-drop reordering, where the form layout can get degraded. A bug report has been opened on the framework repo.
 -   There is an issue with checkboxes requiring two clicks to uncheck. A bug report has been opened on the framework repo.
+-   There is an issue where some of the settings for the Security System may get saved in the JSON config. This does add some noise, but it does not ater the behavior of the individual accessories.
 
 #### Issues with HomeKit:
 
 -   The volume on the Doorbell accessory does not work. This is a limitation of Homekit. Per the [HomeKit Accessory Protocol specification](https://forum.iobroker.net/assets/uploads/files/1634848447889-apple-spezifikation-homekit.pdf), the Doorbell is `the primary service of the Video Doorbell Profile.` What that means is that a Doorbell should only be added to HomeKit as part of a Video Doorbell and the Home app will not display a standalone Doorbell. This plugin takes advantage of the fact that, although it is not displayed, the Doorbell is still there and the companion switch allows you to interact with it, leading HomeKit to play a chime on the HomePods. Unfortunately, because the Doorbell is not displayed, you cannot configure which HomePod(s) it connects to and you cannot configure the volume. You can set the volume level in the free [Eve app](https://www.evehome.com/en-us/eve-app), however it will not affect the HomePod volume.
+-   Some users have reported issues with HomeKey, where the `New Features for Locks` tile keeps displaying in the Home app. Tapping `Set Up Now` causes the tile to close, but the setup popup screen does not display and the `New Features for Locks` tile appears again shortly thereafter. This has been reported as broken since iOS 18 there have been reports that it is still broken in iOS 28. This does not appear to affect all users. If you are having issues with it, leave the `HomeKey Color` field set to `None`.
 
 > [!NOTE]
 > I considered creating a virtual Video Doorbell accessory, however I ruled it out due to the amount of work required. Also, this functionality is easily implemented with the [Homebridge Camera Ffmpeg](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg) plugin.
