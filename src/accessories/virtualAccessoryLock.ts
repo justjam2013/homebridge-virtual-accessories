@@ -39,6 +39,8 @@ export class Lock extends Accessory {
   private deviceCredentialPublicKeys = new Map<string, string>();   // Issuer Key Identifier - Device Credential Public Key
   private readerPrivateKeys = new Map<string, string>();   // Key Identifier - Reader Private Key
 
+  private setupHomeKey: boolean;
+
   // base64 encoded hex
   private readonly lockHardwareFinish: Record<string, string> = {
     'default': 'AQT///8A',  // 0104FFFFFF00
@@ -70,6 +72,7 @@ export class Lock extends Accessory {
     // const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
     // HomeKey appears to be broken right now, so temporarily leaving NFC out if no HomeKey card color is selected
     const walletKeyColor = (this.accessoryConfiguration.lock.walletKeyColor !== undefined) ? this.accessoryConfiguration.lock.walletKeyColor : undefined;
+    this.setupHomeKey = (walletKeyColor === undefined) ? false : true;
 
     this.states.LockCurrentState = this.defaultState;
     this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
@@ -107,8 +110,8 @@ export class Lock extends Accessory {
 
     this.states.LockTargetState = this.states.LockCurrentState;
 
-    if (walletKeyColor !== undefined) {
-      this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor]);
+    if (this.setupHomeKey) {
+      this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor as string]);
     }
 
     this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
@@ -161,7 +164,7 @@ export class Lock extends Accessory {
     lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
 
-    if (walletKeyColor !== undefined) {
+    if (this.setupHomeKey) {
     // Creating Nfc Access service
       const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
       const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
@@ -303,13 +306,19 @@ export class Lock extends Accessory {
   }
 
   protected getJsonState(): string {
-    const json = JSON.stringify({
+    const jsonState = {
       [this.stateStorageKey]: this.states.LockCurrentState,
       [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
       [this.lastKnownActionStorageKey]: this.states.LockLastKnownAction,
-      [this.deviceCredentialPublicKeysStorageKey]: JSON.stringify(this.deviceCredentialPublicKeys),
-      [this.readerPrivateKeysStorageKey]: JSON.stringify(this.readerPrivateKeys),
-    });
+    };
+
+    if (this.setupHomeKey) {
+      Object.assign(jsonState, { [this.deviceCredentialPublicKeysStorageKey]: JSON.stringify(this.deviceCredentialPublicKeys) });
+      Object.assign(jsonState, { [this.readerPrivateKeysStorageKey]: JSON.stringify(this.readerPrivateKeys) });
+    }
+
+    const json = JSON.stringify(jsonState);
+
     return json;
   }
 
