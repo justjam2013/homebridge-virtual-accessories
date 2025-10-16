@@ -645,7 +645,7 @@
                   ]
                 },
                 "": {
-                  "description": "Note: HomeKey appears to currently be brokem. If you are experiencing issues, set HomeKey Color to None.",
+                  "description": "Note: HomeKey appears to currently be broken. If you are experiencing issues, set HomeKey Color to None.",
                   "type": "object",
                   "properties": {}
                 }
