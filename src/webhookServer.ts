@@ -13,9 +13,14 @@ import { UpdatableChargingState } from './accessories/updatableChargingState.js'
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
 import { UpdatableSensor } from './sensors/updatableSensor.js';
 
+import { Certificate, createCA, createCert } from './utils/mkcertUtils.js';
+
 import { SensorValueUpdateNotAllowed } from './errors.js';
 
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
+import http from 'http';
+import https from 'https';
+import fs from 'fs-extra';
 
 /**
  * WebhookServer
@@ -30,12 +35,13 @@ export class WebhookServer {
   private readonly serverName: string = 'Sensor Server';
 
   private server: Express = express();
-  private httpServer?: Server;
-  readonly port: number;
+  private httpXServer: http.Server | https.Server;
+  private webhookServer?: Server;
+  private port: number;
 
   constructor(
     log: VirtualLogger,
-    port: number
+    port: number,
   );
   constructor(
     log: VirtualLogger,
@@ -149,18 +155,39 @@ export class WebhookServer {
         this.processRequest(accessoryId, 'battery', chargingState, response);
       }
     });
+
+    // To be added to config
+    const useSSL: boolean = true;
+    const domains: string[] = [];
+
+    // Setup http/https
+    const certificate: Certificate | undefined = useSSL ? this.getCertificate(domains) : undefined;
+
+    if (certificate === undefined) {
+      this.httpXServer = http.createServer(this.server);
+    }
+    else {
+      this.server.enable('trust proxy');
+      this.server.use(this.requireHTTPS);
+
+      const credentials = {
+        key: certificate.key,
+        cert: certificate.cert,
+      };
+      this.httpXServer = https.createServer(credentials, this.server);
+    }
   }
 
   start() {
     this.log.info(`[${this.serverName}] Starting Sensor Server`);
-    this.httpServer = this.server.listen(this.port, () => {
+    this.webhookServer = this.httpXServer.listen(this.port, () => {
       this.log.info(`[${this.serverName}] Sensor Server running on port ${this.port}`);
     });
   }
 
   stop() {
     this.log.info(`[${this.serverName}] Stopping Sensor Server`);
-    this.httpServer?.close(() => {
+    this.webhookServer?.close(() => {
       this.log.info(`[${this.serverName}] Sensor Server terminated`);
     });
   }
@@ -217,6 +244,71 @@ export class WebhookServer {
   getAccessories(): Accessory[] {
     const accessories: Accessory[] = [...this.accessories.values()];
     return accessories;
+  }
+
+  private requireHTTPS(req: Request, res: Response, next: NextFunction) {
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+      next();
+    } else {
+      res.redirect('https://' + req.headers.host + req.url);
+    }
+  }
+
+  private readonly caKeyFile = 'ca.key';
+  private readonly caCertFile = 'ca.cert';
+  private readonly serverKeyFile = 'server.key';
+  private readonly serverCertFile = 'server.crt';
+
+  private generateCA() {
+    const ca: Certificate = createCA({
+      organization: 'MyRoot',
+      countryCode: 'US',
+      state: 'CA',
+      locality: 'San Jose',
+      validity: 3650,   // 10 years
+    });
+    fs.writeFileSync(this.caKeyFile, ca.key);
+    fs.writeFileSync(this.caCertFile, ca.cert);
+    return ca;
+  }
+
+  private generateServerCert(ca: Certificate, domains: string[]) {
+    const cert:Certificate = createCert({
+      ca,
+      domains: ['127.0.0.1', 'localhost', ...domains],
+      validity: 3650,   // 10 years
+    });
+    fs.writeFile(this.serverKeyFile, cert.key);
+    fs.writeFile(this.serverCertFile, cert.cert);
+    return cert;
+  }
+
+  private getCertificate(domains: string[]): Certificate | undefined {
+    try {
+      let certificate: Certificate;
+
+      // Check if CA files exist
+      const serverKeyExists = fs.existsSync(this.serverKeyFile);
+      const serverCertExists = fs.existsSync(this.serverCertFile);
+
+      if (serverKeyExists && serverCertExists) {
+        this.log.debug(`[${this.serverName}] Using existing Certificate`);
+        const serverKey = fs.readFileSync(this.serverKeyFile, 'utf8');
+        const serverCert = fs.readFileSync(this.serverCertFile, 'utf8');
+        certificate = { key: serverKey, cert: serverCert };
+      } else {
+        this.log.info(`[${this.serverName}] Generating Certificates ...`);
+        const ca: Certificate = this.generateCA();
+        certificate = this.generateServerCert(ca, domains);
+        this.log.info(`[${this.serverName}] Successfully generated Certificates`);
+      }
+
+      return certificate;
+    } catch (error) {
+      this.log.error(`[${this.serverName}] Error generating certificates: ${error}`);
+    }
+
+    return;
   }
 
   private accessoryIdIsValid(

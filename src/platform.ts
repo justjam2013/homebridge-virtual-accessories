@@ -73,7 +73,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       }
       else {
         this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
-        
+
         this.sensorUpdateServer = new WebhookServer(this.log, parseInt(sensorServerConfig!.port));
       }
     }
