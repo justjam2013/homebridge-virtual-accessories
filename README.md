@@ -156,13 +156,11 @@ npm install -g homebridge-virtual-accessories
 > Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image and the Homebridge Linux (apt) install, both provide all the necessary tools. If you are choosing to install on other platforms, you will require the appropriate technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on. Below are platform specific installation notes, which I will update as users of this plugin report issues.
 
 > [!IMPORTANT]
-> If you **manually** update the Node.js version that Homebridge is running on, you will need to ensure that the platform-native library `raw-socket` will also be updated. Run the following commands immediately after the Node.js update:
+> If you **manually** update the Node.js version that Homebridge is running on, may also need to update NPM to the version required by your installed Node.js version (please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry). Then you will need to ensure that the platform-native library `raw-socket` is also updated. Run the following commands immediately after the Node.js update:
 > ```
 > npm uninstall raw-socket
 > npm install raw-socket
 > ```
->
-> You may also need to update NPM to the version required by your installed Node.js version. Please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry.
 
 > [!CAUTION]
 > Due to Virtual Accessories For Homebridge using platform-native modules, when updating Node.js, if the `raw-socket` module is also not updated (see above), it may cause the plugin to fail to load and Homebridge to delete all of the plugin's accessories. It is therefore **strongly** recommended to toggle the `Keep Accessories Of Uninstalled Plugins` option to on, at least while performing updates. This setting is in the `Settings` screen, `Startup & Environment` section:
