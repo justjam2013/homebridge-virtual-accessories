@@ -29,7 +29,7 @@ This is a double issue:
 - A dependency is using a module that is not compatible with Node 24
 - Overriding the incompatible dependency with npm 11 (from Node 24) is currently broken
 
-Details are available [this ticket](https://github.com/justjam2013/homebridge-virtual-accessories/issues/632).
+Details are available in [this ticket](https://github.com/justjam2013/homebridge-virtual-accessories/issues/632).
 
 A [ticket](https://github.com/npm/cli/issues/8713) has been opened with `npm` regarding this bug. At the moment, the recommendation is not to update to Node 24.
 
