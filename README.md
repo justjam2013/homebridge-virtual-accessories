@@ -31,7 +31,7 @@ This is a double issue:
 
 Details are available [this ticket](https://github.com/justjam2013/homebridge-virtual-accessories/issues/632).
 
-A [ticket](https://github.com/npm/cli/issues/8713) has been opened with Node regarding this bug. At the moment, the recommendation is not to update to Node 24.
+A [ticket](https://github.com/npm/cli/issues/8713) has been opened with `npm` regarding this bug. At the moment, the recommendation is not to update to Node 24.
 
 ## <!-- Thin separator line -->
 
