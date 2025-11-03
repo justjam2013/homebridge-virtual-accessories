@@ -22,6 +22,19 @@
 
 ## <!-- Thin separator line -->
 
+### 🔴🔴 Warning: Currently this plugin is not compatible with Node 24 🔴🔴
+
+This is a double issue:
+
+- A dependency is using a module that is not compatible with Node 24
+- Overriding the incompatible dependency with the latest `npm 11.6.2` (from Node 24) is currently broken
+
+Details are available in [this ticket](https://github.com/justjam2013/homebridge-virtual-accessories/issues/632).
+
+A [ticket](https://github.com/npm/cli/issues/8713) has been opened with `npm` regarding this bug. At the moment, the recommendation is not to update to Node 24.
+
+## <!-- Thin separator line -->
+
 <details>
   <summary>
     
@@ -156,7 +169,7 @@ npm install -g homebridge-virtual-accessories
 > Virtual Accessories For Homebridge has dependencies on platform-native libraries, which get compiled for that particular platform at install time. Therefore you will need to make sure that the platform you are installing this plugin on has the necessary build tools available. The official Homebridge Docker image and the Homebridge Linux (apt) install, both provide all the necessary tools. If you are choosing to install on other platforms, you will require the appropriate technical skills to do the necessary installs. I have neither the capacity nor the hardware to test installs on every platform that Homebridge runs on. Below are platform specific installation notes, which I will update as users of this plugin report issues.
 
 > [!IMPORTANT]
-> If you manually update the Node.js version that Homebridge is running on, you will need to ensure that the platform-native library `raw-socket` will also be updated. Run the following commands immediately after the Node.js update:
+> If you **manually** upgrade or downgrade the Node.js version that Homebridge is running on, you may also need to upgrade or downgrade NPM to the version required by your new Node.js version (please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry). Then you will need to ensure that the platform-native library `raw-socket` is also updated. After updating Node.js (and NPM if needed), run the following commands before restarting Homebridge:
 > ```
 > npm uninstall raw-socket
 > npm install raw-socket
