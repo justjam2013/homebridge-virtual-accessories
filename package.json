@@ -112,7 +112,6 @@
     "express": "^5.1.0",
     "homebridge-lib": "^7.1.4",
     "net-ping": "^1.2.4",
-    "raw-socket": "^1.8.1",
     "reflect-metadata": "^0.2.2",
     "typeserializer": "^0.2.5"
   },
