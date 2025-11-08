@@ -8,6 +8,8 @@ import { Utils } from '../utils/utils.js';
 export class WebhookServerConfiguration implements Validatable {
   enabled: boolean = false;
   port: string = '60221';
+  useHttps: boolean = false;
+  domains: string[] = [];
 
   private errorFields: string[] = [];
 

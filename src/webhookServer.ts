@@ -38,18 +38,26 @@ export class WebhookServer {
   private httpXServer: http.Server | https.Server;
   private webhookServer?: Server;
   private port: number;
+  private useHttps: boolean;
+  private domains: string[] = [];
 
   constructor(
     log: VirtualLogger,
     port: number,
+    useHttps: boolean,
+    domains: string[],
   );
   constructor(
     log: VirtualLogger,
     port: number,
+    useHttps: boolean,
+    domains: string[],
     accessories?: Accessory[],
   ) {
     this.log = log;
     this.port = port;
+    this.useHttps = useHttps;
+    this.domains = (domains === undefined) ? [] : domains;
 
     // parse application/x-www-form-urlencoded
     this.server.use(express.urlencoded({ extended: true }));
@@ -156,17 +164,17 @@ export class WebhookServer {
       }
     });
 
-    // To be added to config
-    const useSSL: boolean = true;
-    const domains: string[] = [];
-
     // Setup http/https
-    const certificate: Certificate | undefined = useSSL ? this.getCertificate(domains) : undefined;
+    const certificate: Certificate | undefined = this.useHttps ? new ServerCertificate(this.log, this.serverName).getCertificate(this.domains) : undefined;
 
     if (certificate === undefined) {
+      this.log.info(`[${this.serverName}] No certificates found, running in insecure mode (HTTP)`);
+
       this.httpXServer = http.createServer(this.server);
     }
     else {
+      this.log.info(`[${this.serverName}] No certificates found, running in secure mode (HTTPS)`);
+
       this.server.enable('trust proxy');
       this.server.use(this.requireHTTPS);
 
@@ -252,63 +260,6 @@ export class WebhookServer {
     } else {
       res.redirect('https://' + req.headers.host + req.url);
     }
-  }
-
-  private readonly caKeyFile = 'ca.key';
-  private readonly caCertFile = 'ca.cert';
-  private readonly serverKeyFile = 'server.key';
-  private readonly serverCertFile = 'server.crt';
-
-  private generateCA() {
-    const ca: Certificate = createCA({
-      organization: 'MyRoot',
-      countryCode: 'US',
-      state: 'CA',
-      locality: 'San Jose',
-      validity: 3650,   // 10 years
-    });
-    fs.writeFileSync(this.caKeyFile, ca.key);
-    fs.writeFileSync(this.caCertFile, ca.cert);
-    return ca;
-  }
-
-  private generateServerCert(ca: Certificate, domains: string[]) {
-    const cert:Certificate = createCert({
-      ca,
-      domains: ['127.0.0.1', 'localhost', ...domains],
-      validity: 3650,   // 10 years
-    });
-    fs.writeFile(this.serverKeyFile, cert.key);
-    fs.writeFile(this.serverCertFile, cert.cert);
-    return cert;
-  }
-
-  private getCertificate(domains: string[]): Certificate | undefined {
-    try {
-      let certificate: Certificate;
-
-      // Check if CA files exist
-      const serverKeyExists = fs.existsSync(this.serverKeyFile);
-      const serverCertExists = fs.existsSync(this.serverCertFile);
-
-      if (serverKeyExists && serverCertExists) {
-        this.log.debug(`[${this.serverName}] Using existing Certificate`);
-        const serverKey = fs.readFileSync(this.serverKeyFile, 'utf8');
-        const serverCert = fs.readFileSync(this.serverCertFile, 'utf8');
-        certificate = { key: serverKey, cert: serverCert };
-      } else {
-        this.log.info(`[${this.serverName}] Generating Certificates ...`);
-        const ca: Certificate = this.generateCA();
-        certificate = this.generateServerCert(ca, domains);
-        this.log.info(`[${this.serverName}] Successfully generated Certificates`);
-      }
-
-      return certificate;
-    } catch (error) {
-      this.log.error(`[${this.serverName}] Error generating certificates: ${error}`);
-    }
-
-    return;
   }
 
   private accessoryIdIsValid(
@@ -495,5 +446,79 @@ class ChargingState {
   isEmpty() {
     return (this.charging === undefined &&
       this.charge === undefined);
+  }
+}
+
+class ServerCertificate {
+
+  private readonly caKeyFile = 'ca.key';
+  private readonly caCertFile = 'ca.cert';
+  private readonly serverKeyFile = 'server.key';
+  private readonly serverCertFile = 'server.crt';
+
+  private log: VirtualLogger;
+  private serverName: string;
+
+  constructor (
+    log: VirtualLogger,
+    serverName: string,
+  ) {
+    this.log = log;
+    this.serverName = serverName;
+  }
+
+  private generateCA() {
+    const ca: Certificate = createCA({
+      organization: 'MyRoot',
+      countryCode: 'US',
+      state: 'CA',
+      locality: 'San Jose',
+      validity: 3650,   // 10 years
+    });
+    fs.writeFileSync(this.caKeyFile, ca.key);
+    fs.writeFileSync(this.caCertFile, ca.cert);
+    return ca;
+  }
+
+  private generateServerCert(ca: Certificate, domains: string[]) {
+    const cert:Certificate = createCert({
+      ca,
+      domains: ['127.0.0.1', 'localhost', ...domains],
+      validity: 3650,   // 10 years
+    });
+    fs.writeFile(this.serverKeyFile, cert.key);
+    fs.writeFile(this.serverCertFile, cert.cert);
+    return cert;
+  }
+
+  getCertificate(domains?: string[]): Certificate | undefined {
+    try {
+      let certificate: Certificate | undefined;
+
+      // Check if CA files exist
+      const serverKeyExists = fs.existsSync(this.serverKeyFile);
+      const serverCertExists = fs.existsSync(this.serverCertFile);
+
+      if (serverKeyExists && serverCertExists) {
+        this.log.debug(`[${this.serverName}] Using existing Certificate`);
+        const serverKey = fs.readFileSync(this.serverKeyFile, 'utf8');
+        const serverCert = fs.readFileSync(this.serverCertFile, 'utf8');
+        certificate = { key: serverKey, cert: serverCert };
+      } else {
+        if (domains !== undefined && domains.length > 0) {
+          const domainString: string = domains.join(', ');
+          this.log.info(`[${this.serverName}] Generating Certificates for ${domainString} ...`);
+          const ca: Certificate = this.generateCA();
+          certificate = this.generateServerCert(ca, domains);
+          this.log.info(`[${this.serverName}] Successfully generated Certificates for ${domainString}`);
+        }
+      }
+
+      return certificate;
+    } catch (error) {
+      this.log.error(`[${this.serverName}] Error generating certificates: ${error}`);
+    }
+
+    return;
   }
 }
