@@ -8,6 +8,8 @@ import { Utils } from '../utils/utils.js';
 export class WebhookServerConfiguration implements Validatable {
   enabled: boolean = false;
   port: string = '60221';
+  useHttps: boolean = false;
+  domain!: string;
 
   private errorFields: string[] = [];
 
@@ -27,8 +29,14 @@ export class WebhookServerConfiguration implements Validatable {
       this.errorFields.push(prefix + '.' + this.fieldNames.port);
     }
 
+    let isValidDomain: boolean = true;
+    if (this.useHttps) {
+      isValidDomain = (this.domain !== undefined) ? true : false;
+    }
+
     return [
-      (isValidPort),
+      (isValidPort &&
+        isValidDomain),
       this.errorFields,
     ];
   }
