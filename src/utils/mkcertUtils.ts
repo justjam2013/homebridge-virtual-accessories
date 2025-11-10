@@ -1,4 +1,4 @@
-import { md, pki } from 'node-forge';
+import forge from 'node-forge';
 import net from 'node:net';
 
 export type Certificate = {
@@ -7,8 +7,8 @@ export type Certificate = {
 };
 
 type GenerateOptions = {
-  subject: pki.CertificateField[];
-  issuer: pki.CertificateField[];
+  subject: forge.pki.CertificateField[];
+  issuer: forge.pki.CertificateField[];
   extensions: Record<string, unknown>[];
   validity: number;
   signWith?: string;
@@ -16,6 +16,9 @@ type GenerateOptions = {
 
 function generateCert(options: GenerateOptions): Certificate {
   const { subject, issuer, extensions, validity } = options;
+
+  const pki = forge.pki;
+  const md = forge.md;
 
   // create random serial number between between 50000 and 99999
   const serial = Math.floor(Math.random() * 95000 + 50000).toString();
@@ -123,7 +126,7 @@ export function createCert(options: CertificateOptions): Certificate {
     },
   ];
 
-  const ca = pki.certificateFromPem(options.ca.cert);
+  const ca = forge.pki.certificateFromPem(options.ca.cert);
 
   return generateCert({
     subject: attributes,

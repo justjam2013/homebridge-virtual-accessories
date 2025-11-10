@@ -72,9 +72,17 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.error(`Invalid fields: ${errorFields.toString()}`);
       }
       else {
-        this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
+        // this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
+        this.log.debug('Sensor Server configuration is valid');
 
-        this.sensorUpdateServer = new WebhookServer(this.log, parseInt(sensorServerConfig.port), sensorServerConfig.useHttps, sensorServerConfig.domains);
+        const certificatePath: string = path.join(this.api.user.persistPath(), 'VA4HB_');
+        this.sensorUpdateServer = new WebhookServer(
+          this.log,
+          parseInt(sensorServerConfig.port),
+          sensorServerConfig.useHttps,
+          [ sensorServerConfig.domain ],
+          certificatePath,
+        );
       }
     }
     
@@ -120,10 +128,11 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       this.log.info('No configured accessories');
       configDevices = JSON.parse('[]');
     }
-    this.log.debug(`Found ${configDevices.length} configured accessories: ${JSON.stringify(configDevices)}`);
+    // this.log.debug(`Found ${configDevices.length} configured accessories: ${JSON.stringify(configDevices)}`);
+    this.log.debug(`Found ${configDevices.length} configured accessories`);
 
     const accessoryConfigurations: AccessoryConfiguration[] = this.deserializeAccessoryConfigurations(configDevices);
-    this.log.debug(`Deserialized accessories: ${JSON.stringify(accessoryConfigurations)}`);
+    // this.log.debug(`Deserialized accessories: ${JSON.stringify(accessoryConfigurations)}`);
 
     const virtualAccessories: Accessory[] = [];
 
