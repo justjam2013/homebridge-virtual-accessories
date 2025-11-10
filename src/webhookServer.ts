@@ -458,10 +458,10 @@ class ChargingState {
 
 class ServerCertificate {
 
-  private readonly caKeyFile = (domains: string) => `${this.certificatePath}ca-${domains}.key`;
-  private readonly caCertFile = (domains: string) => `${this.certificatePath}ca-${domains}.cert`;
-  private readonly serverKeyFile = (domains: string) => `${this.certificatePath}server-${domains}.key`;
-  private readonly serverCertFile = (domains: string) => `${this.certificatePath}server-${domains}.crt`;
+  private readonly caKeyFile = (domains: string) => `${this.certificatePath}ca-${domains}.key.pem`;
+  private readonly caCertFile = (domains: string) => `${this.certificatePath}ca-${domains}.cert.pem`;
+  private readonly serverKeyFile = (domains: string) => `${this.certificatePath}server-${domains}.key.pem`;
+  private readonly serverCertFile = (domains: string) => `${this.certificatePath}server-${domains}.cert.pem`;
 
   private log: VirtualLogger;
   private serverName: string;

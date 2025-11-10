@@ -33,6 +33,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   private readonly sensorUpdateServer?: WebhookServer;
 
+  private readonly prefix: string = 'VA4HB_';
+
   // this is used to track restored cached accessories
   public readonly cachedAccessories: PlatformAccessory[] = [];
 
@@ -75,13 +77,15 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
         this.log.debug('Sensor Server configuration is valid');
 
-        const certificatePath: string = path.join(this.api.user.persistPath(), 'VA4HB_');
+        const storagePath: string = path.join(this.api.user.persistPath(), this.prefix);
+        const domains: string[] = sensorServerConfig.domain.split(',').map(item => item.trim());
+
         this.sensorUpdateServer = new WebhookServer(
           this.log,
           parseInt(sensorServerConfig.port),
           sensorServerConfig.useHttps,
-          [ sensorServerConfig.domain ],
-          certificatePath,
+          domains,
+          storagePath,
         );
       }
     }
@@ -194,7 +198,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // the `context` property can be used to store any data about the accessory you may need
         accessory.context.firmwareVersion = this.version;
 
-        const storagePath: string = path.join(this.api.user.persistPath(), `VA4HB_${accessoryConfiguration.accessoryID}.json`);
+        const storagePath: string = path.join(this.api.user.persistPath(), `${this.prefix}${accessoryConfiguration.accessoryID}.json`);
         accessory.context.storagePath = storagePath;
         this.log.debug(`Storage path if stateful accessory: ${storagePath}`);
 
