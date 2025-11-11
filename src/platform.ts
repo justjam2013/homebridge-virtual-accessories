@@ -33,8 +33,6 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
   private readonly sensorUpdateServer?: WebhookServer;
 
-  private readonly prefix: string = 'VA4HB_';
-
   // this is used to track restored cached accessories
   public readonly cachedAccessories: PlatformAccessory[] = [];
 
@@ -74,19 +72,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.error(`Invalid fields: ${errorFields.toString()}`);
       }
       else {
-        // this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
-        this.log.debug('Sensor Server configuration is valid');
-
-        const storagePath: string = path.join(this.api.user.persistPath(), this.prefix);
-        const domains: string[] = sensorServerConfig.domain.split(',').map(item => item.trim());
-
-        this.sensorUpdateServer = new WebhookServer(
-          this.log,
-          parseInt(sensorServerConfig.port),
-          sensorServerConfig.useHttps,
-          domains,
-          storagePath,
-        );
+        this.log.debug(`Sensor Server configuration is valid: ${JSON.stringify(sensorServerConfig)}`);
+        
+        this.sensorUpdateServer = new WebhookServer(this.log, parseInt(sensorServerConfig!.port));
       }
     }
     
@@ -132,11 +120,10 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       this.log.info('No configured accessories');
       configDevices = JSON.parse('[]');
     }
-    // this.log.debug(`Found ${configDevices.length} configured accessories: ${JSON.stringify(configDevices)}`);
-    this.log.debug(`Found ${configDevices.length} configured accessories`);
+    this.log.debug(`Found ${configDevices.length} configured accessories: ${JSON.stringify(configDevices)}`);
 
     const accessoryConfigurations: AccessoryConfiguration[] = this.deserializeAccessoryConfigurations(configDevices);
-    // this.log.debug(`Deserialized accessories: ${JSON.stringify(accessoryConfigurations)}`);
+    this.log.debug(`Deserialized accessories: ${JSON.stringify(accessoryConfigurations)}`);
 
     const virtualAccessories: Accessory[] = [];
 
@@ -198,7 +185,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // the `context` property can be used to store any data about the accessory you may need
         accessory.context.firmwareVersion = this.version;
 
-        const storagePath: string = path.join(this.api.user.persistPath(), `${this.prefix}${accessoryConfiguration.accessoryID}.json`);
+        const storagePath: string = path.join(this.api.user.persistPath(), `VA4HB_${accessoryConfiguration.accessoryID}.json`);
         accessory.context.storagePath = storagePath;
         this.log.debug(`Storage path if stateful accessory: ${storagePath}`);
 
