@@ -88,6 +88,12 @@
 
 ## <!-- Thin separator line -->
 
+## 🔴🔴 Note 🔴🔴
+
+Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
+
+## <!-- Thin separator line -->
+
 ## About Virtual Accessories For Homebridge
 
 This plugin is inspired by Nick Farina's most excellent 🎸 [`homebridge-dummy`](https://github.com/nfarina/homebridge-dummy) plugin, which formed the backbone of my HomeKit automations. At the time `homebridge-dummy` was no longer being maintained, so I was motivated to create a new solution. Since then `homebridge-dummy` has found a new maintainer and gone through a rewrite, so definitely worth checking out.
