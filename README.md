@@ -22,6 +22,12 @@
 
 ## <!-- Thin separator line -->
 
+## 🔴🔴 Note 🔴🔴
+
+Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
+
+## <!-- Thin separator line -->
+
 <details>
   <summary>
     
@@ -85,12 +91,6 @@
     - [Issues with HomeKit](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
-
-## <!-- Thin separator line -->
-
-## 🔴🔴 Note 🔴🔴
-
-Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
 
 ## <!-- Thin separator line -->
 
