@@ -7,7 +7,7 @@ import { Sensor } from '../sensor.js';
 
 import dns from 'dns';
 import net from 'net';
-import ping from 'net-ping';
+import ping from '@justjam2013/net-ping';
 
 /**
  *  Private helper classes to pass values by reference
