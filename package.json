@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.11.11-beta.1",
+  "version": "3.12.0",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -129,7 +129,7 @@
   "overrides": {
     "net-ping": {
       "raw-socket": {
-        "nan": "^2.23.*"
+        "nan": "^2.23.1"
       }
     }
   }
