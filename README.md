@@ -158,8 +158,8 @@ npm install -g homebridge-virtual-accessories
 > [!IMPORTANT]
 > If you **manually** upgrade or downgrade the Node.js version that Homebridge is running on, you may also need to upgrade or downgrade NPM to the version required by your new Node.js version (please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry). Then you will need to ensure that the platform-native library `raw-socket` is also updated. After updating Node.js (and NPM if needed), run the following commands before restarting Homebridge:
 > ```
-> npm uninstall raw-socket
-> npm install raw-socket
+> npm uninstall @justjam2013/raw-socket
+> npm install @justjam2013/raw-socket
 > ```
 
 > [!CAUTION]
@@ -172,8 +172,8 @@ npm install -g homebridge-virtual-accessories
 If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
 
 ```
-npm uninstall raw-socket
-npm install raw-socket
+npm uninstall @justjam2013/raw-socket
+npm install @justjam2013/raw-socket
 ```
 
 This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
