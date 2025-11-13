@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.11.10",
+  "version": "3.11.11-beta.1",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -111,7 +111,7 @@
     "croner": "^9.0.0",
     "express": "^5.1.0",
     "homebridge-lib": "^7.1.4",
-    "net-ping": "^1.2.4",
+    "@justjam2013/net-ping": "^2.0.0",
     "reflect-metadata": "^0.2.2",
     "typeserializer": "^0.2.5"
   },

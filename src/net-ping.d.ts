@@ -1,1 +1,1 @@
-declare module 'net-ping';
+declare module '@justjam2013/net-ping';
