@@ -6,8 +6,8 @@
       "ES2022"
     ],
     "rootDir": "src",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "node16",
+    "moduleResolution": "node16",
     "strict": true,
     "declaration": true,
     "outDir": "dist",
