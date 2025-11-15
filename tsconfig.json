@@ -6,8 +6,8 @@
       "ES2022"
     ],
     "rootDir": "src",
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "strict": true,
     "declaration": true,
     "outDir": "dist",
@@ -18,8 +18,7 @@
     "noImplicitAny": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true
+    "resolveJsonModule": true
   },
   "include": [
     "eslint.config.js",
