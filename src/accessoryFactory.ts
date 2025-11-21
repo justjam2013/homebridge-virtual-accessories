@@ -2,7 +2,7 @@
 import type { PlatformAccessory } from 'homebridge';
 import type { SerializedMatterAccessory } from 'homebridge';
 
-import { HapOrMatterAccessory, VirtualAccessoriesPlatform } from './platform.js';
+import { VirtualAccessoriesPlatform } from './platform.js';
 
 import { Accessory } from './accessories/accessory.js';
 import { AirPurifier } from './accessories/virtualAccessoryAirPurifier.js';
