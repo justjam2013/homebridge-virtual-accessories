@@ -161,7 +161,7 @@
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
-            "matterEnabled": {
+            "isMatterEnabled": {
               "title": "Matter Enabled",
               "description": "Accessory is a Matter enabled device",
               "type": "boolean",
