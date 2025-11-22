@@ -956,6 +956,9 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
 - **Security System alarm triggered state**
 - **Sensors**
 
+> [!NOTE]
+> If your environment does not allow you to modify the POST request body, check the [Webhook server requests using query parameters](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Webhook-server-requests-using-query-parameters) wiki page.
+
 ### Enable webhook service
 
 ```json
