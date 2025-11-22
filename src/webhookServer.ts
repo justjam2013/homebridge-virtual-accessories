@@ -45,22 +45,19 @@ export class WebhookServer {
   private httpServer?: Server;
   readonly port: number;
 
-  private useQueryParams: boolean;
+  private readonly UseQueryParamsHeader: string = 'Use-Query-Params';
 
   constructor(
     log: VirtualLogger,
     port: number,
-    useQueryParams?: boolean,
   );
   constructor(
     log: VirtualLogger,
     port: number,
-    useQueryParams: boolean = false,
     accessories?: Accessory[],
   ) {
     this.log = log;
     this.port = port;
-    this.useQueryParams = useQueryParams;
 
     // parse application/x-www-form-urlencoded
     this.server.use(express.urlencoded({ extended: true }));
@@ -79,10 +76,10 @@ export class WebhookServer {
     const routeHumidity: string = '/humidity';
     this.log.info(`[${this.serverName}] Setting up route: ${routeHumidity}`);
     this.server.post(routeHumidity, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const humidity: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const humidity: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -97,10 +94,10 @@ export class WebhookServer {
     const routeTemperature: string = '/temperature';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTemperature}`);
     this.server.post(routeTemperature, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const temperature: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const temperature: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -115,10 +112,10 @@ export class WebhookServer {
     const routeObstruction: string = '/obstruction';
     this.log.info(`[${this.serverName}] Setting up route: ${routeObstruction}`);
     this.server.post(routeObstruction, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const obstruction: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const obstruction: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -133,10 +130,10 @@ export class WebhookServer {
     const routeTriggerAlarm: string = '/triggeralarm';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerAlarm}`);
     this.server.post(routeTriggerAlarm, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -152,10 +149,10 @@ export class WebhookServer {
     const routeTriggerPanic: string = '/triggerpanic';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerPanic}`);
     this.server.post(routeTriggerPanic, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -171,10 +168,10 @@ export class WebhookServer {
     const routeTriggerSensor: string = '/triggersensor';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerSensor}`);
     this.server.post(routeTriggerSensor, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (this.useQueryParams) ? request.query.value : request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -190,11 +187,11 @@ export class WebhookServer {
     const routeChargingState: string = '/chargingstate';
     this.log.info(`[${this.serverName}] Setting up route: ${routeChargingState}`);
     this.server.post(routeChargingState, (request: Request, response: Response) => {
-      const accessoryId: string = (this.useQueryParams) ? request.query.id : request.body.id;
-      const charging: string = (this.useQueryParams) ? request.query.charging : request.body.charging;
-      const charge: string = (this.useQueryParams) ? Number(<string>request.query.charge) : request.body.charge;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${this.getRequestParameters(request)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const charging: string = (useQueryParams) ? request.query.charging : request.body.charging;
+      const charge: string = (useQueryParams) ? Number(<string>request.query.charge) : request.body.charge;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -208,7 +205,7 @@ export class WebhookServer {
   }
 
   start() {
-    this.log.info(`[${this.serverName}] Starting Sensor Server ${this.useQueryParams ? 'with query params workaround' : ''}`);
+    this.log.info(`[${this.serverName}] Starting Sensor Server`);
     this.httpServer = this.server.listen(this.port, () => {
       this.log.info(`[${this.serverName}] Sensor Server running on port ${this.port}`);
     });
@@ -408,12 +405,15 @@ export class WebhookServer {
     request: Request,
     response: Response,
   ): boolean {
-    this.log.debug(`[${this.serverName}] useQueryParams: ${this.useQueryParams}`);
+    const useQueryParams: boolean = this.usingQueryParams(request);
+    this.log.debug(`[${this.serverName}] ${this.UseQueryParamsHeader}: ${useQueryParams}`);
+
+    this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}`);
     this.log.debug(`[${this.serverName}] POST body: ${JSON.stringify(request.body)}`);
     this.log.debug(`[${this.serverName}] POST query: ${JSON.stringify(request.query)}`);
 
     // POST body
-    if (!this.useQueryParams && JSON.stringify(request.body) === '{}') {
+    if (!useQueryParams && JSON.stringify(request.body) === '{}') {
       const errorMsg: string = 'No parameters found in POST body';
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
@@ -421,7 +421,7 @@ export class WebhookServer {
       return false;
     }
     // POST query
-    if (this.useQueryParams && JSON.stringify(request.query) === '{}') {
+    if (useQueryParams && JSON.stringify(request.query) === '{}') {
       const errorMsg: string = 'No parameters found in POST query. The webhook server is using query parameters';
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
@@ -431,16 +431,13 @@ export class WebhookServer {
 
     return true;
   }
-  
-  private getRequestParameters(
+
+  private usingQueryParams(
     request: Request,
-  ): string {
-    const params: string = (this.useQueryParams) ? JSON.stringify(request.query) : JSON.stringify(request.body);
+  ): boolean {
+    const useQueryParamsHeader: string | undefined = request.header(this.UseQueryParamsHeader);
 
-    this.log.debug(`[${this.serverName}] useQueryParams: ${this.useQueryParams}`);
-    this.log.debug(`[${this.serverName}] POST ${this.useQueryParams ? 'query' : 'body'}: ${params}`);
-
-    return params;
+    return (useQueryParamsHeader === undefined) ? false : ToBoolean(useQueryParamsHeader);
   }
 }
 
