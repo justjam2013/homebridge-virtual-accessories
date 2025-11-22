@@ -947,10 +947,14 @@ To add an external accessory in the Home app follow these steps:
 
 ## Webhook Service Configuration
 
-Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory endpoints are:
 
+- **Battery charging state and charge level**
+- **Garage Door obstruction detected**
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 - **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+- **Security System alarm triggered state**
+- **Sensors**
 
 ### Enable webhook service
 
