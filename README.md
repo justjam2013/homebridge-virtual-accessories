@@ -957,7 +957,7 @@ Virtual Accessories For Homebridge includes a webhook service to update accessor
 - **Sensors**
 
 > [!NOTE]
-> If your environment does not allow you to modify the POST request body, check the [Webhook server requests using query parameters](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Webhook-server-requests-using-query-parameters) wiki page.
+> If your environment does not allow you to modify the body of the POST request, check the [Webhook server requests using query parameters](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Webhook-server-requests-using-query-parameters) wiki page for details on using a custom workaround.
 
 ### Enable webhook service
 
