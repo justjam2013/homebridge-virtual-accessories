@@ -115,7 +115,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const obstruction: string = (useQueryParams) ? request.query.value : request.body.value;
+      const obstruction: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -133,7 +133,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -152,7 +152,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -171,7 +171,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
@@ -190,7 +190,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const charging: string = (useQueryParams) ? request.query.charging : request.body.charging;
+      const charging: string = ((useQueryParams) ? request.query.charging : request.body.charging).toString();
       const charge: string = (useQueryParams) ? Number(<string>request.query.charge) : request.body.charge;
 
       if (this.parametersArePresent(request, response) &&
