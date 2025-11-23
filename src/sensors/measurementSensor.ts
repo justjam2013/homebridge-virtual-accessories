@@ -4,15 +4,18 @@ import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from '../accessories/accessory.js';
 
+import { UpdatableMeasurementSensor } from './updatableSensor.js';
+
 /**
  * Sensor - Abstract accessory
  */
-export abstract class MeasurementSensor extends Accessory {
+export abstract class MeasurementSensor extends Accessory implements UpdatableMeasurementSensor {
 
   protected valueMeasured: WithUUID<{ new (): Characteristic; }>;
   
   protected states = {
     SensorValue: 0,
+    SensorUnits: '',
   };
 
   constructor(
@@ -22,6 +25,10 @@ export abstract class MeasurementSensor extends Accessory {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
+    // First configure the device based on the accessory details
+    this.states.SensorValue = this.getDefaultValue();
+    this.states.SensorUnits = this.accessoryConfiguration.measurement.units;
+
     this.valueMeasured = this.getMeasurementCharacteristic();
 
     const sensorService: WithUUID<typeof Service> = this.getService();
@@ -30,7 +37,6 @@ export abstract class MeasurementSensor extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.states.SensorValue = this.getDefaultValue();
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current Value: ${this.states.SensorValue}`);
     this.service.updateCharacteristic(this.valueMeasured, (this.states.SensorValue));
 
@@ -59,4 +65,8 @@ export abstract class MeasurementSensor extends Accessory {
   protected getJsonState(): string {
     return JSON.stringify({});
   }
+
+  // Updatable Sensor interface
+
+  abstract updateMeasurementSensor(value: number, accessoryId: string): void;
 }

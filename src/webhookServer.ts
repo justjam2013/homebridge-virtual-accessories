@@ -11,7 +11,7 @@ import { TriggerableAlarm } from './accessories/triggerableAlarm.js';
 import { TriggerableSensor } from './sensors/triggerableSensor.js';
 import { UpdatableChargingState } from './accessories/updatableChargingState.js';
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
-import { UpdatableSensor } from './sensors/updatableSensor.js';
+import { UpdatableMeasurementSensor } from './sensors/updatableSensor.js';
 
 import { SensorValueUpdateNotAllowed } from './errors.js';
 
@@ -236,7 +236,7 @@ export class WebhookServer {
       (<TriggerableSensor><unknown>accessory).triggerSensor !== undefined ||
       (<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined ||
       (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
-      (<UpdatableSensor><unknown>accessory).updateSensor !== undefined
+      (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined
     ) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
@@ -367,8 +367,8 @@ export class WebhookServer {
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
         }
-        else if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
+        else if ((<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined) {
+          (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor(<number>value, accessoryId);
         }
         else if (accessory instanceof BinarySensor) {
           const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();

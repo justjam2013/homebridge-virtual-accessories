@@ -10,6 +10,7 @@ import { Utils } from '../utils/utils.js';
  */
 export class MeasurementSensorConfiguration implements Validatable {
   type!: string;
+  units: string = '';
 
   private errorFields: string[] = [];
 

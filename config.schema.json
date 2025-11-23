@@ -893,11 +893,35 @@
                     { "title": "Humidity", "enum": ["humidity"] },
                     { "title": "Temperature", "enum": ["temperature"] }
                   ]
+                },
+                "units": {
+                  "title": "Temperature Units *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].measurement.type === 'temperature';"
+                  }
                 }
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'measurement';"
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "temperature" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "temperatureUnits" ]
+                  }
+                }
+              ]
             },
             "resetTimer": {
               "title": "Reset Timer",
@@ -1541,6 +1565,21 @@
                 "properties": {
                   "sensor": {
                     "required": [ "type", "trigger" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "measurement" }
+                }
+              },
+              "then": {
+                "required": [ "measurement" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type" ]
                   }
                 }
               }
