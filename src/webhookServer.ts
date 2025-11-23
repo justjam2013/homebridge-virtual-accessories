@@ -85,7 +85,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.percentageIsValid(humidity, response))
       {
-        this.processRequest(accessoryId, 'humidifierdehumidifier', Number(humidity), response);
+        this.processRequest(routeHumidity, accessoryId, [ 'humidifierdehumidifier', 'measurement' ], Number(humidity), response);
       }
     });
 
@@ -103,7 +103,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.numberIsValid(temperature, response))
       {
-        this.processRequest(accessoryId, 'heatercooler', Number(temperature), response);
+        this.processRequest(routeTemperature, accessoryId, [ 'heatercooler', 'measurement' ], Number(temperature), response);
       }
     });
 
@@ -121,7 +121,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(obstruction, response))
       {
-        this.processRequest(accessoryId, 'garagedoor', ToBoolean(obstruction), response);
+        this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction), response);
       }
     });
 
@@ -140,7 +140,7 @@ export class WebhookServer {
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(accessoryId, 'securitysystem', (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -159,7 +159,7 @@ export class WebhookServer {
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(accessoryId, 'securitysystem', (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -177,7 +177,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(trigger, response))
       {
-        this.processRequest(accessoryId, 'sensor', ToBoolean(trigger), response);
+        this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger), response);
       }
     });
 
@@ -199,7 +199,7 @@ export class WebhookServer {
           this.numberIsValid(charge, response))
       {
         const chargingState: ChargingState = new ChargingState(ToBoolean(charging), Number(charge));
-        this.processRequest(accessoryId, 'battery', chargingState, response);
+        this.processRequest(routeChargingState, accessoryId, [ 'battery' ], chargingState, response);
       }
     });
   }
@@ -345,14 +345,15 @@ export class WebhookServer {
   }
 
   private processRequest(
+    route: string,
     accessoryId: string,
-    accessoryType: string,
+    accessoryTypes: string[],
     value: number | boolean | ChargingState,
     response: Response,
   ) {
     const accessory: Accessory | undefined = this.accessories.get(accessoryId);
 
-    if (accessory !== undefined && accessory.accessoryConfiguration.accessoryType === accessoryType) {
+    if (accessory !== undefined && accessoryTypes.includes(accessory.accessoryConfiguration.accessoryType)) {
       try {
         if ((<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined) {
           (<TriggerableAlarm><unknown>accessory).triggerAlarm(<number>value, accessoryId);
@@ -396,7 +397,7 @@ export class WebhookServer {
         response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
       }
     } else {
-      const errorMsg: string = `No accessory found with type '${accessoryType}' and id '${accessoryId}'`;
+      const errorMsg: string = `No accessory found  with id '${accessoryId}' and able to respond to request '${route}'`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.NotFound).send(`${errorMsg}`);
     }
