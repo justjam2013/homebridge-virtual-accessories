@@ -1,7 +1,9 @@
 <div>
     <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories?color=F99211" /></a>
     <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/github/v/release/justjam2013/homebridge-virtual-accessories?color=FFd461" /></a>
-    <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://badgen.net/badge/homebridge/verified/purple" /></a>
+    <!-- <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://badgen.net/badge/homebridge/verified/purple" /></a> -->
+    <!-- a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://img.shields.io/badge/_homebridge_-_verified_-6A5ACD" /></a -->
+    <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://img.shields.io/badge/homebridge-verified-blueviolet?color=%23491F59&style=flat" /></a>
     <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50" /></a>
     <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/discord-%23virtual--accessories-737CF8" /></a>
 </div>
@@ -22,16 +24,9 @@
 
 ## <!-- Thin separator line -->
 
-### 🔴🔴 Warning: Currently this plugin is not compatible with Node 24 🔴🔴
+## 🔴🔴 Important 🔴🔴
 
-This is a double issue:
-
-- A dependency is using a module that is not compatible with Node 24
-- Overriding the incompatible dependency with the latest `npm 11.6.2` (from Node 24) is currently broken
-
-Details are available in [this ticket](https://github.com/justjam2013/homebridge-virtual-accessories/issues/632).
-
-A [ticket](https://github.com/npm/cli/issues/8713) has been opened with `npm` regarding this bug. At the moment, the recommendation is not to update to Node 24.
+Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the **updated** Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
 
 ## <!-- Thin separator line -->
 
@@ -171,8 +166,7 @@ npm install -g homebridge-virtual-accessories
 > [!IMPORTANT]
 > If you **manually** upgrade or downgrade the Node.js version that Homebridge is running on, you may also need to upgrade or downgrade NPM to the version required by your new Node.js version (please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry). Then you will need to ensure that the platform-native library `raw-socket` is also updated. After updating Node.js (and NPM if needed), run the following commands before restarting Homebridge:
 > ```
-> npm uninstall raw-socket
-> npm install raw-socket
+> npm rebuild @justjam2013/raw-socket --update-binary
 > ```
 
 > [!CAUTION]
@@ -185,11 +179,10 @@ npm install -g homebridge-virtual-accessories
 If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
 
 ```
-npm uninstall raw-socket
-npm install raw-socket
+npm rebuild @justjam2013/raw-socket --update-binary
 ```
 
-This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
+This will rebuild the library every time the container is restarted, but it ensures that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
 
 ### MacOS
 
@@ -954,10 +947,17 @@ To add an external accessory in the Home app follow these steps:
 
 ## Webhook Service Configuration
 
-Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory endpoints are:
 
+- **Battery charging state and charge level**
+- **Garage Door obstruction detected**
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 - **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+- **Security System alarm triggered state**
+- **Sensors**
+
+> [!NOTE]
+> If your environment does not allow you to modify the body of the POST request, check the [Webhook server requests using query parameters](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Webhook-server-requests-using-query-parameters) wiki page for details on using a custom workaround.
 
 ### Enable webhook service
 

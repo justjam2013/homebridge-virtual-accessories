@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.11.10",
+  "version": "3.12.4",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -95,7 +95,7 @@
   ],
   "main": "dist/index.js",
   "engines": {
-    "node": "^18 || ^20 || ^22 || ^24",
+    "node": "^20.0.0 || ^22.0.0 || ^24.0.0",
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "scripts": {
@@ -107,24 +107,24 @@
   "dependencies": {
     "@js-joda/core": "^5.6.5",
     "@js-joda/timezone": "^2.22.0",
+    "@justjam2013/net-ping": "^2.0.0",
     "@types/express": "^5.0.3",
-    "croner": "^9.0.0",
+    "croner": "^9.1.0",
     "express": "^5.1.0",
-    "homebridge-lib": "^7.1.4",
-    "net-ping": "^1.2.4",
+    "homebridge-lib": "^7.1.12",
     "reflect-metadata": "^0.2.2",
     "typeserializer": "^0.2.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/node": "^24.0.3",
-    "eslint": "^9.21.0",
-    "homebridge": "^2.0.0-beta.0",
-    "nodemon": "^3.1.9",
-    "rimraf": "^6.0.1",
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "homebridge": "^2.0.0-beta.55",
+    "nodemon": "^3.1.11",
+    "rimraf": "^6.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
   },
   "overrides": {
     "net-ping": {
