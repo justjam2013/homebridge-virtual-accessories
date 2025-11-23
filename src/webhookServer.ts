@@ -367,6 +367,7 @@ export class WebhookServer {
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
         }
+        // Heater/Cooler, Humidifier/Dehumidifier, Temperature Sensor, Humidity Sensor
         else if ((<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined) {
           (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor(<number>value, accessoryId);
         }
