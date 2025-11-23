@@ -894,7 +894,7 @@
                     { "title": "Temperature", "enum": ["temperature"] }
                   ]
                 },
-                "units": {
+                "temperatureUnits": {
                   "title": "Temperature Units *",
                   "type": "string",
                   "oneOf": [
@@ -902,7 +902,7 @@
                     { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
                   ],
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].measurement.type === 'temperature';"
+                    "functionBody": "return model.devices[arrayIndices].measurement && model.devices[arrayIndices].measurement.type === 'temperature';"
                   }
                 }
               },

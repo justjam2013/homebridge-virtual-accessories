@@ -5,12 +5,16 @@ import { MeasurementSensorType } from './schema.js';
 
 import { Utils } from '../utils/utils.js';
 
+import { Name } from 'typeserializer';
+
 /**
  * 
  */
 export class MeasurementSensorConfiguration implements Validatable {
   type!: string;
-  units: string = '';
+
+  @Name('temperatureUnits')
+    units: string = '';
 
   private errorFields: string[] = [];
 
