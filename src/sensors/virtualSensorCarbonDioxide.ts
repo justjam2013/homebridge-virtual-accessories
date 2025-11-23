@@ -2,12 +2,12 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { BinarySensor } from './binarySensor.js';
 
 /**
  * CarbonDioxideSensor - Sensor implementation
  */
-export class CarbonDioxideSensor extends Sensor {
+export class CarbonDioxideSensor extends BinarySensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'CarbonDioxideSensor';
 
@@ -35,8 +35,8 @@ export class CarbonDioxideSensor extends Sensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case CarbonDioxideSensor.CO2_LEVELS_NORMAL: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case CarbonDioxideSensor.CO2_LEVELS_ABNORMAL: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case CarbonDioxideSensor.CO2_LEVELS_NORMAL: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
+    case CarbonDioxideSensor.CO2_LEVELS_ABNORMAL: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

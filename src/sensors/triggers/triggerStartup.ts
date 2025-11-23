@@ -1,6 +1,6 @@
  
 
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../../utils/utils.js';
 
@@ -10,7 +10,7 @@ import { Utils } from '../../utils/utils.js';
 export class StartupTrigger extends Trigger {
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     super(sensor, name);
@@ -27,9 +27,9 @@ export class StartupTrigger extends Trigger {
     await Utils.delay(3000);  // 3 second delay
 
     this.log.debug(`[${this.sensorConfig.accessoryName}] Triggering sensor`);
-    this.sensor.triggerSensorState(Sensor.TRIGGERED, this);
+    this.sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
     await Utils.delay(resetDelayMillis);
     this.log.debug(`[${this.sensorConfig.accessoryName}] Resetting sensor`);
-    this.sensor.triggerSensorState(Sensor.NORMAL, this);
+    this.sensor.triggerSensorState(BinarySensor.NORMAL, this);
   }
 }

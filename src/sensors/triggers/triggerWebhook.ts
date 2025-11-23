@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../../errors.js';
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { TriggerableSensor } from '../triggerableSensor.js';
 import { Trigger } from './trigger.js';
 
@@ -11,7 +11,7 @@ import { Trigger } from './trigger.js';
 export class WebhookTrigger extends Trigger implements TriggerableSensor {
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     super(sensor, name);
@@ -34,7 +34,7 @@ export class WebhookTrigger extends Trigger implements TriggerableSensor {
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
 
-    const sensorState: number = value ? Sensor.TRIGGERED : Sensor.NORMAL;
+    const sensorState: number = value ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
     this.sensor.triggerSensorState(sensorState, this);
   }
 }

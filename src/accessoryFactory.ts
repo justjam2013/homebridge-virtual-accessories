@@ -24,7 +24,7 @@ import { Valve } from './accessories/virtualAccessoryValve.js';
 import { Window } from './accessories/virtualAccessoryWindow.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
-import { Sensor } from './sensors/sensor.js';
+import { BinarySensor } from './sensors/binarySensor.js';
 import { ContactSensor } from './sensors/virtualSensorContact.js';
 import { LeakSensor } from './sensors/virtualSensorLeak.js';
 import { MotionSensor } from './sensors/virtualSensorMotion.js';
@@ -135,10 +135,10 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
-  ): Sensor | undefined {
+  ): BinarySensor | undefined {
     const sensorType: string = accessoryConfiguration.sensor.type;
 
-    let virtualSensor: Sensor | undefined;
+    let virtualSensor: BinarySensor | undefined;
 
     switch (sensorType) {
     case SensorType.CarbonDioxide:
@@ -170,7 +170,7 @@ export abstract class AccessoryFactory {
   }
 
   static createTrigger(
-    sensor: Sensor,
+    sensor: BinarySensor,
     triggerType: string,
     name: string,
   ): Trigger | undefined {

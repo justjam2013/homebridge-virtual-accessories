@@ -2,14 +2,16 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { MeasurementSensor } from './measurementSensor.js';
 
 /**
  * TemperatureSensor - Sensor implementation
  */
-export class TemperatureSensor extends Sensor {
+export class TemperatureSensor extends MeasurementSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'TemperatureSensor';
+
+  static readonly DEFAULT_TEMPERATURE_CELSIUS = 20;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -23,19 +25,12 @@ export class TemperatureSensor extends Sensor {
     return this.platform.Service.TemperatureSensor;
   }
 
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
+  protected getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }> {
     return this.platform.Characteristic.CurrentTemperature;
   }
 
-  protected getStateName(state: number): string {
-    let sensorStateName: string;
-
-    switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    default: { sensorStateName = state.toString();}
-    }
-
-    return sensorStateName;
+  protected getDefaultValue(): number {
+    return TemperatureSensor.DEFAULT_TEMPERATURE_CELSIUS;
   }
 
   protected getAccessoryTypeName(): string {

@@ -1,5 +1,5 @@
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { VirtualLogger } from '../../utils/virtualLogger.js';
 
 /**
@@ -7,7 +7,7 @@ import { VirtualLogger } from '../../utils/virtualLogger.js';
  */
 export abstract class Trigger {
 
-  protected sensor: Sensor;
+  protected sensor: BinarySensor;
   readonly sensorConfig: AccessoryConfiguration;
 
   readonly name: string;
@@ -15,7 +15,7 @@ export abstract class Trigger {
   protected log: VirtualLogger;
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     this.sensor = sensor;

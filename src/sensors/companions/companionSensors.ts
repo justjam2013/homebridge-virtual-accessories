@@ -5,7 +5,7 @@ import { PlatformAccessory, Service, WithUUID } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
 
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { SensorType } from '../../configuration/schema.js';
 import { Accessory } from '../../accessories/accessory.js';
 import { AccessoryNotAllowedError } from '../../errors.js';
@@ -66,7 +66,7 @@ export class CompanionSensor {
 
 // Mixin
 
-function Companion<T extends abstract new (...args: any[]) => Sensor>(
+function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
   SensorInstance: T,
 ) {
   abstract class CompanionSensor extends SensorInstance implements TriggerableCompanionSensor {
@@ -102,7 +102,7 @@ function Companion<T extends abstract new (...args: any[]) => Sensor>(
       this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   };
   return CompanionSensor;

@@ -3,7 +3,7 @@
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
 import { PingTriggerConfiguration } from '../../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 
 import dns from 'dns';
 import net from 'net';
@@ -35,7 +35,7 @@ export class PingTrigger extends Trigger {
   private failureCount = new Counter(0);
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     super(sensor, name);
@@ -128,14 +128,14 @@ export class PingTrigger extends Trigger {
         if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
           trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
 
-          trigger.sensor.triggerSensorState(Sensor.TRIGGERED, trigger);
+          trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
         }
       }
       else {
         trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
-        trigger.sensor.triggerSensorState(Sensor.NORMAL, trigger);
+        trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
       }
 
       session.close ();

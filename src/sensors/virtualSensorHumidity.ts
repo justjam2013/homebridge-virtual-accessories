@@ -2,14 +2,16 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { MeasurementSensor } from './measurementSensor.js';
 
 /**
  * HumiditySensor - Sensor implementation
  */
-export class HumiditySensor extends Sensor {
+export class HumiditySensor extends MeasurementSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumiditySensor';
+
+  static readonly DEFAULT_RELATIVE_HUMIDITY = 50;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -23,19 +25,12 @@ export class HumiditySensor extends Sensor {
     return this.platform.Service.HumiditySensor;
   }
 
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
+  protected getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }> {
     return this.platform.Characteristic.CurrentRelativeHumidity;
   }
 
-  protected getStateName(state: number): string {
-    let sensorStateName: string;
-
-    switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    default: { sensorStateName = state.toString();}
-    }
-
-    return sensorStateName;
+  protected getDefaultValue(): number {
+    return HumiditySensor.DEFAULT_RELATIVE_HUMIDITY;
   }
 
   protected getAccessoryTypeName(): string {

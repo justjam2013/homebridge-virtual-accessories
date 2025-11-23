@@ -3,7 +3,7 @@
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
-import { Sensor } from './sensors/sensor.js';
+import { BinarySensor } from './sensors/binarySensor.js';
 import { Trigger } from './sensors/triggers/trigger.js';
 import { VirtualLogger } from './utils/virtualLogger.js';
 
@@ -241,8 +241,8 @@ export class WebhookServer {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
     }
-    else if (accessory instanceof Sensor) {
-      const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+    else if (accessory instanceof BinarySensor) {
+      const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
       if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
         this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
         addedAccessory = true;
@@ -370,8 +370,8 @@ export class WebhookServer {
         else if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
           (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
         }
-        else if (accessory instanceof Sensor) {
-          const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+        else if (accessory instanceof BinarySensor) {
+          const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
             (<TriggerableSensor><unknown>trigger).triggerSensor(<boolean>value, accessoryId);
           }
