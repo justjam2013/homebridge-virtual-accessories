@@ -16,7 +16,8 @@ export class AccessoryType {
   static Lock: string = 'lock';
   static Microphone: string = 'microphone';
   static SecuritySystem: string = 'securitysystem';
-  static Sensor: string = 'sensor';
+  static SensorBinary: string = 'sensor';
+  static SensorMeasurement: string = 'measurement';
   static Speaker: string = 'speaker';
   static Switch: string = 'switch';
   static Television: string = 'television';
@@ -28,7 +29,7 @@ export class AccessoryType {
 /**
  * 
  */
-export class SensorType {
+export class BinarySensorType {
 
   static CarbonDioxide: string = 'carbonDioxide';
   static CarbonMonoxide: string = 'carbonMonoxide';
@@ -39,13 +40,27 @@ export class SensorType {
   static Smoke: string = 'smoke';
 
   static Types: string[] = [
-    SensorType.CarbonDioxide,
-    SensorType.CarbonMonoxide,
-    SensorType.Contact,
-    SensorType.Leak,
-    SensorType.Motion,
-    SensorType.Occupancy,
-    SensorType.Smoke,
+    BinarySensorType.CarbonDioxide,
+    BinarySensorType.CarbonMonoxide,
+    BinarySensorType.Contact,
+    BinarySensorType.Leak,
+    BinarySensorType.Motion,
+    BinarySensorType.Occupancy,
+    BinarySensorType.Smoke,
+  ];
+}
+
+/**
+ * 
+ */
+export class MeasurementSensorType {
+
+  static Humidity: string = 'humidity';
+  static Temperature: string = 'temperature';
+
+  static Types: string[] = [
+    MeasurementSensorType.Humidity,
+    MeasurementSensorType.Temperature,
   ];
 }
 
