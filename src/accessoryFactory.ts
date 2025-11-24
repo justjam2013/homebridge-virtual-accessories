@@ -184,7 +184,7 @@ export abstract class AccessoryFactory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ): MeasurementSensor | undefined {
-    const sensorType: string = accessoryConfiguration.sensor.type;
+    const sensorType: string = accessoryConfiguration.measurement.type;
 
     let virtualSensor: MeasurementSensor | undefined;
 
