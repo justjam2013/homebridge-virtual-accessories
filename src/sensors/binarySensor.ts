@@ -11,7 +11,7 @@ import { TriggerNotAllowedError, InvalidSensorValue } from '../errors.js';
 /**
  * Sensor - Abstract accessory
  */
-export abstract class Sensor extends Accessory {
+export abstract class BinarySensor extends Accessory {
 
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
@@ -27,7 +27,7 @@ export abstract class Sensor extends Accessory {
   protected eventDetected: WithUUID<{ new (): Characteristic; }>;
 
   protected states = {
-    SensorState: Sensor.NORMAL,
+    SensorState: BinarySensor.NORMAL,
   };
 
   constructor(
@@ -45,7 +45,7 @@ export abstract class Sensor extends Accessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`);
     this.service.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
     // register handlers
@@ -72,7 +72,7 @@ export abstract class Sensor extends Accessory {
   async getEventDetected(): Promise<CharacteristicValue> {
     const sensorState = this.states.SensorState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${Sensor.getStateName(sensorState)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${BinarySensor.getStateName(sensorState)}`);
 
     return sensorState;
   }
@@ -86,8 +86,8 @@ export abstract class Sensor extends Accessory {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case Sensor.NORMAL: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case Sensor.TRIGGERED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case BinarySensor.NORMAL: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
+    case BinarySensor.TRIGGERED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 
@@ -102,8 +102,8 @@ export abstract class Sensor extends Accessory {
       throw new TriggerNotAllowedError(`Trigger ${trigger.name} is not allowed to trigger this sensor`);
     }
 
-    if (![Sensor.NORMAL, Sensor.TRIGGERED].includes(sensorState)) {
-      throw new InvalidSensorValue(`Sensor value ${Sensor.getStateName(sensorState)} is not a valid state`);
+    if (![BinarySensor.NORMAL, BinarySensor.TRIGGERED].includes(sensorState)) {
+      throw new InvalidSensorValue(`Sensor value ${BinarySensor.getStateName(sensorState)} is not a valid state`);
     }
 
     // Only update the sensor if the state has changed
@@ -113,7 +113,7 @@ export abstract class Sensor extends Accessory {
       this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
 }

@@ -5,7 +5,7 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { CompanionSensor, TriggerableCompanionSensor } from '../sensors/companions/companionSensors.js';
-import { Sensor } from '../sensors/sensor.js';
+import { BinarySensor } from '../sensors/binarySensor.js';
 import { Timer } from '../utils/timer.js';
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { Utils } from '../utils/utils.js';
@@ -35,7 +35,7 @@ export class Switch extends Accessory {
 
   protected states = {
     SwitchState: Switch.OFF,
-    SensorState: Sensor.NORMAL,
+    SensorState: BinarySensor.NORMAL,
   };
 
   constructor(
@@ -50,7 +50,7 @@ export class Switch extends Accessory {
     this.muteLogging = this.accessoryConfiguration.switch.muteLogging;
 
     this.states.SwitchState = this.defaultState;
-    this.states.SensorState = Sensor.NORMAL;
+    this.states.SensorState = BinarySensor.NORMAL;
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
       this.setupResetTimer(this.accessoryConfiguration.resetTimer);
@@ -194,9 +194,9 @@ export class Switch extends Accessory {
     let sensorState: number;
 
     if (this.defaultState === Switch.OFF) {
-      sensorState = (this.states.SwitchState === Switch.OFF) ? Sensor.NORMAL : Sensor.TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.OFF) ? BinarySensor.NORMAL : BinarySensor.TRIGGERED;
     } else {
-      sensorState = (this.states.SwitchState === Switch.ON) ? Sensor.NORMAL : Sensor.TRIGGERED;
+      sensorState = (this.states.SwitchState === Switch.ON) ? BinarySensor.NORMAL : BinarySensor.TRIGGERED;
     }
 
     return sensorState;

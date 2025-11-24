@@ -1,7 +1,7 @@
 /**
  * 
  */
-export interface UpdatableSensor {
+export interface UpdatableMeasurementSensor {
 
-  updateSensor(value: number, accessoryId: string): void;
+  updateMeasurementSensor(value: number, accessoryId: string): void;
 }

@@ -2,12 +2,12 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { BinarySensor } from './binarySensor.js';
 
 /**
  * OccupancySensor - Sensor implementation
  */
-export class OccupancySensor extends Sensor {
+export class OccupancySensor extends BinarySensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'OccupancySensor';
 
@@ -35,8 +35,8 @@ export class OccupancySensor extends Sensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case OccupancySensor.OCCUPANCY_NOT_DETECTED: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case OccupancySensor.OCCUPANCY_DETECTED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case OccupancySensor.OCCUPANCY_NOT_DETECTED: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
+    case OccupancySensor.OCCUPANCY_DETECTED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

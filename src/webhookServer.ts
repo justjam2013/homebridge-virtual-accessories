@@ -3,7 +3,7 @@
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
-import { Sensor } from './sensors/sensor.js';
+import { BinarySensor } from './sensors/binarySensor.js';
 import { Trigger } from './sensors/triggers/trigger.js';
 import { VirtualLogger } from './utils/virtualLogger.js';
 
@@ -11,7 +11,7 @@ import { TriggerableAlarm } from './accessories/triggerableAlarm.js';
 import { TriggerableSensor } from './sensors/triggerableSensor.js';
 import { UpdatableChargingState } from './accessories/updatableChargingState.js';
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
-import { UpdatableSensor } from './sensors/updatableSensor.js';
+import { UpdatableMeasurementSensor } from './sensors/updatableSensor.js';
 
 import { SensorValueUpdateNotAllowed } from './errors.js';
 
@@ -85,7 +85,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.percentageIsValid(humidity, response))
       {
-        this.processRequest(accessoryId, 'humidifierdehumidifier', Number(humidity), response);
+        this.processRequest(routeHumidity, accessoryId, [ 'humidifierdehumidifier', 'measurement' ], Number(humidity), response);
       }
     });
 
@@ -103,7 +103,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.numberIsValid(temperature, response))
       {
-        this.processRequest(accessoryId, 'heatercooler', Number(temperature), response);
+        this.processRequest(routeTemperature, accessoryId, [ 'heatercooler', 'measurement' ], Number(temperature), response);
       }
     });
 
@@ -121,7 +121,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(obstruction, response))
       {
-        this.processRequest(accessoryId, 'garagedoor', ToBoolean(obstruction), response);
+        this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction), response);
       }
     });
 
@@ -140,7 +140,7 @@ export class WebhookServer {
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(accessoryId, 'securitysystem', (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -159,7 +159,7 @@ export class WebhookServer {
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(accessoryId, 'securitysystem', (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -177,7 +177,7 @@ export class WebhookServer {
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(trigger, response))
       {
-        this.processRequest(accessoryId, 'sensor', ToBoolean(trigger), response);
+        this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger), response);
       }
     });
 
@@ -199,7 +199,7 @@ export class WebhookServer {
           this.numberIsValid(charge, response))
       {
         const chargingState: ChargingState = new ChargingState(ToBoolean(charging), Number(charge));
-        this.processRequest(accessoryId, 'battery', chargingState, response);
+        this.processRequest(routeChargingState, accessoryId, [ 'battery' ], chargingState, response);
       }
     });
   }
@@ -236,13 +236,13 @@ export class WebhookServer {
       (<TriggerableSensor><unknown>accessory).triggerSensor !== undefined ||
       (<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined ||
       (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
-      (<UpdatableSensor><unknown>accessory).updateSensor !== undefined
+      (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined
     ) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
     }
-    else if (accessory instanceof Sensor) {
-      const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+    else if (accessory instanceof BinarySensor) {
+      const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
       if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
         this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
         addedAccessory = true;
@@ -345,14 +345,15 @@ export class WebhookServer {
   }
 
   private processRequest(
+    route: string,
     accessoryId: string,
-    accessoryType: string,
+    accessoryTypes: string[],
     value: number | boolean | ChargingState,
     response: Response,
   ) {
     const accessory: Accessory | undefined = this.accessories.get(accessoryId);
 
-    if (accessory !== undefined && accessory.accessoryConfiguration.accessoryType === accessoryType) {
+    if (accessory !== undefined && accessoryTypes.includes(accessory.accessoryConfiguration.accessoryType)) {
       try {
         if ((<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined) {
           (<TriggerableAlarm><unknown>accessory).triggerAlarm(<number>value, accessoryId);
@@ -367,11 +368,12 @@ export class WebhookServer {
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
         }
-        else if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
+        // Heater/Cooler, Humidifier/Dehumidifier, Temperature Sensor, Humidity Sensor
+        else if ((<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined) {
+          (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor(<number>value, accessoryId);
         }
-        else if (accessory instanceof Sensor) {
-          const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+        else if (accessory instanceof BinarySensor) {
+          const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
             (<TriggerableSensor><unknown>trigger).triggerSensor(<boolean>value, accessoryId);
           }
@@ -395,7 +397,7 @@ export class WebhookServer {
         response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
       }
     } else {
-      const errorMsg: string = `No accessory found with type '${accessoryType}' and id '${accessoryId}'`;
+      const errorMsg: string = `No accessory found  with id '${accessoryId}' and able to respond to request '${route}'`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.NotFound).send(`${errorMsg}`);
     }

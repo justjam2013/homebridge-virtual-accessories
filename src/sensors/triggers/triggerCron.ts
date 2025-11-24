@@ -1,6 +1,6 @@
 import { CronTriggerConfiguration } from '../../configuration/triggers/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { Utils } from '../../utils/utils.js';
 
 import { Cron } from 'croner';
@@ -15,7 +15,7 @@ export class CronTrigger extends Trigger {
   private cronJob!: Cron;
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     super(sensor, name);
@@ -76,9 +76,9 @@ export class CronTrigger extends Trigger {
 
         this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-        sensor.triggerSensorState(Sensor.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerSensorState(BinarySensor.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
         await Utils.delay(resetDelayMillis);
-        sensor.triggerSensorState(Sensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerSensorState(BinarySensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
 
         if (!this.cronJob.nextRun()) {
           this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);

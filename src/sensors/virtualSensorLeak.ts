@@ -2,12 +2,12 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { BinarySensor } from './binarySensor.js';
 
 /**
  * LeakSensor - Sensor implementation
  */
-export class LeakSensor extends Sensor {
+export class LeakSensor extends BinarySensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'LeakSensor';
 
@@ -35,8 +35,8 @@ export class LeakSensor extends Sensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case LeakSensor.LEAK_NOT_DETECTED: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case LeakSensor.LEAK_DETECTED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case LeakSensor.LEAK_NOT_DETECTED: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
+    case LeakSensor.LEAK_DETECTED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

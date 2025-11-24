@@ -2,12 +2,12 @@ import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homeb
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { Sensor } from './sensor.js';
+import { BinarySensor } from './binarySensor.js';
 
 /**
  * MotionSensor - Sensor implementation
  */
-export class MotionSensor extends Sensor {
+export class MotionSensor extends BinarySensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'MotionSensor';
 
@@ -35,8 +35,8 @@ export class MotionSensor extends Sensor {
 
     switch (state) {
     case undefined: { sensorStateName = 'undefined'; break; }
-    case MotionSensor.MOTION_NOT_DETECTED: { sensorStateName = Sensor.NORMAL_INACTIVE; break; }
-    case MotionSensor.MOTION_DETECTED: { sensorStateName = Sensor.TRIGGERED_ACTIVE; break; }
+    case MotionSensor.MOTION_NOT_DETECTED: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
+    case MotionSensor.MOTION_DETECTED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
     default: { sensorStateName = state.toString();}
     }
 

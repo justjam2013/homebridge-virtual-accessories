@@ -143,7 +143,8 @@
                 { "title": "Lock", "enum": ["lock"] },
                 { "title": "Microphone", "enum": ["microphone"] },
                 { "title": "Security System", "enum": ["securitysystem"] },
-                { "title": "Sensor", "enum": ["sensor"] },
+                { "title": "Sensor - Measurement", "enum": ["measurement"] },
+                { "title": "Sensor - Triggered", "enum": ["sensor"] },
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Television", "enum": ["television"] },
@@ -847,7 +848,7 @@
               }
             },
             "sensor": {
-              "title": "Sensor",
+              "title": "Sensor - Triggered",
               "type": "object",
               "properties": {
                 "type": {
@@ -879,6 +880,48 @@
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
               }
+            },
+            "measurement": {
+              "title": "Sensor - Measurement",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Type *",
+                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Humidity", "enum": ["humidity"] },
+                    { "title": "Temperature", "enum": ["temperature"] }
+                  ]
+                },
+                "temperatureUnits": {
+                  "title": "Temperature Units *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].measurement && model.devices[arrayIndices].measurement.type === 'temperature';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'measurement';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "temperature" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "temperatureUnits" ]
+                  }
+                }
+              ]
             },
             "resetTimer": {
               "title": "Reset Timer",
@@ -1522,6 +1565,21 @@
                 "properties": {
                   "sensor": {
                     "required": [ "type", "trigger" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "measurement" }
+                }
+              },
+              "then": {
+                "required": [ "measurement" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type" ]
                   }
                 }
               }
