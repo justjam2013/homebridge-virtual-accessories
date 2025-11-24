@@ -67,11 +67,11 @@ export class Timer {
   ): void;
   start(
     callback: () => void,
-    duration: number,
+    oneOffDuration: number,
   ): void;
   start(
     callback: () => void,
-    duration: number,
+    oneOffDuration: number,
     updateIntervalMillis: number,
   ): void;
   start(
