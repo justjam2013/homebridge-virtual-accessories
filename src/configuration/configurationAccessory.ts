@@ -275,9 +275,9 @@ export class AccessoryConfiguration {
       return this.isErrorless(this.windowCovering, this.fieldNames.windowCovering!);
     // Sensors
     case AccessoryType.SensorBinary:
-      return this.isErrorlessSensor(this.sensor, this.fieldNames.sensor!);
+      return this.isErrorlessBinarySensor(this.sensor, this.fieldNames.sensor!);
     case AccessoryType.SensorMeasurement:
-      return this.isErrorlessSensor(this.measurement, this.fieldNames.measurement!);
+      return this.isErrorlessMeasurementSensor(this.measurement, this.fieldNames.measurement!);
     }
 
     return false;
@@ -302,8 +302,7 @@ export class AccessoryConfiguration {
     );
   };
 
-
-  private isErrorlessSensor(accessory: Validatable, prefix: string): boolean {
+  private isErrorlessBinarySensor(accessory: Validatable, prefix: string): boolean {
     let isValidSensor: boolean = false;
     let sensorErrorFields: string[] = [ prefix ];
      
@@ -326,6 +325,21 @@ export class AccessoryConfiguration {
     return (
       isValidSensor &&
       isValidTrigger
+    );
+  };
+
+  private isErrorlessMeasurementSensor(accessory: Validatable, prefix: string): boolean {
+    let isValidSensor: boolean = false;
+    let sensorErrorFields: string[] = [ prefix ];
+     
+    if (accessory !== undefined) {
+      [isValidSensor, sensorErrorFields] = accessory.isValid(prefix);
+    }
+
+    this.errorFields.push(...sensorErrorFields);
+
+    return (
+      isValidSensor
     );
   };
 
