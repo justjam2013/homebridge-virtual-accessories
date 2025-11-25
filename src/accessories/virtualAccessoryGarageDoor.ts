@@ -109,7 +109,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     // If an obstruction is detected when trying to close ...
     if (this.states.ObstructionDetected === true && this.states.GarageDoorTargetState === GarageDoor.CLOSED) {
+      this.states.GarageDoorTargetState = GarageDoor.OPEN;
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Obstruction Detected: Cannot close ${this.accessoryConfiguration.accessoryName}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
     }
     else if (this.states.GarageDoorCurrentState === GarageDoor.OPENING && this.states.GarageDoorTargetState === GarageDoor.OPEN) {
       // Do nothing - already opening
@@ -223,11 +225,11 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
       this.states.GarageDoorTargetState = GarageDoor.OPEN;
       this.service!.setCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorTargetState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Rolling back Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
 
       this.states.GarageDoorCurrentState = GarageDoor.OPENING;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Rolling back Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
 
       this.transitionTimer.stop();
 
