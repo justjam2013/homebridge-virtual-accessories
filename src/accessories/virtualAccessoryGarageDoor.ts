@@ -126,15 +126,18 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
       this.transitionTimer.stop();
     }
     else {
-      // GarageDoorCurrentState CLOSED && GarageDoorTargetState OPEN: open
-      // GarageDoorCurrentState OPEN && GarageDoorTargetState CLOSED: close
-      // GarageDoorCurrentState CLOSING && GarageDoorTargetState OPEN: stop and open
+      // GarageDoorCurrentState CLOSED && GarageDoorTargetState OPEN -> GarageDoorCurrentState.OPENING
+      // GarageDoorCurrentState CLOSING && GarageDoorTargetState OPEN -> GarageDoorCurrentState.OPENING
+      // GarageDoorCurrentState OPEN && GarageDoorTargetState CLOSED -> GarageDoorCurrentState.CLOSING
 
       this.states.GarageDoorCurrentState = (this.states.GarageDoorTargetState === GarageDoor.OPEN) ?  GarageDoor.OPENING : GarageDoor.CLOSING;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
 
       this.transitionTimer.stop();
+
+      // If it was closing, then the time to open back up would be the elapsed closing time, not the full transition time
+      // Not calculating that for now
 
       this.transitionTimer.start(
         () => {
@@ -209,10 +212,19 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     this.states.ObstructionDetected = value;
     this.service!.setCharacteristic(this.platform.Characteristic.ObstructionDetected, (this.states.ObstructionDetected));
-    // Only log to 'info' if setting ObstructionDetected to true
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating obstruction detected to ${value}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating obstruction detected to ${value}`);
 
     if (this.states.GarageDoorCurrentState === GarageDoor.CLOSING && this.states.ObstructionDetected === true) {
+      // If the door is opening, is should reverse back to 
+      // Target: OPEN
+      // Current: OPENING
+
+      this.log.error(`[${this.accessoryConfiguration.accessoryName}] An obstruction was detected while closing. Rolling back to open`);
+
+      this.states.GarageDoorTargetState = GarageDoor.OPEN;
+      this.service!.setCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorTargetState));
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
+
       this.states.GarageDoorCurrentState = GarageDoor.OPENING;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
