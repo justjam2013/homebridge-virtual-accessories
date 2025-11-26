@@ -73,6 +73,8 @@ Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with 
     - [Binary Sensor with cron trigger with start and end datetimes](#binary-sensor-with-cron-trigger-with-start-and-end-datetimes)
     - [Binary Sensor with sun events trigger](#binary-sensor-with-sun-events-trigger)
     - [Binary Sensor with webhook trigger](#binary-sensor-with-webhook-trigger)
+    - [Humidity Sensor](#humidity-sensor)
+    - [Temperature Sensor](#temperature-sensor)
   - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
@@ -907,6 +909,45 @@ These are example configurations of the virtual accessories and provided for ref
             },
             "webhookTrigger": {
                 "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Humidity Sensor
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "2837933",
+            "accessoryName": "Humidity Meter",
+            "accessoryType": "measurement",
+            "measurement": {
+                "type": "humidity"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Temperature Sensor
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "5756040",
+            "accessoryName": "Temperature Meter",
+            "accessoryType": "measurement",
+            "measurement": {
+                "type": "temperature",
+                "temperatureUnits": "fahrenheit"
             }
         }
     ],
