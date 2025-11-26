@@ -68,11 +68,11 @@ Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with 
       - [Switch with reset timer](#switch-with-reset-timer)
       - [Switch with random reset timer](#switch-with-random-reset-timer)
       - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
-    - [Sensor with ping trigger](#sensor-with-ping-trigger)
-    - [Sensor with cron trigger](#sensor-with-cron-trigger)
-    - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
-    - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
-    - [Sensor with webhook trigger](#sensor-with-webhook-trigger)
+    - [Binary Sensor with ping trigger](#binary-sensor-with-ping-trigger)
+    - [Binary Sensor with cron trigger](#binary-sensor-with-cron-trigger)
+    - [Binary Sensor with cron trigger with start and end datetimes](#binary-sensor-with-cron-trigger-with-start-and-end-datetimes)
+    - [Binary Sensor with sun events trigger](#binary-sensor-with-sun-events-trigger)
+    - [Binary Sensor with webhook trigger](#binary-sensor-with-webhook-trigger)
   - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
@@ -775,7 +775,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with ping trigger
+### Binary Sensor with ping trigger
 
 ```json
 {
@@ -803,7 +803,7 @@ These are example configurations of the virtual accessories and provided for ref
 > [!NOTE]
 > The value for `host` can be an IPv4 address (192.168.0.1), IPv6 address (2001:0db8:85a3:0000:0000:8a2e:0370:7334), or hostname (www.google.com).
 
-### Sensor with cron trigger
+### Binary Sensor with cron trigger
 
 ```json
 {
@@ -829,7 +829,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with cron trigger with start and end datetimes
+### Binary Sensor with cron trigger with start and end datetimes
 
 ```json
 {
@@ -864,7 +864,7 @@ These are example configurations of the virtual accessories and provided for ref
 > "startDateTime": "2024-11-14T19:41",
 > ```
 
-### Sensor with sun events trigger
+### Binary Sensor with sun events trigger
 
 ```json
 {
@@ -891,7 +891,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with webhook trigger
+### Binary Sensor with webhook trigger
 
 ```json
 {
