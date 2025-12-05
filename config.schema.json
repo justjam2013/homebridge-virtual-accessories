@@ -151,8 +151,7 @@
                 { "title": "Valve", "enum": ["valve"] },
                 { "title": "Window", "enum": ["window"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
-              ],
-              "default": "switch"
+              ]
             },
             "accessoryIsStateful": {
               "title": "Accessory Is Stateful",
