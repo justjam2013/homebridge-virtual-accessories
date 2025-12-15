@@ -85,11 +85,10 @@ export class Lock extends Accessory {
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
       const cachedLastKnownAction: number = accessoryState[this.lastKnownActionStorageKey] as number;
 
-      const jsonDeviceCredentialPublicKeys: string = accessoryState[this.deviceCredentialPublicKeysStorageKey];
-      // eslint-disable-next-line max-len
-      const cachedDeviceCredentialPublicKeys = (jsonDeviceCredentialPublicKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonDeviceCredentialPublicKeys)) : undefined;
+      const jsonDeviceCredentialPublicKeys: string = accessoryState[this.deviceCredentialPublicKeysStorageKey]; 
+      const cachedDeviceCredentialPublicKeys = (jsonDeviceCredentialPublicKeys !== undefined) ? Utils.jsonToMap(jsonDeviceCredentialPublicKeys) : undefined;
       const jsonReaderPrivateKeys: string = accessoryState[this.readerPrivateKeysStorageKey];
-      const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? new Map<string, string>(JSON.parse(jsonReaderPrivateKeys)) : undefined;
+      const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? Utils.jsonToMap(jsonReaderPrivateKeys) : undefined;
 
       if (cachedState !== undefined) {
         this.states.LockCurrentState = cachedState;
@@ -313,8 +312,8 @@ export class Lock extends Accessory {
     };
 
     if (this.setupHomeKey) {
-      Object.assign(jsonState, { [this.deviceCredentialPublicKeysStorageKey]: JSON.stringify(this.deviceCredentialPublicKeys) });
-      Object.assign(jsonState, { [this.readerPrivateKeysStorageKey]: JSON.stringify(this.readerPrivateKeys) });
+      Object.assign(jsonState, { [this.deviceCredentialPublicKeysStorageKey]: Utils.mapToJson(this.deviceCredentialPublicKeys) });
+      Object.assign(jsonState, { [this.readerPrivateKeysStorageKey]: Utils.mapToJson(this.readerPrivateKeys) });
     }
 
     const json = JSON.stringify(jsonState);
