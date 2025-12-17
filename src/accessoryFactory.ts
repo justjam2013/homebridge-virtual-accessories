@@ -26,7 +26,8 @@ import { Valve } from './accessories/virtualAccessoryValve.js';
 import { Window } from './accessories/virtualAccessoryWindow.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
 
-import { Sensor } from './sensors/sensor.js';
+import { BinarySensor } from './sensors/binarySensor.js';
+
 import { ContactSensor } from './sensors/virtualSensorContact.js';
 import { LeakSensor } from './sensors/virtualSensorLeak.js';
 import { MotionSensor } from './sensors/virtualSensorMotion.js';
@@ -35,14 +36,20 @@ import { SmokeSensor } from './sensors/virtualSensorSmoke.js';
 import { CarbonDioxideSensor } from './sensors/virtualSensorCarbonDioxide.js';
 import { CarbonMonoxideSensor } from './sensors/virtualSensorCarbonMonoxide.js';
 
+import { MeasurementSensor } from './sensors/measurementSensor.js';
+
+import { HumiditySensor } from './sensors/virtualSensorHumidity.js';
+import { TemperatureSensor } from './sensors/virtualSensorTemperature.js';
+
 import { Trigger } from './sensors/triggers/trigger.js';
+
 import { CronTrigger } from './sensors/triggers/triggerCron.js';
 import { PingTrigger } from './sensors/triggers/triggerPing.js';
 import { StartupTrigger } from './sensors/triggers/triggerStartup.js';
 import { SunEventsTrigger } from './sensors/triggers/triggerSunEvents.js';
 import { WebhookTrigger } from './sensors/triggers/triggerWebhook.js';
 
-import { AccessoryType, SensorType, TriggerType } from './configuration/schema.js';
+import { AccessoryType, BinarySensorType, MeasurementSensorType, TriggerType } from './configuration/schema.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
 import { MatterSwitch } from './accessories/matter/Switch.js';
@@ -125,8 +132,11 @@ export abstract class AccessoryFactory {
     case AccessoryType.WindowCovering:
       virtualAccessory = new WindowCovering(platform, accessory, accessoryConfiguration);
       break;
-    case AccessoryType.Sensor:
-      virtualAccessory = AccessoryFactory.createVirtualSensor(platform, accessory, accessoryConfiguration);
+    case AccessoryType.SensorBinary:
+      virtualAccessory = AccessoryFactory.createVirtualBinarySensor(platform, accessory, accessoryConfiguration);
+      break;
+    case AccessoryType.SensorMeasurement:
+      virtualAccessory = AccessoryFactory.createVirtualMeasurementSensor(platform, accessory, accessoryConfiguration);
       break;
     default:
       platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
@@ -155,36 +165,35 @@ export abstract class AccessoryFactory {
     return virtualAccessory;
   }
 
-
-  static createVirtualSensor(
+  static createVirtualBinarySensor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
-  ): Sensor | undefined {
+  ): BinarySensor | undefined {
     const sensorType: string = accessoryConfiguration.sensor.type;
 
-    let virtualSensor: Sensor | undefined;
+    let virtualSensor: BinarySensor | undefined;
 
     switch (sensorType) {
-    case SensorType.CarbonDioxide:
+    case BinarySensorType.CarbonDioxide:
       virtualSensor = new CarbonDioxideSensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.CarbonMonoxide:
+    case BinarySensorType.CarbonMonoxide:
       virtualSensor = new CarbonMonoxideSensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.Contact:
+    case BinarySensorType.Contact:
       virtualSensor = new ContactSensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.Leak:
+    case BinarySensorType.Leak:
       virtualSensor = new LeakSensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.Motion:
+    case BinarySensorType.Motion:
       virtualSensor = new MotionSensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.Occupancy:
+    case BinarySensorType.Occupancy:
       virtualSensor = new OccupancySensor(platform, accessory, accessoryConfiguration);
       break;
-    case SensorType.Smoke:
+    case BinarySensorType.Smoke:
       virtualSensor = new SmokeSensor(platform, accessory, accessoryConfiguration);
       break;
     default:
@@ -194,8 +203,31 @@ export abstract class AccessoryFactory {
     return virtualSensor;
   }
 
+  static createVirtualMeasurementSensor(
+    platform: VirtualAccessoriesPlatform,
+    accessory: PlatformAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
+  ): MeasurementSensor | undefined {
+    const sensorType: string = accessoryConfiguration.measurement.type;
+
+    let virtualSensor: MeasurementSensor | undefined;
+
+    switch (sensorType) {
+    case MeasurementSensorType.Humidity:
+      virtualSensor = new HumiditySensor(platform, accessory, accessoryConfiguration);
+      break;
+    case MeasurementSensorType.Temperature:
+      virtualSensor = new TemperatureSensor(platform, accessory, accessoryConfiguration);
+      break;
+    default:
+      platform.log.error(`Error creating sensor. Invalid sensor type: ${sensorType}`);
+    }
+
+    return virtualSensor;
+  }
+
   static createTrigger(
-    sensor: Sensor,
+    sensor: BinarySensor,
     triggerType: string,
     name: string,
   ): Trigger | undefined {

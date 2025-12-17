@@ -8,12 +8,13 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { UpdatableSensor } from '../sensors/updatableSensor.js';
+import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
+import { TemperatureUnit } from '../configuration/schema.js';
 
 /**
  * HeaterCooler - Accessory implementation
  */
-export class HeaterCooler extends Accessory implements UpdatableSensor {
+export class HeaterCooler extends Accessory implements UpdatableMeasurementSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HeaterCooler';
 
@@ -61,7 +62,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
     // First configure the device based on the accessory details
     this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
     this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
-    this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === 'celsius' ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
+    this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
     this.states.HeatingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getHeatingThreshold() as number);
     this.states.CoolingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getCoolingThreshold() as number);
 
@@ -485,7 +486,7 @@ export class HeaterCooler extends Accessory implements UpdatableSensor {
 
   // Updatable Sensor interface
 
-  updateSensor(value: number, accessoryId: string): void {
+  updateMeasurementSensor(value: number, accessoryId: string): void {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {

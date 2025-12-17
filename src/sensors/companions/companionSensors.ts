@@ -5,8 +5,8 @@ import { PlatformAccessory, Service, WithUUID } from 'homebridge';
 import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
 
-import { Sensor } from '../sensor.js';
-import { SensorType } from '../../configuration/schema.js';
+import { BinarySensor } from '../binarySensor.js';
+import { BinarySensorType } from '../../configuration/schema.js';
 import { Accessory } from '../../accessories/accessory.js';
 import { AccessoryNotAllowedError } from '../../errors.js';
 
@@ -35,25 +35,25 @@ export class CompanionSensor {
     let virtualSensor: TriggerableCompanionSensor | undefined;
 
     switch (sensorType) {
-    case SensorType.CarbonDioxide:
+    case BinarySensorType.CarbonDioxide:
       virtualSensor = new CompanionCarbonDioxideSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.CarbonMonoxide:
+    case BinarySensorType.CarbonMonoxide:
       virtualSensor = new CompanionCarbonMonoxideSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.Contact:
+    case BinarySensorType.Contact:
       virtualSensor = new CompanionContactSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.Leak:
+    case BinarySensorType.Leak:
       virtualSensor = new CompanionLeakSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.Motion:
+    case BinarySensorType.Motion:
       virtualSensor = new CompanionMotionSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.Occupancy:
+    case BinarySensorType.Occupancy:
       virtualSensor = new CompanionOccupancySensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
-    case SensorType.Smoke:
+    case BinarySensorType.Smoke:
       virtualSensor = new CompanionSmokeSensor(platform, accessory, accessoryConfiguration, companionSensorName);
       break;
     default:
@@ -66,7 +66,7 @@ export class CompanionSensor {
 
 // Mixin
 
-function Companion<T extends abstract new (...args: any[]) => Sensor>(
+function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
   SensorInstance: T,
 ) {
   abstract class CompanionSensor extends SensorInstance implements TriggerableCompanionSensor {
@@ -102,7 +102,7 @@ function Companion<T extends abstract new (...args: any[]) => Sensor>(
       this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
 
       // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${Sensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   };
   return CompanionSensor;

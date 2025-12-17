@@ -1,14 +1,16 @@
 <div>
     <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/github/package-json/v/justjam2013/homebridge-virtual-accessories?color=F99211" /></a>
     <a href="https://www.npmjs.com/package/homebridge-virtual-accessories"><img src="https://img.shields.io/github/v/release/justjam2013/homebridge-virtual-accessories?color=FFd461" /></a>
-    <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://badgen.net/badge/homebridge/verified/purple" /></a>
+    <!-- <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://badgen.net/badge/homebridge/verified/purple" /></a> -->
+    <!-- a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://img.shields.io/badge/_homebridge_-_verified_-6A5ACD" /></a -->
+    <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://img.shields.io/badge/homebridge-verified-blueviolet?color=%23491F59&style=flat" /></a>
     <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="https://img.shields.io/badge/_homebridge_v2.0_-_ready_-4CAF50" /></a>
     <a href="https://discord.gg/Z8jmyvb"><img src="https://img.shields.io/badge/discord-%23virtual--accessories-737CF8" /></a>
 </div>
 
 <br/><br/>
 <p align="center" vertical-align="middle">
-    <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="VirtualAccessories.png" height="140" /></a>
+    <a href="https://github.com/justjam2013/homebridge-virtual-accessories"><img src="assets/icon/VirtualAccessories.png" height="140" /></a>
     <a href="https://github.com/homebridge/homebridge"><img src="https://raw.githubusercontent.com/homebridge/branding/master/logos/homebridge-color-round-stylized.png" height="140" /></a>
 </p>
 
@@ -24,7 +26,7 @@
 
 ## 🔴🔴 Important 🔴🔴
 
-Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
+Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the **updated** Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
 
 ## <!-- Thin separator line -->
 
@@ -66,11 +68,13 @@ Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with 
       - [Switch with reset timer](#switch-with-reset-timer)
       - [Switch with random reset timer](#switch-with-random-reset-timer)
       - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
-    - [Sensor with ping trigger](#sensor-with-ping-trigger)
-    - [Sensor with cron trigger](#sensor-with-cron-trigger)
-    - [Sensor with cron trigger with start and end datetimes](#sensor-with-cron-trigger-with-start-and-end-datetimes)
-    - [Sensor with sun events trigger](#sensor-with-sun-events-trigger)
-    - [Sensor with webhook trigger](#sensor-with-webhook-trigger)
+    - [Binary Sensor with ping trigger](#binary-sensor-with-ping-trigger)
+    - [Binary Sensor with cron trigger](#binary-sensor-with-cron-trigger)
+    - [Binary Sensor with cron trigger with start and end datetimes](#binary-sensor-with-cron-trigger-with-start-and-end-datetimes)
+    - [Binary Sensor with sun events trigger](#binary-sensor-with-sun-events-trigger)
+    - [Binary Sensor with webhook trigger](#binary-sensor-with-webhook-trigger)
+    - [Humidity Sensor](#humidity-sensor)
+    - [Temperature Sensor](#temperature-sensor)
   - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
@@ -110,7 +114,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. Due to [issues with HomeKit](#issues-with-homekit), you will need the free [Eve app](https://www.evehome.com/en-us/eve-app) to control its settings.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
--   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set via a [webhook call](#webhook-service-configuration). The accessory state will show that an obstruction was detected and the current state will be set to `STOPPED`. The "obstruction detected" property will be reset on the next call to open or close the garage door.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates a HomeKit notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set or reset via a [webhook call](#webhook-service-configuration). Per UL 325 safety standards, if the obstruction sensor is triggered and the garage door is open it will remain open. If the garage door is opening it will stop and reverse back to open. It will operate as normal in all other circumstances.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
@@ -129,13 +133,16 @@ Currently, these are the implemented virtual accessories:
     - **Switches with companion sensors.** The switch will trigger a companion sensor when it changes state, generating a HomeKit-native notification in the Home app. Selecting a critical sensor type will allow notifications to bypass Focuses like "Do Not Disturb". This is just the easier way of implementing a switch triggered sensor.
     - **Dimmer switches.** To create a dimmer switch use a virtual lightbulb.
     - **Timed switches.** This is a way to introduce timers into HomeKit. The switch will revert back to its default state when the timer expires. If the switch is stateful, the timer will be restored after a restart of Homebridge. While care is taken to restore the timer with the appropriate time correction, **absolute accuracy is not guaranteed and should not be expected**. The accuracy of the restored timer will be affected, among other things, by the hardware and software Homebridge is running on, the number of plugins installed, the order with which the plugins are restored, etc. (see note below)
--   **Sensor.** Allows you to create different types of virtual sensors. If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
+-   **Binary Sensor.** Allows you to create different types of virtual binary sensors. A binary sensor is a sensor that can have either a triggeredt state or a normal (state retuns a value open or closed). If Activity Notifications are enabled in the Home app, sensors will generate notifications when their state changes in response to a detected event. Some types of notifications, classified as `critical` by Homekit, are allowed to bypass Focuses like `Do Not Disturb` and some are allowed to appear in CarPlay. Sensors can be activated by different triggers. Currently, the available triggers are:
     - **Cron trigger.** Activates the sensor when the time and date match the schedule described by a standard cron expression (https://crontab.guru/). The sensor resets after a brief delay.
     - **Homebridge Startup trigger.** Actvates the sensor whenever Homebridge (re)starts. The sensor resets after a brief delay.
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
     - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call.
+-   **Measurement Sensor.** Allows you you to create a virtual measurement sensor. A measurement sensor returns a continuous value, rather than just open/closed.
+    - **Humidity Meter.** Allows you to create a virtual hygrometer that measures relative humidity. The humidity meter can be updated via a [webhook call](#webhook-service-configuration).
+    - **Temperature Meter.** Allows you to create a virtual thermometer that measures temperature. The temperature meter can be updated via a [webhook call](#webhook-service-configuration).
  
 - **Timer.** To create a timer, create a timed switch.
 
@@ -164,8 +171,7 @@ npm install -g homebridge-virtual-accessories
 > [!IMPORTANT]
 > If you **manually** upgrade or downgrade the Node.js version that Homebridge is running on, you may also need to upgrade or downgrade NPM to the version required by your new Node.js version (please refer to the [Quick Guide: Updating Node.js](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Quick-Guide:-Updating-Node.js#-table-of-contents) wiki entry). Then you will need to ensure that the platform-native library `raw-socket` is also updated. After updating Node.js (and NPM if needed), run the following commands before restarting Homebridge:
 > ```
-> npm uninstall @justjam2013/raw-socket
-> npm install @justjam2013/raw-socket
+> npm rebuild @justjam2013/raw-socket --update-binary
 > ```
 
 > [!CAUTION]
@@ -178,11 +184,10 @@ npm install -g homebridge-virtual-accessories
 If you are installing Virtual Accessories For Homebridge in the Homebridge Docker image, you will need to add the following lines to `config/startup.sh`:
 
 ```
-npm uninstall @justjam2013/raw-socket
-npm install @justjam2013/raw-socket
+npm rebuild @justjam2013/raw-socket --update-binary
 ```
 
-This will ensure that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
+This will rebuild the library every time the container is restarted, but it ensures that if the version of Node.js is updated in the Docker image, the platform-native library `raw-socket` will also be updated after the container starts up.
 
 ### MacOS
 
@@ -772,7 +777,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with ping trigger
+### Binary Sensor with ping trigger
 
 ```json
 {
@@ -800,7 +805,7 @@ These are example configurations of the virtual accessories and provided for ref
 > [!NOTE]
 > The value for `host` can be an IPv4 address (192.168.0.1), IPv6 address (2001:0db8:85a3:0000:0000:8a2e:0370:7334), or hostname (www.google.com).
 
-### Sensor with cron trigger
+### Binary Sensor with cron trigger
 
 ```json
 {
@@ -826,7 +831,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with cron trigger with start and end datetimes
+### Binary Sensor with cron trigger with start and end datetimes
 
 ```json
 {
@@ -861,7 +866,7 @@ These are example configurations of the virtual accessories and provided for ref
 > "startDateTime": "2024-11-14T19:41",
 > ```
 
-### Sensor with sun events trigger
+### Binary Sensor with sun events trigger
 
 ```json
 {
@@ -888,7 +893,7 @@ These are example configurations of the virtual accessories and provided for ref
 }
 ```
 
-### Sensor with webhook trigger
+### Binary Sensor with webhook trigger
 
 ```json
 {
@@ -904,6 +909,45 @@ These are example configurations of the virtual accessories and provided for ref
             },
             "webhookTrigger": {
                 "isDisabled": false
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Humidity Sensor
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "2837933",
+            "accessoryName": "Humidity Meter",
+            "accessoryType": "measurement",
+            "measurement": {
+                "type": "humidity"
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
+### Temperature Sensor
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "5756040",
+            "accessoryName": "Temperature Meter",
+            "accessoryType": "measurement",
+            "measurement": {
+                "type": "temperature",
+                "temperatureUnits": "fahrenheit"
             }
         }
     ],
@@ -947,10 +991,17 @@ To add an external accessory in the Home app follow these steps:
 
 ## Webhook Service Configuration
 
-Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory sensors are:
+Virtual Accessories For Homebridge includes a webhook service to update accessory sensors via web calls. There are no changes required to individual accessories' configurations. Simply enabling the webhook service will automatically make all supported virtual sensors available. Curently supported accessory endpoints are:
 
+- **Battery charging state and charge level**
+- **Garage Door obstruction detected**
 - **Humidifier/Dehumidifier humidity sensor.** Updating the humidity sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
 - **Heater/Cooler temperature sensor.** Updating the temperature sensor will trigger the virtual accessory to switch to the appropriate operating state, based on threshold values and device capabilities.
+- **Security System alarm triggered state**
+- **Sensors**
+
+> [!NOTE]
+> If your environment does not allow you to modify the body of the POST request, check the [Webhook server requests using query parameters](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Webhook-server-requests-using-query-parameters) wiki page for details on using a custom workaround.
 
 ### Enable webhook service
 

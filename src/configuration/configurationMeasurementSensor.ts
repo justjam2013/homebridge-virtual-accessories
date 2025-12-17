@@ -1,16 +1,20 @@
 /* eslint-disable curly */
 
 import { Validatable } from './validatable.js';
-import { SensorType, TriggerType } from './schema.js';
+import { MeasurementSensorType } from './schema.js';
 
 import { Utils } from '../utils/utils.js';
+
+import { Name } from 'typeserializer';
 
 /**
  * 
  */
-export class SensorConfiguration implements Validatable {
+export class MeasurementSensorConfiguration implements Validatable {
   type!: string;
-  trigger!: string;
+
+  @Name('temperatureUnits')
+    units: string = '';
 
   private errorFields: string[] = [];
 
@@ -19,21 +23,14 @@ export class SensorConfiguration implements Validatable {
   isValid(prefix: string): [boolean, string[]] {
     const isValidType: boolean = (
       Utils.required(this.type) &&
-      SensorType.Types.includes(this.type)
-    );
-
-    const isValidTrigger: boolean = (
-      Utils.required(this.trigger) &&
-      TriggerType.Types.includes(this.trigger)
+      MeasurementSensorType.Types.includes(this.type)
     );
 
     // Store fields failing validation
     if (!isValidType) this.errorFields.push(prefix + '.' + this.fieldNames.type);
-    if (!isValidTrigger) this.errorFields.push(prefix + '.' + this.fieldNames.trigger);
 
     return [
-      (isValidType &&
-        isValidTrigger),
+      (isValidType),
       this.errorFields,
     ];
   }

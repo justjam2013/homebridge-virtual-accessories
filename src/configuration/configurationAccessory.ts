@@ -17,13 +17,15 @@ import { LightbulbConfiguration } from './accessories/configurationLightbulb.js'
 import { LockConfiguration } from './accessories/configurationLock.js';
 import { MicrophoneConfiguration } from './accessories/configurationMicrophone.js';
 import { SecuritySystemConfiguration } from './accessories/configurationSecuritySystem.js';
-import { SensorConfiguration } from './configurationSensor.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
 import { TelevisionConfiguration } from './accessories/configurationTelevision.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
 import { WindowConfiguration } from './accessories/configurationWindow.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
+
+import { BinarySensorConfiguration } from './configurationBinarySensor.js';
+import { MeasurementSensorConfiguration } from './configurationMeasurementSensor.js';
 
 import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
@@ -112,10 +114,6 @@ export class AccessoryConfiguration {
   @Type(SecuritySystemConfiguration)
     securitySystem!: SecuritySystemConfiguration;
 
-  // Sensor
-  @Type(SensorConfiguration)
-    sensor!: SensorConfiguration;
-
   // Speaker
   @Type(SpeakerConfiguration)
     speaker!: SpeakerConfiguration;
@@ -139,6 +137,16 @@ export class AccessoryConfiguration {
   // Window Covering
   @Type(WindowCoveringConfiguration)
     windowCovering!: WindowCoveringConfiguration;
+
+  // Sensors
+
+  // Sensor
+  @Type(MeasurementSensorConfiguration)
+    measurement!: MeasurementSensorConfiguration;
+
+  // Sensor
+  @Type(BinarySensorConfiguration)
+    sensor!: BinarySensorConfiguration;
 
   // Switch decorations
 
@@ -223,6 +231,7 @@ export class AccessoryConfiguration {
 
   private isValidAccessory(): boolean {
     switch (this.accessoryType) {
+    // Accessories
     case AccessoryType.AirPurifier:
       return this.isErrorless(this.airPurifier, this.fieldNames.airPurifier!);
     case AccessoryType.Battery:
@@ -253,8 +262,6 @@ export class AccessoryConfiguration {
       return this.isErrorless(this.microphone, this.fieldNames.microphone!);
     case AccessoryType.SecuritySystem:
       return this.isErrorless(this.securitySystem, this.fieldNames.securitySystem!);
-    case AccessoryType.Sensor:
-      return this.isErrorlessSensor(this.sensor, this.fieldNames.sensor!);
     case AccessoryType.Speaker:
       this.category = Categories.SPEAKER;
       return this.isErrorless(this.speaker, this.fieldNames.speaker!);
@@ -269,6 +276,11 @@ export class AccessoryConfiguration {
       return this.isErrorless(this.window, this.fieldNames.window!);
     case AccessoryType.WindowCovering:
       return this.isErrorless(this.windowCovering, this.fieldNames.windowCovering!);
+    // Sensors
+    case AccessoryType.SensorBinary:
+      return this.isErrorlessBinarySensor(this.sensor, this.fieldNames.sensor!);
+    case AccessoryType.SensorMeasurement:
+      return this.isErrorlessMeasurementSensor(this.measurement, this.fieldNames.measurement!);
     }
 
     return false;
@@ -293,8 +305,7 @@ export class AccessoryConfiguration {
     );
   };
 
-
-  private isErrorlessSensor(accessory: Validatable, prefix: string): boolean {
+  private isErrorlessBinarySensor(accessory: Validatable, prefix: string): boolean {
     let isValidSensor: boolean = false;
     let sensorErrorFields: string[] = [ prefix ];
      
@@ -317,6 +328,21 @@ export class AccessoryConfiguration {
     return (
       isValidSensor &&
       isValidTrigger
+    );
+  };
+
+  private isErrorlessMeasurementSensor(accessory: Validatable, prefix: string): boolean {
+    let isValidSensor: boolean = false;
+    let sensorErrorFields: string[] = [ prefix ];
+     
+    if (accessory !== undefined) {
+      [isValidSensor, sensorErrorFields] = accessory.isValid(prefix);
+    }
+
+    this.errorFields.push(...sensorErrorFields);
+
+    return (
+      isValidSensor
     );
   };
 

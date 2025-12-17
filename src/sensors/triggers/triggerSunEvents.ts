@@ -1,4 +1,4 @@
-import { Sensor } from '../sensor.js';
+import { BinarySensor } from '../binarySensor.js';
 import { SunEventsTriggerConfiguration } from '../../configuration/triggers/configurationSunEventsTrigger.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../../utils/utils.js';
@@ -22,7 +22,7 @@ export class SunEventsTrigger extends Trigger {
   private timezone: string | undefined;
 
   constructor(
-    sensor: Sensor,
+    sensor: BinarySensor,
     name: string,
   ) {
     super(sensor, name);
@@ -74,7 +74,7 @@ export class SunEventsTrigger extends Trigger {
   private async setupSunEvent(
     triggerConfig: SunEventsTriggerConfiguration,
     timezone: string,
-    sensor: Sensor,
+    sensor: BinarySensor,
   ) {
     const today: string = LocalDate.now().toString();
     this.log.debug(`[${this.sensorConfig.accessoryName}] Today: ${today}`);
@@ -173,7 +173,7 @@ export class SunEventsTrigger extends Trigger {
     event: string,
     offset: number,
     dailyDetails: DailyDetails,
-    sensor: Sensor,
+    sensor: BinarySensor,
   ) {
     let eventTime: string | undefined;
     switch (event) {
@@ -218,9 +218,9 @@ export class SunEventsTrigger extends Trigger {
         const now = Utils.now().toString();
         this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
-        sensor.triggerSensorState(Sensor.TRIGGERED, this);
+        sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
         await this.delay(resetDelayMillis);
-        sensor.triggerSensorState(Sensor.NORMAL, this);
+        sensor.triggerSensorState(BinarySensor.NORMAL, this);
       }),
     );
 

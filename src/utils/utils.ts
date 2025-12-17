@@ -112,6 +112,16 @@ export class Utils {
     return new Promise(resolve => setTimeout(resolve, millis));
   }
 
+  // serialise Map to JSON
+  static mapToJson(map: Map<string, string>): string {
+    return JSON.stringify(Array.from(map.entries()));
+  }
+
+  // de-serialise JSON to Map
+  static jsonToMap(json: string): Map<string, string> {
+    return new Map(JSON.parse(json));
+  }
+
   /**
    * Get the field name 
    */

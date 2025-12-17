@@ -3,7 +3,7 @@
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
-import { Sensor } from './sensors/sensor.js';
+import { BinarySensor } from './sensors/binarySensor.js';
 import { Trigger } from './sensors/triggers/trigger.js';
 import { VirtualLogger } from './utils/virtualLogger.js';
 
@@ -11,11 +11,23 @@ import { TriggerableAlarm } from './accessories/triggerableAlarm.js';
 import { TriggerableSensor } from './sensors/triggerableSensor.js';
 import { UpdatableChargingState } from './accessories/updatableChargingState.js';
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
-import { UpdatableSensor } from './sensors/updatableSensor.js';
+import { UpdatableMeasurementSensor } from './sensors/updatableSensor.js';
 
 import { SensorValueUpdateNotAllowed } from './errors.js';
 
 import express, { Express, Request, Response } from 'express';
+
+ 
+function ToBoolean(value: string): boolean {
+  switch (value) {
+  case 'true':
+    return true;
+  case 'false':
+    return false;
+  default:
+    throw new Error('Invalid boolean string');
+  }
+}
 
 /**
  * WebhookServer
@@ -33,9 +45,11 @@ export class WebhookServer {
   private httpServer?: Server;
   readonly port: number;
 
+  private readonly UseQueryParamsHeader: string = 'Use-Query-Params';
+
   constructor(
     log: VirtualLogger,
-    port: number
+    port: number,
   );
   constructor(
     log: VirtualLogger,
@@ -57,96 +71,135 @@ export class WebhookServer {
 
     // Routes
 
+    // id
+    // value: number
     const routeHumidity: string = '/humidity';
     this.log.info(`[${this.serverName}] Setting up route: ${routeHumidity}`);
     this.server.post(routeHumidity, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const humidity: string = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const humidity: string = (useQueryParams) ? request.query.value : request.body.value;
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.percentageIsValid(humidity, response)) {
-        this.processRequest(accessoryId, 'humidifierdehumidifier', Number(humidity), response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.percentageIsValid(humidity, response))
+      {
+        this.processRequest(routeHumidity, accessoryId, [ 'humidifierdehumidifier', 'measurement' ], Number(humidity), response);
       }
     });
 
+    // id
+    // value: number
     const routeTemperature: string = '/temperature';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTemperature}`);
     this.server.post(routeTemperature, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const temperature: string = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const temperature: string = (useQueryParams) ? request.query.value : request.body.value;
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.numberIsValid(temperature, response)) {
-        this.processRequest(accessoryId, 'heatercooler', Number(temperature), response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.numberIsValid(temperature, response))
+      {
+        this.processRequest(routeTemperature, accessoryId, [ 'heatercooler', 'measurement' ], Number(temperature), response);
       }
     });
 
+    // id
+    // value: boolean
     const routeObstruction: string = '/obstruction';
     this.log.info(`[${this.serverName}] Setting up route: ${routeObstruction}`);
     this.server.post(routeObstruction, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const obstruction: boolean = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const obstruction: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(obstruction, response)) {
-        this.processRequest(accessoryId, 'garagedoor', obstruction, response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.booleanIsValid(obstruction, response))
+      {
+        this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction), response);
       }
     });
 
+    // id
+    // value: boolean
     const routeTriggerAlarm: string = '/triggeralarm';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerAlarm}`);
     this.server.post(routeTriggerAlarm, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const trigger: boolean = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
-        this.processRequest(accessoryId, 'securitysystem', trigger ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None, response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.booleanIsValid(trigger, response))
+      {
+        // eslint-disable-next-line max-len
+        this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
       }
     });
 
+    // id
+    // value: boolean
     const routeTriggerPanic: string = '/triggerpanic';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerPanic}`);
     this.server.post(routeTriggerPanic, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const trigger: boolean = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
-        this.processRequest(accessoryId, 'securitysystem', trigger ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None, response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.booleanIsValid(trigger, response))
+      {
+        // eslint-disable-next-line max-len
+        this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
       }
     });
 
+    // id
+    // value: boolean
     const routeTriggerSensor: string = '/triggersensor';
     this.log.info(`[${this.serverName}] Setting up route: ${routeTriggerSensor}`);
     this.server.post(routeTriggerSensor, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const trigger: boolean = request.body.value;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
 
-      if (this.accessoryIdIsValid(accessoryId, response) && this.booleanIsValid(trigger, response)) {
-        this.processRequest(accessoryId, 'sensor', trigger, response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.booleanIsValid(trigger, response))
+      {
+        this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger), response);
       }
     });
 
+    // id
+    // charging: boolean
+    // charge: number
     const routeChargingState: string = '/chargingstate';
     this.log.info(`[${this.serverName}] Setting up route: ${routeChargingState}`);
     this.server.post(routeChargingState, (request: Request, response: Response) => {
-      const accessoryId: string = request.body.id;
-      const charging: boolean = request.body.charging;
-      const charge: number = request.body.charge;
+      const useQueryParams: boolean = this.usingQueryParams(request);
 
-      this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}, ${JSON.stringify(request.body)}`);
+      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const charging: string = ((useQueryParams) ? request.query.charging : request.body.charging).toString();
+      const charge: string = (useQueryParams) ? Number(<string>request.query.charge) : request.body.charge;
 
-      const chargingState: ChargingState = new ChargingState(charging, charge);
-      if (this.accessoryIdIsValid(accessoryId, response) && this.chargingStateIsValid(chargingState, response)) {
-        this.processRequest(accessoryId, 'battery', chargingState, response);
+      if (this.parametersArePresent(request, response) &&
+          this.accessoryIdIsValid(accessoryId, response) &&
+          this.booleanIsValid(charging, response) &&
+          this.numberIsValid(charge, response))
+      {
+        const chargingState: ChargingState = new ChargingState(ToBoolean(charging), Number(charge));
+        this.processRequest(routeChargingState, accessoryId, [ 'battery' ], chargingState, response);
       }
     });
   }
@@ -183,13 +236,13 @@ export class WebhookServer {
       (<TriggerableSensor><unknown>accessory).triggerSensor !== undefined ||
       (<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined ||
       (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
-      (<UpdatableSensor><unknown>accessory).updateSensor !== undefined
+      (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined
     ) {
       this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
       addedAccessory = true;
     }
-    else if (accessory instanceof Sensor) {
-      const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+    else if (accessory instanceof BinarySensor) {
+      const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
       if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
         this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
         addedAccessory = true;
@@ -275,10 +328,12 @@ export class WebhookServer {
   }
 
   private booleanIsValid(
-    value: boolean,
+    value: string,
     response: Response,
   ): boolean {
-    if (typeof value !== 'boolean') {
+    const valueBoolean: boolean = ['true', 'false'].includes(value.toLowerCase());
+
+    if (!valueBoolean) {
       const errorMsg: string = `Invalid value: ${value}. Value must be a boolean`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
@@ -289,48 +344,16 @@ export class WebhookServer {
     return true;
   }
 
-  private chargingStateIsValid(
-    chargingState: ChargingState,
-    response: Response,
-  ): boolean {
-    if (chargingState.isEmpty()) {
-      const errorMsg: string = 'No values provided for chargeable, charging, or charge';
-      this.log.error(`[${this.serverName}] ${errorMsg}`);
-      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
-
-      return false;
-    }
-
-    const charging: boolean = chargingState.charging;
-    const charge: number = chargingState.charge;
-
-    if ((charging !== undefined) && typeof charging !== 'boolean') {
-      const errorMsg: string = `Invalid charging value: ${charging}. Value must be a boolean`;
-      this.log.error(`[${this.serverName}] ${errorMsg}`);
-      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
-
-      return false;
-    }
-    if ((charge !== undefined) && (isNaN(charge) || charge < 0 || charge > 100)) {
-      const errorMsg: string = `Invalid charge value: ${charge}. Value must be a percentage`;
-      this.log.error(`[${this.serverName}] ${errorMsg}`);
-      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
-
-      return false;
-    }
-
-    return true;
-  }
-
   private processRequest(
+    route: string,
     accessoryId: string,
-    accessoryType: string,
+    accessoryTypes: string[],
     value: number | boolean | ChargingState,
     response: Response,
   ) {
     const accessory: Accessory | undefined = this.accessories.get(accessoryId);
 
-    if (accessory !== undefined && accessory.accessoryConfiguration.accessoryType === accessoryType) {
+    if (accessory !== undefined && accessoryTypes.includes(accessory.accessoryConfiguration.accessoryType)) {
       try {
         if ((<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined) {
           (<TriggerableAlarm><unknown>accessory).triggerAlarm(<number>value, accessoryId);
@@ -345,11 +368,12 @@ export class WebhookServer {
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);
         }
-        else if ((<UpdatableSensor><unknown>accessory).updateSensor !== undefined) {
-          (<UpdatableSensor><unknown>accessory).updateSensor(<number>value, accessoryId);
+        // Heater/Cooler, Humidifier/Dehumidifier, Temperature Sensor, Humidity Sensor
+        else if ((<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined) {
+          (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor(<number>value, accessoryId);
         }
-        else if (accessory instanceof Sensor) {
-          const trigger: Trigger = (<Sensor><unknown>accessory).getTrigger();
+        else if (accessory instanceof BinarySensor) {
+          const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
             (<TriggerableSensor><unknown>trigger).triggerSensor(<boolean>value, accessoryId);
           }
@@ -373,10 +397,49 @@ export class WebhookServer {
         response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
       }
     } else {
-      const errorMsg: string = `No accessory found with type '${accessoryType}' and id '${accessoryId}'`;
+      const errorMsg: string = `No accessory found  with id '${accessoryId}' and able to respond to request '${route}'`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.NotFound).send(`${errorMsg}`);
     }
+  }
+
+  private parametersArePresent(
+    request: Request,
+    response: Response,
+  ): boolean {
+    const useQueryParams: boolean = this.usingQueryParams(request);
+    this.log.debug(`[${this.serverName}] ${this.UseQueryParamsHeader}: ${useQueryParams}`);
+
+    this.log.debug(`[${this.serverName}] Request: ${request.method} ${request.path}`);
+    this.log.debug(`[${this.serverName}] POST body: ${JSON.stringify(request.body)}`);
+    this.log.debug(`[${this.serverName}] POST query: ${JSON.stringify(request.query)}`);
+
+    // POST body
+    if (!useQueryParams && JSON.stringify(request.body) === '{}') {
+      const errorMsg: string = 'No parameters found in POST body';
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
+
+      return false;
+    }
+    // POST query
+    if (useQueryParams && JSON.stringify(request.query) === '{}') {
+      const errorMsg: string = 'No parameters found in POST query. The webhook server is using query parameters';
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  private usingQueryParams(
+    request: Request,
+  ): boolean {
+    const useQueryParamsHeader: string | undefined = request.header(this.UseQueryParamsHeader);
+
+    return (useQueryParamsHeader === undefined) ? false : ToBoolean(useQueryParamsHeader);
   }
 }
 

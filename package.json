@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.12.1",
+  "version": "3.13.3",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -95,7 +95,7 @@
   ],
   "main": "dist/index.js",
   "engines": {
-    "node": "^18 || ^20 || ^22 || ^24",
+    "node": "^20.0.0 || ^22.0.0 || ^24.0.0",
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "scripts": {
@@ -117,9 +117,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.2",
     "eslint": "^9.39.1",
-    "homebridge": "^2.0.0-beta.0",
+    "homebridge": "^2.0.0-beta.55",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.0",
     "ts-node": "^10.9.2",

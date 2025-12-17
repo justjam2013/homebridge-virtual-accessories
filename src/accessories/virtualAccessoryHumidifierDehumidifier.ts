@@ -8,12 +8,12 @@ import { AccessoryConfiguration } from '../configuration/configurationAccessory.
 import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
-import { UpdatableSensor } from '../sensors/updatableSensor.js';
+import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
 
 /**
  * HumidifierDehumidifier - Accessory implementation
  */
-export class HumidifierDehumidifier extends Accessory implements UpdatableSensor {
+export class HumidifierDehumidifier extends Accessory implements UpdatableMeasurementSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
 
@@ -412,7 +412,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableSensor
 
   // Updatable Sensor interface
 
-  updateSensor(value: number, accessoryId: string):void {
+  updateMeasurementSensor(value: number, accessoryId: string):void {
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}%`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
