@@ -61,7 +61,15 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
 
     this.deviceType = this.accessoryConfiguration.humidifierDehumidifier.type;
 
-    this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.AUTOMATIC;
+    if (this.deviceType === HumidifierType.Humidifier) {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.HUMIDIFY;
+    }
+    else if (this.deviceType === HumidifierType.Dehumidifier) {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.DEHUMIDIFY;
+    }
+    else {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.AUTOMATIC;
+    }
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {

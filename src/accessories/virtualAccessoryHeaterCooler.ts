@@ -71,7 +71,15 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
-    this.states.HeaterCoolerTargetState = HeaterCooler.AUTO;
+    if (this.deviceType === HeaterType.Heater) {
+      this.states.HeaterCoolerTargetState = HeaterCooler.HEAT;
+    }
+    else if (this.deviceType === HeaterType.Cooler) {
+      this.states.HeaterCoolerTargetState = HeaterCooler.COOL;
+    }
+    else {
+      this.states.HeaterCoolerTargetState = HeaterCooler.AUTO;
+    }
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
