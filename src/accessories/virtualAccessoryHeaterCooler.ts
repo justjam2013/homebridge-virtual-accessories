@@ -9,7 +9,7 @@ import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
-import { TemperatureUnit } from '../configuration/schema.js';
+import { HeaterType, TemperatureUnit } from '../configuration/schema.js';
 
 /**
  * HeaterCooler - Accessory implementation
@@ -274,20 +274,12 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     return HeaterCooler.ACCESSORY_TYPE_NAME;
   }
 
-  private isHeater(): boolean {
-    return ['heater'].includes(this.deviceType);
-  }
-
-  private isCooler(): boolean {
-    return ['cooler'].includes(this.deviceType);
-  }
-
   private heats(): boolean {
-    return ['auto', 'heater'].includes(this.deviceType);
+    return [HeaterType.Auto, HeaterType.Heater].includes(this.deviceType);
   }
 
   private cools(): boolean {
-    return ['auto', 'cooler'].includes(this.deviceType);
+    return [HeaterType.Auto, HeaterType.Cooler].includes(this.deviceType);
   }
 
   private setDeviceOperationalCondition() {
@@ -401,15 +393,19 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       TargetHeaterCoolerState.COOL,
     ]);
 
-    if (this.isHeater()) {
+    if (this.deviceType === HeaterType.Heater) {
       currentStateValues.delete(CurrentHeaterCoolerState.COOLING);
       targetStateValues.delete(TargetHeaterCoolerState.COOL);
 
+      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
+
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater`);
     }
-    else if (this.isCooler()) {
+    else if (this.deviceType === HeaterType.Cooler) {
       currentStateValues.delete(CurrentHeaterCoolerState.HEATING);
       targetStateValues.delete(TargetHeaterCoolerState.HEAT);
+
+      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Cooler`);
     }
