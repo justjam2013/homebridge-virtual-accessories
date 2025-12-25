@@ -770,7 +770,7 @@
                   "orderable": true,
                   "uniqueItems": true,
                   "items": {
-                    "title": "{{ ' Input ' + $index }}",
+                    "title": "{{ $index ? ' Input ' + $index : 'Input' }}",
                     "type": "string",
                     "minLength": 1,
                     "placeholder": "HDMI"
