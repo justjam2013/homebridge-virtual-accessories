@@ -1,6 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Logging, LogLevel } from 'homebridge';
+import { Logging, LogLevel } from 'homebridge';
+
+/**
+ * VirtualLogLevel
+ */
+export declare const enum VirtualLogLevel {
+  DEBUG = 1,
+  INFO = 2,
+  WARNING = 3,
+  ERROR = 4,
+}
 
 /**
  * VirtualLogger
@@ -9,47 +19,69 @@ export class VirtualLogger {
 
   private platformLogger: Logging;
 
-  private muteInfo: boolean = false;
+  private logLevel: VirtualLogLevel;
 
   constructor(
     platformLogger: Logging,
-  );
-  constructor(
-    platformLogger: Logging,
-    muteInfo?: boolean,
+    logLevel: VirtualLogLevel = VirtualLogLevel.INFO,
   ) {
     this.platformLogger = platformLogger;
 
-    if (muteInfo !== undefined) {
-      this.muteInfo = muteInfo;
+    this.logLevel = logLevel;
+  }
+
+  setLogLevel(logLevel: VirtualLogLevel): void {
+    this.logLevel = logLevel;
+  }
+
+  getLogLevel(): VirtualLogLevel {
+    return this.logLevel;
+  }
+
+  debug(message: string, parameters: any[] = []): void {
+    if (this.logLevel <= VirtualLogLevel.DEBUG) {
+      this.platformLogger.debug(message, ...parameters);
     }
   }
 
   info (message: string, debug: boolean = false, parameters: any[] = []): void {
-    if (debug || this.muteInfo) {
+    if (debug) {
       this.platformLogger.debug(message, ...parameters);
     } else {
       this.platformLogger.info(message, ...parameters);
     }
   }
 
-  success(message: string, parameters: any[] = []): void {
-    this.platformLogger.success(message, ...parameters);
-  }
-
   warn(message: string, parameters: any[] = []): void {
-    this.platformLogger.warn(message, ...parameters);
+    if (this.logLevel <= VirtualLogLevel.WARNING) {
+      this.platformLogger.warn(message, ...parameters);
+    }
   }
 
   error(message: string, parameters: any[] = []): void {
-    this.platformLogger.error(message, ...parameters);
+    if (this.logLevel <= VirtualLogLevel.ERROR) {
+      this.platformLogger.error(message, ...parameters);
+    }
   }
 
-  debug(message: string, parameters: any[] = []): void {
-    this.platformLogger.debug(message, ...parameters);
-  }
+  log(logLevel: VirtualLogLevel, message: string, parameters: any[] = []): void {
+    let level: LogLevel;
 
-  log(level: LogLevel, message: string, parameters: any[] = []): void {
+    switch (logLevel) {
+    case VirtualLogLevel.DEBUG:
+      level = LogLevel.DEBUG;
+      break;
+    case VirtualLogLevel.INFO:
+      level = LogLevel.INFO;
+      break;
+    case VirtualLogLevel.WARNING:
+      level = LogLevel.WARN;
+      break;
+    case VirtualLogLevel.ERROR:
+      level = LogLevel.ERROR;
+      break;
+    }
+
     this.platformLogger.log(level, message, ...parameters);
   }
 }
