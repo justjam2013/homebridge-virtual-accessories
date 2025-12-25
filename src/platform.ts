@@ -8,7 +8,7 @@ import { AccessoryConfiguration } from './configuration/configurationAccessory.j
 import { AccessoryFactory } from './accessoryFactory.js';
 import { ConfigurationUtils } from './configuration/utils.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
-import { VirtualLogger } from './utils/virtualLogger.js';
+import { VirtualLogger, VirtualLogLevel } from './utils/virtualLogger.js';
 import { WebhookServerConfiguration } from './configuration/configurationWebhookServer.js';
 import { WebhookServer } from './webhookServer.js';
 
@@ -46,7 +46,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
-    this.log = new VirtualLogger(log);
+    // This is for dev purposes only to control the output of this plugin
+    this.log = new VirtualLogger(log, VirtualLogLevel.DEBUG);
 
     // Validate platform name
     const platformName: string | undefined = this.config.name;
