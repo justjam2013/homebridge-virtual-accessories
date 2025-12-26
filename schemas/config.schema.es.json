@@ -1,0 +1,1707 @@
+{
+  "pluginAlias": "VirtualAccessoriesForHomebridge",
+  "pluginType": "platform",
+  "singular": true,
+  "footerDisplay": "* = required fields",
+  "strictValidation": true,
+  "schema": {
+    "type": "object",
+    "$defs": {
+      "volume": {
+        "title": "Volumen (0% - 100%) *",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "duration": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "title": "Días *",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "hours": {
+            "title": "Horas *",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "minutes": {
+            "title": "Minutos *",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          },
+          "seconds": {
+            "title": "Segundos *",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          }
+        }
+      },
+      "requireHoursMinutesSeconds": {
+        "if": {
+          "properties": {
+            "days": { "maximum": 6 }
+          },
+          "required": [ "days" ]
+        },
+        "then": {
+          "required": [ "hours", "minutes", "seconds" ]
+        }
+      },
+      "doorAndWindowAccessory": {
+        "type": "object",
+        "properties": {
+          "defaultState": {
+            "title": "Estado Predeterminado *",
+            "type": "string",
+            "oneOf": [
+              { "title": "Cerrado", "enum": ["closed"] },
+              { "title": "Abierto", "enum": ["open"] }
+            ]
+          },
+          "transitionDuration": {
+            "title": "Duración de la Transición",
+            "description": "Duración de la transición de apertura y cierre en segundos (predeterminado: 3 segundos)",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          }
+        }
+      }
+    },
+    "properties": {
+      "name": {
+        "title": "Nombre de la Plataforma",
+        "type": "string",
+        "required": true,
+        "default": "Virtual Accessories Platform",
+        "readonly": true
+      },
+      "sensorServer": {
+        "title": "Webhooks de Sensores",
+        "type": "object",
+        "expandable": true,
+        "expanded": false,
+        "properties": {
+          "enabled": {
+            "title": "Habilitado",
+            "description": "Actualizar sensores mediante llamadas web",
+            "type": "boolean"
+          },
+          "port": {
+            "title": "Puerto del Servidor",
+            "type": "string",
+            "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+            "placeholder": "60221"
+          }
+        }
+      },
+      "devices": {
+        "title": "Accesorios",
+        "type": "array",
+        "orderable": true,
+        "uniqueItemProperties": [ "accessoryID" ],
+        "items": {
+          "title": " {{ value.accessoryName || 'Nuevo Accesorio' }}",
+          "type": "object",
+          "expandable": true,
+          "expanded": false,
+          "properties": {
+            "accessoryID": {
+              "title": "ID del Accesorio",
+              "description": "ID único del accesorio (https://www.random.org/). ¡No lo modifique una vez asignado!",
+              "type": "string",
+              "required": true,
+              "pattern": "^[A-Za-z0-9\\-]{5,}$"
+            },
+            "accessoryName": {
+              "title": "Nombre del Accesorio",
+              "description": "Nombre del accesorio tal como se mostrará en HomeKit",
+              "type": "string",
+              "required": true
+            },
+            "accessoryType": {
+              "title": "Tipo de Accesorio",
+              "type": "string",
+              "required": true,
+              "oneOf": [
+                { "title": "Purificador de Aire", "enum": ["airpurifier"] },
+                { "title": "Batería", "enum": ["battery"] },
+                { "title": "Puerta", "enum": ["door"] },
+                { "title": "Timbre", "enum": ["doorbell"] },
+                { "title": "Ventilador", "enum": ["fan"] },
+                { "title": "Mantenimiento del Filtro", "enum": ["filtermaintenance"] },
+                { "title": "Puerta de Garaje", "enum": ["garagedoor"] },
+                { "title": "Calefactor/Aire Acondicionado", "enum": ["heatercooler"] },
+                { "title": "Humidificador/Deshumidificador", "enum": ["humidifierdehumidifier"] },
+                { "title": "Bombilla", "enum": ["lightbulb"] },
+                { "title": "Cerradura", "enum": ["lock"] },
+                { "title": "Micrófono", "enum": ["microphone"] },
+                { "title": "Sistema de Seguridad", "enum": ["securitysystem"] },
+                { "title": "Sensor - Medición", "enum": ["measurement"] },
+                { "title": "Sensor - Activado", "enum": ["sensor"] },
+                { "title": "Altavoz", "enum": ["speaker"] },
+                { "title": "Interruptor", "enum": ["switch"] },
+                { "title": "Televisor", "enum": ["television"] },
+                { "title": "Válvula", "enum": ["valve"] },
+                { "title": "Ventana", "enum": ["window"] },
+                { "title": "Cubierta de Ventana (Persianas, Cortinas)", "enum": ["windowcovering"] }
+              ]
+            },
+            "accessoryIsStateful": {
+              "title": "El Accesorio Conserva el Estado",
+              "description": "El estado del accesorio se mantiene tras reiniciar Homebridge",
+              "type": "boolean",
+              "condition": {
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+              }
+            },
+            "airPurifier": {
+              "title": "Purificador de Aire",
+              "type": "object",
+              "properties": {
+                "rotationSpeed": {
+                  "title": "Velocidad de Rotación (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'airpurifier';"
+              }
+            },
+            "battery": {
+              "title": "Batería",
+              "type": "object",
+              "properties": {
+                "isRechargeable": {
+                  "title": "Es Recargable",
+                  "type": "boolean"
+                },
+                "lowLevelThreshold": {
+                  "title": "Umbral de Batería Baja (5% - 25%) *",
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 25
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'battery';"
+              }
+            },
+            "door": {
+              "title": "Puerta",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
+              }
+            },
+            "doorbell": {
+              "title": "Timbre",
+              "type": "object",
+              "properties": {
+                "volume": { "$ref": "#/$defs/volume" }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'doorbell';"
+              }
+            },
+            "fan": {
+              "title": "Ventilador",
+              "type": "object",
+              "properties": {
+                "rotationDirection": {
+                  "title": "Dirección de Rotación *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Sentido Horario", "enum": ["clockwise"] },
+                    { "title": "Sentido Antihorario", "enum": ["counterclockwise"] }
+                  ]
+                },
+                "rotationSpeed": {
+                  "title": "Velocidad de Rotación (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'fan';"
+              }
+            },
+            "filterMaintenance": {
+              "title": "Mantenimiento de Filtro",
+              "type": "object",
+              "description": "Vida útil del filtro (máx. 30 días)",
+              "properties": {
+                "lifespan": {
+                  "title": " ",
+                  "type": "object",
+                  "properties": {
+                    "days": {
+                      "title": "Días *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].filterMaintenance && model.devices[arrayIndices].filterMaintenance.lifespan && model.devices[arrayIndices].filterMaintenance.lifespan.days < 30;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "days": { "maximum": 29 }
+                        },
+                        "required": [ "days" ]
+                      },
+                      "then": {
+                        "required": [ "hours", "minutes", "seconds" ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'filtermaintenance';"
+              }
+            },
+            "garageDoor": {
+              "title": "Puerta de Garaje",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
+              }
+            },
+            "heaterCooler": {
+              "title": "Calefactor/Aire Acondicionado",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Tipo *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Calefactor", "enum": ["heater"] },
+                    { "title": "Aire Acondicionado", "enum": ["cooler"] },
+                    { "title": "Calefactor y Aire Acondicionado", "enum": ["auto"] }
+                  ]
+                },
+                "temperatureDisplayUnits": {
+                  "title": "Unidades de Temperatura *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ]
+                },
+                "heatingThresholdCelsius": {
+                  "title": "Umbral de Calefacción ºC *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor (0ºC - 25ºC)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 25,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdCelsius": {
+                  "title": "Umbral de Refrigeración ºC *",
+                  "description": "Nivel de temperatura por encima del cual se enciende el aire acondicionado (10ºC - 35ºC)",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 35,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "heatingThresholdFahrenheit": {
+                  "title": "Umbral de Calefacción ºF *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor (32ºF - 77ºF)",
+                  "type": "integer",
+                  "minimum": 32,
+                  "maximum": 77,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['heater', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "coolingThresholdFahrenheit": {
+                  "title": "Umbral de Refrigeración ºF *",
+                  "description": "Nivel de temperatura por encima del cual se enciende el aire acondicionado (50ºF - 95ºF)",
+                  "type": "integer",
+                  "minimum": 50,
+                  "maximum": 95,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "": {
+                  "title": "",
+                  "description": "Nota: El valor del umbral de calefacción **debe ser menor** que el valor del umbral de refrigeración",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.type === 'auto';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'heatercooler';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "heater" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "cooler" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "coolingThresholdFahrenheit" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" },
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                  }
+                }
+              ]
+            },
+            "humidifierDehumidifier": {
+              "title": "Humidificador/Deshumidificador",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Tipo *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Humidificador", "enum": ["humidifier"] },
+                    { "title": "Deshumidificador", "enum": ["dehumidifier"] },
+                    { "title": "Humidificador y Deshumidificador", "enum": ["auto"] }
+                  ]
+                },
+                "humidifierThreshold": {
+                  "title": "Umbral de Humidificación *",
+                  "description": "Nivel de humedad por debajo del cual se enciende el humidificador (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['humidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
+                "dehumidifierThreshold": {
+                  "title": "Umbral de Deshumidificación *",
+                  "description": "Nivel de humedad por encima del cual se enciende el deshumidificador (0% - 100%)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['dehumidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
+                "": {
+                  "title": "",
+                  "description": "Nota: El valor del umbral de humidificación **debe ser menor** que el valor del umbral de deshumidificación",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && model.devices[arrayIndices].humidifierDehumidifier.type === 'auto';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'humidifierdehumidifier';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "humidifier" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "humidifierThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "dehumidifier" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "dehumidifierThreshold" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "auto" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "humidifierThreshold", "dehumidifierThreshold" ]
+                  }
+                }
+              ]
+            },
+            "lightbulb": {
+              "title": "Bombilla",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Estado Predeterminado *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Apagado", "enum": ["off"] },
+                    { "title": "Encendido", "enum": ["on"] }
+                  ]
+                },
+                "type": {
+                  "title": "Tipo *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Blanca", "enum": ["white"] },
+                    { "title": "Blanca Ambiente", "enum": ["ambiance"] },
+                    { "title": "Color", "enum": ["color"] }
+                  ]
+                },
+                "brightness": {
+                  "title": "Brillo (0% - 100%) *",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && ['white', 'ambiance'].includes(model.devices[arrayIndices].lightbulb.type);"
+                  }
+                },
+                "colorTemperatureKelvin": {
+                  "title": "Temperatura de Color *",
+                  "description": "Temperatura de color en Kelvin (2200 K a 6500 K)",
+                  "type": "integer",
+                  "minimum": 2200,
+                  "maximum": 6500,
+                  "placeholder": 2700,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'ambiance';"
+                  }
+                },
+                "colorHex": {
+                  "title": "Color *",
+                  "type": "string",
+                  "format": "color",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].lightbulb && model.devices[arrayIndices].lightbulb.type === 'color';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lightbulb';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "white" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "brightness" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "ambiance" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "brightness", "colorTemperatureKelvin" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "color" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "colorHex" ]
+                  }
+                }
+              ]
+            },
+            "lock": {
+              "title": "Cerradura",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Estado Predeterminado *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Bloqueado", "enum": ["locked"] },
+                    { "title": "Desbloqueado", "enum": ["unlocked"] }
+                  ]
+                },
+                "autoSecurityTimeout": {
+                  "title": "Tiempo de Bloqueo Automático *",
+                  "description": "Tiempo de bloqueo automático de la cerradura en segundos (0 = desactivado)",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "walletKeyColor": {
+                  "title": "Color de HomeKey",
+                  "description": "Color de la tarjeta HomeKey en la app Wallet (predeterminado: Beige)",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Beige", "enum": ["tan"] },
+                    { "title": "Oro", "enum": ["gold"] },
+                    { "title": "Plata", "enum": ["silver"] },
+                    { "title": "Negro", "enum": ["black"] }
+                  ]
+                },
+                "": {
+                  "description": "Nota: Actualmente HomeKey parece estar fallando. Si experimentas problemas, establece el Color de HomeKey en Ninguno.",
+                  "type": "object",
+                  "properties": {}
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'lock';"
+              }
+            },
+            "microphone": {
+              "title": "Micrófono",
+              "type": "object",
+              "properties": {
+                "volume": { "$ref": "#/$defs/volume" }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'microphone';"
+              }
+            },
+            "securitySystem": {
+              "title": "Sistema de Seguridad",
+              "type": "object",
+              "properties": {
+                "": {
+                  "title": "Modos Armados",
+                  "description": "Modos del sistema de seguridad (Se requieren 'Fuera de Casa' y 'En Casa')",
+                  "type": "object",
+                  "properties": {}
+                },
+                "hasAwayMode": {
+                  "title": "Modo Fuera de Casa",
+                  "type": "boolean",
+                  "disabled": true,
+                  "default": true
+                },
+                "hasHomeMode": {
+                  "title": "Modo En Casa",
+                  "type": "boolean",
+                  "disabled": true,
+                  "default": true
+                },
+                "hasNightMode": {
+                  "title": "Modo Noche",
+                  "description": "El modo noche es un modo armado personalizado",
+                  "type": "boolean"
+                },
+                "defaultState": {
+                  "title": "Estado Predeterminado *",
+                  "description": "El estado predeterminado **debe ser** 'Desarmado' o uno de los estados armados disponibles",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Armado - Fuera de Casa", "enum": ["armedaway"] },
+                    { "title": "Armado - En Casa", "enum": ["armedstay"] },
+                    { "title": "Desarmado", "enum": ["disarmed"] }
+                  ]
+                },
+                "awayArmingDelay": {
+                  "title": "Retraso de Armado Fuera de Casa",
+                  "description": "Retraso de armado del sistema de seguridad cuando estás fuera de casa en segundos (predeterminado 0 = inmediato)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 60
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
+              }
+            },
+            "speaker": {
+              "title": "Altavoz",
+              "type": "object",
+              "properties": {
+                "mute": {
+                  "title": "Silenciado",
+                  "type": "boolean"
+                },
+                "volume": { "$ref": "#/$defs/volume" }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'speaker';"
+              }
+            },
+            "switch": {
+              "title": "Interruptor",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Estado Predeterminado *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Apagado", "enum": ["off"] },
+                    { "title": "Encendido", "enum": ["on"] }
+                  ]
+                },
+                "hasResetTimer": {
+                  "title": "Tiene Temporizador de Reinicio",
+                  "description": "El interruptor vuelve al estado predeterminado cuando termina el temporizador",
+                  "type": "boolean"
+                },
+                "hasCompanionSensor": {
+                  "title": "Tiene Sensor Complementario",
+                  "description": "El interruptor activa un sensor cuando cambia su estado",
+                  "type": "boolean"
+                },
+                "muteLogging": {
+                  "title": "Silenciar Registro",
+                  "description": "La información del registro solo será visible al ejecutar en modo depuración",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'switch';"
+              }
+            },
+            "television": {
+              "title": "Entradas de Televisión",
+              "type": "object",
+              "properties": {
+                "inputs": {
+                  "title": " ",
+                  "type": "array",
+                  "minItems": 1,
+                  "orderable": true,
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "{{ $index ? ' Entrada ' + $index : 'Entrada' }}",
+                    "type": "string",
+                    "minLength": 1,
+                    "placeholder": "HDMI"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'television';"
+              }
+            },
+            "valve": {
+              "title": "Válvula",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Tipo *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Válvula Genérica", "enum": ["generic"] },
+                    { "title": "Riego", "enum": ["irrigation"] },
+                    { "title": "Ducha", "enum": ["showerhead"] },
+                    { "title": "Grifo de Agua", "enum": ["waterfaucet"] }
+                  ]
+                },
+                "duration": {
+                  "title": "Tiempo de Funcionamiento",
+                  "description": "Tiempo de apagado automático de la válvula (máx. 1h - 0 = apagado manual)",
+                  "type": "object",
+                  "properties": {
+                    "minutes": {
+                      "title": "Minutos *",
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].valve && model.devices[arrayIndices].valve.duration && model.devices[arrayIndices].valve.duration.minutes < 60;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "minutes": { "maximum": 59 }
+                        },
+                        "required": [ "minutes" ]
+                      },
+                      "then": {
+                        "required": [ "seconds" ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'valve';"
+              }
+            },
+            "window": {
+              "title": "Ventana",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
+              }
+            },
+            "windowCovering": {
+              "title": "Cortina/Persiana",
+              "$ref": "#/$defs/doorAndWindowAccessory",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
+              }
+            },
+            "sensor": {
+              "title": "Sensor - Activado",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Contacto", "enum": ["contact"] },
+                    { "title": "Fuga (crítico)", "enum": ["leak"] },
+                    { "title": "Movimiento", "enum": ["motion"] },
+                    { "title": "Ocupación", "enum": ["occupancy"] },
+                    { "title": "Dióxido de Carbono (crítico)", "enum": ["carbonDioxide"] },
+                    { "title": "Monóxido de Carbono (crítico)", "enum": ["carbonMonoxide"] },
+                    { "title": "Humo (crítico)", "enum": ["smoke"] }
+                  ]
+                },
+                "trigger": {
+                  "title": "Disparador *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Ping al Host", "enum": ["ping"] },
+                    { "title": "Cronograma Cron", "enum": ["cron"] },
+                    { "title": "Eventos Solares (Amanecer/Atardecer)", "enum": ["sunevents"] },
+                    { "title": "Webhook", "enum": ["webhook"] },
+                    { "title": "Disparador al Iniciar Homebridge", "enum": ["startup"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'sensor';"
+              }
+            },
+            "measurement": {
+              "title": "Sensor - Medición",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Humedad", "enum": ["humidity"] },
+                    { "title": "Temperatura", "enum": ["temperature"] }
+                  ]
+                },
+                "temperatureUnits": {
+                  "title": "Unidades de Temperatura *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].measurement && model.devices[arrayIndices].measurement.type === 'temperature';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'measurement';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": { "const": "temperature" }
+                    },
+                    "required": [ "type" ]
+                  },
+                  "then": {
+                    "required": [ "temperatureUnits" ]
+                  }
+                }
+              ]
+            },
+            "resetTimer": {
+              "title": "Temporizador de Reinicio",
+              "type": "object",
+              "properties": {
+                "durationIsRandom": {
+                  "title": "Duración Aleatoria",
+                  "type": "boolean"
+                },
+                "duration": {
+                  "title": "Duración",
+                  "description": "Retraso del reinicio del temporizador (máx. 7 días)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.duration && model.devices[arrayIndices].resetTimer.duration.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer.durationIsRandom !== true;"
+                  }
+                },
+                "durationRandomMin": {
+                  "title": "Duración Mínima",
+                  "description": "Retraso mínimo del reinicio del temporizador (máx. 7 días)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMin && model.devices[arrayIndices].resetTimer.durationRandomMin.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "durationRandomMax": {
+                  "title": "Duración Máxima",
+                  "description": "Retraso máximo del reinicio del temporizador (máx. 7 días)",
+                  "type": "object",
+                  "properties": {
+                    "days": { "$ref": "#/$defs/duration/properties/days" },
+                    "hours": {
+                      "$ref": "#/$defs/duration/properties/hours",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
+                      }
+                    },
+                    "minutes": {
+                      "$ref": "#/$defs/duration/properties/minutes",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
+                      }
+                    },
+                    "seconds": {
+                      "$ref": "#/$defs/duration/properties/seconds",
+                      "condition": {
+                        "functionBody": "return model.devices[arrayIndices].resetTimer.durationRandomMax && model.devices[arrayIndices].resetTimer.durationRandomMax.days < 7;"
+                      }
+                    }
+                  },
+                  "allOf": [
+                    { "$ref": "#/$defs/requireHoursMinutesSeconds" }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "": {
+                  "title": "",
+                  "description": "Nota: El valor de duración mínima **debe ser menor** que el valor de duración máxima",
+                  "type": "object",
+                  "properties": {},
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].resetTimer && model.devices[arrayIndices].resetTimer.durationIsRandom === true;"
+                  }
+                },
+                "isResettable": {
+                  "title": "Es Reiniciable",
+                  "description": "El temporizador se reinicia cada vez que se activa el accesorio, incluso si el estado del accesorio no cambia",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].switch && model.devices[arrayIndices].switch.hasResetTimer === true;"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "durationIsRandom": { "const": true }
+                    },
+                    "required": [ "durationIsRandom" ]
+                  },
+                  "then": {
+                    "required": [ "durationRandomMin", "durationRandomMax" ],
+                    "properties": {
+                      "durationRandomMin": {
+                        "required": [ "days" ]
+                      },
+                      "durationRandomMax": {
+                        "required": [ "days" ]
+                      }
+                    }
+                  },
+                  "else": {
+                    "required": [ "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "days" ]
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "companionSensor": {
+              "title": "Sensor Compañero",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "title": "Nombre *",
+                  "description": "Nombre del sensor tal como se mostrará en HomeKit",
+                  "type": "string"
+                },
+                "type": {
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor activado por el cambio de estado del accesorio (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Contacto", "enum": ["contact"] },
+                    { "title": "Fuga (crítica)", "enum": ["leak"] },
+                    { "title": "Movimiento", "enum": ["motion"] },
+                    { "title": "Ocupación", "enum": ["occupancy"] },
+                    { "title": "Dióxido de Carbono (crítico)", "enum": ["carbonDioxide"] },
+                    { "title": "Monóxido de Carbono (crítico)", "enum": ["carbonMonoxide"] },
+                    { "title": "Humo (crítico)", "enum": ["smoke"] }
+                  ]
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].switch && model.devices[arrayIndices].switch.hasCompanionSensor === true;"
+              }
+            },
+            "pingTrigger": {
+              "title": "Disparador Ping Host",
+              "type": "object",
+              "properties": {
+                "host": {
+                  "title": "Host *",
+                  "description": "Dirección IP (142.250.178.4) o nombre de dominio (www.google.com) del host a hacer ping",
+                  "placeholder": "192.168.0.1",
+                  "type": "string"
+                },
+                "failureRetryCount": {
+                  "title": "Reintentos Antes del Fallo *",
+                  "description": "Número de pings fallidos antes de activar el sensor",
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'ping';"
+              }
+            },
+            "cronTrigger": {
+              "title": "Disparador de Programación Cron",
+              "type": "object",
+              "properties": {
+                "pattern": {
+                  "title": "Patrón Cron *",
+                  "description": "Patrón cron estándar de Unix - minuto, hora, día, mes, día de la semana (https://crontab.guru/)",
+                  "type": "string",
+                  "placeholder": "* * * * *",
+                  "pattern": "(^((\\*\\/)?([0-5]?[0-9])((,|-|\\/)([0-5]?[0-9]))*|\\*)\\s((\\*\\/)?((2[0-3]|1[0-9]|[0-9]|00))((,|-|\\/)(2[0-3]|1[0-9]|[0-9]|00))*|\\*)\\s((\\*\\/)?([1-9]|[12][0-9]|3[01])((,|-|\\/)([1-9]|[12][0-9]|3[01]))*|\\*)\\s((\\*\\/)?([1-9]|1[0-2])((,|-|\\/)([1-9]|1[0-2]))*|\\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))\\s((\\*\\/)?[0-6]((,|-|\\/)[0-6])*|\\*|00|(sun|mon|tue|wed|thu|fri|sat))$)"
+                },
+                "zoneId": {
+                  "title": "Zona",
+                  "description": "ID de zona (https://es.wikipedia.org/wiki/Lista_de_zonas_horarias). Por defecto, la zona del sistema",
+                  "placeholder": "America/Los_Angeles",
+                  "type": "string",
+                  "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
+                },
+                "startDateTime": {
+                  "title": "Fecha-Hora de Inicio",
+                  "type": "string",
+                  "format": "iso-date-time",
+                  "widget": "datetime-local",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }
+                },
+                "endDateTime": {
+                  "title": "Fecha-Hora de Fin",
+                  "type": "string",
+                  "format": "iso-date-time",
+                  "widget": "datetime-local",
+                  "x-inputAttributes": {
+                    "step": 1
+                  }
+                },
+                "disableTriggerEventLogging": {
+                  "title": "Desactivar Registro de Eventos de Disparador",
+                  "description": "Desactiva el registro para eventos de disparador de alta frecuencia",
+                  "type": "boolean"
+                },
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'cron';"
+              }
+            },
+            "sunEventsTrigger": {
+              "title": "Disparador de Amanecer/Atardecer",
+              "type": "object",
+              "properties": {
+                "event": {
+                  "title": "Evento *",
+                  "description": "Evento solar",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Amanecer", "enum": ["sunrise"] },
+                    { "title": "Atardecer", "enum": ["sunset"] },
+                    { "title": "Hora Dorada", "enum": ["goldenhour"] }
+                  ]
+                },
+                "offset": {
+                  "title": "Desfase de Tiempo",
+                  "description": "Minutos antes (-) o después (+) del evento",
+                  "type": "integer",
+                  "placeholder": 0
+                },
+                "latitude": {
+                  "title": "Latitud *",
+                  "description": "Latitud de su ubicación (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
+                },
+                "longitude": {
+                  "title": "Longitud *",
+                  "description": "Longitud de su ubicación (https://www.latlong.net/)",
+                  "type": "string",
+                  "pattern": "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+                },
+                "zoneId": {
+                  "title": "Zona",
+                  "description": "ID de zona (https://es.wikipedia.org/wiki/Lista_de_zonas_horarias). Por defecto, la zona del sistema",
+                  "placeholder": "America/Los_Angeles",
+                  "type": "string",
+                  "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
+                },
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'sunevents';"
+              }
+            },
+            "webhookTrigger": {
+              "title": "Disparador Webhook",
+              "type": "object",
+              "properties": {
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'webhook';"
+              }
+            },
+            "startupTrigger": {
+              "title": "Disparador de Inicio de Homebridge",
+              "type": "object",
+              "properties": {
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'startup';"
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "switch" }
+                }
+              },
+              "then": {
+                "required": [ "switch" ],
+                "properties": {
+                  "switch": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "airpurifier" }
+                }
+              },
+              "then": {
+                "required": [ "airPurifier" ],
+                "properties": {
+                  "airpurifier": {
+                    "required": [ "rotationSpeed" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "battery" }
+                }
+              },
+              "then": {
+                "required": [ "battery" ],
+                "properties": {
+                  "battery": {
+                    "required": [ "lowLevelThreshold" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "door" }
+                }
+              },
+              "then": {
+                "required": [ "door" ],
+                "properties": {
+                  "door": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "doorbell" }
+                }
+              },
+              "then": {
+                "required": [ "doorbell" ],
+                "properties": {
+                  "doorbell": {
+                    "required": [ "volume" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "fan" }
+                }
+              },
+              "then": {
+                "required": [ "fan" ],
+                "properties": {
+                  "fan": {
+                    "required": [ "rotationDirection", "rotationSpeed" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "filtermaintenance" }
+                }
+              },
+              "then": {
+                "required": [ "filterMaintenance" ],
+                "properties": {
+                  "filterMaintenance": {
+                    "required": [ "lifespan" ],
+                    "properties": {
+                      "lifespan": {
+                        "required": [ "days" ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "garagedoor" }
+                }
+              },
+              "then": {
+                "required": [ "garageDoor" ],
+                "properties": {
+                  "garageDoor": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "heatercooler" }
+                }
+              },
+              "then": {
+                "required": [ "heaterCooler" ],
+                "properties": {
+                  "heaterCooler": {
+                    "required": [ "type", "temperatureDisplayUnits" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "humidifierdehumidifier" }
+                }
+              },
+              "then": {
+                "required": [ "humidifierDehumidifier" ],
+                "properties": {
+                  "humidifierDehumidifier": {
+                    "required": [ "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lightbulb" }
+                }
+              },
+              "then": {
+                "required": [ "lightbulb" ],
+                "properties": {
+                  "lightbulb": {
+                    "required": [ "defaultState", "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "lock" }
+                }
+              },
+              "then": {
+                "required": [ "lock" ],
+                "properties": {
+                  "lock": {
+                    "required": [ "defaultState", "autoSecurityTimeout" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "microphone" }
+                }
+              },
+              "then": {
+                "required": [ "microphone" ],
+                "properties": {
+                  "microphone": {
+                    "required": [ "volume" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "securitysystem" }
+                }
+              },
+              "then": {
+                "required": [ "securitySystem" ],
+                "properties": {
+                  "securitySystem": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "speaker" }
+                }
+              },
+              "then": {
+                "required": [ "speaker" ],
+                "properties": {
+                  "speaker": {
+                    "required": [ "volume" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "television" }
+                }
+              },
+              "then": {
+                "required": [ "television" ],
+                "properties": {
+                  "television": {
+                    "required": [ "inputs" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "valve" }
+                }
+              },
+              "then": {
+                "required": [ "valve" ],
+                "properties": {
+                  "valve": {
+                    "required": [ "type", "duration" ],
+                    "properties": {
+                      "duration": {
+                        "required": [ "minutes" ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "window" }
+                }
+              },
+              "then": {
+                "required": [ "window" ],
+                "properties": {
+                  "window": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "windowcovering" }
+                }
+              },
+              "then": {
+                "required": [ "windowCovering" ],
+                "properties": {
+                  "windowCovering": {
+                    "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "sensor" }
+                }
+              },
+              "then": {
+                "required": [ "sensor" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type", "trigger" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "measurement" }
+                }
+              },
+              "then": {
+                "required": [ "measurement" ],
+                "properties": {
+                  "sensor": {
+                    "required": [ "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "switch": {
+                    "properties": {
+                      "hasResetTimer": { "const": true }
+                    },
+                    "required": [ "hasResetTimer" ]
+                  }
+                },
+                "required": [ "switch" ]
+              },
+              "then": {
+                "required": [ "resetTimer" ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "switch": {
+                    "properties": {
+                      "hasCompanionSensor": { "const": true }
+                    },
+                    "required": [ "hasCompanionSensor" ]
+                  }
+                },
+                "required": [ "switch" ]
+              },
+              "then": {
+                "required": [ "companionSensor" ],
+                "properties": {
+                  "companionSensor": {
+                    "required": [ "name", "type" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "ping" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "pingTrigger" ],
+                "properties": {
+                  "pingTrigger": {
+                    "required": [ "host", "failureRetryCount" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "cron" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "cronTrigger" ],
+                "properties": {
+                  "cronTrigger": {
+                    "required": [ "pattern" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "sunevents" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "sunEventsTrigger" ],
+                "properties": {
+                  "sunEventsTrigger": {
+                    "required": [ "latitude", "longitude" ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "": {
+        "title": " ",
+        "description": "Note: You can change the accessory order by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  "uiSchema": {
+  },
+  "form": [
+    {
+      "type": "fieldset",
+      "title": "Plataforma",
+      "items": []
+    },
+    "*"
+  ]
+}
