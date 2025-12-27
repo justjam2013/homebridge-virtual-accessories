@@ -24,9 +24,11 @@
 
 ## <!-- Thin separator line -->
 
-## 🔴🔴 Important 🔴🔴
+#### UI Languages
 
-Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the **updated** Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
+Currently Virtual Accessories For Homebridge offers a Spanish translated UI. This can be accessed by changing the Language setting in Homebridge UI. The plugin will use this setting. Please vote in this ticket for which language you would like to see the UI translated to: [Looking for people interested in translating the plugin UI into other languages](https://github.com/justjam2013/homebridge-virtual-accessories/issues/703)
+
+You do not have to volunteer to translate it, but hopefully will provide feedback if there are issues with the translations.
 
 ## <!-- Thin separator line -->
 
