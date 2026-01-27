@@ -8,7 +8,7 @@
     "type": "object",
     "$defs": {
       "volume": {
-        "title": "Volume (0% - 100%) *",
+        "title": "Volumen (0% - 100%) *",
         "type": "integer",
         "minimum": 0,
         "maximum": 100
@@ -17,25 +17,25 @@
         "type": "object",
         "properties": {
           "days": {
-            "title": "Days *",
+            "title": "Días *",
             "type": "integer",
             "minimum": 0,
             "maximum": 7
           },
           "hours": {
-            "title": "Hours *",
+            "title": "Horas *",
             "type": "integer",
             "minimum": 0,
             "maximum": 23
           },
           "minutes": {
-            "title": "Minutes *",
+            "title": "Minutos *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           },
           "seconds": {
-            "title": "Seconds *",
+            "title": "Segundos *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
@@ -57,16 +57,16 @@
         "type": "object",
         "properties": {
           "defaultState": {
-            "title": "Default State *",
+            "title": "Estado Predeterminado *",
             "type": "string",
             "oneOf": [
-              { "title": "Closed", "enum": ["closed"] },
-              { "title": "Open", "enum": ["open"] }
+              { "title": "Cerrado", "enum": ["closed"] },
+              { "title": "Abierto", "enum": ["open"] }
             ]
           },
           "transitionDuration": {
-            "title": "Transition Duration",
-            "description": "Open & close transition duration in seconds (default: 3 seconds)",
+            "title": "Duración de la Transición",
+            "description": "Duración de la transición de apertura y cierre en segundos (predeterminado: 3 segundos)",
             "type": "integer",
             "minimum": 1,
             "maximum": 60
@@ -76,25 +76,25 @@
     },
     "properties": {
       "name": {
-        "title": "Platform Name",
+        "title": "Nombre de la Plataforma",
         "type": "string",
         "required": true,
         "default": "Virtual Accessories Platform",
         "readonly": true
       },
       "sensorServer": {
-        "title": "Sensor Webhooks",
+        "title": "Webhooks de Sensores",
         "type": "object",
         "expandable": true,
         "expanded": false,
         "properties": {
           "enabled": {
-            "title": "Enabled",
-            "description": "Update sensors via web calls",
+            "title": "Habilitado",
+            "description": "Actualizar sensores mediante llamadas web",
             "type": "boolean"
           },
           "port": {
-            "title": "Server Port",
+            "title": "Puerto del Servidor",
             "type": "string",
             "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
             "placeholder": "60221"
@@ -102,79 +102,71 @@
         }
       },
       "devices": {
-        "title": "Accessories",
+        "title": "Accesorios",
         "type": "array",
         "orderable": true,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": " {{ value.accessoryName || 'New Accessory' }}",
+          "title": " {{ value.accessoryName || 'Nuevo Accesorio' }}",
           "type": "object",
           "expandable": true,
           "expanded": false,
           "properties": {
             "accessoryID": {
-              "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
+              "title": "ID del Accesorio",
+              "description": "ID único del accesorio (https://www.random.org/). ¡No lo modifique una vez asignado!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Za-z0-9\\-]{5,}$"
             },
             "accessoryName": {
-              "title": "Accessory Name",
-              "description": "Accessory name as it will be displayed in HomeKit",
+              "title": "Nombre del Accesorio",
+              "description": "Nombre del accesorio tal como se mostrará en HomeKit",
               "type": "string",
               "required": true
             },
             "accessoryType": {
-              "title": "Accessory Type",
+              "title": "Tipo de Accesorio",
               "type": "string",
               "required": true,
               "oneOf": [
-                { "title": "Air Purifier", "enum": ["airpurifier"] },
-                { "title": "Battery", "enum": ["battery"] },
-                { "title": "Door", "enum": ["door"] },
-                { "title": "Doorbell", "enum": ["doorbell"] },
-                { "title": "Fan", "enum": ["fan"] },
-                { "title": "Filter Maintenance", "enum": ["filtermaintenance"] },
-                { "title": "Garage Door", "enum": ["garagedoor"] },
-                { "title": "Heater/Cooler (AC)", "enum": ["heatercooler"] },
-                { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
-                { "title": "Lightbulb", "enum": ["lightbulb"] },
-                { "title": "Lock", "enum": ["lock"] },
-                { "title": "Microphone", "enum": ["microphone"] },
-                { "title": "Security System", "enum": ["securitysystem"] },
-                { "title": "Sensor - Measurement", "enum": ["measurement"] },
-                { "title": "Sensor - Triggered", "enum": ["sensor"] },
-                { "title": "Speaker", "enum": ["speaker"] },
-                { "title": "Switch", "enum": ["switch"] },
-                { "title": "Television", "enum": ["television"] },
-                { "title": "Valve", "enum": ["valve"] },
-                { "title": "Window", "enum": ["window"] },
-                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
+                { "title": "Purificador de Aire", "enum": ["airpurifier"] },
+                { "title": "Batería", "enum": ["battery"] },
+                { "title": "Puerta", "enum": ["door"] },
+                { "title": "Timbre", "enum": ["doorbell"] },
+                { "title": "Ventilador", "enum": ["fan"] },
+                { "title": "Mantenimiento del Filtro", "enum": ["filtermaintenance"] },
+                { "title": "Puerta de Garaje", "enum": ["garagedoor"] },
+                { "title": "Calefactor/Aire Acondicionado", "enum": ["heatercooler"] },
+                { "title": "Humidificador/Deshumidificador", "enum": ["humidifierdehumidifier"] },
+                { "title": "Bombilla", "enum": ["lightbulb"] },
+                { "title": "Cerradura", "enum": ["lock"] },
+                { "title": "Micrófono", "enum": ["microphone"] },
+                { "title": "Sistema de Seguridad", "enum": ["securitysystem"] },
+                { "title": "Sensor - Medición", "enum": ["measurement"] },
+                { "title": "Sensor - Activado", "enum": ["sensor"] },
+                { "title": "Altavoz", "enum": ["speaker"] },
+                { "title": "Interruptor", "enum": ["switch"] },
+                { "title": "Televisor", "enum": ["television"] },
+                { "title": "Válvula", "enum": ["valve"] },
+                { "title": "Ventana", "enum": ["window"] },
+                { "title": "Cubierta de Ventana (Persianas, Cortinas)", "enum": ["windowcovering"] }
               ]
             },
             "accessoryIsStateful": {
-              "title": "Accessory Is Stateful",
-              "description": "Accessory state survives Homebridge restart",
+              "title": "El Accesorio Conserva el Estado",
+              "description": "El estado del accesorio se mantiene tras reiniciar Homebridge",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
-              }
-            },
-            "isMatterEnabled": {
-              "title": "Matter Enabled",
-              "description": "Accessory is a Matter enabled device",
-              "type": "boolean",
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType == 'switch';"
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
-              "title": "Air Purifier",
+              "title": "Purificador de Aire",
               "type": "object",
               "properties": {
                 "rotationSpeed": {
-                  "title": "Rotation Speed (0% - 100%) *",
+                  "title": "Velocidad de Rotación (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -185,15 +177,15 @@
               }
             },
             "battery": {
-              "title": "Battery",
+              "title": "Batería",
               "type": "object",
               "properties": {
                 "isRechargeable": {
-                  "title": "Is Rechargeable",
+                  "title": "Es Recargable",
                   "type": "boolean"
                 },
                 "lowLevelThreshold": {
-                  "title": "Battery low threshold (5% - 25%) *",
+                  "title": "Umbral de Batería Baja (5% - 25%) *",
                   "type": "integer",
                   "minimum": 5,
                   "maximum": 25
@@ -204,14 +196,14 @@
               }
             },
             "door": {
-              "title": "Door",
+              "title": "Puerta",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
               }
             },
             "doorbell": {
-              "title": "Doorbell",
+              "title": "Timbre",
               "type": "object",
               "properties": {
                 "volume": { "$ref": "#/$defs/volume" }
@@ -221,19 +213,19 @@
               }
             },
             "fan": {
-              "title": "Fan",
+              "title": "Ventilador",
               "type": "object",
               "properties": {
                 "rotationDirection": {
-                  "title": "Rotation Direction *",
+                  "title": "Dirección de Rotación *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Clockwise", "enum": ["clockwise"] },
-                    { "title": "Counter Clockwise", "enum": ["counterclockwise"] }
+                    { "title": "Sentido Horario", "enum": ["clockwise"] },
+                    { "title": "Sentido Antihorario", "enum": ["counterclockwise"] }
                   ]
                 },
                 "rotationSpeed": {
-                  "title": "Rotation Speed (0% - 100%) *",
+                  "title": "Velocidad de Rotación (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -244,16 +236,16 @@
               }
             },
             "filterMaintenance": {
-              "title": "Filter Maintenance",
+              "title": "Mantenimiento de Filtro",
               "type": "object",
-              "description": "Filter Lifetime (30 days max)",
+              "description": "Vida útil del filtro (máx. 30 días)",
               "properties": {
                 "lifespan": {
                   "title": " ",
                   "type": "object",
                   "properties": {
                     "days": {
-                      "title": "Days *",
+                      "title": "Días *",
                       "type": "integer",
                       "minimum": 0,
                       "maximum": 30
@@ -297,31 +289,27 @@
               }
             },
             "garageDoor": {
-              "title": "Garage Door",
+              "title": "Puerta de Garaje",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
             "heaterCooler": {
-              "title": "Heater/Cooler",
+              "title": "Calefactor/Aire Acondicionado",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Type *",
+                  "title": "Tipo *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Heater", "enum": ["heater"] },
-                    { "title": "Cooler (AC)", "enum": ["cooler"] },
-                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
+                    { "title": "Calefactor", "enum": ["heater"] },
+                    { "title": "Aire Acondicionado", "enum": ["cooler"] },
+                    { "title": "Calefactor y Aire Acondicionado", "enum": ["auto"] }
                   ]
                 },
-                "hasFan": {
-                  "title": "Has Fan",
-                  "type": "boolean"
-                },
                 "temperatureDisplayUnits": {
-                  "title": "Temperature Display Units *",
+                  "title": "Unidades de Temperatura *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -329,8 +317,8 @@
                   ]
                 },
                 "heatingThresholdCelsius": {
-                  "title": "Heating Threshold ºC *",
-                  "description": "Temperature level below which the heater turns on (0ºC - 25ºC)",
+                  "title": "Umbral de Calefacción ºC *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor (0ºC - 25ºC)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 25,
@@ -339,8 +327,8 @@
                   }
                 },
                 "coolingThresholdCelsius": {
-                  "title": "Cooling Threshold ºC *",
-                  "description": "Temperature level above which the cooler (AC) turns on (10ºC - 35ºC)",
+                  "title": "Umbral de Refrigeración ºC *",
+                  "description": "Nivel de temperatura por encima del cual se enciende el aire acondicionado (10ºC - 35ºC)",
                   "type": "integer",
                   "minimum": 10,
                   "maximum": 35,
@@ -349,8 +337,8 @@
                   }
                 },
                 "heatingThresholdFahrenheit": {
-                  "title": "Heating Threshold ºF *",
-                  "description": "Temperature level below which the heater turns on (32ºF - 77ºF)",
+                  "title": "Umbral de Calefacción ºF *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor (32ºF - 77ºF)",
                   "type": "integer",
                   "minimum": 32,
                   "maximum": 77,
@@ -359,8 +347,8 @@
                   }
                 },
                 "coolingThresholdFahrenheit": {
-                  "title": "Cooling Threshold ºF *",
-                  "description": "Temperature level above which the cooler (AC) turns on (50ºF - 95ºF)",
+                  "title": "Umbral de Refrigeración ºF *",
+                  "description": "Nivel de temperatura por encima del cual se enciende el aire acondicionado (50ºF - 95ºF)",
                   "type": "integer",
                   "minimum": 50,
                   "maximum": 95,
@@ -370,7 +358,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The heating threshold value **must be lower** than the cooling threshold value",
+                  "description": "Nota: El valor del umbral de calefacción **debe ser menor** que el valor del umbral de refrigeración",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -457,21 +445,21 @@
               ]
             },
             "humidifierDehumidifier": {
-              "title": "Humidifier/Dehumidifier",
+              "title": "Humidificador/Deshumidificador",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Type *",
+                  "title": "Tipo *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Humidifier", "enum": ["humidifier"] },
-                    { "title": "Dehumidifier", "enum": ["dehumidifier"] },
-                    { "title": "Humidifier and Dehumidifier", "enum": ["auto"] }
+                    { "title": "Humidificador", "enum": ["humidifier"] },
+                    { "title": "Deshumidificador", "enum": ["dehumidifier"] },
+                    { "title": "Humidificador y Deshumidificador", "enum": ["auto"] }
                   ]
                 },
                 "humidifierThreshold": {
-                  "title": "Humidifying Threshold *",
-                  "description": "Humidity level below which the humidifier turns on (0% - 100%)",
+                  "title": "Umbral de Humidificación *",
+                  "description": "Nivel de humedad por debajo del cual se enciende el humidificador (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -480,8 +468,8 @@
                   }
                 },
                 "dehumidifierThreshold": {
-                  "title": "Dehumidifying Threshold *",
-                  "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
+                  "title": "Umbral de Deshumidificación *",
+                  "description": "Nivel de humedad por encima del cual se enciende el deshumidificador (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -491,7 +479,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
+                  "description": "Nota: El valor del umbral de humidificación **debe ser menor** que el valor del umbral de deshumidificación",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -539,28 +527,28 @@
               ]
             },
             "lightbulb": {
-              "title": "Lightbulb",
+              "title": "Bombilla",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Estado Predeterminado *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Off", "enum": ["off"] },
-                    { "title": "On", "enum": ["on"] }
+                    { "title": "Apagado", "enum": ["off"] },
+                    { "title": "Encendido", "enum": ["on"] }
                   ]
                 },
                 "type": {
-                  "title": "Type *",
+                  "title": "Tipo *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "White", "enum": ["white"] },
-                    { "title": "White Ambiance", "enum": ["ambiance"] },
+                    { "title": "Blanca", "enum": ["white"] },
+                    { "title": "Blanca Ambiente", "enum": ["ambiance"] },
                     { "title": "Color", "enum": ["color"] }
                   ]
                 },
                 "brightness": {
-                  "title": "Brightness (0% - 100%) *",
+                  "title": "Brillo (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -569,8 +557,8 @@
                   }
                 },
                 "colorTemperatureKelvin": {
-                  "title": "Color Temperature *",
-                  "description": "Color temperature in Kelvin (2200 K to 6500 K)",
+                  "title": "Temperatura de Color *",
+                  "description": "Temperatura de color en Kelvin (2200 K a 6500 K)",
                   "type": "integer",
                   "minimum": 2200,
                   "maximum": 6500,
@@ -628,36 +616,36 @@
               ]
             },
             "lock": {
-              "title": "Lock",
+              "title": "Cerradura",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Estado Predeterminado *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Locked", "enum": ["locked"] },
-                    { "title": "Unlocked", "enum": ["unlocked"] }
+                    { "title": "Bloqueado", "enum": ["locked"] },
+                    { "title": "Desbloqueado", "enum": ["unlocked"] }
                   ]
                 },
                 "autoSecurityTimeout": {
-                  "title": "Auto Security Timeout *",
-                  "description": "Lock auto-lock time in seconds (0 = off)",
+                  "title": "Tiempo de Bloqueo Automático *",
+                  "description": "Tiempo de bloqueo automático de la cerradura en segundos (0 = desactivado)",
                   "type": "integer",
                   "minimum": 0
                 },
                 "walletKeyColor": {
-                  "title": "HomeKey Color",
-                  "description": "HomeKey card color in Wallet app (default: Tan)",
+                  "title": "Color de HomeKey",
+                  "description": "Color de la tarjeta HomeKey en la app Wallet (predeterminado: Beige)",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Tan", "enum": ["tan"] },
-                    { "title": "Gold", "enum": ["gold"] },
-                    { "title": "Silver", "enum": ["silver"] },
-                    { "title": "Black", "enum": ["black"] }
+                    { "title": "Beige", "enum": ["tan"] },
+                    { "title": "Oro", "enum": ["gold"] },
+                    { "title": "Plata", "enum": ["silver"] },
+                    { "title": "Negro", "enum": ["black"] }
                   ]
                 },
                 "": {
-                  "description": "Note: HomeKey appears to currently be broken. If you are experiencing issues, set HomeKey Color to None.",
+                  "description": "Nota: Actualmente HomeKey parece estar fallando. Si experimentas problemas, establece el Color de HomeKey en Ninguno.",
                   "type": "object",
                   "properties": {}
                 }
@@ -667,7 +655,7 @@
               }
             },
             "microphone": {
-              "title": "Microphone",
+              "title": "Micrófono",
               "type": "object",
               "properties": {
                 "volume": { "$ref": "#/$defs/volume" }
@@ -677,45 +665,45 @@
               }
             },
             "securitySystem": {
-              "title": "Security System",
+              "title": "Sistema de Seguridad",
               "type": "object",
               "properties": {
                 "": {
-                  "title": "Armed Modes",
-                  "description": "Security system modes (Away and Home are required)",
+                  "title": "Modos Armados",
+                  "description": "Modos del sistema de seguridad (Se requieren 'Fuera de Casa' y 'En Casa')",
                   "type": "object",
                   "properties": {}
                 },
                 "hasAwayMode": {
-                  "title": "Away Mode",
+                  "title": "Modo Fuera de Casa",
                   "type": "boolean",
                   "disabled": true,
                   "default": true
                 },
                 "hasHomeMode": {
-                  "title": "Home Mode",
+                  "title": "Modo En Casa",
                   "type": "boolean",
                   "disabled": true,
                   "default": true
                 },
                 "hasNightMode": {
-                  "title": "Night Mode",
-                  "description": "Night mode is a custom armed mode",
+                  "title": "Modo Noche",
+                  "description": "El modo noche es un modo armado personalizado",
                   "type": "boolean"
                 },
                 "defaultState": {
-                  "title": "Default State *",
-                  "description": "The default state **must be** either 'Disarmed' or one of the available armed states",
+                  "title": "Estado Predeterminado *",
+                  "description": "El estado predeterminado **debe ser** 'Desarmado' o uno de los estados armados disponibles",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Armed - Away", "enum": ["armedaway"] },
-                    { "title": "Armed - Home", "enum": ["armedstay"] },
-                    { "title": "Disarmed", "enum": ["disarmed"] }
+                    { "title": "Armado - Fuera de Casa", "enum": ["armedaway"] },
+                    { "title": "Armado - En Casa", "enum": ["armedstay"] },
+                    { "title": "Desarmado", "enum": ["disarmed"] }
                   ]
                 },
                 "awayArmingDelay": {
-                  "title": "Away Arming Delay",
-                  "description": "Security System away arming delay in seconds (default 0 = immediate)",
+                  "title": "Retraso de Armado Fuera de Casa",
+                  "description": "Retraso de armado del sistema de seguridad cuando estás fuera de casa en segundos (predeterminado 0 = inmediato)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 60
@@ -726,11 +714,11 @@
               }
             },
             "speaker": {
-              "title": "Speaker",
+              "title": "Altavoz",
               "type": "object",
               "properties": {
                 "mute": {
-                  "title": "Muted",
+                  "title": "Silenciado",
                   "type": "boolean"
                 },
                 "volume": { "$ref": "#/$defs/volume" }
@@ -740,30 +728,30 @@
               }
             },
             "switch": {
-              "title": "Switch",
+              "title": "Interruptor",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Estado Predeterminado *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Off", "enum": ["off"] },
-                    { "title": "On", "enum": ["on"] }
+                    { "title": "Apagado", "enum": ["off"] },
+                    { "title": "Encendido", "enum": ["on"] }
                   ]
                 },
                 "hasResetTimer": {
-                  "title": "Has a Reset Timer",
-                  "description": "Switch resets to default state when timer ends",
+                  "title": "Tiene Temporizador de Reinicio",
+                  "description": "El interruptor vuelve al estado predeterminado cuando termina el temporizador",
                   "type": "boolean"
                 },
                 "hasCompanionSensor": {
-                  "title": "Has a Companion Sensor",
-                  "description": "Switch triggers a sensor when its state changes",
+                  "title": "Tiene Sensor Complementario",
+                  "description": "El interruptor activa un sensor cuando cambia su estado",
                   "type": "boolean"
                 },
-                "muteLogging" : {
-                  "title": "Mute Logging",
-                  "description": "Log information will only be visible when running in debug mode",
+                "muteLogging": {
+                  "title": "Silenciar Registro",
+                  "description": "La información del registro solo será visible al ejecutar en modo depuración",
                   "type": "boolean"
                 }
               },
@@ -772,7 +760,7 @@
               }
             },
             "television": {
-              "title": "Television Inputs",
+              "title": "Entradas de Televisión",
               "type": "object",
               "properties": {
                 "inputs": {
@@ -782,7 +770,7 @@
                   "orderable": true,
                   "uniqueItems": true,
                   "items": {
-                    "title": "{{ $index ? ' Input ' + $index : 'Input' }}",
+                    "title": "{{ $index ? ' Entrada ' + $index : 'Entrada' }}",
                     "type": "string",
                     "minLength": 1,
                     "placeholder": "HDMI"
@@ -794,26 +782,26 @@
               }
             },
             "valve": {
-              "title": "Valve",
+              "title": "Válvula",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Type *",
+                  "title": "Tipo *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Generic Valve", "enum": ["generic"] },
-                    { "title": "Irrigation", "enum": ["irrigation"] },
-                    { "title": "Shower Head", "enum": ["showerhead"] },
-                    { "title": "Water Faucet", "enum": ["waterfaucet"] }
+                    { "title": "Válvula Genérica", "enum": ["generic"] },
+                    { "title": "Riego", "enum": ["irrigation"] },
+                    { "title": "Ducha", "enum": ["showerhead"] },
+                    { "title": "Grifo de Agua", "enum": ["waterfaucet"] }
                   ]
                 },
                 "duration": {
-                  "title": "Runtime",
-                  "description": "Valve auto shut-off time (1hr max - 0 = manual off)",
+                  "title": "Tiempo de Funcionamiento",
+                  "description": "Tiempo de apagado automático de la válvula (máx. 1h - 0 = apagado manual)",
                   "type": "object",
                   "properties": {
                     "minutes": {
-                      "title": "Minutes *",
+                      "title": "Minutos *",
                       "type": "integer",
                       "minimum": 0,
                       "maximum": 60
@@ -845,46 +833,46 @@
               }
             },
             "window": {
-              "title": "Window",
+              "title": "Ventana",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
               }
             },
             "windowCovering": {
-              "title": "Window Covering",
+              "title": "Cortina/Persiana",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
             },
             "sensor": {
-              "title": "Sensor - Triggered",
+              "title": "Sensor - Activado",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Contact", "enum": ["contact"] },
-                    { "title": "Leak (critical)", "enum": ["leak"] },
-                    { "title": "Motion", "enum": ["motion"] },
-                    { "title": "Occupancy", "enum": ["occupancy"] },
-                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                    { "title": "Contacto", "enum": ["contact"] },
+                    { "title": "Fuga (crítico)", "enum": ["leak"] },
+                    { "title": "Movimiento", "enum": ["motion"] },
+                    { "title": "Ocupación", "enum": ["occupancy"] },
+                    { "title": "Dióxido de Carbono (crítico)", "enum": ["carbonDioxide"] },
+                    { "title": "Monóxido de Carbono (crítico)", "enum": ["carbonMonoxide"] },
+                    { "title": "Humo (crítico)", "enum": ["smoke"] }
                   ]
                 },
                 "trigger": {
-                  "title": "Trigger *",
+                  "title": "Disparador *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Ping Host", "enum": ["ping"] },
-                    { "title": "Cron Schedule", "enum": ["cron"] },
-                    { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] },
+                    { "title": "Ping al Host", "enum": ["ping"] },
+                    { "title": "Cronograma Cron", "enum": ["cron"] },
+                    { "title": "Eventos Solares (Amanecer/Atardecer)", "enum": ["sunevents"] },
                     { "title": "Webhook", "enum": ["webhook"] },
-                    { "title": "Homebridge Startup Trigger", "enum": ["startup"] }
+                    { "title": "Disparador al Iniciar Homebridge", "enum": ["startup"] }
                   ]
                 }
               },
@@ -893,20 +881,20 @@
               }
             },
             "measurement": {
-              "title": "Sensor - Measurement",
+              "title": "Sensor - Medición",
               "type": "object",
               "properties": {
                 "type": {
-                  "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Humidity", "enum": ["humidity"] },
-                    { "title": "Temperature", "enum": ["temperature"] }
+                    { "title": "Humedad", "enum": ["humidity"] },
+                    { "title": "Temperatura", "enum": ["temperature"] }
                   ]
                 },
                 "temperatureUnits": {
-                  "title": "Temperature Units *",
+                  "title": "Unidades de Temperatura *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -935,16 +923,16 @@
               ]
             },
             "resetTimer": {
-              "title": "Reset Timer",
+              "title": "Temporizador de Reinicio",
               "type": "object",
               "properties": {
                 "durationIsRandom": {
-                  "title": "Duration is Random",
+                  "title": "Duración Aleatoria",
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Duration",
-                  "description": "Timer reset delay (7 days max)",
+                  "title": "Duración",
+                  "description": "Retraso del reinicio del temporizador (máx. 7 días)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -975,8 +963,8 @@
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Min Duration",
-                  "description": "Minimum timer reset delay (7 days max)",
+                  "title": "Duración Mínima",
+                  "description": "Retraso mínimo del reinicio del temporizador (máx. 7 días)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -1007,8 +995,8 @@
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Max Duration",
-                  "description": "Maximum timer reset delay (7 days max)",
+                  "title": "Duración Máxima",
+                  "description": "Retraso máximo del reinicio del temporizador (máx. 7 días)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -1040,7 +1028,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "description": "Nota: El valor de duración mínima **debe ser menor** que el valor de duración máxima",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -1048,8 +1036,8 @@
                   }
                 },
                 "isResettable": {
-                  "title": "Is Resettable",
-                  "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
+                  "title": "Es Reiniciable",
+                  "description": "El temporizador se reinicia cada vez que se activa el accesorio, incluso si el estado del accesorio no cambia",
                   "type": "boolean"
                 }
               },
@@ -1087,26 +1075,26 @@
               ]
             },
             "companionSensor": {
-              "title": "Companion Sensor",
+              "title": "Sensor Compañero",
               "type": "object",
               "properties": {
                 "name": {
-                  "title": "Name *",
-                  "description": "Sensor name as it will be displayed in HomeKit",
+                  "title": "Nombre *",
+                  "description": "Nombre del sensor tal como se mostrará en HomeKit",
                   "type": "string"
                 },
                 "type": {
-                  "title": "Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "title": "Tipo *",
+                  "description": "Tipo de sensor activado por el cambio de estado del accesorio (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Contact", "enum": ["contact"] },
-                    { "title": "Leak (critical)", "enum": ["leak"] },
-                    { "title": "Motion", "enum": ["motion"] },
-                    { "title": "Occupancy", "enum": ["occupancy"] },
-                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                    { "title": "Contacto", "enum": ["contact"] },
+                    { "title": "Fuga (crítica)", "enum": ["leak"] },
+                    { "title": "Movimiento", "enum": ["motion"] },
+                    { "title": "Ocupación", "enum": ["occupancy"] },
+                    { "title": "Dióxido de Carbono (crítico)", "enum": ["carbonDioxide"] },
+                    { "title": "Monóxido de Carbono (crítico)", "enum": ["carbonMonoxide"] },
+                    { "title": "Humo (crítico)", "enum": ["smoke"] }
                   ]
                 }
               },
@@ -1115,24 +1103,24 @@
               }
             },
             "pingTrigger": {
-              "title": "Ping Host Trigger",
+              "title": "Disparador Ping Host",
               "type": "object",
               "properties": {
                 "host": {
                   "title": "Host *",
-                  "description": "IP address (142.250.178.4) or domain name (www.google.com) of host to ping",
+                  "description": "Dirección IP (142.250.178.4) o nombre de dominio (www.google.com) del host a hacer ping",
                   "placeholder": "192.168.0.1",
                   "type": "string"
                 },
                 "failureRetryCount": {
-                  "title": "Retries Before Failure *",
-                  "description": "Failed ping count before triggering the sensor",
+                  "title": "Reintentos Antes del Fallo *",
+                  "description": "Número de pings fallidos antes de activar el sensor",
                   "type": "integer",
                   "minimum": 0
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
                   "type": "boolean"
                 }
               },
@@ -1141,49 +1129,49 @@
               }
             },
             "cronTrigger": {
-              "title": "Cron Schedule Trigger",
+              "title": "Disparador de Programación Cron",
               "type": "object",
               "properties": {
                 "pattern": {
-                  "title": "Cron Pattern *",
-                  "description": "Standard unix cron pattern - minute, hour, day, month, weekday (https://crontab.guru/)",
+                  "title": "Patrón Cron *",
+                  "description": "Patrón cron estándar de Unix - minuto, hora, día, mes, día de la semana (https://crontab.guru/)",
                   "type": "string",
                   "placeholder": "* * * * *",
                   "pattern": "(^((\\*\\/)?([0-5]?[0-9])((,|-|\\/)([0-5]?[0-9]))*|\\*)\\s((\\*\\/)?((2[0-3]|1[0-9]|[0-9]|00))((,|-|\\/)(2[0-3]|1[0-9]|[0-9]|00))*|\\*)\\s((\\*\\/)?([1-9]|[12][0-9]|3[01])((,|-|\\/)([1-9]|[12][0-9]|3[01]))*|\\*)\\s((\\*\\/)?([1-9]|1[0-2])((,|-|\\/)([1-9]|1[0-2]))*|\\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))\\s((\\*\\/)?[0-6]((,|-|\\/)[0-6])*|\\*|00|(sun|mon|tue|wed|thu|fri|sat))$)"
                 },
                 "zoneId": {
-                  "title": "Zone Id",
-                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "title": "Zona",
+                  "description": "ID de zona (https://es.wikipedia.org/wiki/Lista_de_zonas_horarias). Por defecto, la zona del sistema",
                   "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "startDateTime": {
-                  "title": "Start Date-Time",
+                  "title": "Fecha-Hora de Inicio",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
                 },
                 "endDateTime": {
-                  "title": "End Date-Time ",
+                  "title": "Fecha-Hora de Fin",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
                 },
                 "disableTriggerEventLogging": {
-                  "title": "Disable Trigger Event Logging",
-                  "description": "Disable logging for high frequency trigger events",
+                  "title": "Desactivar Registro de Eventos de Disparador",
+                  "description": "Desactiva el registro para eventos de disparador de alta frecuencia",
                   "type": "boolean"
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
                   "type": "boolean"
                 }
               },
@@ -1192,47 +1180,47 @@
               }
             },
             "sunEventsTrigger": {
-              "title": "Sunrise/Sunset Trigger",
+              "title": "Disparador de Amanecer/Atardecer",
               "type": "object",
               "properties": {
                 "event": {
-                  "title": "Event *",
-                  "description": "Sun event",
+                  "title": "Evento *",
+                  "description": "Evento solar",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Sunrise", "enum": ["sunrise"] },
-                    { "title": "Sunset", "enum": ["sunset"] },
-                    { "title": "Golden Hour", "enum": ["goldenhour"] }
+                    { "title": "Amanecer", "enum": ["sunrise"] },
+                    { "title": "Atardecer", "enum": ["sunset"] },
+                    { "title": "Hora Dorada", "enum": ["goldenhour"] }
                   ]
                 },
                 "offset": {
-                  "title": "Time Offset",
-                  "description": "Minutes before (-) or after (+) the event",
+                  "title": "Desfase de Tiempo",
+                  "description": "Minutos antes (-) o después (+) del evento",
                   "type": "integer",
                   "placeholder": 0
                 },
                 "latitude": {
-                  "title": "Latitude *",
-                  "description": "Latitude for your location (https://www.latlong.net/)",
+                  "title": "Latitud *",
+                  "description": "Latitud de su ubicación (https://www.latlong.net/)",
                   "type": "string",
                   "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
                 },
                 "longitude": {
-                  "title": "Longitude *",
-                  "description": "Longitude for your location (https://www.latlong.net/)",
+                  "title": "Longitud *",
+                  "description": "Longitud de su ubicación (https://www.latlong.net/)",
                   "type": "string",
                   "pattern": "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
                 },
                 "zoneId": {
-                  "title": "Zone Id",
-                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "title": "Zona",
+                  "description": "ID de zona (https://es.wikipedia.org/wiki/Lista_de_zonas_horarias). Por defecto, la zona del sistema",
                   "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
                   "type": "boolean"
                 }
               },
@@ -1241,12 +1229,12 @@
               }
             },
             "webhookTrigger": {
-              "title": "Webhook Trigger",
+              "title": "Disparador Webhook",
               "type": "object",
               "properties": {
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
                   "type": "boolean"
                 }
               },
@@ -1255,12 +1243,12 @@
               }
             },
             "startupTrigger": {
-              "title": "Homebridge Startup Trigger",
+              "title": "Disparador de Inicio de Homebridge",
               "type": "object",
               "properties": {
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
                   "type": "boolean"
                 }
               },
@@ -1711,7 +1699,7 @@
   "form": [
     {
       "type": "fieldset",
-      "title": "Platform",
+      "title": "Plataforma",
       "items": []
     },
     "*"

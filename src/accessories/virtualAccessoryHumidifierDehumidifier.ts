@@ -9,6 +9,7 @@ import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
+import { HumidifierType } from '../configuration/schema.js';
 
 /**
  * HumidifierDehumidifier - Accessory implementation
@@ -60,7 +61,15 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
 
     this.deviceType = this.accessoryConfiguration.humidifierDehumidifier.type;
 
-    this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.AUTOMATIC;
+    if (this.deviceType === HumidifierType.Humidifier) {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.HUMIDIFY;
+    }
+    else if (this.deviceType === HumidifierType.Dehumidifier) {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.DEHUMIDIFY;
+    }
+    else {
+      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.AUTOMATIC;
+    }
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -238,20 +247,12 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     return HumidifierDehumidifier.ACCESSORY_TYPE_NAME;
   }
 
-  private isHumidifier(): boolean {
-    return this.deviceType === 'humidifier';
-  }
-
-  private isDehumidifier(): boolean {
-    return this.deviceType === 'dehumidifier';
-  }
-
   private humidifies(): boolean {
-    return this.deviceType === 'auto' || this.deviceType === 'humidifier';
+    return [HumidifierType.Auto, HumidifierType.Humidifier].includes(this.deviceType);
   }
 
   private dehumidifies(): boolean {
-    return this.deviceType === 'auto' || this.deviceType === 'dehumidifier';
+    return [HumidifierType.Auto, HumidifierType.Dehumidifier].includes(this.deviceType);
   }
 
   private setDeviceOperationalCondition() {
@@ -352,15 +353,19 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       TargetHumidifierDehumidifierState.DEHUMIDIFIER,
     ]);
 
-    if (this.isHumidifier()) {
+    if (this.deviceType === HumidifierType.Humidifier) {
       currentStateValues.delete(CurrentHumidifierDehumidifierState.DEHUMIDIFYING);
       targetStateValues.delete(TargetHumidifierDehumidifierState.DEHUMIDIFIER);
 
+      targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
+
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier`);
     }
-    else if (this.isDehumidifier()) {
+    else if (this.deviceType === HumidifierType.Dehumidifier) {
       currentStateValues.delete(CurrentHumidifierDehumidifierState.HUMIDIFYING);
       targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER);
+
+      targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Dehumidifier`);
     }
