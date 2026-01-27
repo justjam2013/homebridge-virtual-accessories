@@ -2,7 +2,7 @@
 
 import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
-import type { MatterAccessory, SerializedMatterAccessory } from 'homebridge';
+import type { MatterAccessory } from 'homebridge';
 
 import { Accessory } from './accessories/accessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -20,7 +20,7 @@ import fs from 'fs';
 // @ts-ignore <-- TODO remove this line, unless that gives an error
 import packageInfo from '../package.json' with { type: 'json' };
 
-export type HapOrMatterAccessory = PlatformAccessory | SerializedMatterAccessory;
+export type HapOrMatterAccessory = PlatformAccessory | MatterAccessory;
 
 /**
  * HomebridgePlatform
@@ -113,7 +113,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     this.cachedAccessories.push(accessory);
   }
 
-  configureMatterAccessory(accessory: SerializedMatterAccessory) {
+  configureMatterAccessory(accessory: MatterAccessory) {
     this.log.info(`Loading Matter accessory from cache: ${accessory.displayName}`);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
@@ -149,7 +149,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
       const cachedAccessory: HapOrMatterAccessory | undefined = this.cachedAccessories.find(accessory =>
         uuid === (<PlatformAccessory>accessory).UUID ||
-        uuid === (<SerializedMatterAccessory>accessory).uuid,
+        uuid === (<MatterAccessory>accessory).UUID,
       );
 
       if (cachedAccessory) {
@@ -174,7 +174,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           if ((<PlatformAccessory>cachedAccessory).UUID !== undefined) {
             this.api.updatePlatformAccessories([cachedAccessory as PlatformAccessory]);
           }
-          else if ((<SerializedMatterAccessory>cachedAccessory).uuid !== undefined) {
+          else if ((<MatterAccessory>cachedAccessory).UUID !== undefined) {
             this.api.matter.updatePlatformAccessories([cachedAccessory as unknown as MatterAccessory]);
           }
           this.log.debug(`Updating cache: ${accessoryConfiguration.accessoryName}`);
@@ -230,7 +230,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     for (const cachedAccessory of this.cachedAccessories) {
       const configuredDevice = configDevices.find(device =>
         this.api.hap.uuid.generate(device.accessoryID) === (<PlatformAccessory>cachedAccessory).UUID ||
-        this.api.hap.uuid.generate(device.accessoryID) === (<SerializedMatterAccessory>cachedAccessory).uuid,
+        this.api.hap.uuid.generate(device.accessoryID) === (<MatterAccessory>cachedAccessory).UUID,
       );
 
       // If there is no configured device for this cached accessory
@@ -241,7 +241,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         if ((<PlatformAccessory>cachedAccessory).UUID) {
           this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [<PlatformAccessory>cachedAccessory]);
         }
-        else if ((<SerializedMatterAccessory>cachedAccessory).uuid) {
+        else if ((<MatterAccessory>cachedAccessory).UUID) {
           this.api.matter.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [< MatterAccessory>(<unknown>cachedAccessory)]);
         }
 

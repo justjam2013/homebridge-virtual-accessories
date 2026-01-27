@@ -1,6 +1,6 @@
  
 import type { PlatformAccessory } from 'homebridge';
-import type { SerializedMatterAccessory } from 'homebridge';
+import type { MatterAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from './platform.js';
 
@@ -147,7 +147,7 @@ export abstract class AccessoryFactory {
 
   static createVirtualMatterAccessory(
     platform: VirtualAccessoriesPlatform,
-    accessory: SerializedMatterAccessory,
+    accessory: MatterAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ): Accessory | undefined {
     let virtualAccessory: Accessory | undefined;

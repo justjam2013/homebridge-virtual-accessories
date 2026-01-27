@@ -1,5 +1,5 @@
  
-import type { PlatformAccessory, SerializedMatterAccessory } from 'homebridge';
+import type { PlatformAccessory, MatterAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../../platform.js';
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
@@ -14,7 +14,7 @@ export class MatterSwitch extends Accessory {
 
   constructor(
     platform: VirtualAccessoriesPlatform,
-    accessory: SerializedMatterAccessory,
+    accessory: MatterAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
     // This needs to be fixed
