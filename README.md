@@ -24,9 +24,11 @@
 
 ## <!-- Thin separator line -->
 
-## 🔴🔴 Important 🔴🔴
+#### UI Languages
 
-Virtual Accessories for Homebridge v3.12.0 migrated to using a new library with Node.js 24.x support. Please refer to the **updated** Wiki entry [Updating to Node.js 24.x](https://github.com/justjam2013/homebridge-virtual-accessories/wiki/Updating-to-Node.js-24.x) for details to ensure a smooth upgrade.
+Currently Virtual Accessories For Homebridge offers a Spanish translation for the UI. This can be accessed by changing the Language setting in Homebridge UI. The plugin will use this setting. Please vote in this ticket for which language you would like to see the UI translated to: [Looking for people interested in translating the plugin UI into other languages](https://github.com/justjam2013/homebridge-virtual-accessories/issues/703)
+
+You do not have to volunteer to translate it, but hopefully will provide feedback if there are issues with the translations.
 
 ## <!-- Thin separator line -->
 
@@ -114,7 +116,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. Due to [issues with HomeKit](#issues-with-homekit), you will need the free [Eve app](https://www.evehome.com/en-us/eve-app) to control its settings.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
--   **Garage Door.** Allows you to create a virtual garage door. Generates an Apple Home notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set or reset via a [webhook call](#webhook-service-configuration). Per UL 325 safety standards, if the obstruction sensor is triggered and the garage door is open it will remain open. If the garage door is opening it will stop and reverse back to open. It will operate as normal in all other circumstances.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates an Apple Home notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set or reset via a [webhook call](#webhook-service-configuration). Per UL 325 safety standards, if the obstruction sensor is triggered and the garage door is open it will remain open. If the garage door is closing, it will stop and reverse back to open. It will operate as normal in all other circumstances.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
