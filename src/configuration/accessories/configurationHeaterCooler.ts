@@ -11,6 +11,7 @@ import { Utils } from '../../utils/utils.js';
  */
 export class HeaterCoolerConfiguration implements Validatable {
   type!: string;
+  hasFan: boolean = false;
   temperatureDisplayUnits!: string;
   heatingThresholdCelsius!: number;
   coolingThresholdCelsius!: number;
