@@ -118,15 +118,19 @@ export class PingTrigger extends Trigger {
     session.pingHost(triggerConfig.host, (error, target: string, sent: number, rcvd: number) => {
       const millis = rcvd - sent;
       if (error) {
-        trigger.log.error(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
+        // Only log the error when we reach the failure count instead of spamming the logs
+        trigger.log.debug(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
 
         if (trigger.failureCount.value < Number.MAX_VALUE) {
           trigger.failureCount.value++;
         }
 
-        trigger.log.info(`[${sensorConfig.accessoryName}] Failure count: ${trigger.failureCount.value}`);
+        trigger.log.debug(`[${sensorConfig.accessoryName}] Failure count: ${trigger.failureCount.value}`);
         if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
           trigger.log.debug(`[${sensorConfig.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
+
+          // Only log the error when we reach the failure count instead of spamming the logs
+          trigger.log.error(`[${sensorConfig.accessoryName}] Ping ${target}: ${error.toString()}`);
 
           trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
         }
