@@ -124,6 +124,12 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
     const delayTime: number = (this.states.SecuritySystemTargetState === SecuritySystem.AWAY_ARM) ?
       this.accessoryConfiguration.securitySystem.awayArmingDelay :
       0;
+    // eslint-disable-next-line max-len
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)} - Delay timer: ${delayTime}`);
+
+    // Stop timer in case it's running
+    this.awayArmingDelayTimer.stop();
+
     this.awayArmingDelayTimer.start(
       () => {
         this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
