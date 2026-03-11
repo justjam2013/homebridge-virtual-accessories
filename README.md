@@ -39,6 +39,13 @@ You do not have to volunteer to translate it, but hopefully will provide feedbac
 
   </summary>
 
+- [Virtual Accessories For Homebridge](#virtual-accessories-for-homebridge)
+    - [Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual Apple Home accessories.](#virtual-accessories-for-homebridge-is-a-plugin-for-homebridge-that-provides-the-ability-to-create-virtual-apple-home-accessories)
+  - [](#)
+      - [UI Languages](#ui-languages)
+  - [](#-1)
+  - [📝 Table Of Contents](#-table-of-contents)
+  - [](#-2)
   - [About Virtual Accessories For Homebridge](#about-virtual-accessories-for-homebridge)
   - [Installation](#installation)
     - [Docker](#docker)
@@ -67,9 +74,9 @@ You do not have to volunteer to translate it, but hopefully will provide feedbac
     - [Window Covering - Blinds, Shades](#window-covering---blinds-shades)
     - [Window](#window)
     - [Switch](#switch)
-      - [Switch with reset timer](#switch-with-reset-timer)
-      - [Switch with random reset timer](#switch-with-random-reset-timer)
-      - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
+    - [Switch with reset timer](#switch-with-reset-timer)
+    - [Switch with random reset timer](#switch-with-random-reset-timer)
+    - [Switch with companion sensor (sensor triggered on \& off by switch state)](#switch-with-companion-sensor-sensor-triggered-on--off-by-switch-state)
     - [Binary Sensor with ping trigger](#binary-sensor-with-ping-trigger)
     - [Binary Sensor with cron trigger](#binary-sensor-with-cron-trigger)
     - [Binary Sensor with cron trigger with start and end datetimes](#binary-sensor-with-cron-trigger-with-start-and-end-datetimes)
@@ -77,6 +84,7 @@ You do not have to volunteer to translate it, but hopefully will provide feedbac
     - [Binary Sensor with webhook trigger](#binary-sensor-with-webhook-trigger)
     - [Humidity Sensor](#humidity-sensor)
     - [Temperature Sensor](#temperature-sensor)
+  - [](#-3)
   - [Adding an external accessory in the Home app](#adding-an-external-accessory-in-the-home-app)
   - [Webhook Service Configuration](#webhook-service-configuration)
     - [Enable webhook service](#enable-webhook-service)
@@ -88,13 +96,14 @@ You do not have to volunteer to translate it, but hopefully will provide feedbac
     - [Update Security System triggered state](#update-security-system-triggered-state)
     - [Update Sensor with webhook state](#update-sensor-with-webhook-state)
   - [Creative Uses](#creative-uses)
+- [](#-4)
   - [Mentions](#mentions)
     - [Make Smart Matter](#make-smart-matter)
     - [Edgar’s Home Tech](#edgars-home-tech)
   - [Known Issues](#known-issues)
-    - [Issues with Homebridge UI:](#issues-with-homebridge-ui)
-    - [Issues with underlying frameworks:](#issues-with-underlying-frameworks)
-    - [Issues with HomeKit](#issues-with-homekit)
+      - [Issues with Homebridge UI:](#issues-with-homebridge-ui)
+      - [Issues with underlying frameworks:](#issues-with-underlying-frameworks)
+      - [Issues with HomeKit:](#issues-with-homekit)
   - [What if I run into a problem?](#what-if-i-run-into-a-problem)
 </details>
 
@@ -425,11 +434,11 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "1234567",
             "accessoryName": "My Heater",
             "accessoryType": "heatercooler",
-            "heatercooler": {
+            "heaterCooler": {
                 "type": "auto",
-                "temperatureDisplayUnits": "fahrenheit"
+                "temperatureDisplayUnits": "fahrenheit",
                 "heatingThresholdFahrenheit": 68,
-                "coolingThresholdFahrenheit": 77,
+                "coolingThresholdFahrenheit": 77
             }
         }
     ],
