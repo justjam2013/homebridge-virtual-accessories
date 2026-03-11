@@ -425,11 +425,11 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "1234567",
             "accessoryName": "My Heater",
             "accessoryType": "heatercooler",
-            "heatercooler": {
+            "heaterCooler": {
                 "type": "auto",
-                "temperatureDisplayUnits": "fahrenheit"
+                "temperatureDisplayUnits": "fahrenheit",
                 "heatingThresholdFahrenheit": 68,
-                "coolingThresholdFahrenheit": 77,
+                "coolingThresholdFahrenheit": 77
             }
         }
     ],
