@@ -116,10 +116,18 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     else if (this.states.GarageDoorCurrentState === GarageDoor.OPENING && this.states.GarageDoorTargetState === GarageDoor.OPEN) {
       // Do nothing - already opening
     }
+    else if (this.states.GarageDoorCurrentState === GarageDoor.OPENING && this.states.GarageDoorTargetState === GarageDoor.CLOSED) {
+      // Stop
+      this.states.GarageDoorCurrentState = GarageDoor.STOPPED;
+      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
+      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+
+      this.transitionTimer.stop();
+    }
     else if (this.states.GarageDoorCurrentState === GarageDoor.CLOSING && this.states.GarageDoorTargetState === GarageDoor.CLOSED) {
       // Do nothing - already closing
     }
-    else if (this.states.GarageDoorCurrentState === GarageDoor.OPENING && this.states.GarageDoorTargetState === GarageDoor.CLOSED) {
+    else if (this.states.GarageDoorCurrentState === GarageDoor.CLOSING && this.states.GarageDoorTargetState === GarageDoor.OPEN) {
       // Stop
       this.states.GarageDoorCurrentState = GarageDoor.STOPPED;
       this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
