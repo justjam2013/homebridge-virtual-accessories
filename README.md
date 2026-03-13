@@ -405,11 +405,11 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "1234567",
             "accessoryName": "My Heater",
             "accessoryType": "heatercooler",
-            "heatercooler": {
+            "heaterCooler": {
                 "type": "auto",
-                "temperatureDisplayUnits": "celsius"
+                "temperatureDisplayUnits": "celsius",
                 "heatingThresholdCelsius": 20,
-                "coolingThresholdCelsius": 25,
+                "coolingThresholdCelsius": 25
             }
         }
     ],
@@ -425,11 +425,11 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "1234567",
             "accessoryName": "My Heater",
             "accessoryType": "heatercooler",
-            "heatercooler": {
+            "heaterCooler": {
                 "type": "auto",
-                "temperatureDisplayUnits": "fahrenheit"
+                "temperatureDisplayUnits": "fahrenheit",
                 "heatingThresholdFahrenheit": 68,
-                "coolingThresholdFahrenheit": 77,
+                "coolingThresholdFahrenheit": 77
             }
         }
     ],
@@ -547,11 +547,9 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryName": "My Security System",
             "accessoryType": "securitysystem",
             "securitySystem": {
-                "armedModes": [
-                    "Away",
-                    "Night"
-                ],
-                "defaultState": "disarmed"
+                "hasNightMode": false,
+                "defaultState": "disarmed",
+                "awayArmingDelay": 60
             }
         }
     ],
