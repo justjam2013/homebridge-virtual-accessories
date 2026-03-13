@@ -672,27 +672,24 @@
               "title": "Security System",
               "type": "object",
               "properties": {
-                "": {
+                "armedModesTitle": {
                   "title": "Armed Modes",
-                  "description": "Security system modes (Away and Home are required)",
+                  "description": "Security system modes (Away and Home modes are required)",
                   "type": "object",
                   "properties": {}
                 },
                 "hasAwayMode": {
-                  "title": "Away Mode",
-                  "type": "boolean",
-                  "disabled": true,
-                  "default": true
+                  "title": "❎ Away Mode",
+                  "type": "object",
+                  "properties": {}
                 },
                 "hasHomeMode": {
-                  "title": "Home Mode",
-                  "type": "boolean",
-                  "disabled": true,
-                  "default": true
+                  "title": "❎ Home Mode",
+                  "type": "object",
+                  "properties": {}
                 },
                 "hasNightMode": {
                   "title": "Night Mode",
-                  "description": "Night mode is a custom armed mode",
                   "type": "boolean"
                 },
                 "defaultState": {
@@ -707,7 +704,7 @@
                 },
                 "awayArmingDelay": {
                   "title": "Away Arming Delay",
-                  "description": "Security System away arming delay in seconds (default 0 = immediate)",
+                  "description": "Away Mode arming delay in seconds (default 0 = immediate)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 60
