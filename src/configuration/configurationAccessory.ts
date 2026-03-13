@@ -58,7 +58,7 @@ export class AccessoryConfiguration {
   accessoryIsStateful: boolean = false;
 
   // Optional
-  isMatterEnabled: boolean = false;
+  deviceType!: string;
 
   // Accessories
 

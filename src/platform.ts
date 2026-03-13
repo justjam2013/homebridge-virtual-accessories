@@ -8,6 +8,7 @@ import { Accessory } from './accessories/accessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 import { AccessoryFactory } from './accessoryFactory.js';
 import { ConfigurationUtils } from './configuration/utils.js';
+import { DeviceType } from './configuration/schema.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { VirtualLogger, VirtualLogLevel } from './utils/virtualLogger.js';
 import { WebhookServerConfiguration } from './configuration/configurationWebhookServer.js';
@@ -145,7 +146,16 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
 
-      //      if (accessoryConfiguration.isMatterEnabled && this.api.isMatterAvailable() && this.api.isMatterEnabled()) {
+      if (accessoryConfiguration.deviceType === DeviceType.Matter) {
+        if (!this.api.isMatterAvailable()) {
+          this.log.error(`Error: Matter is not supported (${accessoryConfiguration.accessoryName})`);
+          continue;
+        }
+        else if (!this.api.isMatterEnabled()) {
+          this.log.error(`Error: Matter is not enabled (${accessoryConfiguration.accessoryName})`);
+          continue;
+        }
+      }
 
       const cachedAccessory: HapOrMatterAccessory | undefined = this.cachedAccessories.find(accessory =>
         uuid === (<PlatformAccessory>accessory).UUID ||
@@ -170,6 +180,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
             virtualAccessory.updateConfiguredName();
             (cachedAccessory as PlatformAccessory).updateDisplayName(accessoryConfiguration.accessoryName);
           }
+
           // Just update all the cached accessories
           if ((<PlatformAccessory>cachedAccessory).UUID !== undefined) {
             this.api.updatePlatformAccessories([cachedAccessory as PlatformAccessory]);

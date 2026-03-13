@@ -161,10 +161,14 @@
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
-            "isMatterEnabled": {
-              "title": "Matter Enabled",
-              "description": "Accessory is a Matter enabled device",
-              "type": "boolean",
+            "deviceType": {
+              "title": "Device Type *",
+              "description": "Accessory is HomeKit or Matter device",
+              "type": "string",
+              "oneOf": [
+                { "title": "HomeKit", "const": "homekit" },
+                { "title": "Matter", "const": "matter" }
+              ],
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType == 'switch';"
               }
@@ -1274,7 +1278,7 @@
                 }
               },
               "then": {
-                "required": [ "switch" ],
+                "required": [ "switch", "deviceType" ],
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]
