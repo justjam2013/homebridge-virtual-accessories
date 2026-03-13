@@ -547,11 +547,9 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryName": "My Security System",
             "accessoryType": "securitysystem",
             "securitySystem": {
-                "armedModes": [
-                    "Away",
-                    "Night"
-                ],
-                "defaultState": "disarmed"
+                "hasNightMode": false,
+                "defaultState": "disarmed",
+                "awayArmingDelay": 60
             }
         }
     ],
