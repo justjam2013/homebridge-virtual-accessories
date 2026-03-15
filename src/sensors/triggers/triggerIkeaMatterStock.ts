@@ -37,7 +37,7 @@ export class IkeaMatterStockTrigger extends Trigger {
     triggerConfig: IkeaMatterStockTriggerConfiguration,
   ) {
     await setTimeout(10000);
-    trigger.checkStockAvailability(trigger, triggerConfig);
+    trigger.checkStockAvailability(trigger, triggerConfig, true);
 
     const intervalBetweenChecksMillis = 60 * 60 * 1000;   // trigger.intervalBetweenChecksMillis: 60 minutes
 
@@ -45,6 +45,7 @@ export class IkeaMatterStockTrigger extends Trigger {
       trigger.checkStockAvailability, intervalBetweenChecksMillis,
       trigger,
       triggerConfig,
+      false,
     );
   }
 
@@ -54,6 +55,7 @@ export class IkeaMatterStockTrigger extends Trigger {
   private async checkStockAvailability(
     trigger: IkeaMatterStockTrigger,
     triggerConfig: IkeaMatterStockTriggerConfiguration,
+    firstRun: boolean,
   ) {
     const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
 
@@ -111,13 +113,20 @@ export class IkeaMatterStockTrigger extends Trigger {
           this.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
         }
         else if (countNum > 0) {
-          this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} items in ${triggerConfig.storeLocation}`);
+          // eslint-disable-next-line max-len
+          this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
 
           trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
         }
         else {
-          // this.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} items`);
-          this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} items`);
+          if (firstRun === true) {
+            // eslint-disable-next-line max-len
+            this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+          }
+          else {
+            // eslint-disable-next-line max-len
+            this.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+          }
 
           trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
         }
