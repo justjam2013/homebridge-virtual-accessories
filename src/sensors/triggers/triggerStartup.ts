@@ -1,11 +1,10 @@
- 
 
 import { BinarySensor } from '../binarySensor.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../../utils/utils.js';
 
 /**
- * WebhookTrigger - Trigger implementation
+ * StartupTrigger - Trigger implementation
  */
 export class StartupTrigger extends Trigger {
 
@@ -18,10 +17,10 @@ export class StartupTrigger extends Trigger {
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
 
-    this.triggerSensor(resetDelayMillis);
+    this.start(resetDelayMillis);
   }
 
-  async triggerSensor(
+  async start(
     resetDelayMillis: number,
   ) {
     await Utils.delay(3000);  // 3 second delay
