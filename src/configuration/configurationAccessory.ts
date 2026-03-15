@@ -28,6 +28,7 @@ import { BinarySensorConfiguration } from './configurationBinarySensor.js';
 import { MeasurementSensorConfiguration } from './configurationMeasurementSensor.js';
 
 import { CronTriggerConfiguration } from './triggers/configurationCronTrigger.js';
+import { IkeaMatterStockTriggerConfiguration } from './triggers/configurationIkeaMatterStockTrigger.js';
 import { PingTriggerConfiguration } from './triggers/configurationPingTrigger.js';
 import { StartupTriggerConfiguration } from './triggers/configurationStartupTrigger.js';
 import { SunEventsTriggerConfiguration } from './triggers/configurationSunEventsTrigger.js';
@@ -157,20 +158,23 @@ export class AccessoryConfiguration {
 
   // Triggers
 
+  @Type(CronTriggerConfiguration)
+    cronTrigger!: CronTriggerConfiguration;
+
+  @Type(IkeaMatterStockTriggerConfiguration)
+    ikeaMatterStockTrigger!: IkeaMatterStockTriggerConfiguration;
+
   @Type(PingTriggerConfiguration)
     pingTrigger!: PingTriggerConfiguration;
 
-  @Type(CronTriggerConfiguration)
-    cronTrigger!: CronTriggerConfiguration;
+  @Type(StartupTriggerConfiguration)
+    startupTrigger!: StartupTriggerConfiguration;
 
   @Type(SunEventsTriggerConfiguration)
     sunEventsTrigger!: SunEventsTriggerConfiguration;
 
   @Type(WebhookTriggerConfiguration)
     webhookTrigger!: WebhookTriggerConfiguration;
-
-  @Type(StartupTriggerConfiguration)
-    startupTrigger!: StartupTriggerConfiguration;
 
   // ********************* Configuration enrichment fields *********************
 
@@ -459,6 +463,13 @@ export class AccessoryConfiguration {
         }
 
         [isValid, errorFields] = this.webhookTrigger.isValid(this.fieldNames.webhookTrigger!);
+        break;
+      case TriggerType.IkeaMatterStock:
+        if (this.ikeaMatterStockTrigger === undefined) {
+          return [false, [this.fieldNames.ikeaMatterStockTrigger!]];
+        }
+
+        [isValid, errorFields] = this.ikeaMatterStockTrigger.isValid(this.fieldNames.ikeaMatterStockTrigger!);
         break;
       default:
         return [false, ['trigger']];

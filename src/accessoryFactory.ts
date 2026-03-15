@@ -42,6 +42,7 @@ import { TemperatureSensor } from './sensors/virtualSensorTemperature.js';
 import { Trigger } from './sensors/triggers/trigger.js';
 
 import { CronTrigger } from './sensors/triggers/triggerCron.js';
+import { IkeaMatterStockTrigger } from './sensors/triggers/triggerIkeaMatterStock.js';
 import { PingTrigger } from './sensors/triggers/triggerPing.js';
 import { StartupTrigger } from './sensors/triggers/triggerStartup.js';
 import { SunEventsTrigger } from './sensors/triggers/triggerSunEvents.js';
@@ -212,6 +213,9 @@ export abstract class AccessoryFactory {
     switch (triggerType) {
     case TriggerType.Cron:
       trigger = new CronTrigger(sensor, name);
+      break;
+    case TriggerType.IkeaMatterStock:
+      trigger = new IkeaMatterStockTrigger(sensor, name);
       break;
     case TriggerType.Ping:
       trigger = new PingTrigger(sensor, name);
