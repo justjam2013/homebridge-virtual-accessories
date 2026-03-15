@@ -4,9 +4,9 @@ import { AccessoryConfiguration } from '../../configuration/configurationAccesso
 import { BinarySensor } from '../binarySensor.js';
 import { IkeaMatterStockTriggerConfiguration } from '../../configuration/triggers/configurationIkeaMatterStockTrigger.js';
 import { Trigger } from './trigger.js';
+import { Utils } from '../../utils/utils.js';
 
 import * as cheerio from 'cheerio';
-import { setTimeout } from 'timers/promises';
 
 /**
  * IkeaMatterStockTrigger - Trigger implementation
@@ -36,7 +36,8 @@ export class IkeaMatterStockTrigger extends Trigger {
     trigger: IkeaMatterStockTrigger,
     triggerConfig: IkeaMatterStockTriggerConfiguration,
   ) {
-    await setTimeout(10000);
+    await Utils.delay(10000);  // 10 second delay
+    
     trigger.checkStockAvailability(trigger, triggerConfig, true);
 
     const intervalBetweenChecksMillis = 60 * 60 * 1000;   // trigger.intervalBetweenChecksMillis: 60 minutes
