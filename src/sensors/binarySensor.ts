@@ -63,6 +63,10 @@ export abstract class BinarySensor extends Accessory {
     return this.trigger!;
   }
 
+  getSensorState(): number {
+    return this.states.SensorState;
+  }
+
   protected abstract getService(): WithUUID<typeof Service>;
 
   protected abstract getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }>;

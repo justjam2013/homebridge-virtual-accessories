@@ -873,7 +873,8 @@
                     { "title": "Cron Schedule", "enum": ["cron"] },
                     { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] },
                     { "title": "Webhook", "enum": ["webhook"] },
-                    { "title": "Homebridge Startup Trigger", "enum": ["startup"] }
+                    { "title": "Homebridge Startup Trigger", "enum": ["startup"] },
+                    { "title": "Ikea Matter Stock Trigger", "enum": ["ikeamatterstock"] }
                   ]
                 }
               },
@@ -1255,6 +1256,51 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'startup';"
+              }
+            },
+            "ikeaMatterStockTrigger": {
+              "title": "Ikea Matter Device Available Trigger",
+              "type": "object",
+              "properties": {
+                "country": {
+                  "title": "Country *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Australia", "enum": ["Australia"] },
+                    { "title": "Canada", "enum": ["Canada"] },
+                    { "title": "Japan", "enum": ["Japan"] },
+                    { "title": "Korea", "enum": ["Korea"] },
+                    { "title": "New Zealand", "enum": ["New Zealand"] },
+                    { "title": "UK", "enum": ["UK"] },
+                    { "title": "USA", "enum": ["USA"] }
+                  ]
+                },
+                "storeLocation": {
+                  "title": "Store Location *",
+                  "description": "Store location (use Ikea store locator)",
+                  "type": "string"
+                },
+                "itemName": {
+                  "title": "Item *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "ALPSTUGA", "enum": ["ALPSTUGA"] },
+                    { "title": "BILRESA", "enum": ["BILRESA"] },
+                    { "title": "GRILLPLATS", "enum": ["GRILLPLATS"] },
+                    { "title": "KLIPPBOK", "enum": ["KLIPPBOK"] },
+                    { "title": "MYGGBETT", "enum": ["MYGGBETT"] },
+                    { "title": "MYGGSPRAY", "enum": ["MYGGSPRAY"] },
+                    { "title": "TIMMERFLOTTE", "enum": ["TIMMERFLOTTE"] }
+                  ]
+                },
+                "isDisabled": {
+                  "title": "Disable Trigger",
+                  "description": "Turn off/on trigger",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'ikeamatterstock';"
               }
             }
           },
@@ -1680,6 +1726,27 @@
                 "properties": {
                   "sunEventsTrigger": {
                     "required": [ "latitude", "longitude" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "ikeamatterstock" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "ikeaMatterStockTrigger" ],
+                "properties": {
+                  "ikeaMatterStockTrigger": {
+                    "required": [ "country", "storeLocation", "itemName" ]
                   }
                 }
               }

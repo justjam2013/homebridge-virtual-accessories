@@ -70,6 +70,7 @@ export class MeasurementSensorType {
 export class TriggerType {
 
   static Cron: string = 'cron';
+  static IkeaMatterStock: string = 'ikeamatterstock';
   static Ping: string = 'ping';
   static SunEvents: string = 'sunevents';
   static Webhook: string = 'webhook';
@@ -77,6 +78,7 @@ export class TriggerType {
 
   static Types: string[] = [
     TriggerType.Cron,
+    TriggerType.IkeaMatterStock,
     TriggerType.Ping,
     TriggerType.SunEvents,
     TriggerType.Webhook,
