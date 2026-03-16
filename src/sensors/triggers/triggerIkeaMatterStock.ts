@@ -60,39 +60,39 @@ export class IkeaMatterStockTrigger extends Trigger {
   ) {
     const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
 
-    const countryCode: string | undefined = this.getCountryCode(triggerConfig.country);
+    const countryCode: string | undefined = trigger.getCountryCode(triggerConfig.country);
     if (countryCode === undefined) {
-      this.log.error(`[${sensorConfig.accessoryName}] Country not supported: ${triggerConfig.country}`);
+      trigger.log.error(`[${sensorConfig.accessoryName}] Country not supported: ${triggerConfig.country}`);
       return;
     }
-    this.log.debug(`[${sensorConfig.accessoryName}] Country code: ${triggerConfig.country} - ${countryCode}`);
+    trigger.log.debug(`[${sensorConfig.accessoryName}] Country code: ${triggerConfig.country} - ${countryCode}`);
 
-    const itemCode: string | undefined = this.getItemCode(countryCode, triggerConfig.itemName);
+    const itemCode: string | undefined = trigger.getItemCode(countryCode, triggerConfig.itemName);
     if (itemCode === undefined) {
-      this.log.error(`[${sensorConfig.accessoryName}] Item not supported: ${triggerConfig.itemName}`);
+      trigger.log.error(`[${sensorConfig.accessoryName}] Item not supported: ${triggerConfig.itemName}`);
       return;
     }
     else if (itemCode === '') {
-      this.log.error(`[${sensorConfig.accessoryName}] Unknown item code for: ${triggerConfig.itemName} in ${triggerConfig.country}`);
+      trigger.log.error(`[${sensorConfig.accessoryName}] Unknown item code for: ${triggerConfig.itemName} in ${triggerConfig.country}`);
       return;
     }
-    this.log.debug(`[${sensorConfig.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
+    trigger.log.debug(`[${sensorConfig.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
 
-    const request = new Request(this.easyrebuildURL(countryCode, itemCode), { method: 'GET' });
-    this.log.debug(`[${sensorConfig.accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
+    const request = new Request(trigger.easyrebuildURL(countryCode, itemCode), { method: 'GET' });
+    trigger.log.debug(`[${sensorConfig.accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
 
     let htmlFetchResponse: globalThis.Response | undefined;
     try {
       htmlFetchResponse = await fetch(request);
     } catch (error) {
-      this.log.error(`[${sensorConfig.accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
+      trigger.log.error(`[${sensorConfig.accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
     }
 
     if (htmlFetchResponse === undefined || !htmlFetchResponse.ok) {
-      this.log.error(`[${sensorConfig.accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
+      trigger.log.error(`[${sensorConfig.accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
     }
 
-    this.log.debug(`[${sensorConfig.accessoryName}] Retrieved Ikea matter stock data`);
+    trigger.log.debug(`[${sensorConfig.accessoryName}] Retrieved Ikea matter stock data`);
 
     const html: string | undefined = await htmlFetchResponse!.text();
     const dom = cheerio.load(html);
@@ -111,25 +111,31 @@ export class IkeaMatterStockTrigger extends Trigger {
       if (store.toLowerCase().startsWith('ikea') && store.toLowerCase().endsWith(triggerConfig.storeLocation.toLowerCase())) {
         const countNum: number = Number.parseInt(count);
         if (Number.isNaN(countNum)) {
-          this.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
+          trigger.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
         }
         else if (countNum > 0) {
-          // eslint-disable-next-line max-len
-          this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
-
-          trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
-        }
-        else {
-          if (firstRun === true) {
+          if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true) {
             // eslint-disable-next-line max-len
-            this.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+
+            trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
           }
           else {
             // eslint-disable-next-line max-len
-            this.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
           }
+        }
+        else {
+          if (trigger.sensor.getSensorState() !== BinarySensor.NORMAL || firstRun === true) {
+            // eslint-disable-next-line max-len
+            trigger.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
 
-          trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+            trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+          }
+          else {
+            // eslint-disable-next-line max-len
+            trigger.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+          }
         }
 
         return false; // breaks out of the loop
