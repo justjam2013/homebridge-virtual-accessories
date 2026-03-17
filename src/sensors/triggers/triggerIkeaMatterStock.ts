@@ -78,30 +78,23 @@ export class IkeaMatterStockTrigger extends Trigger {
     }
     trigger.log.debug(`[${sensorConfig.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
 
-    const request = new Request(trigger.easyrebuildURL(countryCode, itemCode), { method: 'GET' });
-    trigger.log.debug(`[${sensorConfig.accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
-
-    let htmlFetchResponse: globalThis.Response | undefined;
-    try {
-      htmlFetchResponse = await fetch(request);
-    } catch (error) {
-      trigger.log.error(`[${sensorConfig.accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
-    }
-
-    if (htmlFetchResponse === undefined || !htmlFetchResponse.ok) {
-      trigger.log.error(`[${sensorConfig.accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
+    const html: string | undefined = await trigger.getHtml(countryCode, itemCode, trigger, sensorConfig.accessoryName);
+    if (html === undefined) {
+      return;
     }
 
     trigger.log.debug(`[${sensorConfig.accessoryName}] Retrieved Ikea matter stock data`);
 
-    const html: string | undefined = await htmlFetchResponse!.text();
     const dom = cheerio.load(html);
+
+    let foundLocation: boolean = false;
 
     const selector: string = 'table.table tbody tr.expandable-row';
     dom(`${selector}`).each((_, row) => {
       const cells = dom(row).find('td');
 
       if (cells.length < 2) {
+        // Next row
         return;
       }
 
@@ -109,6 +102,8 @@ export class IkeaMatterStockTrigger extends Trigger {
       const count: string = dom(cells[1]).text().replace(/\s+/g, ' ').trim();
 
       if (store.toLowerCase().startsWith('ikea') && store.toLowerCase().endsWith(triggerConfig.storeLocation.toLowerCase())) {
+        foundLocation = true;
+
         const countNum: number = Number.parseInt(count);
         if (Number.isNaN(countNum)) {
           trigger.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
@@ -141,6 +136,53 @@ export class IkeaMatterStockTrigger extends Trigger {
         return false; // breaks out of the loop
       }
     });
+
+    if (foundLocation === false) {
+      trigger.log.info(`[${sensorConfig.accessoryName}] Location ${triggerConfig.storeLocation} not found in ${triggerConfig.country}`);
+    }
+  }
+
+  private async getHtml(
+    countryCode: string,
+    itemCode: string,
+    trigger: IkeaMatterStockTrigger,
+    accessoryName: string,
+  ): Promise<string | undefined> {
+    const productCodes: string[] = [itemCode, itemCode.replaceAll('.', '')];
+
+    for (const productCode of productCodes) {
+      const request = new Request(trigger.easyrebuildURL(countryCode, productCode), { method: 'GET' });
+      trigger.log.debug(`[${accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
+
+      let htmlFetchResponse: globalThis.Response | undefined;
+      try {
+        htmlFetchResponse = await fetch(request);
+      } catch (error) {
+        trigger.log.error(`[${accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
+        continue;
+      }
+
+      if (htmlFetchResponse === undefined || !htmlFetchResponse.ok) {
+        trigger.log.error(`[${accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
+        continue;
+      }
+
+      const html: string | undefined = await htmlFetchResponse!.text();
+      if (html === undefined) {
+        trigger.log.error(`[${accessoryName}] Response did not return html`);
+        continue;
+      }
+      else if (html.includes('is not a valid product number')) {
+        // Try the next format
+        continue;
+      }
+
+      return html;
+    }
+
+    trigger.log.error(`[${accessoryName}] Not a valid product number: "${productCodes[0]}" / "${productCodes[1]}"`);
+
+    return undefined;
   }
 
   private getCountryCode(countryName: string): string | undefined {
@@ -237,8 +279,8 @@ export class IkeaMatterStockTrigger extends Trigger {
           ['BILRESA', '506.178.68'],
           ['GRILLPLATS', '306.247.42'],
           ['KLIPPBOK', '706.177.68'],
-          ['MYGGBETT', '40617642'],
-          ['MYGGSPRAY', '00619450'],
+          ['MYGGBETT', '406.176.42'],
+          ['MYGGSPRAY', '006.194.50'],
           ['TIMMERFLOTTE', '006.189.50'],
         ]),
       ],
