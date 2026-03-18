@@ -16,6 +16,8 @@ export class IkeaMatterStockTrigger extends Trigger {
   private easyrebuildURL = (countryCode: string, itemNumber: string) =>
     `https://easyrebuild.com/stock?country=${countryCode}&itemNo=${itemNumber}`;
 
+  private count: number = 0;
+
   constructor(
     sensor: BinarySensor,
     name: string,
@@ -109,11 +111,12 @@ export class IkeaMatterStockTrigger extends Trigger {
           trigger.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
         }
         else if (countNum > 0) {
-          if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true) {
+          if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true || countNum !== trigger.count) {
             // eslint-disable-next-line max-len
             trigger.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
 
             trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
+            trigger.count = countNum;
           }
           else {
             // eslint-disable-next-line max-len
