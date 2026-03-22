@@ -33,6 +33,7 @@ export class PingTrigger extends Trigger {
   private IPv6: number = 6;
 
   private failureCount = new Counter(0);
+  private pingIntervalId: ReturnType<typeof setInterval> | undefined;
 
   constructor(
     sensor: BinarySensor,
@@ -78,13 +79,25 @@ export class PingTrigger extends Trigger {
     const pingTimeoutMillis = 10 * 1000;            // trigger.pingTimeout: 10 seconds
     const intervalBetweenPingsMillis = 60 * 1000;   // trigger.intervalBetweenPings: 60 seconds
 
-    setInterval(
+    this.pingIntervalId = setInterval(
       this.ping, intervalBetweenPingsMillis,
       this,
       triggerConfig,
       protocol,
       pingTimeoutMillis,
     );
+
+    if (this.pingIntervalId) {
+      this.pingIntervalId.unref();
+    }
+  }
+
+  cleanup(): void {
+    if (this.pingIntervalId !== undefined) {
+      clearInterval(this.pingIntervalId);
+      this.pingIntervalId = undefined;
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Ping trigger cleanup completed`);
+    }
   }
 
   /**

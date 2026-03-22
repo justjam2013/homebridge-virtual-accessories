@@ -340,6 +340,14 @@ export class Lock extends Accessory {
     return stateName;
   }
 
+  cleanup(): void {
+    if (this.securityTimerId !== undefined) {
+      clearTimeout(this.securityTimerId);
+      this.securityTimerId = undefined;
+    }
+    super.cleanup();
+  }
+
   private startAutoSecurityTimeout(): void {
     if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
       const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;

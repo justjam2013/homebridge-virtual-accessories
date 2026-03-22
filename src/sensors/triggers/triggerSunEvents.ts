@@ -16,8 +16,8 @@ export class SunEventsTrigger extends Trigger {
   private SunTimesURL = (latitude: string, longitude: string, timezone: string, date: string) =>
     `https://api.sunrisesunset.io/json?time_format=24&lat=${latitude}&lng=${longitude}&timezone=${timezone}&date=${date}`;
 
-  private triggerCronJob!: Cron;
-  private dataCronJob!: Cron;
+  private triggerCronJob?: Cron;
+  private dataCronJob?: Cron;
 
   private timezone: string | undefined;
 
@@ -54,11 +54,15 @@ export class SunEventsTrigger extends Trigger {
 
         this.setupSunEvent(triggerConfig, timezone, sensor);
 
-        this.displayNextRun(this.dataCronJob);
+        if (this.dataCronJob) {
+          this.displayNextRun(this.dataCronJob);
+        }
       }),
     );
 
-    this.displayNextRun(this.dataCronJob);
+    if (this.dataCronJob) {
+      this.displayNextRun(this.dataCronJob);
+    }
   }
 
   private displayNextRun(
@@ -225,6 +229,18 @@ export class SunEventsTrigger extends Trigger {
     );
 
     this.displayNextRun(this.triggerCronJob);
+  }
+
+  cleanup(): void {
+    if (this.triggerCronJob !== undefined) {
+      this.triggerCronJob.stop();
+      this.triggerCronJob = undefined;
+    }
+    if (this.dataCronJob !== undefined) {
+      this.dataCronJob.stop();
+      this.dataCronJob = undefined;
+    }
+    this.log.debug(`[${this.sensorConfig.accessoryName}] SunEvents trigger cleanup completed`);
   }
 
   private delay(millis: number) {

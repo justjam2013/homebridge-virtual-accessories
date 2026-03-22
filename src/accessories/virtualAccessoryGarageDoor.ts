@@ -185,6 +185,11 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     return GarageDoor.ACCESSORY_TYPE_NAME;
   }
 
+  cleanup(): void {
+    this.transitionTimer.stop();
+    super.cleanup();
+  }
+
   static getStateName(state: number): string {
     let stateName: string;
 

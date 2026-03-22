@@ -260,4 +260,11 @@ export class Switch extends Accessory {
   private onTimerExpired(): void {
     this.service!.setCharacteristic(this.platform.Characteristic.On, this.defaultState);
   }
+
+  cleanup(): void {
+    if (this.resetTimer !== undefined) {
+      this.resetTimer.stop();
+    }
+    super.cleanup();
+  }
 }

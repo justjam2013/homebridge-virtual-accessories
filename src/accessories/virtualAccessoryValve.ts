@@ -247,4 +247,11 @@ export class Valve extends Accessory {
 
     return eventName;
   }
+
+  cleanup(): void {
+    if (this.durationTimer !== undefined) {
+      this.durationTimer.stop();
+    }
+    super.cleanup();
+  }
 }

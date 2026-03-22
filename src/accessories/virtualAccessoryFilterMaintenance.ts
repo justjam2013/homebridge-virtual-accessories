@@ -187,4 +187,11 @@ export class FilterMaintenance extends Accessory {
 
     this.log.info(`[${this.accessoryConfiguration.accessoryName}] Filter lifetime expired`);
   }
+
+  cleanup(): void {
+    if (this.lifespanTimer !== undefined) {
+      this.lifespanTimer.stop();
+    }
+    super.cleanup();
+  }
 }

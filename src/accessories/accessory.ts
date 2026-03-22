@@ -124,6 +124,14 @@ export abstract class Accessory {
     }
   }
 
+  /**
+   * Cleanup accessory resources (timers, intervals)
+   * Override in subclasses to clean up specific resources
+   */
+  cleanup(): void {
+    this.log.debug(`[${this.accessoryName}] Accessory cleanup completed`);
+  }
+
   // Store device state if stateful
   protected storeState() {
     if (this.accessoryConfiguration.accessoryIsStateful) {

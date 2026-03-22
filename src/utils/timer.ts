@@ -108,6 +108,10 @@ export class Timer {
         }
       }, this.updateIntervalMillis);
 
+      if (this.id) {
+        this.id.unref();
+      }
+
       this.startTime = Utils.now();
       this.isRunning = true;
     }

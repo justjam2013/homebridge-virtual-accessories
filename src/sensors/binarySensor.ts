@@ -120,4 +120,10 @@ export abstract class BinarySensor extends Accessory {
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
     }
   }
+
+  cleanup(): void {
+    if (this.trigger !== undefined) {
+      this.trigger.cleanup();
+    }
+  }
 }

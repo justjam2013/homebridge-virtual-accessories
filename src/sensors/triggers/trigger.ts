@@ -25,4 +25,10 @@ export abstract class Trigger {
 
     this.log = this.sensor.platform.log;
   }
+
+  /**
+   * Cleanup resources (timers, intervals, cron jobs)
+   * Override in subclasses to clean up specific resources
+   */
+  cleanup(): void {}
 }

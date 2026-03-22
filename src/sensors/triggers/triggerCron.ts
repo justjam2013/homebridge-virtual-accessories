@@ -12,7 +12,7 @@ import '@js-joda/timezone';
  */
 export class CronTrigger extends Trigger {
 
-  private cronJob!: Cron;
+  private cronJob?: Cron;
 
   constructor(
     sensor: BinarySensor,
@@ -80,13 +80,21 @@ export class CronTrigger extends Trigger {
         await Utils.delay(resetDelayMillis);
         sensor.triggerSensorState(BinarySensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
 
-        if (!this.cronJob.nextRun()) {
+        if (this.cronJob && !this.cronJob.nextRun()) {
           this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);
         }
       }),
     );
 
     this.displayNextRun(this.cronJob);
+  }
+
+  cleanup(): void {
+    if (this.cronJob !== undefined) {
+      this.cronJob.stop();
+      this.cronJob = undefined;
+      this.log.debug(`[${this.sensorConfig.accessoryName}] Cron trigger cleanup completed`);
+    }
   }
 
   /**

@@ -36,6 +36,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly cachedAccessories: PlatformAccessory[] = [];
 
+  // Track virtual accessories for cleanup
+  private readonly virtualAccessories: Map<string, Accessory> = new Map<string, Accessory>();
+
   public version: string = packageInfo.version;
 
   constructor(
@@ -95,6 +98,12 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.api.on(APIEvent.SHUTDOWN, () => {
       log.debug('Executing shutdown callback');
+
+      for (const [, accessory] of this.virtualAccessories) {
+        accessory.cleanup();
+      }
+      this.virtualAccessories.clear();
+
       this.sensorUpdateServer?.stop();
     });
   }
@@ -166,6 +175,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           this.log.debug(`Updating cache: ${accessoryConfiguration.accessoryName}`);
 
           virtualAccessories.push(virtualAccessory);
+          this.virtualAccessories.set(uuid, virtualAccessory);
         }
         else {
           this.log.error(`Error restoring existing accessory: ${accessoryConfiguration.accessoryName}`);
@@ -199,11 +209,13 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         else if (virtualAccessory.isExternalAccessory()) {
           this.log.info(`Publishing new external accessory: ${accessoryConfiguration.accessoryName}`);
           this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+          this.virtualAccessories.set(uuid, virtualAccessory);
         }
         else {
           // link the accessory to your platform
           this.log.info(`Publishing new accessory: ${accessoryConfiguration.accessoryName}`);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          this.virtualAccessories.set(uuid, virtualAccessory);
 
           virtualAccessories.push(virtualAccessory);
         }
@@ -222,6 +234,11 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         this.log.info(`Removing deleted accessory: ${cachedAccessory.displayName}`);
 
         // Unregister the accessory from the platform
+        const virtualAccessory = this.virtualAccessories.get(cachedAccessory.UUID);
+        if (virtualAccessory !== undefined) {
+          virtualAccessory.cleanup();
+          this.virtualAccessories.delete(cachedAccessory.UUID);
+        }
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
 
         // Delete any stateful info, if it exists
@@ -234,7 +251,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
             else {
               this.log.debug(`Deleted stateful storage for: ${cachedAccessory.displayName}`);
             }
-          }); 
+          });
         }
       }
     }

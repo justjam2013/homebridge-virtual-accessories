@@ -212,4 +212,9 @@ export abstract class OpeningAccessory extends Accessory {
 
     return stateName;
   }
+
+  cleanup(): void {
+    this.transitionTimer.stop();
+    super.cleanup();
+  }
 }
