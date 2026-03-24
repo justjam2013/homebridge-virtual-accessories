@@ -369,7 +369,7 @@ export class Lock extends Accessory {
 
   private processAccessControlPointRequest(base64TlvRequest: string) {
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
-    const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest);
+    const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest, this.log);
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
 
