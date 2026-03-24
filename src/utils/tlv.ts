@@ -1,6 +1,7 @@
 /* eslint-disable brace-style */
 
 import { createHash } from 'crypto';
+import { VirtualLogger } from './virtualLogger.js';
 
 /**
  * TLV8
@@ -169,7 +170,10 @@ export class TLVRequest {
   public request!: TLV;
   public requestPayload?: TLVDeviceCredentialRequest | TLVReaderKeyRequest;
 
-  constructor(tlvString: string) {
+  constructor(
+    tlvString: string,
+    log: VirtualLogger,
+  ) {
     const tlvs: Set<TLV> = TLVUtils.parseTLVs(tlvString);
 
     tlvs.forEach(tlv => {
@@ -185,13 +189,13 @@ export class TLVRequest {
     });    
 
     if (this.request.type === TLVUtils.DEVICE_CREDENTIAL_REQUEST) {
-      this.requestPayload = new TLVDeviceCredentialRequest(this.request.value as string);
+      this.requestPayload = new TLVDeviceCredentialRequest(this.request.value as string, log);
     }
     else if (this.request.type === TLVUtils.READER_KEY_REQUEST) {
-      this.requestPayload = new TLVReaderKeyRequest(this.request.value as string);
+      this.requestPayload = new TLVReaderKeyRequest(this.request.value as string, log);
     }
     else {
-      console.log(`Invalid request type: ${this.request.type}`);
+      log.error(`Invalid request type: ${this.request.type}`);
     }
   }
 }
@@ -204,7 +208,10 @@ export class TLVDeviceCredentialRequest {
   public keyState?: TLV;                    // Add
   public keyIdentifier?: TLV;               // Remove? (not seen yet)
 
-  constructor(tlvString: string) {
+  constructor(
+    tlvString: string,
+    log: VirtualLogger,
+  ) {
     const tlvs: Set<TLV> = TLVUtils.parseTLVs(tlvString);
 
     tlvs.forEach(tlv => {
@@ -230,7 +237,7 @@ export class TLVDeviceCredentialRequest {
         break;
       }
       default: {
-        console.log(`Invalid TLVDeviceCredentialRequest sub tlv: ${tlv.type}`);
+        log.error(`Invalid TLVDeviceCredentialRequest sub tlv: ${tlv.type}`);
       }
       }
     });
@@ -302,7 +309,10 @@ export class TLVReaderKeyRequest {
   public unknown?: TLV;             // Add
   public keyIdentifier?: TLV;       // Remove
 
-  constructor(tlvString: string) {
+  constructor(
+    tlvString: string,
+    log: VirtualLogger,
+  ) {
     const tlvs: Set<TLV> = TLVUtils.parseTLVs(tlvString);
 
     tlvs.forEach(tlv => {
@@ -324,7 +334,7 @@ export class TLVReaderKeyRequest {
         break;
       }
       default: {
-        console.log(`Invalid TLVReaderKeyRequest sub tlv: ${tlv.type}`);
+        log.error(`Invalid TLVReaderKeyRequest sub tlv: ${tlv.type}`);
       }
       }
     });
