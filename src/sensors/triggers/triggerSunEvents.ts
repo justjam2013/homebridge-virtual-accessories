@@ -30,7 +30,7 @@ export class SunEventsTrigger extends Trigger {
     const triggerConfig: SunEventsTriggerConfiguration = this.sensorConfig.sunEventsTrigger;
 
     if (triggerConfig.isDisabled) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Sun Events trigger is disabled`);
+      this.log.info(`[${this.accessoryName}] Sun Events trigger is disabled`);
       return;
     }
     const timezone: string = (triggerConfig.zoneId !== undefined) ? triggerConfig.zoneId : Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -41,16 +41,17 @@ export class SunEventsTrigger extends Trigger {
 
     const pattern: string = '1 0 * * *';    // Every day at 00:01 - one minute after midnight
 
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating data cron job: pattern ${pattern}; timezone ${timezone}`);
+    this.log.debug(`[${this.accessoryName}] Creating data cron job: pattern ${pattern}; timezone ${timezone}`);
 
     this.dataCronJob = new Cron(
       pattern,
       {
-        name: `Fetch Sun Data Cron Job (${this.sensorConfig.accessoryName})`,
+        name: `Fetch Sun Data Cron Job (${this.accessoryName})`,
         timezone: timezone,
+        unref: true,
       },
       (async () => {
-        this.log.debug(`[${this.sensorConfig.accessoryName}] Matched data cron job pattern '${pattern}'. Triggering sensor`);
+        this.log.debug(`[${this.accessoryName}] Matched data cron job pattern '${pattern}'. Triggering sensor`);
 
         this.setupSunEvent(triggerConfig, timezone, sensor);
 
@@ -68,7 +69,7 @@ export class SunEventsTrigger extends Trigger {
     const nextRunTimestamp = (nextRun === null) ?
       'None scheduled' :
       `${nextRun.toString().split('.')[0]}; max count: ${cronJob.options.maxRuns}`;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Next "${cronJob.name}" run: ${nextRunTimestamp}`);
+    this.log.debug(`[${this.accessoryName}] Next "${cronJob.name}" run: ${nextRunTimestamp}`);
   }
 
   private async setupSunEvent(
@@ -77,14 +78,14 @@ export class SunEventsTrigger extends Trigger {
     sensor: BinarySensor,
   ) {
     const today: string = LocalDate.now().toString();
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Today: ${today}`);
+    this.log.debug(`[${this.accessoryName}] Today: ${today}`);
 
     await this.getSunEventsData(triggerConfig.latitude, triggerConfig.longitude, timezone, today)
       .then(
         (async (response: SunEventsResponse | undefined) => {
           if (response !== undefined) {
             if (response.status !== SunEventsResponse.OK) {
-              this.log.error(`[${this.sensorConfig.accessoryName}] Sunrise/sunset server returned error response: ${response.status}`);
+              this.log.error(`[${this.accessoryName}] Sunrise/sunset server returned error response: ${response.status}`);
             } else {
               await this.setupTriggerCron(triggerConfig.event, triggerConfig.offset, response.results, sensor);
             }
@@ -102,7 +103,7 @@ export class SunEventsTrigger extends Trigger {
     let response: SunEventsResponse | undefined;
 
     const request = new Request(this.SunTimesURL(latitude, longitude, timezone, date), { method: 'GET' });
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
+    this.log.debug(`[${this.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
 
     const maxAttempts: number = 5;
     const millis: number = 60 * 1000;
@@ -124,29 +125,31 @@ export class SunEventsTrigger extends Trigger {
       try {
         dataFetchResponse = await fetch(request);
       } catch (error) {
-        this.log.error(`[${this.sensorConfig.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
+        this.log.error(`[${this.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
       }
 
       if (dataFetchResponse === undefined || !dataFetchResponse.ok) {
-        this.log.error(`[${this.sensorConfig.accessoryName}] Error fetching sunrise/sunset data. Response status: ${dataFetchResponse?.status}`);
+        this.log.error(`[${this.accessoryName}] Error fetching sunrise/sunset data. Response status: ${dataFetchResponse?.status}`);
         attempts++;
 
         const baseErrorMsg: string = `Failed ${attempts} of ${maxAttempts} attempts.`;
 
         if (attempts === maxAttempts) {
           gaveUp = true;
-          this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Giving up`);
+          this.log.error(`[${this.accessoryName}] ${baseErrorMsg} Giving up`);
         } else {
           const backoffMinutes: number = (attempts * waitMinutes);
-          this.log.error(`[${this.sensorConfig.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
-          await new Promise(resolve => setTimeout(resolve, backoffMinutes * millis));
+          this.log.error(`[${this.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
+          await new Promise(resolve =>
+            setTimeout(resolve, backoffMinutes * millis).unref(),
+          );
         }
       }
     } while ((dataFetchResponse === undefined || !dataFetchResponse.ok) && attempts < maxAttempts);
 
     if (!gaveUp) {
       dataResponse = await dataFetchResponse!.text();
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
+      this.log.debug(`[${this.accessoryName}] Fetched sunrise/sunset data: ${(dataResponse)}`);
 
       response = this.desrializeSunEventsResponse(dataResponse);
     }
@@ -162,8 +165,8 @@ export class SunEventsTrigger extends Trigger {
     try {
       response = deserialize(dataResponse, SunEventsResponse);
     } catch (error) {
-      this.log.error(`[${this.sensorConfig.accessoryName}] Error deserializing response data: ${JSON.stringify(error)}`);
-      this.log.debug(`[${this.sensorConfig.accessoryName}] Response data: ${response}`);
+      this.log.error(`[${this.accessoryName}] Error deserializing response data: ${JSON.stringify(error)}`);
+      this.log.debug(`[${this.accessoryName}] Response data: ${response}`);
     }
 
     return response;
@@ -187,17 +190,17 @@ export class SunEventsTrigger extends Trigger {
       eventTime = dailyDetails.golden_hour;
       break;
     default:
-      this.log.error(`[${this.sensorConfig.accessoryName}] Error creating sunrise/sunset trigger. Invalid event: ${event}`);
+      this.log.error(`[${this.accessoryName}] Error creating sunrise/sunset trigger. Invalid event: ${event}`);
       return;
     }
 
     let cronRunTimestamp: string = `${dailyDetails.date}T${eventTime}`;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Cron run timestamp: ${cronRunTimestamp}; offset: ${offset} minutes`);
+    this.log.debug(`[${this.accessoryName}] Cron run timestamp: ${cronRunTimestamp}; offset: ${offset} minutes`);
     if (offset !== 0) {
       cronRunTimestamp = this.addOffset(cronRunTimestamp, offset);
     }
     const runTimezone: string = dailyDetails.timezone;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Creating cron for: event ${event}; timestamp: ${cronRunTimestamp}; timezone: ${runTimezone}`);
+    this.log.debug(`[${this.accessoryName}] Creating cron for: event ${event}; timestamp: ${cronRunTimestamp}; timezone: ${runTimezone}`);
 
     // Hardcode reset delay
     const resetDelayMillis: number = 3 * 1000;     // 3 second reset delay
@@ -210,13 +213,14 @@ export class SunEventsTrigger extends Trigger {
     this.triggerCronJob = new Cron(
       cronRunTimestamp,
       {
-        name: `Sun Events Cron Job (${this.sensorConfig.accessoryName})`,
+        name: `Sun Events Cron Job (${this.accessoryName})`,
         maxRuns: 1,
         timezone: runTimezone,
+        unref: true,
       },
       (async () => {
         const now = Utils.now().toString();
-        this.log.debug(`[${this.sensorConfig.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
+        this.log.debug(`[${this.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
         sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
         await this.delay(resetDelayMillis);
@@ -228,7 +232,9 @@ export class SunEventsTrigger extends Trigger {
   }
 
   private delay(millis: number) {
-    return new Promise(resolve => setTimeout(resolve, millis));
+    return new Promise(resolve =>
+      setTimeout(resolve, millis).unref(),
+    );
   }
 
   private addOffset(datetime: string, offset: number): string {

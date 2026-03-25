@@ -23,12 +23,12 @@ export class CronTrigger extends Trigger {
     const triggerConfig: CronTriggerConfiguration = this.sensorConfig.cronTrigger;
 
     if (triggerConfig.isDisabled) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger is disabled`);
+      this.log.info(`[${this.accessoryName}] Cron trigger is disabled`);
       return;
     }
 
     if (triggerConfig.disableTriggerEventLogging) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Cron trigger event logging is disabled. Sensor state changes will not be displayed in the logs`);
+      this.log.info(`[${this.accessoryName}] Cron trigger event logging is disabled. Sensor state changes will not be displayed in the logs`);
     }
 
     // Hardcode reset delay
@@ -36,52 +36,57 @@ export class CronTrigger extends Trigger {
 
     // System settings - date/time formatting - timezone
     const timezone: string = (triggerConfig.zoneId !== undefined) ? triggerConfig.zoneId : Intl.DateTimeFormat().resolvedOptions().timeZone;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting timezone to '${timezone}'`);
+    this.log.debug(`[${this.accessoryName}] Setting timezone to '${timezone}'`);
 
     const zoneId: ZoneId = ZoneId.of(timezone);
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Setting ZoneId to '${zoneId}'`);
+    this.log.debug(`[${this.accessoryName}] Setting ZoneId to '${zoneId}'`);
 
     const cronStart: ZonedDateTime | undefined = this.getZonedDateTime(triggerConfig.startDateTime, zoneId);
     const cronEnd: ZonedDateTime | undefined = this.getZonedDateTime(triggerConfig.endDateTime, zoneId);
 
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Start time: '${cronStart?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
-    this.log.debug(`[${this.sensorConfig.accessoryName}] End time:   '${cronEnd?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Now time:   '${Utils.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
+    this.log.debug(`[${this.accessoryName}] Start time: '${cronStart?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
+    this.log.debug(`[${this.accessoryName}] End time:   '${cronEnd?.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
+    this.log.debug(`[${this.accessoryName}] Now time:   '${Utils.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)}'`);
 
     // If we're past the end date, don't even bother starting up the cron job
     if (cronEnd && Utils.now().isAfter(cronEnd)) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Not setting up cron job`);
+      this.log.info(`[${this.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Not setting up cron job`);
       return;
 
       // eslint-disable-next-line brace-style
     }
     else if (cronStart && (Utils.now().isEqual(cronStart) || Utils.now().isBefore(cronStart))) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Waiting for start time`);
+      this.log.info(`[${this.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Waiting for start time`);
     }
 
     let firstTrigger: boolean = true;
     this.cronJob = new Cron(
       triggerConfig.pattern,
       {
-        name: `Schedule Cron Job  (${this.sensorConfig.accessoryName})`,
+        name: `Schedule Cron Job  (${this.accessoryName})`,
         startAt: this.includeStartTime(triggerConfig.startDateTime),
         stopAt: this.includeEndTime(triggerConfig.endDateTime),
         timezone: timezone,
+        unref: true,
       },
       (async () => {
         if (firstTrigger) {
-          this.log.info(`[${this.sensorConfig.accessoryName}] Starting cron job`);
+          this.log.info(`[${this.accessoryName}] Starting cron job`);
           firstTrigger = false;
         }
 
-        this.log.debug(`[${this.sensorConfig.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
+        this.log.debug(`[${this.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
         sensor.triggerSensorState(BinarySensor.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
-        await Utils.delay(resetDelayMillis);
+        await Utils.delay(
+          resetDelayMillis,
+          this.accessoryName,
+          this.log,
+        );
         sensor.triggerSensorState(BinarySensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
 
         if (!this.cronJob.nextRun()) {
-          this.log.info(`[${this.sensorConfig.accessoryName}] Stopping cron job`);
+          this.log.info(`[${this.accessoryName}] Stopping cron job`);
         }
       }),
     );
@@ -100,7 +105,7 @@ export class CronTrigger extends Trigger {
     nextRunTimestamp = (nextRunTimestamp === undefined) ?
       'None scheduled' :
       `${nextRunTimestamp.split('.')[0]} (count: ${cronJob.options.maxRuns})`;
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Next ${cronJob.name} run: ${nextRunTimestamp}`);
+    this.log.debug(`[${this.accessoryName}] Next ${cronJob.name} run: ${nextRunTimestamp}`);
   }
 
   private getZonedDateTime(datetime: string | undefined, zoneId: ZoneId): ZonedDateTime | undefined {

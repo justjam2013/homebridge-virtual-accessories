@@ -7,6 +7,13 @@ import { Duration, Instant, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
 
 /**
+ * shutdownSignal
+ */
+export const shutdownSignal = {
+  isShuttingDown: false,
+};
+
+/**
  * Utils
  */
 export class Utils {
@@ -96,7 +103,14 @@ export class Utils {
   static debounce<T extends (...args: any[]) => void>(
     func: T,
     delayMillis: number = Utils.debounceMillis,
-  ): (...args: any[]) => void {
+    accessoryName: string,
+    log: VirtualLogger,
+  ): ((...args: any[]) => void) | undefined {
+    if (delayMillis <= 0) {
+      log.error(`[${accessoryName}] Invalid delay: ${delayMillis}`);
+      return;
+    }
+
     let timeoutId: ReturnType<typeof setTimeout>;
     return function(this: any, ...args: any[]) {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -108,8 +122,18 @@ export class Utils {
     };
   }
 
-  static async delay(millis: number) {
-    return new Promise(resolve => setTimeout(resolve, millis));
+  static async delay(
+    millis: number,
+    accessoryName: string,
+    log: VirtualLogger,
+  ): Promise<unknown> {
+    if (millis <= 0) {
+      log.error(`[${accessoryName}] Invalid delay: ${millis}`);
+      return;
+    }
+    return new Promise(resolve =>
+      setTimeout(resolve, millis).unref(),
+    );
   }
 
   // serialise Map to JSON
@@ -174,10 +198,19 @@ export class Utils {
     accessoryName: string,
     log: VirtualLogger,
   ): void {
-    const elapsedTime: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedStartTime), Utils.now()).toMillis() / 1000); // seconds
-    let timeRemaining: number = (cachedDuration - elapsedTime);
+    if (cachedDuration < 0) {
+      log.error(`[${accessoryName}] Invalid cached duration: ${cachedDuration}`);
+      return;
+    }
 
+    const elapsedTime: number = Math.trunc(Duration.between(Utils.zonedDateTime(cachedStartTime), Utils.now()).toMillis() / 1000); // seconds
     log.debug(`[${accessoryName}] Elapsed Time: ${elapsedTime}`);
+    if (elapsedTime < 0) {
+      log.error(`[${accessoryName}] Invalid elapsed time: ${elapsedTime}. Start time cannot be in the future`);
+      return;
+    }
+
+    let timeRemaining: number = (cachedDuration - elapsedTime);
     log.debug(`[${accessoryName}] Time Remaining: ${timeRemaining}`);
 
     // If the timer is expired, set timer to 1 second to issue trigger switch off

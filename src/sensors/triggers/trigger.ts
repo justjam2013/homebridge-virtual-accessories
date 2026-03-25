@@ -12,6 +12,7 @@ export abstract class Trigger {
 
   readonly name: string;
 
+  protected accessoryName: string;
   protected log: VirtualLogger;
 
   constructor(
@@ -20,6 +21,7 @@ export abstract class Trigger {
   ) {
     this.sensor = sensor;
     this.sensorConfig = this.sensor.accessoryConfiguration;
+    this.accessoryName = this.sensorConfig.accessoryName;
 
     this.name = name;
 
