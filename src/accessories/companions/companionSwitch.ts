@@ -1,9 +1,9 @@
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../../platform.js';
 import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
-
 import { Switch } from '../virtualAccessorySwitch.js';
+
 import { TriggerableEventAccessory } from '../triggerableEventAccessory.js';
 
 /**
@@ -34,39 +34,39 @@ export class CompanionSwitch extends Switch {
     this.muteLogging = false;
 
     // Replace the Switch Service
-    const switchService = this.accessory.getService(this.platform.Service.Switch);
+    const switchService = this.accessory.getService(ServiceType.Switch);
     if (switchService !== undefined) {
       this.accessory.removeService(switchService);
     }
 
     this.service = this.accessory.getService(this.companionName) ||
-                     this.accessory.addService(this.platform.Service.Switch, this.companionName, accessory.UUID + this.postfix);
+                     this.accessory.addService(ServiceType.Switch, this.companionName, accessory.UUID + this.postfix);
 
     // Replace the Name Characteristic
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.companionName!);
+    this.setValue(CharacteristicType.Name, this.accessoryName);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(this.states.SwitchState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.SwitchState));
+    this.log.debug(`[${this.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(this.getOn())}`);
+    this.updateOn(this.getOn());
 
     // register handlers
 
-    this.service!.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this))
-      .onGet(this.getOn.bind(this));
+    this.service!.getCharacteristic(CharacteristicType.On)
+      .onGet(this.getOnHandler.bind(this))
+      .onSet(this.setOnHandler.bind(this));
   }
 
-  async setOn(value: CharacteristicValue) {
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Calling super.On()`, this.muteLogging);
-    super.setOn(value);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Calling super.On()`, this.muteLogging);
+  async setOnHandler(value: CharacteristicValue) {
+    this.log.debug(`[${this.accessoryName}] Calling super.On()`);
+    super.setOnHandler(value);
+    this.log.debug(`[${this.accessoryName}] Calling super.On()`);
 
-    if (this.states.SwitchState === CompanionSwitch.ON) {
+    if (this.getOn() === CompanionSwitch.ON) {
       this.partnerAccessory.triggerEvent(this);
     }
   }
 
-  async getOn(): Promise<CharacteristicValue> {
-    return super.getOn();
+  async getOnHandler(): Promise<CharacteristicValue> {
+    return super.getOnHandler();
   }
 }

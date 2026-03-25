@@ -9,7 +9,7 @@ import { VirtualLogger } from './utils/virtualLogger.js';
 
 import { TriggerableAlarm } from './accessories/triggerableAlarm.js';
 import { TriggerableSensor } from './sensors/triggerableSensor.js';
-import { UpdatableChargingState } from './accessories/updatableChargingState.js';
+import { UpdatableCharging } from './accessories/updatableChargingState.js';
 import { UpdatableObstruction } from './accessories/updatableObstruction.js';
 import { UpdatableMeasurementSensor } from './sensors/updatableSensor.js';
 
@@ -234,7 +234,7 @@ export class WebhookServer {
     if (
       (<TriggerableAlarm><unknown>accessory).triggerAlarm !== undefined ||
       (<TriggerableSensor><unknown>accessory).triggerSensor !== undefined ||
-      (<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined ||
+      (<UpdatableCharging><unknown>accessory).updateCharging !== undefined ||
       (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
       (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined
     ) {
@@ -361,9 +361,9 @@ export class WebhookServer {
         else if ((<TriggerableSensor><unknown>accessory).triggerSensor !== undefined) {
           (<TriggerableSensor><unknown>accessory).triggerSensor(<boolean>value, accessoryId);
         }
-        else if ((<UpdatableChargingState><unknown>accessory).updateChargingState !== undefined) {
+        else if ((<UpdatableCharging><unknown>accessory).updateCharging !== undefined) {
           const chargingState: ChargingState = (<ChargingState>value);
-          (<UpdatableChargingState><unknown>accessory).updateChargingState(chargingState.charging, chargingState.charge, accessoryId);
+          (<UpdatableCharging><unknown>accessory).updateCharging(chargingState.charging, chargingState.charge, accessoryId);
         }
         else if ((<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined) {
           (<UpdatableObstruction><unknown>accessory).updateObstruction(<boolean>value, accessoryId);

@@ -9,6 +9,7 @@ import { Utils } from '../../utils/utils.js';
  */
 export class DoorbellConfiguration implements Validatable {
   volume!: number;
+  mute: boolean = false;
 
   private errorFields: string[] = [];
 

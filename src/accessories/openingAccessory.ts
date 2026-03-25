@@ -1,6 +1,8 @@
+/* eslint-disable brace-style */
+
 import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -12,12 +14,14 @@ import { Timer } from '../utils/timer.js';
  */
 export abstract class OpeningAccessory extends Accessory {
 
-  static readonly CLOSED: number = 0;   // 0%
-  static readonly OPEN: number = 100;   // 100%
+  static readonly CLOSED: number = 0;
+  static readonly OPEN: number = 100;
 
-  static readonly DECREASING: number = 0;   //	Characteristic.PositionState.DECREASING   -> CLOSING
-  static readonly INCREASING: number = 1;   //	Characteristic.PositionState.INCREASING   -> OPENING
-  static readonly STOPPED: number = 2;      //	Characteristic.PositionState.STOPPED      -> OPEN or CLOSED
+  // Because of how Homebridge works, these are not initialized until the constructor runs
+
+  static DECREASING: number;  // CharacteristicType.PositionState.DECREASING;
+  static INCREASING: number;  // CharacteristicType.PositionState.INCREASING;
+  static STOPPED: number;     // CharacteristicType.PositionState.STOPPED;
 
   private static readonly MIN_TIMEOUT_SECS: number = 1;
   private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
@@ -26,14 +30,9 @@ export abstract class OpeningAccessory extends Accessory {
 
   private transitionTimer: Timer;
   private transitionSteps: number = 0;
+  private transitionIntervalId: ReturnType<typeof setInterval> | undefined;
 
   private openingAccessoryConfiguration: OpenableAccessoryConfiguration;
-
-  protected states = {
-    CurrentPosition: OpeningAccessory.CLOSED, // %
-    TargetPosition: OpeningAccessory.CLOSED,  // %
-    PositionState: OpeningAccessory.STOPPED,
-  };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -42,11 +41,17 @@ export abstract class OpeningAccessory extends Accessory {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
+    this.setupStaticFields();
+
+    // Set service
+    const implService: WithUUID<typeof Service> = this.getOpeningAccessoryService();
+    this.service = this.accessory.getService(implService) || this.accessory.addService(implService as unknown as Service);
+
     // First configure the device based on the accessory details
     this.openingAccessoryConfiguration = this.getOpeningAccessoryConfiguration();
     this.defaultState = this.openingAccessoryConfiguration.defaultState === 'open' ? OpeningAccessory.OPEN : OpeningAccessory.CLOSED;
 
-    this.states.CurrentPosition = this.defaultState;
+    let currentPosition: number = this.defaultState;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -54,81 +59,90 @@ export abstract class OpeningAccessory extends Accessory {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.CurrentPosition = cachedState;
+        currentPosition = cachedState;
       }
     }
 
-    this.states.TargetPosition = this.states.CurrentPosition;
+    const targetPosition = currentPosition;
 
     const timerIsResettable: boolean = true;
     this.transitionTimer = new Timer(
-      this.accessoryConfiguration.accessoryName,
+      this.accessoryName,
       this.log,
       timerIsResettable,
       // No default timer duration
     );
 
-    // set accessory information
-    const service: WithUUID<typeof Service> = this.getOpeningAccessoryService();
-    this.service = this.accessory.getService(service) || this.accessory.addService(service as unknown as Service);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // Set accessory information
+    this.setValue(CharacteristicType.Name, this.accessoryName);
 
     // Update the initial state of the accessory
-    // eslint-disable-next-line max-len
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Window Covering Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (this.states.TargetPosition));
-    this.service.updateCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
+    this.log.debug(`[${this.accessoryName}] Setting Window Covering Current Position: ${OpeningAccessory.getStateName(currentPosition)}`);
+    this.updateCurrentPosition(currentPosition);
+    this.updateTargetPosition(targetPosition);
+    this.updatePositionState(OpeningAccessory.STOPPED);
 
     // register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
-      .onGet(this.getCurrentPosition.bind(this));
+    this.service.getCharacteristic(CharacteristicType.CurrentPosition)
+      .onGet(this.getCurrentPositionHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetPosition)
-      .onSet(this.setTargetPosition.bind(this))
-      .onGet(this.getTargetPosition.bind(this));
+    this.service.getCharacteristic(CharacteristicType.TargetPosition)
+      .onGet(this.getTargetPositionHandler.bind(this))
+      .onSet(this.setTargetPositionHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.PositionState)
-      .onGet(this.getPositionState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.PositionState)
+      .onGet(this.getPositionStateHandler.bind(this));
   }
 
-  // Handlers
+  // *** Handlers ***
 
-  async getCurrentPosition(): Promise<CharacteristicValue> {
+  // CurrentPosition
+
+  async getCurrentPositionHandler(): Promise<CharacteristicValue> {
     // If timer is running, then blinds are moving, so calculate the interim position
     if (this.transitionTimer.isTimerRunning()) {
       const runtimeMillis: number = this.transitionTimer.getRuntime() * 1000;
       const remainingSteps: number = Math.ceil(this.transitionTimer.getRemainingDurationMillis() / runtimeMillis * this.transitionSteps);
-      this.states.CurrentPosition = this.states.TargetPosition - remainingSteps;
+      this.updateCurrentPosition(this.getTargetPosition() - remainingSteps);
     }
-    const currentPosition = this.states.CurrentPosition;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Position: ${OpeningAccessory.getStateName(currentPosition)}`);
+    const CurrentPosition: number = this.getCurrentPosition();
+    this.log.debug(`[${this.accessoryName}] Getting Current Position: ${OpeningAccessory.getStateName(CurrentPosition)}`);
 
-    return currentPosition;
+    return CurrentPosition;
   }
 
-  async setTargetPosition(value: CharacteristicValue) {
-    this.states.TargetPosition = value as number;
+  // TargetPosition
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Position: ${OpeningAccessory.getStateName(this.states.TargetPosition)}`);
+  async getTargetPositionHandler(): Promise<CharacteristicValue> {
+    const TargetPosition: number = this.getTargetPosition();
+    this.log.debug(`[${this.accessoryName}] Getting Target Position: ${OpeningAccessory.getStateName(TargetPosition)}`);
 
-    this.states.PositionState = (this.states.TargetPosition > this.states.CurrentPosition) ? OpeningAccessory.INCREASING : OpeningAccessory.DECREASING;
-    this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
+    return TargetPosition;
+  }
+
+  async setTargetPositionHandler(value: CharacteristicValue) {
+    const TargetPosition: number = value as number;
+    this.updateTargetPosition(TargetPosition);
+    this.log.info(`[${this.accessoryName}] Setting Target Position: ${OpeningAccessory.getStateName(TargetPosition)}`);
+
+    const CurrentPosition: number = this.getCurrentPosition();
+
+    const PositionState: number = (TargetPosition > CurrentPosition) ? OpeningAccessory.INCREASING : OpeningAccessory.DECREASING;
+    this.updatePositionState(PositionState);
+    this.log.info(`[${this.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(PositionState)}`);
 
     const transitionDuration = this.openingAccessoryConfiguration.transitionDuration;
     const transitionDelay: number = (transitionDuration ? transitionDuration : OpeningAccessory.DEFAULT_TIMEOUT_SECS);
 
-    this.transitionSteps = this.states.TargetPosition - this.states.CurrentPosition;
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Transition Steps: ${this.transitionSteps}`);
+    this.transitionSteps = TargetPosition - CurrentPosition;
+    this.log.debug(`[${this.accessoryName}] Transition Steps: ${this.transitionSteps}`);
     const proportionalTransitionDelay: number = Math.max(
       // Round up to the nearest second
       Math.ceil(transitionDelay / 100 * Math.abs(this.transitionSteps)),
       OpeningAccessory.MIN_TIMEOUT_SECS);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
+    this.log.debug(`[${this.accessoryName}] Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
 
     const updateIntervalMillis = 100;
 
@@ -137,39 +151,51 @@ export abstract class OpeningAccessory extends Accessory {
 
     this.transitionTimer.start(
       () => {
-        this.states.PositionState = OpeningAccessory.STOPPED;
-        this.service!.setCharacteristic(this.platform.Characteristic.PositionState, (this.states.PositionState));
-        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(this.states.PositionState)}`);
+        const CurrentPosition: number = this.getTargetPosition();
+        this.updateCurrentPosition(CurrentPosition);
+        this.log.info(`[${this.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(CurrentPosition)}`);
 
-        this.states.CurrentPosition = this.states.TargetPosition;
-        this.service!.setCharacteristic(this.platform.Characteristic.CurrentPosition, (this.states.CurrentPosition));
+        const PositionState: number = OpeningAccessory.STOPPED;
+        this.updatePositionState(PositionState);
+        this.log.info(`[${this.accessoryName}] Setting Position State: ${OpeningAccessory.getPositionName(PositionState)}`);
 
         this.transitionSteps = 0;
 
         this.storeState();
-
-        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Position: ${OpeningAccessory.getStateName(this.states.CurrentPosition)}`);
       },
       proportionalTransitionDelay,
       updateIntervalMillis,
     );
+
+    const runtime: number = this.transitionTimer.getRuntime();
+    const direction: number = (TargetPosition > CurrentPosition) ? OpeningAccessory.INCREASING : OpeningAccessory.DECREASING;
+
+    clearInterval(this.transitionIntervalId);
+
+    this.transitionIntervalId = setInterval(() => {
+      if (this.transitionTimer.getRemainingDurationMillis() === 0) {
+        clearInterval(this.transitionIntervalId);
+      }
+      else {
+        const remainingDuration: number = this.transitionTimer.getRemainingDuration();
+        const complete: number = (direction === OpeningAccessory.INCREASING) ? runtime - remainingDuration : remainingDuration;
+        const transitionCompletePct: number = Math.trunc((complete / runtime) * 100);
+        this.updateCurrentPosition(transitionCompletePct);
+        this.log.debug(`[${this.accessoryName}] Setting Current Position: ${transitionCompletePct}% - ${complete} of ${runtime}`);
+      }
+    }, 1000);
   }
 
-  async getTargetPosition(): Promise<CharacteristicValue> {
-    const targetPosition = this.states.TargetPosition;
+  // PositionState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Position: ${OpeningAccessory.getStateName(targetPosition)}`);
+  async getPositionStateHandler(): Promise<CharacteristicValue> {
+    const PositionState: number = this.getPositionState();
+    this.log.debug(`[${this.accessoryName}] Getting Position State: ${OpeningAccessory.getPositionName(PositionState)}`);
 
-    return targetPosition;
+    return PositionState;
   }
 
-  async getPositionState(): Promise<CharacteristicValue> {
-    const positionState = this.states.PositionState;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Position State: ${OpeningAccessory.getPositionName(positionState)}`);
-
-    return positionState;
-  }
+  // *** Handlers ***
 
   protected abstract getOpeningAccessoryConfiguration(): OpenableAccessoryConfiguration;
 
@@ -177,7 +203,7 @@ export abstract class OpeningAccessory extends Accessory {
 
   protected getJsonState(): string {
     const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.CurrentPosition,
+      [this.stateStorageKey]: this.getValue(CharacteristicType.CurrentPosition) as number,
     });
     return json;
   }
@@ -211,5 +237,49 @@ export abstract class OpeningAccessory extends Accessory {
     }
 
     return stateName;
+  }
+
+  // Convenience methods
+
+  protected setupStaticFields() {
+    OpeningAccessory.DECREASING = CharacteristicType.PositionState.DECREASING;
+    OpeningAccessory.INCREASING = CharacteristicType.PositionState.INCREASING;
+    OpeningAccessory.STOPPED    = CharacteristicType.PositionState.STOPPED;
+  }
+
+  // CurrentPosition
+
+  private getCurrentPosition(): number {
+    return this.getValue(CharacteristicType.CurrentPosition) as number;
+  }
+
+  private updateCurrentPosition(
+    value: number,
+  ) {
+    this.updateValue(CharacteristicType.CurrentPosition, value);
+  }
+
+  // TargetPosition
+
+  private getTargetPosition(): number {
+    return this.getValue(CharacteristicType.TargetPosition) as number;
+  }
+
+  private updateTargetPosition(
+    value: number,
+  ) {
+    this.updateValue(CharacteristicType.TargetPosition, value);
+  }
+
+  // PositionState
+
+  private getPositionState(): number {
+    return this.getValue(CharacteristicType.PositionState) as number;
+  }
+
+  private updatePositionState(
+    value: number,
+  ) {
+    this.updateValue(CharacteristicType.PositionState, value);
   }
 }

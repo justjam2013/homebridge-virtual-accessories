@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { PlatformAccessory, Service } from 'homebridge';
-import { Categories } from 'homebridge';
+import { Categories, Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
 import { VirtualLogger } from '../utils/virtualLogger.js';
@@ -14,7 +13,7 @@ import fs from 'fs';
  * Abstract Accessory
  */
 export abstract class Accessory {
-  service?: Service;
+  service!: Service;
 
   readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
@@ -23,8 +22,7 @@ export abstract class Accessory {
   readonly log: VirtualLogger;
 
   protected accessoryName: string = '';
-
-  protected defaultState;
+  protected defaultState!: number | boolean;
 
   protected storagePath: string;
 
@@ -52,13 +50,13 @@ export abstract class Accessory {
     }
 
     // set accessory information
-    this.accessoryInformationService = this.accessory.getService(this.platform.Service.AccessoryInformation);
+    this.accessoryInformationService = this.accessory.getService(ServiceType.AccessoryInformation);
     this.accessoryInformationService!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
-      .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName)
-      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.accessory.context.firmwareVersion);
+      .setCharacteristic(CharacteristicType.Manufacturer, 'Virtual Accessories for Homebridge')
+      .setCharacteristic(CharacteristicType.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
+      .setCharacteristic(CharacteristicType.SerialNumber, this.accessory.UUID)
+      .setCharacteristic(CharacteristicType.Name, this.accessoryName)
+      .setCharacteristic(CharacteristicType.FirmwareRevision, this.accessory.context.firmwareVersion);
   }
 
   isExternalAccessory(): boolean {
@@ -66,7 +64,7 @@ export abstract class Accessory {
   }
 
   updateConfiguredName() {
-    const configuredName = this.accessoryInformationService!.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+    const configuredName = this.accessoryInformationService!.getCharacteristic(CharacteristicType.ConfiguredName);
     if (configuredName !== undefined) {
       this.accessoryInformationService!.removeCharacteristic(configuredName);
     }
@@ -134,4 +132,26 @@ export abstract class Accessory {
   protected abstract getAccessoryTypeName(): string;
 
   protected abstract getJsonState(): string;
+
+  // Convenience methods
+
+  protected getValue(
+    characteristic: WithUUID<new () => Characteristic>,
+  ): CharacteristicValue {
+    return this.service.getCharacteristic(characteristic).value as CharacteristicValue;
+  }
+
+  protected setValue(
+    characteristic: WithUUID<new () => Characteristic>,
+    value: CharacteristicValue,
+  ) {
+    this.service.setCharacteristic(characteristic, value);
+  }
+
+  protected updateValue(
+    characteristic: WithUUID<new () => Characteristic>,
+    value: CharacteristicValue,
+  ) {
+    this.service.updateCharacteristic(characteristic, value);
+  }
 }

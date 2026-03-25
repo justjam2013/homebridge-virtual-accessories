@@ -1,6 +1,6 @@
 import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { OpeningAccessory } from './openingAccessory.js';
 
@@ -26,7 +26,7 @@ export class Door extends OpeningAccessory {
   }
 
   protected getOpeningAccessoryService(): WithUUID<typeof Service> {
-    return this.platform.Service.Door;
+    return ServiceType.Door;
   }
 
   protected getAccessoryTypeName(): string {
