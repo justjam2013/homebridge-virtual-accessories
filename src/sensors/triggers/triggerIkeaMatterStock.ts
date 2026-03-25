@@ -153,6 +153,8 @@ export class IkeaMatterStockTrigger extends Trigger {
   ): Promise<string | undefined> {
     const productCodes: string[] = [itemCode, itemCode.replaceAll('.', '')];
 
+    let validProductNumber: boolean = true;
+
     for (const productCode of productCodes) {
       const request = new Request(trigger.easyrebuildURL(countryCode, productCode), { method: 'GET' });
       trigger.log.debug(`[${accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
@@ -176,6 +178,7 @@ export class IkeaMatterStockTrigger extends Trigger {
         continue;
       }
       else if (html.includes('is not a valid product number')) {
+        validProductNumber = false;
         // Try the next format
         continue;
       }
@@ -183,7 +186,10 @@ export class IkeaMatterStockTrigger extends Trigger {
       return html;
     }
 
-    trigger.log.error(`[${accessoryName}] Not a valid product number: "${productCodes[0]}" / "${productCodes[1]}"`);
+    if (validProductNumber !== true) {
+      const itemName = trigger.sensorConfig.ikeaMatterStockTrigger.itemName;
+      trigger.log.error(`[${accessoryName}] Not a valid product number for ${itemName}: "${productCodes[0]}" / "${productCodes[1]}"`);
+    }
 
     return undefined;
   }
