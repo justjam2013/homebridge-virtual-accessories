@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import { Utils } from './utils.js';
+import { Utils, shutdownSignal } from './utils.js';
 import { VirtualLogger } from './virtualLogger.js';
 
 import { ZonedDateTime } from '@js-joda/core';
@@ -90,11 +90,17 @@ export class Timer {
     this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
     this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
 
+    if (this.updateIntervalMillis < 0) {
+      this.log.error(`[${this.accessoryName} Timer] updateIntervalMillis is less than 0: ${this.updateIntervalMillis} seconds`);
+    }
+
     if (this.runtime > 0) {
       this.remainingDurationMillis = this.runtime * 1000;
       this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime} seconds`);
 
       this.id = setInterval(() => {
+        if (shutdownSignal.isShuttingDown) {return;}
+
         this.remainingDurationMillis -= this.updateIntervalMillis;
 
         // We don't want this flooding the debug logs
@@ -106,7 +112,8 @@ export class Timer {
           this.stop();
           callback();
         }
-      }, this.updateIntervalMillis);
+      }, this.updateIntervalMillis)
+        .unref();
 
       this.startTime = Utils.now();
       this.isRunning = true;

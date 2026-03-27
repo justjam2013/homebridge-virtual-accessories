@@ -1,10 +1,9 @@
 /* eslint-disable brace-style */
 
-import { AccessoryConfiguration } from '../../configuration/configurationAccessory.js';
 import { BinarySensor } from '../binarySensor.js';
 import { IkeaMatterStockTriggerConfiguration } from '../../configuration/triggers/configurationIkeaMatterStockTrigger.js';
 import { Trigger } from './trigger.js';
-import { Utils } from '../../utils/utils.js';
+import { shutdownSignal, Utils } from '../../utils/utils.js';
 
 import * as cheerio from 'cheerio';
 
@@ -27,7 +26,7 @@ export class IkeaMatterStockTrigger extends Trigger {
     const triggerConfig: IkeaMatterStockTriggerConfiguration = this.sensorConfig.ikeaMatterStockTrigger;
 
     if (triggerConfig.isDisabled) {
-      this.log.info(`[${this.sensorConfig.accessoryName}] Ikea Matter Stock trigger is disabled`);
+      this.log.info(`[${this.accessoryName}] Ikea Matter Stock trigger is disabled`);
       return;
     }
 
@@ -38,7 +37,11 @@ export class IkeaMatterStockTrigger extends Trigger {
     trigger: IkeaMatterStockTrigger,
     triggerConfig: IkeaMatterStockTriggerConfiguration,
   ) {
-    await Utils.delay(10000);  // 10 second delay
+    await Utils.delay(
+      10000,
+      trigger.accessoryName,
+      trigger.log,
+    );  // 10 second delay
     
     trigger.checkStockAvailability(trigger, triggerConfig, true);
 
@@ -49,7 +52,8 @@ export class IkeaMatterStockTrigger extends Trigger {
       trigger,
       triggerConfig,
       false,
-    );
+    )
+      .unref();
   }
 
   /**
@@ -60,32 +64,32 @@ export class IkeaMatterStockTrigger extends Trigger {
     triggerConfig: IkeaMatterStockTriggerConfiguration,
     firstRun: boolean,
   ) {
-    const sensorConfig: AccessoryConfiguration = trigger.sensor.accessoryConfiguration;
-
+    if (shutdownSignal.isShuttingDown) {return;}
+    
     const countryCode: string | undefined = trigger.getCountryCode(triggerConfig.country);
     if (countryCode === undefined) {
-      trigger.log.error(`[${sensorConfig.accessoryName}] Country not supported: ${triggerConfig.country}`);
+      trigger.log.error(`[${trigger.accessoryName}] Country not supported: ${triggerConfig.country}`);
       return;
     }
-    trigger.log.debug(`[${sensorConfig.accessoryName}] Country code: ${triggerConfig.country} - ${countryCode}`);
+    trigger.log.debug(`[${trigger.accessoryName}] Country code: ${triggerConfig.country} - ${countryCode}`);
 
     const itemCode: string | undefined = trigger.getItemCode(countryCode, triggerConfig.itemName);
     if (itemCode === undefined) {
-      trigger.log.error(`[${sensorConfig.accessoryName}] Item not supported: ${triggerConfig.itemName}`);
+      trigger.log.error(`[${trigger.accessoryName}] Item not supported: ${triggerConfig.itemName}`);
       return;
     }
     else if (itemCode === '') {
-      trigger.log.error(`[${sensorConfig.accessoryName}] Unknown item code for: ${triggerConfig.itemName} in ${triggerConfig.country}`);
+      trigger.log.error(`[${trigger.accessoryName}] Unknown item code for: ${triggerConfig.itemName} in ${triggerConfig.country}`);
       return;
     }
-    trigger.log.debug(`[${sensorConfig.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
+    trigger.log.debug(`[${trigger.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
 
-    const html: string | undefined = await trigger.getHtml(countryCode, itemCode, trigger, sensorConfig.accessoryName);
+    const html: string | undefined = await trigger.getHtml(countryCode, itemCode, trigger);
     if (html === undefined) {
       return;
     }
 
-    trigger.log.debug(`[${sensorConfig.accessoryName}] Retrieved Ikea matter stock data`);
+    trigger.log.debug(`[${trigger.accessoryName}] Retrieved Ikea matter stock data`);
 
     const dom = cheerio.load(html);
 
@@ -108,31 +112,31 @@ export class IkeaMatterStockTrigger extends Trigger {
 
         const countNum: number = Number.parseInt(count);
         if (Number.isNaN(countNum)) {
-          trigger.log.error(`[${sensorConfig.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
+          trigger.log.error(`[${trigger.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
         }
         else if (countNum > 0) {
           if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true || countNum !== trigger.count) {
             // eslint-disable-next-line max-len
-            trigger.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
 
             trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
             trigger.count = countNum;
           }
           else {
             // eslint-disable-next-line max-len
-            trigger.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
           }
         }
         else {
           if (trigger.sensor.getSensorState() !== BinarySensor.NORMAL || firstRun === true) {
             // eslint-disable-next-line max-len
-            trigger.log.info(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
 
             trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
           }
           else {
             // eslint-disable-next-line max-len
-            trigger.log.debug(`[${sensorConfig.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
           }
         }
 
@@ -141,7 +145,7 @@ export class IkeaMatterStockTrigger extends Trigger {
     });
 
     if (foundLocation === false) {
-      trigger.log.info(`[${sensorConfig.accessoryName}] Location ${triggerConfig.storeLocation} not found in ${triggerConfig.country}`);
+      trigger.log.info(`[${trigger.accessoryName}] Location ${triggerConfig.storeLocation} not found in ${triggerConfig.country}`);
     }
   }
 
@@ -149,7 +153,6 @@ export class IkeaMatterStockTrigger extends Trigger {
     countryCode: string,
     itemCode: string,
     trigger: IkeaMatterStockTrigger,
-    accessoryName: string,
   ): Promise<string | undefined> {
     const productCodes: string[] = [itemCode, itemCode.replaceAll('.', '')];
 
@@ -157,24 +160,24 @@ export class IkeaMatterStockTrigger extends Trigger {
 
     for (const productCode of productCodes) {
       const request = new Request(trigger.easyrebuildURL(countryCode, productCode), { method: 'GET' });
-      trigger.log.debug(`[${accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
+      trigger.log.debug(`[${trigger.accessoryName}] Requesting Ikea matter stock data from: ${(request.url)}`);
 
       let htmlFetchResponse: globalThis.Response | undefined;
       try {
         htmlFetchResponse = await fetch(request);
       } catch (error) {
-        trigger.log.error(`[${accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
+        trigger.log.error(`[${trigger.accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
         continue;
       }
 
       if (htmlFetchResponse === undefined || !htmlFetchResponse.ok) {
-        trigger.log.error(`[${accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
+        trigger.log.error(`[${trigger.accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
         continue;
       }
 
       const html: string | undefined = await htmlFetchResponse!.text();
       if (html === undefined) {
-        trigger.log.error(`[${accessoryName}] Response did not return html`);
+        trigger.log.error(`[${trigger.accessoryName}] Response did not return html`);
         continue;
       }
       else if (html.includes('is not a valid product number')) {
@@ -188,7 +191,7 @@ export class IkeaMatterStockTrigger extends Trigger {
 
     if (validProductNumber !== true) {
       const itemName = trigger.sensorConfig.ikeaMatterStockTrigger.itemName;
-      trigger.log.error(`[${accessoryName}] Not a valid product number for ${itemName}: "${productCodes[0]}" / "${productCodes[1]}"`);
+      trigger.log.error(`[${trigger.accessoryName}] Not a valid product number for ${itemName}: "${productCodes[0]}" / "${productCodes[1]}"`);
     }
 
     return undefined;

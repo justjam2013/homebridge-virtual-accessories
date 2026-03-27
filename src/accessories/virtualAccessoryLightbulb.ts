@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable brace-style */
  
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
@@ -117,29 +118,41 @@ export class Lightbulb extends Accessory {
       .onGet(this.getOn.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(Utils.debounce(this.setBrightness.bind(this)))
+      .onSet(this.debounce(this.setBrightness.bind(this)))
       .onGet(this.getBrightness.bind(this));
 
     switch(this.type) {
     case Lightbulb.AMBIANCE:
       // register handlers for the ColorTemperature Characteristic
       this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature)
-        .onSet(Utils.debounce(this.setColorTemperature.bind(this)))
+        .onSet(this.debounce(this.setColorTemperature.bind(this)))
         .onGet(this.getColorTemperature.bind(this));
       break;
     case Lightbulb.COLOR:
       this.service.getCharacteristic(this.platform.Characteristic.Hue)
-        .onSet(Utils.debounce(this.setHue.bind(this)))
+        .onSet(this.debounce(this.setHue.bind(this)))
         .onGet(this.getHue.bind(this));
 
       this.service.getCharacteristic(this.platform.Characteristic.Saturation)
-        .onSet(Utils.debounce(this.setSaturation.bind(this)))
+        .onSet(this.debounce(this.setSaturation.bind(this)))
         .onGet(this.getSaturation.bind(this));
       break;
     case Lightbulb.WHITE:
       // No additional characteristics
       break;
     }
+  }
+
+  private debounce<T extends (...args: any[]) => void>(
+    func: T,
+  ): ((...args: any[]) => void) {
+    const debounce = Utils.debounce(
+      func,
+      undefined,
+      this.accessoryName,
+      this.log,
+    );
+    return debounce!;
   }
 
   // Handlers
