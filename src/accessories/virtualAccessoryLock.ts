@@ -350,7 +350,8 @@ export class Lock extends Accessory {
         this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
 
         this.states.LockLastKnownAction = Lock.SECURED_BY_AUTO_SECURE_TIMEOUT;
-      }, securityTimeoutMillis);
+      }, securityTimeoutMillis)
+        .unref();
  
       const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
       this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);

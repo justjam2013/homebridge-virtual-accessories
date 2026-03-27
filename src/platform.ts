@@ -12,6 +12,8 @@ import { VirtualLogger, VirtualLogLevel } from './utils/virtualLogger.js';
 import { WebhookServerConfiguration } from './configuration/configurationWebhookServer.js';
 import { WebhookServer } from './webhookServer.js';
 
+import { shutdownSignal } from './utils/utils.js';
+
 import * as path from 'path';
 import fs from 'fs';
 
@@ -101,6 +103,8 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.api.on(APIEvent.SHUTDOWN, () => {
       log.debug('Executing shutdown callback');
+
+      shutdownSignal.isShuttingDown = true;
       this.sensorUpdateServer?.stop();
     });
   }

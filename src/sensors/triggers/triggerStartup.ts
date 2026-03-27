@@ -23,12 +23,20 @@ export class StartupTrigger extends Trigger {
   async start(
     resetDelayMillis: number,
   ) {
-    await Utils.delay(3000);  // 3 second delay
+    await Utils.delay(
+      3000,
+      this.accessoryName,
+      this.log,
+    );  // 3 second delay
 
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Triggering sensor`);
+    this.log.debug(`[${this.accessoryName}] Triggering sensor`);
     this.sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
-    await Utils.delay(resetDelayMillis);
-    this.log.debug(`[${this.sensorConfig.accessoryName}] Resetting sensor`);
+    await Utils.delay(
+      resetDelayMillis,
+      this.accessoryName,
+      this.log,
+    );
+    this.log.debug(`[${this.accessoryName}] Resetting sensor`);
     this.sensor.triggerSensorState(BinarySensor.NORMAL, this);
   }
 }
