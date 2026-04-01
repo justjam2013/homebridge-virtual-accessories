@@ -128,8 +128,9 @@ export class HeaterType {
   static Auto: string = 'auto';
   static Cooler: string = 'cooler';
   static Heater: string = 'heater';
+  static Sauna: string = 'sauna';
 
-  static Types: string[] = [ HeaterType.Auto, HeaterType.Cooler, HeaterType.Heater ];
+  static Types: string[] = [ HeaterType.Auto, HeaterType.Cooler, HeaterType.Heater, HeaterType.Sauna ];
 }
 
 /**
@@ -248,17 +249,17 @@ export class ColorTemperature {
  */
 export class ThresholdTemperature {
 
-  static CoolingThresholdCelsiusMin: number = 10;
-  static CoolingThresholdCelsiusMax: number = 35;
+  // HomeKit units: ºC
 
-  static CoolingThresholdFahrenheitMin: number = 50;
-  static CoolingThresholdFahrenheitMax: number = 95;
+  static CoolingThresholdMin: number = 10;
+  static CoolingThresholdMax: number = 35;
 
-  static HeatingThresholdCelsiusMin: number = 0;
-  static HeatingThresholdCelsiusMax: number = 25;
+  static HeatingThresholdMin: number = 0;
+  static HeatingThresholdMax: number = 25;
 
-  static HeatingThresholdFahrenheitMin: number = 32;
-  static HeatingThresholdFahrenheitMax: number = 77;
+  // Sauna thresholds
+  static SaunaHeatingThresholdMin: number = 15;
+  static SaunaHeatingThresholdMax: number = 90;
 }
 
 /**
