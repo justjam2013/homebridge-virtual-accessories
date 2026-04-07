@@ -9,7 +9,7 @@ import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
-import { HeaterType, TemperatureUnit } from '../configuration/schema.js';
+import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../configuration/schema.js';
 
 /**
  * HeaterCooler - Accessory implementation
@@ -65,11 +65,11 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
     this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
     this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
-    this.states.HeatingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getHeatingThreshold() as number);
-    this.states.CoolingThreshold = this.toCelsius(this.accessoryConfiguration.heaterCooler.getCoolingThreshold() as number);
+    this.states.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold as number;
+    this.states.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold as number;
 
-    // set to 22ºC or 71ºF
-    this.states.CurrentTemperature = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? 22 : this.toCelsius(71);
+    // set to 22ºC
+    this.states.CurrentTemperature = 22;
 
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
@@ -444,19 +444,25 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       TargetHeaterCoolerState.COOL,
     ]);
 
-    if (this.deviceType === HeaterType.Heater) {
+    // HEAT: On/off heater
+    // COOL: On/off cooler
+    // AUTO: Uses threshold values to heat/cool
+
+    if ((this.deviceType === HeaterType.Heater) || (this.deviceType === HeaterType.Sauna)) {
       currentStateValues.delete(CurrentHeaterCoolerState.COOLING);
       targetStateValues.delete(TargetHeaterCoolerState.COOL);
 
-      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
+      // Remove this only if we want manual operation only
+      //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater ${this.deviceType === HeaterType.Sauna ? '(sauna)' : ''}`);
     }
     else if (this.deviceType === HeaterType.Cooler) {
       currentStateValues.delete(CurrentHeaterCoolerState.HEATING);
       targetStateValues.delete(TargetHeaterCoolerState.HEAT);
 
-      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
+      // Remove this only if we want manual operation only
+      //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Cooler`);
     }
@@ -484,6 +490,15 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHeaterCoolerState).props)}`);
     }
+
+    if (this.deviceType === HeaterType.Sauna) {
+      service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
+        .setProps({
+          minValue: ThresholdTemperature.SaunaHeatingThresholdMin,
+          maxValue: ThresholdTemperature.SaunaHeatingThresholdMax,
+        });
+
+    }
   }
 
   private getCurrentStateLabels(values: Set<number>): string[] {
@@ -504,12 +519,6 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     });
 
     return labels;
-  }
-
-  private toCelsius(temperature: number): number {
-    const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
-
-    return Math.round(temperatureCelsius * 10) / 10;
   }
 
   private displayTemperature(temperature: number): number {
@@ -552,5 +561,11 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       this.states.CurrentTemperature = this.toCelsius(value);
       this.setDeviceOperationalCondition();
     }
+  }
+
+  private toCelsius(temperature: number): number {
+    const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
+
+    return Math.round(temperatureCelsius * 10) / 10;
   }
 }

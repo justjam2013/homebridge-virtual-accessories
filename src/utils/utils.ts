@@ -161,7 +161,7 @@ export class Utils {
     };
   }
 
-  static required(field: number | string | string[]): boolean {
+  static required(field: number | string | string[] | undefined): boolean {
     return (field !== undefined);
   }
 

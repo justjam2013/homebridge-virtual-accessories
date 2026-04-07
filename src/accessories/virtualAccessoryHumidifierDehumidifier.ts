@@ -353,11 +353,16 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       TargetHumidifierDehumidifierState.DEHUMIDIFIER,
     ]);
 
+    // HUMIDIFIER: On/off humidifier
+    // DEHUMIDIFIER: On/off dehumidifier
+    // HUMIDIFIER_OR_DEHUMIDIFIER: Uses threshold values to humidify/dehumidify -> AUTO
+
     if (this.deviceType === HumidifierType.Humidifier) {
       currentStateValues.delete(CurrentHumidifierDehumidifierState.DEHUMIDIFYING);
       targetStateValues.delete(TargetHumidifierDehumidifierState.DEHUMIDIFIER);
 
-      targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
+      // Remove this only if we want manual operation only
+      // targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier`);
     }
@@ -365,7 +370,8 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       currentStateValues.delete(CurrentHumidifierDehumidifierState.HUMIDIFYING);
       targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER);
 
-      targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
+      // Remove this only if we want manual operation only
+      // targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Dehumidifier`);
     }
