@@ -444,19 +444,25 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       TargetHeaterCoolerState.COOL,
     ]);
 
+    // HEAT: On/off heater
+    // COOL: On/off cooler
+    // AUTO: Uses threshold values to heat/cool
+
     if ((this.deviceType === HeaterType.Heater) || (this.deviceType === HeaterType.Sauna)) {
       currentStateValues.delete(CurrentHeaterCoolerState.COOLING);
       targetStateValues.delete(TargetHeaterCoolerState.COOL);
 
-      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
+      // Remove this only if we want manual operation only
+      //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater`);
+      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater ${this.deviceType === HeaterType.Sauna ? '(sauna)' : ''}`);
     }
     else if (this.deviceType === HeaterType.Cooler) {
       currentStateValues.delete(CurrentHeaterCoolerState.HEATING);
       targetStateValues.delete(TargetHeaterCoolerState.HEAT);
 
-      targetStateValues.delete(TargetHeaterCoolerState.AUTO);
+      // Remove this only if we want manual operation only
+      //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
       this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Cooler`);
     }

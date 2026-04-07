@@ -311,7 +311,10 @@
                 },
                 "hasFan": {
                   "title": "Has Fan",
-                  "type": "boolean"
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
                 },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
@@ -363,7 +366,7 @@
                 },
                 "saunaHeatingThresholdCelsius": {
                   "title": "Sauna Heating Threshold ºC *",
-                  "description": "Temperature level below which the sauna heater turns on (16ºC - 66ºC)",
+                  "description": "Temperature level below which the sauna heater turns on (15ºC - 90ºC)",
                   "type": "integer",
                   "minimum": 15,
                   "maximum": 90,
@@ -373,7 +376,7 @@
                 },
                 "saunaHeatingThresholdFahrenheit": {
                   "title": "Sauna Heating Threshold ºF *",
-                  "description": "Temperature level below which the sauna heater turns on (61ºF - 151ºF)",
+                  "description": "Temperature level below which the sauna heater turns on (59ºF - 194ºF)",
                   "type": "integer",
                   "minimum": 59,
                   "maximum": 194,
