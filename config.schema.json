@@ -305,12 +305,16 @@
                   "oneOf": [
                     { "title": "Heater", "enum": ["heater"] },
                     { "title": "Cooler (AC)", "enum": ["cooler"] },
-                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] }
+                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] },
+                    { "title": "Sauna", "enum": ["sauna"] }
                   ]
                 },
                 "hasFan": {
                   "title": "Has Fan",
-                  "type": "boolean"
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
                 },
                 "temperatureDisplayUnits": {
                   "title": "Temperature Display Units *",
@@ -358,6 +362,26 @@
                   "maximum": 95,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "saunaHeatingThresholdCelsius": {
+                  "title": "Sauna Heating Threshold ºC *",
+                  "description": "Temperature level below which the sauna heater turns on (15ºC - 90ºC)",
+                  "type": "integer",
+                  "minimum": 15,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['sauna'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "saunaHeatingThresholdFahrenheit": {
+                  "title": "Sauna Heating Threshold ºF *",
+                  "description": "Temperature level below which the sauna heater turns on (59ºF - 194ºF)",
+                  "type": "integer",
+                  "minimum": 59,
+                  "maximum": 194,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['sauna'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "": {

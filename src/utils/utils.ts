@@ -118,7 +118,8 @@ export class Utils {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         func.apply(context, args);
-      }, delayMillis);
+      }, delayMillis)
+        .unref();
     };
   }
 
@@ -132,7 +133,8 @@ export class Utils {
       return;
     }
     return new Promise(resolve =>
-      setTimeout(resolve, millis).unref(),
+      setTimeout(resolve, millis)
+        .unref(),
     );
   }
 
@@ -161,7 +163,7 @@ export class Utils {
     };
   }
 
-  static required(field: number | string | string[]): boolean {
+  static required(field: number | string | string[] | undefined): boolean {
     return (field !== undefined);
   }
 

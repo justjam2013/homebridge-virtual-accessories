@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable brace-style */
 /* eslint-disable curly */
 
@@ -18,6 +19,13 @@ export class HeaterCoolerConfiguration implements Validatable {
   heatingThresholdFahrenheit!: number;
   coolingThresholdFahrenheit!: number;
 
+  saunaHeatingThresholdCelsius!: number;
+  saunaHeatingThresholdFahrenheit!: number;
+
+  // HomeKit units: ºC
+  heatingThreshold: number | undefined;
+  coolingThreshold: number | undefined;
+
   private errorFields: string[] = [];
 
   readonly fieldNames = Utils.proxiedPropertiesOf(this);
@@ -33,8 +41,8 @@ export class HeaterCoolerConfiguration implements Validatable {
       TemperatureUnit.Units.includes(this.temperatureDisplayUnits)
     );
 
-    const heatingThreshold: number | undefined = this.getHeatingThreshold();
-    const coolingThreshold: number | undefined = this.getCoolingThreshold();
+    this.heatingThreshold = this.getHeatingThreshold();
+    this.coolingThreshold = this.getCoolingThreshold();
 
     const isValidHeatingThreshold: boolean = (
       this.isValidHeatingThreshold()
@@ -45,8 +53,8 @@ export class HeaterCoolerConfiguration implements Validatable {
     );
 
     const isValidThresholdWindow: boolean = (
-      (heatingThreshold !== undefined) && (coolingThreshold !== undefined) ?
-        (coolingThreshold > heatingThreshold) :
+      (this.heatingThreshold !== undefined) && (this.coolingThreshold !== undefined) ?
+        (this.coolingThreshold > this.heatingThreshold) :
         true
     );
 
@@ -71,20 +79,20 @@ export class HeaterCoolerConfiguration implements Validatable {
     ];
   }
 
-  getHeatingThreshold(): number | undefined {
+  private getHeatingThreshold(): number | undefined {
     let heatingThreshold: number | undefined = undefined;
 
     if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
-      heatingThreshold = this.heatingThresholdCelsius;
+      heatingThreshold = (this.type === HeaterType.Sauna) ? this.saunaHeatingThresholdCelsius : this.heatingThresholdCelsius;
     }
     else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
-      heatingThreshold = this.heatingThresholdFahrenheit;
+      heatingThreshold = (this.type === HeaterType.Sauna) ? this.saunaHeatingThresholdFahrenheit : this.heatingThresholdFahrenheit;
     }
 
-    return heatingThreshold;
+    return this.toCelsius(heatingThreshold);
   }
 
-  getCoolingThreshold(): number | undefined {
+  private getCoolingThreshold(): number | undefined {
     let coolingThreshold: number | undefined = undefined;
 
     if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
@@ -94,27 +102,24 @@ export class HeaterCoolerConfiguration implements Validatable {
       coolingThreshold = this.coolingThresholdFahrenheit;
     }
 
-    return coolingThreshold;
+    return this.toCelsius(coolingThreshold);
   }
 
   private isValidHeatingThreshold(): boolean {
     let isValidHeatingThreshold = false;
 
-    // If it's a cooler onlu, then no heating threshold is valid
+    // If it's a cooler only, then no heating threshold is valid
     if (this.type === HeaterType.Cooler) {
-      isValidHeatingThreshold = true;
+      isValidHeatingThreshold = this.heatingThreshold === undefined;
     }
-    else if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+    else {
+      const HeatingThresholdMin: number = (this.type === HeaterType.Sauna) ? ThresholdTemperature.SaunaHeatingThresholdMin : ThresholdTemperature.HeatingThresholdMin;
+      const HeatingThresholdMax: number = (this.type === HeaterType.Sauna) ? ThresholdTemperature.SaunaHeatingThresholdMax : ThresholdTemperature.HeatingThresholdMax;
+
       isValidHeatingThreshold =
-        Utils.required(this.heatingThresholdCelsius) &&
-        (this.heatingThresholdCelsius >= ThresholdTemperature.HeatingThresholdCelsiusMin &&
-         this.heatingThresholdCelsius <= ThresholdTemperature.HeatingThresholdCelsiusMax);
-    }
-    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
-      isValidHeatingThreshold =
-        Utils.required(this.heatingThresholdFahrenheit) &&
-        (this.heatingThresholdFahrenheit >= ThresholdTemperature.HeatingThresholdFahrenheitMin &&
-         this.heatingThresholdFahrenheit <= ThresholdTemperature.HeatingThresholdFahrenheitMax);
+        Utils.required(this.heatingThreshold) &&
+        (this.heatingThreshold! >= HeatingThresholdMin &&
+         this.heatingThreshold! <= HeatingThresholdMax);
     }
 
     return isValidHeatingThreshold;
@@ -123,24 +128,30 @@ export class HeaterCoolerConfiguration implements Validatable {
   private isValidCoolingThreshold(): boolean {
     let isValidCoolingThreshold = false;
 
-    // If it's a heater onlu, then no cooling threshold is valid
-    if (this.type === HeaterType.Heater) {
-      isValidCoolingThreshold = true;
+    // If it's a heater only, then no cooling threshold is valid
+    if (this.type === HeaterType.Heater || this.type === HeaterType.Sauna) {
+      isValidCoolingThreshold = (this.coolingThreshold === undefined);
     }
-    else if (this.temperatureDisplayUnits === TemperatureUnit.Celsius) {
+    else {
       isValidCoolingThreshold =
-        Utils.required(this.coolingThresholdCelsius) &&
-        (this.coolingThresholdCelsius >= ThresholdTemperature.CoolingThresholdCelsiusMin &&
-         this.coolingThresholdCelsius <= ThresholdTemperature.CoolingThresholdCelsiusMax);
-    }
-    else if (this.temperatureDisplayUnits === TemperatureUnit.Fahrenheit) {
-      isValidCoolingThreshold =
-        Utils.required(this.coolingThresholdFahrenheit) &&
-        (this.coolingThresholdFahrenheit >= ThresholdTemperature.CoolingThresholdFahrenheitMin &&
-         this.coolingThresholdFahrenheit <= ThresholdTemperature.CoolingThresholdFahrenheitMax);
+        Utils.required(this.coolingThreshold) &&
+        (this.coolingThreshold! >= ThresholdTemperature.CoolingThresholdMin &&
+         this.coolingThreshold! <= ThresholdTemperature.CoolingThresholdMax);
     }
 
     return isValidCoolingThreshold;
+  }
+
+  private toCelsius(
+    temperature: number | undefined,
+  ): number | undefined {
+    if (temperature === undefined) {
+      return undefined;
+    }
+
+    const temperatureCelsius = (this.temperatureDisplayUnits === TemperatureUnit.Celsius) ? temperature : (temperature - 32) * 5/9;
+
+    return Math.round(temperatureCelsius * 10) / 10;
   }
 
   private capitalize(value: string) {

@@ -48,6 +48,14 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
+    // This should catch the "TimeoutNegativeWarning: -1 is a negative number." warning
+    // and show where it is occurring
+    process.on('warning', (warning) => {
+      console.log('WARNING:', warning.name);
+      console.log(warning.message);
+      console.log(warning.stack);
+    });
+
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
