@@ -19,8 +19,6 @@ export class SunEventsTrigger extends Trigger {
   private triggerCronJob!: Cron;
   private dataCronJob!: Cron;
 
-  private timezone: string | undefined;
-
   constructor(
     sensor: BinarySensor,
     name: string,
@@ -106,7 +104,6 @@ export class SunEventsTrigger extends Trigger {
     this.log.debug(`[${this.accessoryName}] Requesting sunrise/sunset data from: ${(request.url)}`);
 
     const maxAttempts: number = 5;
-    const millis: number = 60 * 1000;
     const waitMinutes: number = 2;
     // Attempts over 30 minutes
     // Backoff / retry schedule:
@@ -140,9 +137,7 @@ export class SunEventsTrigger extends Trigger {
         } else {
           const backoffMinutes: number = (attempts * waitMinutes);
           this.log.error(`[${this.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
-          await new Promise(resolve =>
-            setTimeout(resolve, backoffMinutes * millis).unref(),
-          );
+          await Utils.delay(backoffMinutes * 60 * 1000, this.accessoryName, this.log);
         }
       }
     } while ((dataFetchResponse === undefined || !dataFetchResponse.ok) && attempts < maxAttempts);
@@ -223,18 +218,12 @@ export class SunEventsTrigger extends Trigger {
         this.log.debug(`[${this.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
         sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
-        await this.delay(resetDelayMillis);
+        await Utils.delay(resetDelayMillis, this.accessoryName, this.log);
         sensor.triggerSensorState(BinarySensor.NORMAL, this);
       }),
     );
 
     this.displayNextRun(this.triggerCronJob);
-  }
-
-  private delay(millis: number) {
-    return new Promise(resolve =>
-      setTimeout(resolve, millis).unref(),
-    );
   }
 
   private addOffset(datetime: string, offset: number): string {

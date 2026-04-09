@@ -90,8 +90,9 @@ export class Timer {
     this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
     this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
 
-    if (this.updateIntervalMillis < 0) {
-      this.log.error(`[${this.accessoryName} Timer] updateIntervalMillis is less than 0: ${this.updateIntervalMillis} seconds`);
+    if (this.updateIntervalMillis < 1) {
+      this.log.error(`[${this.accessoryName} Timer] updateIntervalMillis is less than 1: ${this.updateIntervalMillis} seconds. Setting to 1s/1000 ms`);
+      this.updateIntervalMillis = this.oneSecond;
     }
 
     if (this.runtime > 0) {
