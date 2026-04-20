@@ -115,7 +115,7 @@
     "cheerio": "^1.2.0",
     "croner": "^10.0.1",
     "express": "^5.1.0",
-    "homebridge-lib": "^7.1.12",
+    "homebridge-lib": "^8.0.0",
     "reflect-metadata": "^0.2.2",
     "typeserializer": "^0.2.5"
   },
