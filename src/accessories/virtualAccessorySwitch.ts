@@ -112,6 +112,9 @@ export class Switch extends Accessory {
      * can use the same subtype id.)
      */
 
+    // Remove sensor service
+    this.removeCompanionSensorService();
+
     // Create sensor service
     if (this.accessoryConfiguration.switch.hasCompanionSensor) {
       this.createCompanionSensor();
@@ -228,6 +231,18 @@ export class Switch extends Accessory {
 
     // Set initial sensor state
     this.companionSensor!.triggerCompanionSensorState(this.states.SensorState, this, this.muteLogging);
+  }
+
+  private removeCompanionSensorService(): void {
+    const companionSensorServiceUUIDs: string[] = CompanionSensor.getCompanionSensorServiceUUIDs(this.platform);
+    console.log(`UUIDs: ${companionSensorServiceUUIDs.join(', ')}`);
+    for (const service of this.accessory.services) {
+      console.log(`${this.accessory.displayName} - ${service.UUID} - ${service.displayName}`);
+      if (companionSensorServiceUUIDs.includes(service.UUID)) {
+        console.log(`${this.accessory.displayName} - ${service.UUID} - ${service.displayName} - Removed`);
+        this.accessory.removeService(service);
+      }
+    }
   }
 
   private restoreRunningTimer(
