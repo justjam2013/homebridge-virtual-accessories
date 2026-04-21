@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { PlatformAccessory, Service } from 'homebridge';
@@ -52,7 +53,7 @@ export abstract class Accessory {
     }
 
     // set accessory information
-    this.accessoryInformationService = this.accessory.getService(this.platform.Service.AccessoryInformation);
+    this.accessoryInformationService = this.accessory.getService(this.platform.Service.AccessoryInformation) || this.accessory.addService(this.platform.Service.AccessoryInformation);
     this.accessoryInformationService!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
       .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
