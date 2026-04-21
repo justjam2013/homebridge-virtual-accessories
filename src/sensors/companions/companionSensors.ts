@@ -62,22 +62,6 @@ export class CompanionSensor {
 
     return virtualSensor;
   }
-
-  static getCompanionSensorServiceUUIDs(
-    platform: VirtualAccessoriesPlatform,
-  ): string[] {
-    const companionSensorServiceUUIDs: string[] =
-    [
-      platform.Service.CarbonDioxideSensor.UUID,
-      platform.Service.CarbonMonoxideSensor.UUID,
-      platform.Service.ContactSensor.UUID,
-      platform.Service.LeakSensor.UUID,
-      platform.Service.MotionSensor.UUID,
-      platform.Service.OccupancySensor.UUID,
-      platform.Service.SmokeSensor.UUID,
-    ];
-    return companionSensorServiceUUIDs;
-  }
 }
 
 // Mixin
