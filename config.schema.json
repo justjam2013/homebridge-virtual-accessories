@@ -1314,7 +1314,11 @@
                     { "title": "KLIPPBOK", "enum": ["KLIPPBOK"] },
                     { "title": "MYGGBETT", "enum": ["MYGGBETT"] },
                     { "title": "MYGGSPRAY", "enum": ["MYGGSPRAY"] },
-                    { "title": "TIMMERFLOTTE", "enum": ["TIMMERFLOTTE"] }
+                    { "title": "TIMMERFLOTTE", "enum": ["TIMMERFLOTTE"] },
+                    { "title": "KAJPLATS - E26/E27 - Color (1055/1100/1160 lumen)", "enum": ["KAJPLATS-COLOR-M"] },
+                    { "title": "KAJPLATS - E26/E27 - White (450/470/485 lumen)", "enum": ["KAJPLATS-WHITE-S"] },
+                    { "title": "KAJPLATS - E26/E27 - White (1055/1100/1160 lumen)", "enum": ["KAJPLATS-WHITE-M"] },
+                    { "title": "KAJPLATS - E26/E27 - White (1520/1521/1600 lumen)", "enum": ["KAJPLATS-WHITE-L"] }
                   ]
                 },
                 "isDisabled": {
