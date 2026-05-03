@@ -1,45 +1,49 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
+import { Mute } from './accessoryCharacteristics.js';
 
 /**
  * Microphone - Accessory implementation
  */
-export class Microphone extends Accessory {
+export class Microphone extends Accessory<typeof Service.Microphone> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Microphone';
+  private static readonly ACCESSORY_TYPE_NAME: string = 'Microphone';
 
   private readonly muteStorageKey: string = 'MicrophoneMute';
 
-  private states = {
-    Mute: false,
-    Volume: 100,
-  };
+  // Device states
+  private Mute: boolean = Mute.UNMUTED;
+  private Volume: number = 100;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.Microphone,
+      Microphone.ACCESSORY_TYPE_NAME,
+    );
 
     // First configure the device based on the accessory details
-    this.states.Volume = this.accessoryConfiguration.microphone.volume;
+    this.Volume = this.accessoryConfiguration.microphone.volume;
 
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
     if (!this.isEmptyAccessoryState(accessoryState)) {
-      const cachedDoorbellMute = accessoryState[this.muteStorageKey] as boolean;
+      const cachedMute = accessoryState[this.muteStorageKey] as boolean;
 
-      if (cachedDoorbellMute !== undefined) {
-        this.states.Mute = cachedDoorbellMute;
+      if (cachedMute !== undefined) {
+        this.Mute = cachedMute;
       }
     }
 
-    this.service = this.accessory.getService(this.platform.Service.Microphone) || this.accessory.addService(this.platform.Service.Microphone);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.Mute)
       .onSet(this.setMute.bind(this))
@@ -53,46 +57,44 @@ export class Microphone extends Accessory {
   // Handlers
 
   async setMute(value: CharacteristicValue) {
-    this.states.Mute = value as boolean;
+    this.Mute = value as boolean;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${this.states.Mute}`);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute.getName(this.Mute)}`);
   }
 
   async getMute(): Promise<CharacteristicValue> {
-    const mute: boolean = this.states.Mute;
+    const mute: boolean = this.Mute;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Mute: ${mute}`);
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute.getName(mute)}`);
 
     return mute;
   }
 
   async setVolume(value: CharacteristicValue) {
-    this.states.Volume = value as number;
+    this.Volume = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${this.Volume}`);
   }
 
   async getVolume(): Promise<CharacteristicValue> {
-    const volume: number = this.states.Volume;
+    const volume: number = this.Volume;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${volume}`);
 
     return volume;
   }
 
-  protected getJsonState(): string {
+  //
+
+  protected override getJsonState(): string {
     const jsonState = {
-      [this.muteStorageKey]: this.states.Mute,
+      [this.muteStorageKey]: this.Mute,
     };
 
     const json = JSON.stringify(jsonState);
 
     return json;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return Microphone.ACCESSORY_TYPE_NAME;
   }
 }

@@ -1,11 +1,14 @@
 /* eslint-disable brace-style */
 
+import { Service } from 'homebridge';
+
 import { BinarySensor } from '../binarySensor.js';
 import { IkeaMatterStockTriggerConfiguration } from '../../configuration/triggers/configurationIkeaMatterStockTrigger.js';
 import { Trigger } from './trigger.js';
 import { shutdownSignal, Utils } from '../../utils/utils.js';
 
 import * as cheerio from 'cheerio';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 /**
  * IkeaMatterStockTrigger - Trigger implementation
@@ -18,7 +21,7 @@ export class IkeaMatterStockTrigger extends Trigger {
   private count: number = 0;
 
   constructor(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     name: string,
   ) {
     super(sensor, name);
@@ -117,11 +120,11 @@ export class IkeaMatterStockTrigger extends Trigger {
           trigger.log.error(`[${trigger.accessoryName}] Error in Ikea matter stock data. Count is not a number`);
         }
         else if (countNum > 0) {
-          if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true || countNum !== trigger.count) {
+          if (trigger.sensor.getSensorState() !== TriggeredState.TRIGGERED || firstRun === true || countNum !== trigger.count) {
              
             trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
 
-            trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
+            trigger.sensor.triggerSensorState(TriggeredState.TRIGGERED, trigger);
             trigger.count = countNum;
           }
           else {
@@ -130,11 +133,11 @@ export class IkeaMatterStockTrigger extends Trigger {
           }
         }
         else {
-          if (trigger.sensor.getSensorState() !== BinarySensor.NORMAL || firstRun === true) {
+          if (trigger.sensor.getSensorState() !== TriggeredState.NORMAL || firstRun === true) {
              
             trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
 
-            trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+            trigger.sensor.triggerSensorState(TriggeredState.NORMAL, trigger);
           }
           else {
             // eslint-disable-next-line max-len

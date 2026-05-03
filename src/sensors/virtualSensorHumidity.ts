@@ -10,9 +10,9 @@ import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.j
 /**
  * HumiditySensor - Sensor implementation
  */
-export class HumiditySensor extends MeasurementSensor {
+export class HumiditySensor extends MeasurementSensor<typeof Service.HumiditySensor> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'HumiditySensor';
+  private static readonly ACCESSORY_TYPE_NAME: string = 'HumiditySensor';
 
   static readonly DEFAULT_RELATIVE_HUMIDITY = 50;
 
@@ -21,11 +21,13 @@ export class HumiditySensor extends MeasurementSensor {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getService(): WithUUID<typeof Service> {
-    return this.platform.Service.HumiditySensor;
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.HumiditySensor,
+      HumiditySensor.ACCESSORY_TYPE_NAME,
+    );
   }
 
   protected getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }> {
@@ -36,29 +38,25 @@ export class HumiditySensor extends MeasurementSensor {
     return HumiditySensor.DEFAULT_RELATIVE_HUMIDITY;
   }
 
-  protected getAccessoryTypeName(): string {
-    return HumiditySensor.ACCESSORY_TYPE_NAME;
-  }
-
   // Updatable Sensor interface
 
   updateMeasurementSensor(value: number, accessoryId: string):void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}%`);
+    this.log.debug(`[${this.accessoryName}] Request update humidity sensor to ${value}%`);
 
-    if (accessoryId !== this.accessoryConfiguration.accessoryID) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+    if (accessoryId !== this.accessoryId) {
+      this.log.error(`[${this.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Humidifier/Dehumidifier sensor`);
+      this.log.error(`[${this.accessoryName}] Value ${value} is not valid for Humidifier/Dehumidifier sensor`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating humidity sensor to ${value}%`);
+      this.log.debug(`[${this.accessoryName}] Updating humidity sensor to ${value}%`);
 
-      this.states.SensorValue = value;
+      this.Value = value;
     }
   }
 }

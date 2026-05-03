@@ -1,28 +1,18 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
 import { Timer } from '../utils/timer.js';
+import { Active, InUse, ValveType } from './accessoryCharacteristics.js';
 
 /**
  * Valve - Accessory implementation
  */
-export class Valve extends Accessory {
+export class Valve extends Accessory<typeof Service.Valve> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Valve';
-
-  static readonly GENERIC_VALVE: number = 0;  // Characteristic.ValveType.GENERIC_VALVE
-  static readonly IRRIGATION: number = 1;     // Characteristic.ValveType.IRRIGATION
-  static readonly SHOWER_HEAD: number = 2;    // Characteristic.ValveType.SHOWER_HEAD
-  static readonly WATER_FAUCET: number = 3;   // Characteristic.ValveType.WATER_FAUCET
-
-  static readonly INACTIVE: number = 0;   // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;     // Characteristic.Active.ACTIVE
-
-  static readonly NOT_IN_USE: number = 0;   // Characteristic.InUse.NOT_IN_USE
-  static readonly IN_USE: number = 1;       // Characteristic.InUse.IN_USE
+  private static readonly ACCESSORY_TYPE_NAME: string = 'Valve';
 
   private valveType: number;
   private durationTimer: Timer;
@@ -32,69 +22,70 @@ export class Valve extends Accessory {
   // private readonly timerDurationStorageKey: string = 'TimerDuration';
   // private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
 
-  private states = {
-    ValveActive: Valve.INACTIVE,
-    ValveInUse: Valve.NOT_IN_USE,
-  };
+  // Device states
+  private Active: number = Active.INACTIVE;
+  private InUse: number = InUse.NOT_IN_USE;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.Valve,
+      Valve.ACCESSORY_TYPE_NAME,
+    );
 
     switch(this.accessoryConfiguration.valve.type) {
     case 'generic':
-      this.valveType = Valve.GENERIC_VALVE;
+      this.valveType = ValveType.GENERIC_VALVE;
       break;
     case 'irrigation':
-      this.valveType = Valve.IRRIGATION;
+      this.valveType = ValveType.IRRIGATION;
       break;
     case 'showerhead':
-      this.valveType = Valve.SHOWER_HEAD;
+      this.valveType = ValveType.SHOWER_HEAD;
       break;
     case 'waterfaucet':
-      this.valveType = Valve.WATER_FAUCET;
+      this.valveType = ValveType.WATER_FAUCET;
       break;
     // Should never drop down to here, but being defensive
     default:
-      this.valveType = Valve.GENERIC_VALVE;
+      this.valveType = ValveType.GENERIC_VALVE;
       break;
     }
 
     // First configure the device based on the accessory details
-    this.states.ValveActive = Valve.INACTIVE;
-    this.states.ValveInUse = Valve.NOT_IN_USE;
+    this.Active = Active.INACTIVE;
+    this.InUse = InUse.NOT_IN_USE;
 
     // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
+    if (this.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.ValveActive = cachedState;
-        this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
+        this.Active = cachedState;
+        this.InUse = (this.Active === Active.ACTIVE) ? InUse.IN_USE : InUse.NOT_IN_USE;
       }
     }
 
     // Timer is not resettable
     const timerIsResettable: boolean = false;
     this.durationTimer = new Timer(
-      this.accessoryConfiguration.accessoryName,
+      this.accessoryName,
       this.log,
       timerIsResettable,
       this.accessoryConfiguration.valve.duration.toSeconds(),
     );
 
-    this.service = this.accessory.getService(this.platform.Service.Valve) || this.accessory.addService(this.platform.Service.Valve);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${Valve.getActiveName(this.states.ValveActive)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.states.ValveActive));
-    this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
+    this.log.debug(`[${this.accessoryName}] Setting Valve Current State: ${Active.getName(this.Active)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.Active, (this.Active));
+    this.service.updateCharacteristic(this.platform.Characteristic.InUse, (this.InUse));
     this.service.updateCharacteristic(this.platform.Characteristic.SetDuration, (this.accessoryConfiguration.valve.duration.toSeconds()));
 
     // register handlers
@@ -122,49 +113,49 @@ export class Valve extends Accessory {
   async getValveType(): Promise<CharacteristicValue> {
     const valveType = this.valveType;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Valve Type: ${Valve.getValveTypeName(valveType)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Valve Type: ${ValveType.getName(valveType)}`);
 
     return valveType;
   }
 
   async setActive(value: CharacteristicValue) {
-    this.states.ValveActive = value as number;
+    this.Active = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${Valve.getActiveName(this.states.ValveActive)}`);
+    this.log.info(`[${this.accessoryName}] Setting Active: ${Active.getName(this.Active)}`);
 
-    this.states.ValveInUse = (this.states.ValveActive === Valve.ACTIVE) ? Valve.IN_USE : Valve.NOT_IN_USE;
-    this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.states.ValveInUse));
+    this.InUse = (this.Active === Active.ACTIVE) ? InUse.IN_USE : InUse.NOT_IN_USE;
+    this.service!.setCharacteristic(this.platform.Characteristic.InUse, (this.InUse));
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting In Use: ${Valve.getInUseName(this.states.ValveInUse)}`);
+    this.log.info(`[${this.accessoryName}] Setting In Use: ${InUse.getName(this.InUse)}`);
 
     // Valve was turned off: turn off timer
-    if (this.states.ValveActive === Valve.INACTIVE) {
+    if (this.Active === Active.INACTIVE) {
       this.durationTimer.stop();
     }
     // Valve was turned on: try to start timer
-    if (this.states.ValveActive === Valve.ACTIVE && this.accessoryConfiguration.valve.duration.toSeconds() > 0) {
+    if (this.Active === Active.ACTIVE && this.accessoryConfiguration.valve.duration.toSeconds() > 0) {
       this.durationTimer.start(
         () => {
-          this.service!.setCharacteristic(this.platform.Characteristic.Active, Valve.INACTIVE);
+          this.service!.setCharacteristic(this.platform.Characteristic.Active, Active.INACTIVE);
         },
       );
     }
   }
 
   async getActive(): Promise<CharacteristicValue> {
-    const valveActive = this.states.ValveActive;
+    const valveActive = this.Active;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${Valve.getActiveName(valveActive)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Active: ${Active.getName(valveActive)}`);
 
     return valveActive;
   }
 
   async getInUse(): Promise<CharacteristicValue> {
-    const valveInUse = this.states.ValveInUse;
+    const valveInUse = this.InUse;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting In Use: ${Valve.getInUseName(valveInUse)}`);
+    this.log.debug(`[${this.accessoryName}] Getting In Use: ${InUse.getName(valveInUse)}`);
 
     return valveInUse;
   }
@@ -174,13 +165,13 @@ export class Valve extends Accessory {
 
     this.durationTimer.setDefaultDuration(duration);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Set Duration: ${duration} seconds`);
+    this.log.info(`[${this.accessoryName}] Setting Set Duration: ${duration} seconds`);
   }
 
   async getSetDuration(): Promise<CharacteristicValue> {
     const duration = this.durationTimer.getDefaultDuration();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Set Duration: ${duration} seconds`);
+    this.log.debug(`[${this.accessoryName}] Getting Set Duration: ${duration} seconds`);
 
     return duration;
   }
@@ -188,63 +179,18 @@ export class Valve extends Accessory {
   async getRemainingDuration(): Promise<CharacteristicValue> {
     const remainingDuration = this.durationTimer.getRemainingDuration();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
+    this.log.debug(`[${this.accessoryName}] Getting Remaining Duration: ${remainingDuration} seconds`);
 
     return remainingDuration;
   }
 
-  protected getJsonState(): string {
+  protected override getJsonState(): string {
     const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.ValveActive,
+      [this.stateStorageKey]: this.Active,
       // [this.timerStartTimeStorageKey]: this.durationTimer.getStartTime().toString(),
       // [this.timerDurationStorageKey]: this.durationTimer.getDuration(),
       // [this.timerIsRunningStorageKey]: this.durationTimer.isTimerRunning(),
     });
     return json;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return Valve.ACCESSORY_TYPE_NAME;
-  }
-
-  static getValveTypeName(event: number): string {
-    let eventName: string;
-
-    switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.GENERIC_VALVE: { eventName = 'GENERIC VALVE'; break; }
-    case Valve.IRRIGATION: { eventName = 'IRRIGATION'; break; }
-    case Valve.SHOWER_HEAD: { eventName = 'SHOWER HEAD'; break; }
-    case Valve.WATER_FAUCET: { eventName = 'WATER FAUCET'; break; }
-    default: { eventName = event.toString(); }
-    }
-
-    return eventName;
-  }
-
-  static getActiveName(event: number): string {
-    let eventName: string;
-
-    switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.INACTIVE: { eventName = 'INACTIVE'; break; }
-    case Valve.ACTIVE: { eventName = 'ACTIVE'; break; }
-    default: { eventName = event.toString(); }
-    }
-
-    return eventName;
-  }
-
-  static getInUseName(event: number): string {
-    let eventName: string;
-
-    switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.NOT_IN_USE: { eventName = 'NOT IN USE'; break; }
-    case Valve.IN_USE: { eventName = 'IN USE'; break; }
-    default: { eventName = event.toString(); }
-    }
-
-    return eventName;
   }
 }

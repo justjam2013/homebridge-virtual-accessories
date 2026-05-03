@@ -1,5 +1,7 @@
 /* eslint-disable brace-style */
 
+import { Service } from 'homebridge';
+
 import { PingTriggerConfiguration } from '../../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
 import { BinarySensor } from '../binarySensor.js';
@@ -9,6 +11,7 @@ import { shutdownSignal } from '../../utils/utils.js';
 import dns from 'dns';
 import net from 'net';
 import ping from '@justjam2013/net-ping';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 /**
  *  Private helper classes to pass values by reference
@@ -36,7 +39,7 @@ export class PingTrigger extends Trigger {
   private failureCount = new Counter(0);
 
   constructor(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     name: string,
   ) {
     super(sensor, name);
@@ -134,14 +137,14 @@ export class PingTrigger extends Trigger {
           // Only log the error when we reach the failure count instead of spamming the logs
           trigger.log.error(`[${trigger.accessoryName}] Ping ${target}: ${error.toString()}`);
 
-          trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
+          trigger.sensor.triggerSensorState(TriggeredState.TRIGGERED, trigger);
         }
       }
       else {
         trigger.log.debug(`[${trigger.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
 
         trigger.failureCount.value = 0;
-        trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+        trigger.sensor.triggerSensorState(TriggeredState.NORMAL, trigger);
       }
 
       session.close ();

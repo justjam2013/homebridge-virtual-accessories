@@ -1,7 +1,9 @@
+import { Service } from 'homebridge';
 
 import { BinarySensor } from '../binarySensor.js';
 import { Trigger } from './trigger.js';
 import { Utils } from '../../utils/utils.js';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 /**
  * StartupTrigger - Trigger implementation
@@ -9,7 +11,7 @@ import { Utils } from '../../utils/utils.js';
 export class StartupTrigger extends Trigger {
 
   constructor(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     name: string,
   ) {
     super(sensor, name);
@@ -30,13 +32,13 @@ export class StartupTrigger extends Trigger {
     );  // 3 second delay
 
     this.log.debug(`[${this.accessoryName}] Triggering sensor`);
-    this.sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
+    this.sensor.triggerSensorState(TriggeredState.TRIGGERED, this);
     await Utils.delay(
       resetDelayMillis,
       this.accessoryName,
       this.log,
     );
     this.log.debug(`[${this.accessoryName}] Resetting sensor`);
-    this.sensor.triggerSensorState(BinarySensor.NORMAL, this);
+    this.sensor.triggerSensorState(TriggeredState.NORMAL, this);
   }
 }

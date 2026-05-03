@@ -1,5 +1,7 @@
 /* eslint-disable brace-style */
 
+import { Service } from 'homebridge';
+
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
@@ -16,7 +18,6 @@ import { UpdatableMeasurementSensor } from './sensors/updatableSensor.js';
 import { SensorValueUpdateNotAllowed } from './errors.js';
 
 import express, { Express, Request, Response } from 'express';
-
  
 function ToBoolean(value: string): boolean {
   switch (value) {
@@ -36,7 +37,7 @@ export class WebhookServer {
 
   private static accessoryIdPattern: string = '^[A-Za-z0-9\\-]{5,}$';
 
-  private readonly accessories: Map<string, Accessory> = new Map<string, Accessory>();
+  private readonly accessories: Map<string, Accessory<typeof Service>> = new Map<string, Accessory<typeof Service>>();
   private readonly log: VirtualLogger;
 
   private readonly serverName: string = 'Sensor Server';
@@ -54,7 +55,7 @@ export class WebhookServer {
   constructor(
     log: VirtualLogger,
     port: number,
-    accessories?: Accessory[],
+    accessories?: Accessory<typeof Service>[],
   ) {
     this.log = log;
     this.port = port;
@@ -219,7 +220,7 @@ export class WebhookServer {
   }
 
   addAccessories(
-    accessories: Accessory[],
+    accessories: Accessory<typeof Service>[],
   ) {
     accessories.forEach((accessory) => {
       this.addAccessory(accessory);
@@ -227,7 +228,7 @@ export class WebhookServer {
   }
 
   addAccessory(
-    accessory: Accessory,
+    accessory: Accessory<typeof Service>,
   ) {
     let addedAccessory: boolean = false;
 
@@ -238,37 +239,37 @@ export class WebhookServer {
       (<UpdatableObstruction><unknown>accessory).updateObstruction !== undefined ||
       (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor !== undefined
     ) {
-      this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+      this.accessories.set(accessory.accessoryId, accessory);
       addedAccessory = true;
     }
     else if (accessory instanceof BinarySensor) {
-      const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
+      const trigger: Trigger = (<BinarySensor<typeof Service>><unknown>accessory).getTrigger();
       if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
-        this.accessories.set(accessory.accessoryConfiguration.accessoryID, accessory);
+        this.accessories.set(accessory.accessoryId, accessory);
         addedAccessory = true;
       }
     }
 
     if (addedAccessory === true) {
-      this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+      this.log.info(`[${this.serverName}] Added accessory ${accessory.accessoryName} (${accessory.accessoryId})`);
     }
     else {
-      // eslint-disable-next-line max-len
-      this.log.debug(`[${this.serverName}] Skipping accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+       
+      this.log.debug(`[${this.serverName}] Skipping accessory ${accessory.accessoryName} (${accessory.accessoryId})`);
     }
   }
 
   removeAccessory(
-    accessory: Accessory,
+    accessory: Accessory<typeof Service>,
   ): boolean {
-    const found: boolean = this.accessories.delete(accessory.accessoryConfiguration.accessoryID);
-    this.log.info(`[${this.serverName}] Removed accessory ${accessory.accessoryConfiguration.accessoryName} (${accessory.accessoryConfiguration.accessoryID})`);
+    const found: boolean = this.accessories.delete(accessory.accessoryId);
+    this.log.info(`[${this.serverName}] Removed accessory ${accessory.accessoryName} (${accessory.accessoryId})`);
 
     return found;
   }
 
-  getAccessories(): Accessory[] {
-    const accessories: Accessory[] = [...this.accessories.values()];
+  getAccessories(): Accessory<typeof Service>[] {
+    const accessories: Accessory<typeof Service>[] = [...this.accessories.values()];
     return accessories;
   }
 
@@ -351,7 +352,7 @@ export class WebhookServer {
     value: number | boolean | ChargingState,
     response: Response,
   ) {
-    const accessory: Accessory | undefined = this.accessories.get(accessoryId);
+    const accessory: Accessory<typeof Service> | undefined = this.accessories.get(accessoryId);
 
     if (accessory !== undefined && accessoryTypes.includes(accessory.accessoryConfiguration.accessoryType)) {
       try {
@@ -373,7 +374,7 @@ export class WebhookServer {
           (<UpdatableMeasurementSensor><unknown>accessory).updateMeasurementSensor(<number>value, accessoryId);
         }
         else if (accessory instanceof BinarySensor) {
-          const trigger: Trigger = (<BinarySensor><unknown>accessory).getTrigger();
+          const trigger: Trigger = (<BinarySensor<typeof Service>><unknown>accessory).getTrigger();
           if ((<TriggerableSensor><unknown>trigger).triggerSensor !== undefined) {
             (<TriggerableSensor><unknown>trigger).triggerSensor(<boolean>value, accessoryId);
           }

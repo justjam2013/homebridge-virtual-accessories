@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 
 import { APIEvent } from 'homebridge';
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
 
 import { Accessory } from './accessories/accessory.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
@@ -138,7 +138,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     const accessoryConfigurations: AccessoryConfiguration[] = this.deserializeAccessoryConfigurations(configDevices);
     this.log.debug(`Deserialized accessories: ${JSON.stringify(accessoryConfigurations)}`);
 
-    const virtualAccessories: Accessory[] = [];
+    const virtualAccessories: Accessory<typeof Service>[] = [];
 
     // loop over the discovered devices and register each one if it has not already been registered
     for (const accessoryConfiguration of accessoryConfigurations) {
@@ -158,13 +158,22 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
         // update the device firmware version in the `accessory.context`
         cachedAccessory.context.firmwareVersion = this.version;
 
+        // Remove any services from the cached accessory. These will be added back
+        // when the accessory handler for the restored accessory is recreated
+        for (const service of cachedAccessory.services) {
+          if (service.isPrimaryService) {
+            //
+          }
+          cachedAccessory.removeService(service);
+        }
+
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // registeredAccessory.context.device = device;
         // this.api.updatePlatformAccessories([registeredAccessory]);
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, cachedAccessory, accessoryConfiguration);
+        const virtualAccessory: Accessory<typeof Service> | undefined = AccessoryFactory.createVirtualAccessory(this, cachedAccessory, accessoryConfiguration);
 
         if (virtualAccessory !== undefined) {
           if (cachedAccessory.displayName !== accessoryConfiguration.accessoryName) {
@@ -204,7 +213,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        const virtualAccessory: Accessory | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, accessoryConfiguration);
+        const virtualAccessory: Accessory<typeof Service> | undefined = AccessoryFactory.createVirtualAccessory(this, accessory, accessoryConfiguration);
         if (virtualAccessory === undefined) {
           this.log.error(`Error adding new accessory: ${accessoryConfiguration.accessoryName}`);
         }

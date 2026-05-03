@@ -25,5 +25,5 @@
     "eslint.config.js",
     "homebridge-ui",
     "src"
-  ]
+, "src/accessories/accessoryCharacteristics.ts"  ]
 }
