@@ -123,7 +123,8 @@
               "title": "Accessory Name",
               "description": "Accessory name as it will be displayed in HomeKit",
               "type": "string",
-              "required": true
+              "required": true,
+              "pattern": "^[a-zA-Z0-9\\s']*$"
             },
             "accessoryType": {
               "title": "Accessory Type",
