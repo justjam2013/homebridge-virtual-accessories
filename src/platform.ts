@@ -160,12 +160,15 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
         // Remove any services from the cached accessory. These will be added back
         // when the accessory handler for the restored accessory is recreated
+
+        console.info(`Found service count: ${cachedAccessory.services.length}`);
         for (const service of cachedAccessory.services) {
           if (service.isPrimaryService) {
             //
           }
           cachedAccessory.removeService(service);
         }
+        console.info(`Remaining service count: ${cachedAccessory.services.length}`);
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         // registeredAccessory.context.device = device;

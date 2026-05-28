@@ -109,6 +109,7 @@ export abstract class Accessory<S extends typeof Service> {
     let primaryService: Service | undefined;
 
     console.info(`Accessory ${accessory.displayName} -> Category ${accessory.UUID}`);
+    console.info(`Found service count: ${accessory.services.length}`);
     for (const service of accessory.services) {
       console.info(`Accessory ${accessory.displayName} -> Service: ${service.name}/${service.name}`);
       if (service.isPrimaryService) {
