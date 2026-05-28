@@ -304,7 +304,7 @@ export class IkeaMatterStockTrigger extends Trigger {
           ['KLIPPBOK',     ['706.177.68', 'KLIPPBOK']],
           ['MYGGBETT',     ['406.176.42', 'MYGGBETT']],
           ['MYGGSPRAY',    ['006.194.50', 'MYGGSPRAY']],
-          ['TIMMERFLOTTE', ['',           'TIMMERFLOTTE']],
+          ['TIMMERFLOTTE', ['006.189.50', 'TIMMERFLOTTE']],
           ['KAJPLATS-COLOR-M', ['606.192.73', 'KAJPLATS E26 Color 1055lm']],
           ['KAJPLATS-WHITE-S', ['306.189.77', 'KAJPLATS E26 White 470lm']],
           ['KAJPLATS-WHITE-M', ['206.189.87', 'KAJPLATS E26 White 1055lm']],
