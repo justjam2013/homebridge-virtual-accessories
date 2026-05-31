@@ -670,12 +670,11 @@
                     { "title": "Beige", "enum": ["tan"] },
                     { "title": "Goud", "enum": ["gold"] },
                     { "title": "Zilver", "enum": ["silver"] },
-                    { "title": "Zwart", "enum": ["black"] },
-                    { "title": "Geen", "enum": ["None"] }
+                    { "title": "Zwart", "enum": ["black"] }
                   ]
                 },
                 "": {
-                  "description": "Opmerking: HomeKey lijkt momenteel niet te werken. Als je problemen ondervindt, stel dan de kleur van HomeKey in op ‘Geen’.",
+                  "description": "Opmerking: HomeKey lijkt momenteel niet te werken. Als je problemen ondervindt, stel dan de kleur van HomeKey in op ‘None’.",
                   "type": "object",
                   "properties": {}
                 }
