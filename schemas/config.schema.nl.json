@@ -114,7 +114,7 @@
           "properties": {
             "accessoryID": {
               "title": "Accessoire ID",
-              "description": "Uniek ID voor ht Accessoire (https://www.random.org/). Niet meer veranderen als het toegewezen is!",
+              "description": "Uniek ID voor het Accessoire (https://www.random.org/). Niet meer veranderen als het toegewezen is!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Za-z0-9\\-]{5,}$"
