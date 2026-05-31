@@ -162,6 +162,18 @@
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
+            "deviceType": {
+              "title": "Soort Verbinding *",
+              "description": "Accessoire is HomeKit of Matter Verbinding",
+              "type": "string",
+              "oneOf": [
+                { "title": "HomeKit", "const": "homekit" },
+                { "title": "Matter", "const": "matter" }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType == 'switch';"
+              }
+            },
             "airPurifier": {
               "title": "Luchtreiniger",
               "type": "object",
@@ -1341,7 +1353,7 @@
                 }
               },
               "then": {
-                "required": [ "switch" ],
+                "required": [ "switch", "deviceType" ],
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]
