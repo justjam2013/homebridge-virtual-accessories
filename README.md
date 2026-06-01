@@ -26,7 +26,7 @@
 
 #### UI Languages
 
-Currently Virtual Accessories For Homebridge offers a Spanish translation for the UI. This can be accessed by changing the Language setting in Homebridge UI. The plugin will use this setting. Please vote in this ticket for which language you would like to see the UI translated to: [Looking for people interested in translating the plugin UI into other languages](https://github.com/justjam2013/homebridge-virtual-accessories/issues/703)
+Currently Virtual Accessories For Homebridge offers Spanish and Dutch translations for the UI. This can be accessed by changing the Language setting in Homebridge UI. The plugin will use this setting. Please vote in this ticket for which language you would like to see the UI translated to: [Looking for people interested in translating the plugin UI into other languages](https://github.com/justjam2013/homebridge-virtual-accessories/issues/703)
 
 You do not have to volunteer to translate it, but hopefully will provide feedback if there are issues with the translations.
 
