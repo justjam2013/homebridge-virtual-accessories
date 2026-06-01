@@ -2,7 +2,7 @@
   "pluginAlias": "VirtualAccessoriesForHomebridge",
   "pluginType": "platform",
   "singular": true,
-  "footerDisplay": "* = required fields",
+  "footerDisplay": "* = verplicht in te vullen velden",
   "strictValidation": true,
   "schema": {
     "type": "object",
@@ -89,7 +89,7 @@
         "expanded": false,
         "properties": {
           "enabled": {
-            "title": "Enabled",
+            "title": "Ingeschakeld",
             "description": "Update sensors via web oproep",
             "type": "boolean"
           },
