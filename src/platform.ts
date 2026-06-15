@@ -48,7 +48,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     // This should catch the "TimeoutNegativeWarning: -1 is a negative number." warning
     // and show where it is occurring
     process.on('warning', (warning) => {
-      console.log('WARNING:', warning.name);
+      this.log.warn(`WARNING: ${warning.name}`);
       console.log(warning.message);
       console.log(warning.stack);
     });
