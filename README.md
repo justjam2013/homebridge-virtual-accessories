@@ -794,6 +794,7 @@ These are example configurations of the virtual accessories and provided for ref
             "pingTrigger": {
                 "host": "192.168.0.200",
                 "failureRetryCount": 3,
+                "interval": 1,
                 "isDisabled": false
             }
         }
