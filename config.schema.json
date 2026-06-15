@@ -1145,6 +1145,13 @@
                   "type": "integer",
                   "minimum": 0
                 },
+                "interval": {
+                  "title": "Interval Between Pings",
+                  "description": "Interval between pings in minutes - low for crical infrastructure, higher for non-critical devices (default: 1 minute)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 15
+                },
                 "isDisabled": {
                   "title": "Disable Trigger",
                   "description": "Turn off/on trigger",
