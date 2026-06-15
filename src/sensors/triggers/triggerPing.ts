@@ -76,8 +76,9 @@ export class PingTrigger extends Trigger {
     }
     this.log.debug(`[${this.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
-    const pingTimeoutMillis = 10 * 1000;            // trigger.pingTimeout: 10 seconds
-    const intervalBetweenPingsMillis = 60 * 1000;   // trigger.intervalBetweenPings: 60 seconds
+    const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;
+    this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
+    const pingTimeoutMillis = 10 * 1000;
 
     setInterval(
       this.ping, intervalBetweenPingsMillis,
