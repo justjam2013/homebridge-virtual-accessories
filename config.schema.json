@@ -124,7 +124,7 @@
               "description": "Accessory name as it will be displayed in HomeKit",
               "type": "string",
               "required": true,
-              "pattern": "^[a-zA-Z0-9\\s']*$"
+              "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
               "title": "Accessory Type",

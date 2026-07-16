@@ -123,7 +123,8 @@
               "title": "Nombre del Accesorio",
               "description": "Nombre del accesorio tal como se mostrará en HomeKit",
               "type": "string",
-              "required": true
+              "required": true,
+              "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
               "title": "Tipo de Accesorio",
@@ -305,8 +306,16 @@
                   "oneOf": [
                     { "title": "Calefactor", "enum": ["heater"] },
                     { "title": "Aire Acondicionado", "enum": ["cooler"] },
-                    { "title": "Calefactor y Aire Acondicionado", "enum": ["auto"] }
+                    { "title": "Calefactor y Aire Acondicionado", "enum": ["auto"] },
+                    { "title": "Sauna", "enum": ["sauna"] }
                   ]
+                },
+                "hasFan": {
+                  "title": "Tiene ventilador",
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
                 },
                 "temperatureDisplayUnits": {
                   "title": "Unidades de Temperatura *",
@@ -354,6 +363,26 @@
                   "maximum": 95,
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "saunaHeatingThresholdCelsius": {
+                  "title": "Umbral de Calefacción de la Sauna ºC *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor de la sauna (15ºC - 90ºC)",
+                  "type": "integer",
+                  "minimum": 15,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'celsius' && ['sauna'].includes(model.devices[arrayIndices].heaterCooler.type);"
+                  }
+                },
+                "saunaHeatingThresholdFahrenheit": {
+                  "title": "Umbral de Calefacción de la Sauna ºF *",
+                  "description": "Nivel de temperatura por debajo del cual se enciende el calefactor de la sauna (59ºF - 194ºF)",
+                  "type": "integer",
+                  "minimum": 59,
+                  "maximum": 194,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].heaterCooler && model.devices[arrayIndices].heaterCooler.temperatureDisplayUnits === 'fahrenheit' && ['sauna'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "": {
@@ -668,27 +697,24 @@
               "title": "Sistema de Seguridad",
               "type": "object",
               "properties": {
-                "": {
+                "armedModesTitle": {
                   "title": "Modos Armados",
                   "description": "Modos del sistema de seguridad (Se requieren 'Fuera de Casa' y 'En Casa')",
                   "type": "object",
                   "properties": {}
                 },
                 "hasAwayMode": {
-                  "title": "Modo Fuera de Casa",
-                  "type": "boolean",
-                  "disabled": true,
-                  "default": true
+                  "title": "❎ Modo Fuera de Casa",
+                  "type": "object",
+                  "properties": {}
                 },
                 "hasHomeMode": {
-                  "title": "Modo En Casa",
-                  "type": "boolean",
-                  "disabled": true,
-                  "default": true
+                  "title": "❎ Modo En Casa",
+                  "type": "object",
+                  "properties": {}
                 },
                 "hasNightMode": {
                   "title": "Modo Noche",
-                  "description": "El modo noche es un modo armado personalizado",
                   "type": "boolean"
                 },
                 "defaultState": {
@@ -872,7 +898,8 @@
                     { "title": "Cronograma Cron", "enum": ["cron"] },
                     { "title": "Eventos Solares (Amanecer/Atardecer)", "enum": ["sunevents"] },
                     { "title": "Webhook", "enum": ["webhook"] },
-                    { "title": "Disparador al Iniciar Homebridge", "enum": ["startup"] }
+                    { "title": "Disparador al Iniciar Homebridge", "enum": ["startup"] },
+                    { "title": "Disparador de Niveles de Stock de Ikea Matter", "enum": ["ikeamatterstock"] }
                   ]
                 }
               },
@@ -1118,6 +1145,13 @@
                   "type": "integer",
                   "minimum": 0
                 },
+                "interval": {
+                  "title": "Intervalo entres Pings",
+                  "description": "Intervalo entres pings en minutos - bajo para infraestructura crítica, más alto para dispositivos no críticos (predeterminado: 1 minuto)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 15
+                },
                 "isDisabled": {
                   "title": "Desactivar Disparador",
                   "description": "Encender o apagar el disparador",
@@ -1254,6 +1288,55 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'startup';"
+              }
+            },
+            "ikeaMatterStockTrigger": {
+              "title": "Disparador de disponibilidad de dispositivo Matter de IKEA",
+              "type": "object",
+              "properties": {
+                "country": {
+                  "title": "País *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Australia", "enum": ["Australia"] },
+                    { "title": "Canadá", "enum": ["Canada"] },
+                    { "title": "Japón", "enum": ["Japan"] },
+                    { "title": "Corea", "enum": ["Korea"] },
+                    { "title": "Nueva Zelanda", "enum": ["New Zealand"] },
+                    { "title": "Reino Unido", "enum": ["UK"] },
+                    { "title": "EE.UU", "enum": ["USA"] }
+                  ]
+                },
+                "storeLocation": {
+                  "title": "Ubicación de la tienda *",
+                  "description": "Ubicación de la tienda (utilice el buscador de tiendas de IKEA)",
+                  "type": "string"
+                },
+                "itemName": {
+                  "title": "Artículo *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "ALPSTUGA", "enum": ["ALPSTUGA"] },
+                    { "title": "BILRESA", "enum": ["BILRESA"] },
+                    { "title": "GRILLPLATS", "enum": ["GRILLPLATS"] },
+                    { "title": "KLIPPBOK", "enum": ["KLIPPBOK"] },
+                    { "title": "MYGGBETT", "enum": ["MYGGBETT"] },
+                    { "title": "MYGGSPRAY", "enum": ["MYGGSPRAY"] },
+                    { "title": "TIMMERFLOTTE", "enum": ["TIMMERFLOTTE"] },
+                    { "title": "KAJPLATS - E26/E27 - Color (1055/1100/1160 lumen)", "enum": ["KAJPLATS-COLOR-M"] },
+                    { "title": "KAJPLATS - E26/E27 - White (450/470/485 lumen)", "enum": ["KAJPLATS-WHITE-S"] },
+                    { "title": "KAJPLATS - E26/E27 - White (1055/1100/1160 lumen)", "enum": ["KAJPLATS-WHITE-M"] },
+                    { "title": "KAJPLATS - E26/E27 - White (1520/1521/1600 lumen)", "enum": ["KAJPLATS-WHITE-L"] }
+                  ]
+                },
+                "isDisabled": {
+                  "title": "Desactivar Disparador",
+                  "description": "Encender o apagar el disparador",
+                  "type": "boolean"
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'ikeamatterstock';"
               }
             }
           },
@@ -1679,6 +1762,27 @@
                 "properties": {
                   "sunEventsTrigger": {
                     "required": [ "latitude", "longitude" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "sensor": {
+                    "properties": {
+                      "trigger": { "const": "ikeamatterstock" }
+                    },
+                    "required": [ "trigger" ]
+                  }
+                },
+                "required": [ "sensor" ]
+              },
+              "then": {
+                "required": [ "ikeaMatterStockTrigger" ],
+                "properties": {
+                  "ikeaMatterStockTrigger": {
+                    "required": [ "country", "storeLocation", "itemName" ]
                   }
                 }
               }
