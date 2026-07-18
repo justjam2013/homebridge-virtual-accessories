@@ -1130,7 +1130,7 @@
               }
             },
             "pingTrigger": {
-              "title": "Ping a Host activering",
+              "title": "Ping een Host als activering",
               "type": "object",
               "properties": {
                 "host": {
