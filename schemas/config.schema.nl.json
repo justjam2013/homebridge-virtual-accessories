@@ -124,7 +124,7 @@
               "description": "Accessoire naam zoals het wordt weergegeven in HomeKit",
               "type": "string",
               "required": true,
-              "pattern": "^[a-zA-Z0-9\\s']*$"
+              "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
               "title": "Accessoire Type",
@@ -160,18 +160,6 @@
               "type": "boolean",
               "condition": {
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
-              }
-            },
-            "deviceType": {
-              "title": "Soort Verbinding *",
-              "description": "Accessoire is HomeKit of Matter Verbinding",
-              "type": "string",
-              "oneOf": [
-                { "title": "HomeKit", "const": "homekit" },
-                { "title": "Matter", "const": "matter" }
-              ],
-              "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType == 'switch';"
               }
             },
             "airPurifier": {
@@ -1142,7 +1130,7 @@
               }
             },
             "pingTrigger": {
-              "title": "Ping a Host activering",
+              "title": "Ping een Host als activering",
               "type": "object",
               "properties": {
                 "host": {
@@ -1156,6 +1144,13 @@
                   "description": "Aantal mislukte pings voordat de sensor wordt geactiveerd",
                   "type": "integer",
                   "minimum": 0
+                },
+                "interval": {
+                  "title": "Interval Tussen Pings",
+                  "description": "Interval tussen pings in minuten - laag voor kritieke infrastructuur, hoger voor niet-kritieke apparaten (standaard: 1 minuut)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 15
                 },
                 "isDisabled": {
                   "title": "activering uitschakelen",
