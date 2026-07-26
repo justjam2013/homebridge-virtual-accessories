@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -6,33 +6,14 @@ import { ExternalAccessory } from './externalAccessory.js';
 
 import { InputSource } from './virtualAccessoryInputSource.js';
 import { InputSourceConfiguration } from '../configuration/accessories/configurationInputSource.js';
+import { Active, RemoteKey, SleepDiscoveryMode } from './accessoryCharacteristics.js';
 
 /**
  * Television - Accessory implementation
  */
-export class Television extends ExternalAccessory {
+export class Television extends ExternalAccessory<typeof Service.Television> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Television';
-
-  static readonly INACTIVE: number = 0;               // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;                 // Characteristic.Active.ACTIVE
-
-  static readonly NOT_DISCOVERABLE: number = 0;       // Characteristic.SleepDiscoveryMode.NOT_DISCOVERABLE
-  static readonly ALWAYS_DISCOVERABLE: number = 1;    // Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE
-
-  static readonly REWIND: number = 0;                 // Characteristic.RemoteKey.REWIND
-  static readonly FAST_FORWARD: number = 1;           // Characteristic.RemoteKey.FAST_FORWARD
-  static readonly NEXT_TRACK: number = 2;             // Characteristic.RemoteKey.NEXT_TRACK
-  static readonly PREVIOUS_TRACK: number = 3;         // Characteristic.RemoteKey.PREVIOUS_TRACK
-  static readonly ARROW_UP: number = 4;               // Characteristic.RemoteKey.ARROW_UP
-  static readonly ARROW_DOWN: number = 5;             // Characteristic.RemoteKey.ARROW_DOWN
-  static readonly ARROW_LEFT: number = 6;             // Characteristic.RemoteKey.ARROW_LEFT
-  static readonly ARROW_RIGHT: number = 7;	          // Characteristic.RemoteKey.ARROW_RIGHT
-  static readonly SELECT: number = 8;	                // Characteristic.RemoteKey.SELECT
-  static readonly BACK: number = 9;	                  // Characteristic.RemoteKey.BACK
-  static readonly EXIT: number = 10;	                // Characteristic.RemoteKey.EXIT
-  static readonly PLAY_PAUSE: number = 11;	          // Characteristic.RemoteKey.PLAY_PAUSE
-  static readonly INFORMATION: number = 15;	          // Characteristic.RemoteKey.INFORMATION
+  private static readonly ACCESSORY_TYPE_NAME: string = 'Television';
 
   private readonly stateStorageKey: string = 'TelevisionState';
   private readonly inputActiveIdStorageKey: string = 'TelevisionInputActiveId';
@@ -40,44 +21,44 @@ export class Television extends ExternalAccessory {
 
   private inputSources: InputSource[] = [];
 
-  private states = {
-    TelevisionState: Television.INACTIVE,
-    TelevisionInputActiveId: 0,
-    TelevisionConfiguredName: '',
-    TelevisionSleepDiscoveryMode: Television.ALWAYS_DISCOVERABLE,
-  };
+  // Device states
+  private Active: number = Active.INACTIVE;
+  private InputActiveId: number = 0;
+  private ConfiguredName: string = '';
+  private SleepDiscoveryMode: number = SleepDiscoveryMode.ALWAYS_DISCOVERABLE;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.Television,
+      Television.ACCESSORY_TYPE_NAME,
+    );
 
-    this.states.TelevisionConfiguredName = this.accessoryConfiguration.accessoryName;
+    this.ConfiguredName = this.accessoryName;
 
     // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
+    if (this.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedInputActiveId: number = accessoryState[this.inputActiveIdStorageKey] as number;
       const cachedConfiguredName: string = accessoryState[this.configuredNameStorageKey] as string;
 
       if (cachedState !== undefined) {
-        this.states.TelevisionState = cachedState;
+        this.Active = cachedState;
       }
       if (cachedInputActiveId !== undefined) {
-        this.states.TelevisionInputActiveId = cachedInputActiveId;
+        this.InputActiveId = cachedInputActiveId;
       }
       if (cachedConfiguredName !== undefined) {
-        this.states.TelevisionConfiguredName = cachedConfiguredName;
+        this.ConfiguredName = cachedConfiguredName;
       }
     }
-
-    // set accessory information
-    this.service = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // register handlers
 
@@ -128,47 +109,47 @@ export class Television extends ExternalAccessory {
   // Handlers
 
   async setActive(value: CharacteristicValue) {
-    this.states.TelevisionState = value as number;
+    this.Active = value as number;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Television.getStateName(this.states.TelevisionState)}`);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Active.getName(this.Active)}`);
   }
 
   async getActive(): Promise<CharacteristicValue> {
-    const televisionState = this.states.TelevisionState;
+    const televisionState = this.Active;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Television.getStateName(televisionState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Active.getName(televisionState)}`);
 
     return televisionState;
   }
 
   async setActiveIdentifier(value: CharacteristicValue) {
-    this.states.TelevisionInputActiveId = value as number;
+    this.InputActiveId = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Input Active Identifier: ${this.states.TelevisionInputActiveId}`);
+    this.log.info(`[${this.accessoryName}] Setting Input Active Identifier: ${this.InputActiveId}`);
   }
 
   async getActiveIdentifier(): Promise<CharacteristicValue> {
-    const inputActiveId = this.states.TelevisionInputActiveId;
+    const inputActiveId = this.InputActiveId;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Input Active Identifier: ${inputActiveId}`);
+    this.log.debug(`[${this.accessoryName}] Getting Input Active Identifier: ${inputActiveId}`);
 
     return inputActiveId;
   }
 
   async setConfiguredName(value: CharacteristicValue) {
-    this.states.TelevisionConfiguredName = value as string;
+    this.ConfiguredName = value as string;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Configured Name: ${this.states.TelevisionConfiguredName}`);
+    this.log.info(`[${this.accessoryName}] Setting Configured Name: ${this.ConfiguredName}`);
   }
 
   async getConfiguredName(): Promise<CharacteristicValue> {
-    const televisionConfiguredName = this.states.TelevisionConfiguredName;
+    const televisionConfiguredName = this.ConfiguredName;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configured Name: ${televisionConfiguredName}`);
+    this.log.debug(`[${this.accessoryName}] Getting Configured Name: ${televisionConfiguredName}`);
 
     return televisionConfiguredName;
   }
@@ -176,67 +157,28 @@ export class Television extends ExternalAccessory {
   async setRemoteKey(value: CharacteristicValue) {
     const remoteKey = value as number;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Remote Key: ${Television.getKeyName(remoteKey)}`);
+    this.log.debug(`[${this.accessoryName}] Setting Remote Key: ${RemoteKey.getName(remoteKey)}`);
   }
 
   async getSleepDiscoveryMode(): Promise<CharacteristicValue> {
-    const sleepDiscoveryMode = this.states.TelevisionSleepDiscoveryMode;
+    const sleepDiscoveryMode = this.SleepDiscoveryMode;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sleep Discovery Mode: ${sleepDiscoveryMode}`);
+    this.log.debug(`[${this.accessoryName}] Getting Sleep Discovery Mode: ${SleepDiscoveryMode.getName(sleepDiscoveryMode)}`);
 
     return sleepDiscoveryMode;
   }
 
-  protected getJsonState(): string {
+  //
+
+  protected override getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.TelevisionState,
-      [this.inputActiveIdStorageKey]: this.states.TelevisionInputActiveId,
-      [this.configuredNameStorageKey]: this.states.TelevisionConfiguredName,
+      [this.stateStorageKey]: this.Active,
+      [this.inputActiveIdStorageKey]: this.InputActiveId,
+      [this.configuredNameStorageKey]: this.ConfiguredName,
     };
 
     const json = JSON.stringify(jsonState);
 
     return json;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return Television.ACCESSORY_TYPE_NAME;
-  }
-
-  static getStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Television.INACTIVE: { stateName = 'INACTIVE'; break; }
-    case Television.ACTIVE: { stateName = 'ACTIVE'; break; }
-    default: { stateName = state.toString();}
-    }
-
-    return stateName;
-  }
-
-  static getKeyName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Television.REWIND: { stateName = 'REWIND'; break; }
-    case Television.FAST_FORWARD: { stateName = 'FAST FORWARD'; break; }
-    case Television.NEXT_TRACK: { stateName = 'NEXT TRACK'; break; }
-    case Television.PREVIOUS_TRACK: { stateName = 'PREVIOUS TRACK'; break; }
-    case Television.ARROW_UP: { stateName = 'ARROW UP'; break; }
-    case Television.ARROW_DOWN: { stateName = 'ARROW DOWN'; break; }
-    case Television.ARROW_LEFT: { stateName = 'ARROW LEFT'; break; }
-    case Television.ARROW_RIGHT: { stateName = 'ARROW RIGHT'; break; }
-    case Television.SELECT: { stateName = 'SELECT'; break; }
-    case Television.BACK: { stateName = 'BACK'; break; }
-    case Television.EXIT: { stateName = 'EXIT'; break; }
-    case Television.PLAY_PAUSE: { stateName = 'PLAY PAUSE'; break; }
-    case Television.INFORMATION: { stateName = 'INFORMATION'; break; }
-    default: { stateName = state.toString();}
-    }
-
-    return stateName;
   }
 }

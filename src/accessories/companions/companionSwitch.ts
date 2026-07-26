@@ -5,6 +5,7 @@ import { AccessoryConfiguration } from '../../configuration/configurationAccesso
 
 import { Switch } from '../virtualAccessorySwitch.js';
 import { TriggerableEventAccessory } from '../triggerableEventAccessory.js';
+import { Power } from '../accessoryCharacteristics.js';
 
 /**
  * CompanionSwitch - Companion accessory
@@ -29,7 +30,7 @@ export class CompanionSwitch extends Switch {
     this.partnerAccessory = partnerAccessory;
 
     // Override Switch settings
-    this.defaultState = Switch.OFF;
+    this.defaultState = Power.OFF;
     this.companionSensor = undefined;
     this.muteLogging = false;
 
@@ -46,8 +47,8 @@ export class CompanionSwitch extends Switch {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.companionName!);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(this.states.SwitchState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.SwitchState));
+    this.log.debug(`[${this.accessoryName}] Setting Companion Switch Current State: ${Power.getName(this.PowerState)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.On, (this.PowerState));
 
     // register handlers
 
@@ -57,11 +58,11 @@ export class CompanionSwitch extends Switch {
   }
 
   async setOn(value: CharacteristicValue) {
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Calling super.On()`, this.muteLogging);
+    this.log.info(`[${this.accessoryName}] Calling super.On()`, this.muteLogging);
     super.setOn(value);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Calling super.On()`, this.muteLogging);
+    this.log.info(`[${this.accessoryName}] Calling super.On()`, this.muteLogging);
 
-    if (this.states.SwitchState === CompanionSwitch.ON) {
+    if (this.PowerState === Power.ON) {
       this.partnerAccessory.triggerEvent(this);
     }
   }

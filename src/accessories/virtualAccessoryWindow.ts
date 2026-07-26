@@ -1,4 +1,4 @@
-import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,27 +9,25 @@ import { OpenableAccessoryConfiguration } from '../configuration/configurationOp
 /**
  * Window - Accessory implementation
  */
-export class Window extends OpeningAccessory {
+export class Window extends OpeningAccessory<typeof Service.Window> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Window';
+  private static readonly ACCESSORY_TYPE_NAME: string = 'Window';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.Window,
+      Window.ACCESSORY_TYPE_NAME,
+    );
   }
 
   protected getOpeningAccessoryConfiguration(): OpenableAccessoryConfiguration {
     return this.accessoryConfiguration.window;
-  }
-
-  protected getOpeningAccessoryService(): WithUUID<typeof Service> {
-    return this.platform.Service.Window;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return Window.ACCESSORY_TYPE_NAME;
   }
 }

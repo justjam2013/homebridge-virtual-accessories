@@ -1,4 +1,4 @@
-import type { PlatformAccessory } from 'homebridge';
+import type { PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from './platform.js';
 
@@ -66,8 +66,8 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
-  ): Accessory | undefined {
-    let virtualAccessory: Accessory | undefined;
+  ): Accessory<typeof Service> | undefined {
+    let virtualAccessory: Accessory<typeof Service> | undefined;
 
     const accessoryType: string = accessoryConfiguration.accessoryType;
 
@@ -146,10 +146,10 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
-  ): BinarySensor | undefined {
+  ): BinarySensor<typeof Service> | undefined {
     const sensorType: string = accessoryConfiguration.sensor.type;
 
-    let virtualSensor: BinarySensor | undefined;
+    let virtualSensor: BinarySensor<typeof Service> | undefined;
 
     switch (sensorType) {
     case BinarySensorType.CarbonDioxide:
@@ -184,10 +184,10 @@ export abstract class AccessoryFactory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
-  ): MeasurementSensor | undefined {
+  ): MeasurementSensor<typeof Service> | undefined {
     const sensorType: string = accessoryConfiguration.measurement.type;
 
-    let virtualSensor: MeasurementSensor | undefined;
+    let virtualSensor: MeasurementSensor<typeof Service> | undefined;
 
     switch (sensorType) {
     case MeasurementSensorType.Humidity:
@@ -204,7 +204,7 @@ export abstract class AccessoryFactory {
   }
 
   static createTrigger(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     triggerType: string,
     name: string,
   ): Trigger | undefined {

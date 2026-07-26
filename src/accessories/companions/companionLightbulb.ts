@@ -5,6 +5,8 @@ import { AccessoryConfiguration } from '../../configuration/configurationAccesso
 
 import { Lightbulb } from '../virtualAccessoryLightbulb.js';
 
+// UNUSED - Was created to provide timer capability
+
 /**
  * CompanionLightbulb - Companion accessory
  */

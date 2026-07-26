@@ -10,28 +10,14 @@ import { Accessory } from './accessory.js';
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
 import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../configuration/schema.js';
+import { Active, CurrentHeaterCoolerState, TargetHeaterCoolerState, TemperatureDisplayUnits } from './accessoryCharacteristics.js';
 
 /**
  * HeaterCooler - Accessory implementation
  */
-export class HeaterCooler extends Accessory implements UpdatableMeasurementSensor {
+export class HeaterCooler extends Accessory<typeof Service.HeaterCooler> implements UpdatableMeasurementSensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'HeaterCooler';
-
-  static readonly CURRENTLY_INACTIVE: number = 0;       // Characteristic.CurrentHeaterCoolerState.INACTIVE
-  static readonly CURRENTLY_IDLE: number = 1;           // Characteristic.CurrentHeaterCoolerState.IDLE
-  static readonly CURRENTLY_HEATING: number = 2;        // Characteristic.CurrentHeaterCoolerState.HEATING
-  static readonly CURRENTLY_COOLING: number = 3;        // Characteristic.CurrentHeaterCoolerState.COOLING
-
-  static readonly AUTO: number = 0;                     // Characteristic.TargetHeaterCoolerState.AUTO 
-  static readonly HEAT: number = 1;                     // Characteristic.TargetHeaterCoolerState.HEAT
-  static readonly COOL: number = 2;                     // Characteristic.TargetHeaterCoolerState.COOL
-
-  static readonly INACTIVE: number = 0;                 // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;                   // Characteristic.Active.ACTIVE
-
-  static readonly CELSIUS: number = 0;                  // Characteristic.TemperatureDisplayUnits.CELSIUS
-  static readonly FAHRENHEIT: number = 1;               // Characteristic.TemperatureDisplayUnits.FAHRENHEIT
+  private static readonly ACCESSORY_TYPE_NAME: string = 'HeaterCooler';
 
   private readonly stateStorageKey: string = 'HeaterCoolerActive';
   private readonly targetStateStorageKey: string = 'HeaterCoolerTargetState';
@@ -42,49 +28,54 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
   private deviceType: string;
 
-  private states = {
-    HeaterCoolerActive: HeaterCooler.INACTIVE,
-    HeaterCoolerCurrentState: HeaterCooler.CURRENTLY_INACTIVE,
-    HeaterCoolerTargetState: HeaterCooler.AUTO,
-    // HomeKit units are in celsius
-    HeatingThreshold: 18,           // 18ºC considered a minimum for health and safety
-    CoolingThreshold: 27,           // 27ºC
-    CurrentTemperature: 22,         // This value comes from sensor, set to 22ºC for now - room temperature
-    TemperatureDisplayUnits: HeaterCooler.CELSIUS,
-    FanRotationSpeed: 0,
-  };
+  // Device state
+  private Active: number = Active.INACTIVE;
+  private CurrentState: number = CurrentHeaterCoolerState.INACTIVE;
+  private TargetState: number = TargetHeaterCoolerState.AUTO;
+  // HomeKit units are in celsius
+  private HeatingThreshold: number = 18;           // 18ºC considered a minimum for health and safety
+  private CoolingThreshold: number = 27;           // 27ºC
+  private CurrentTemperature: number = 22;         // This value comes from sensor, set to 22ºC for now - room temperature
+  private TemperatureDisplayUnits: number = TemperatureDisplayUnits.CELSIUS;
+  private FanRotationSpeed: number = 0;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.HeaterCooler,
+      HeaterCooler.ACCESSORY_TYPE_NAME,
+    );
 
     // First configure the device based on the accessory details
-    this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
-    this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
-    this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
-    this.states.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold as number;
-    this.states.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold as number;
+    this.Active = Active.INACTIVE;
+    this.CurrentState = CurrentHeaterCoolerState.INACTIVE;
+    this.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? TemperatureDisplayUnits.CELSIUS : TemperatureDisplayUnits.FAHRENHEIT;
+    this.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold as number;
+    this.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold as number;
 
     // set to 22ºC
-    this.states.CurrentTemperature = 22;
+    this.CurrentTemperature = 22;
 
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
     if (this.deviceType === HeaterType.Heater) {
-      this.states.HeaterCoolerTargetState = HeaterCooler.HEAT;
+      this.TargetState = TargetHeaterCoolerState.HEAT;
     }
     else if (this.deviceType === HeaterType.Cooler) {
-      this.states.HeaterCoolerTargetState = HeaterCooler.COOL;
+      this.TargetState = TargetHeaterCoolerState.COOL;
     }
     else {
-      this.states.HeaterCoolerTargetState = HeaterCooler.AUTO;
+      this.TargetState = TargetHeaterCoolerState.AUTO;
     }
 
     // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
+    if (this.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedTargetState: number = accessoryState[this.targetStateStorageKey] as number;
@@ -92,48 +83,43 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       const cachedFanRotationSpeed: number = accessoryState[this.fanRotatioSpeedStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.HeaterCoolerActive = cachedState;
+        this.Active = cachedState;
       }
       if (cachedTargetState !== undefined) {
-        this.states.HeaterCoolerTargetState = cachedTargetState;
+        this.TargetState = cachedTargetState;
       }
       if (cachedTemperatureDisplayUnits !== undefined) {
-        this.states.TemperatureDisplayUnits = cachedTemperatureDisplayUnits;
+        this.TemperatureDisplayUnits = cachedTemperatureDisplayUnits;
       }
       if (cachedFanRotationSpeed !== undefined) {
-        this.states.FanRotationSpeed = cachedFanRotationSpeed;
+        this.FanRotationSpeed = cachedFanRotationSpeed;
       }
       if (this.cools()) {
         const cachedCoolingThreshold: number = accessoryState[this.coolingThresholdStorageKey] as number;
         if (cachedCoolingThreshold !== undefined) {
-          this.states.CoolingThreshold = cachedCoolingThreshold;
+          this.CoolingThreshold = cachedCoolingThreshold;
         }
       }
       if (this.heats()) {
         const cachedHeatingThreshold: number = accessoryState[this.heatingThresholdStorageKey] as number;
         if (cachedHeatingThreshold !== undefined) {
-          this.states.HeatingThreshold = cachedHeatingThreshold;
+          this.HeatingThreshold = cachedHeatingThreshold;
         }
       }
     }
 
     this.setDeviceOperationalCondition();
 
-    // get the HeaterCooler service if it exists, otherwise create a new LightBulb service
-    this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
     // These characteristics will be added back as needed
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature));
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature));
 
     this.setHeaterCoolerServiceProperties(this.service!);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Heater/Cooler Current State: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.states.HeaterCoolerCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState, (this.states.HeaterCoolerTargetState));
+    this.log.debug(`[${this.accessoryName}] Setting Heater/Cooler Current State: ${CurrentHeaterCoolerState.getName(this.CurrentState)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.CurrentState));
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState, (this.TargetState));
 
     // register handlers
 
@@ -170,12 +156,12 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       .onGet(this.getTemperatureDisplayUnits.bind(this));
 
     const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
+    this.log.debug(`[${this.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
 
     if (this.accessoryConfiguration.heaterCooler.hasFan) {
-      const lockManagementServiceName = `${this.accessoryConfiguration.accessoryName} Fan`;
-      const fanService = this.accessory.getService(lockManagementServiceName)
-        || this.accessory.addService(this.platform.Service.Fan, lockManagementServiceName, this.accessory.UUID + '-Fan');
+      const fanServiceName = `${this.accessoryName} Fan`;
+      const fanService = this.accessory.getService(fanServiceName)
+        || this.accessory.addService(this.platform.Service.Fan, fanServiceName, this.accessory.UUID + '-Fan');
 
       fanService.updateCharacteristic(this.platform.Characteristic.RotationSpeed, (0));
 
@@ -188,99 +174,99 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   // Handlers
 
   async setActive(value: CharacteristicValue) {
-    this.states.HeaterCoolerActive = value as number;
+    this.Active = value as number;
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${HeaterCooler.getActiveName(this.states.HeaterCoolerActive)}`);
+    this.log.info(`[${this.accessoryName}] Setting Active: ${Active.getName(this.Active)}`);
   }
 
   async getActive(): Promise<CharacteristicValue> {
-    const heaterCoolerActive = this.states.HeaterCoolerActive;
+    const heaterCoolerActive = this.Active;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${HeaterCooler.getActiveName(heaterCoolerActive)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Active: ${Active.getName(heaterCoolerActive)}`);
 
     return heaterCoolerActive;
   }
 
   async getCurrentHeaterCoolerState(): Promise<CharacteristicValue> {
-    const heaterCoolerCurrentState = this.states.HeaterCoolerCurrentState;
+    const heaterCoolerCurrentState = this.CurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(heaterCoolerCurrentState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current Heater Cooler State: ${CurrentHeaterCoolerState.getName(heaterCoolerCurrentState)}`);
 
     return heaterCoolerCurrentState;
   }
 
   async setTargetHeaterCoolerState(value: CharacteristicValue) {
-    this.states.HeaterCoolerTargetState = value as number;
+    this.TargetState = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(this.states.HeaterCoolerTargetState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Target Heater Cooler State: ${TargetHeaterCoolerState.getName(this.TargetState)}`);
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Current Heater Cooler State: ${CurrentHeaterCoolerState.getName(this.CurrentState)}`);
   }
 
   async getTargetHeaterCoolerState(): Promise<CharacteristicValue> {
-    const heaterCoolerTargetState = this.states.HeaterCoolerTargetState;
+    const heaterCoolerTargetState = this.TargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(heaterCoolerTargetState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Target Heater Cooler State: ${TargetHeaterCoolerState.getName(heaterCoolerTargetState)}`);
 
     return heaterCoolerTargetState;
   }
 
   async getCurrentTemperature(): Promise<CharacteristicValue> {
-    const currentTemperature = this.states.CurrentTemperature;
+    const currentTemperature = this.CurrentTemperature;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${this.displayTemperature(currentTemperature)}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current Temperature: ${this.displayTemperature(currentTemperature)}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
 
     return currentTemperature;
   }
 
   async setCoolingThresholdTemperature(value: CharacteristicValue) {
-    this.states.CoolingThreshold = value as number;
+    this.CoolingThreshold = value as number;
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Cooling Threshold Temperature: ${this.displayTemperature(this.states.CoolingThreshold)}${this.getDegreeUnits()}`);
+    this.log.info(`[${this.accessoryName}] Setting Cooling Threshold Temperature: ${this.displayTemperature(this.CoolingThreshold)}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
   }
 
   async getCoolingThresholdTemperature(): Promise<CharacteristicValue>  {
-    const coolingThreshold = this.states.CoolingThreshold;
+    const coolingThreshold = this.CoolingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Cooling Threshold Temperature: ${this.displayTemperature(coolingThreshold)}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryName}] Getting Cooling Threshold Temperature: ${this.displayTemperature(coolingThreshold)}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
 
     return coolingThreshold;
   }
 
   async setHeatingThresholdTemperature(value: CharacteristicValue) {
-    this.states.HeatingThreshold = value as number;
+    this.HeatingThreshold = value as number;
 
     this.setDeviceOperationalCondition();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(this.states.HeatingThreshold)}${this.getDegreeUnits()}`);
+    this.log.info(`[${this.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(this.HeatingThreshold)}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
   }
 
   async getHeatingThresholdTemperature(): Promise<CharacteristicValue> {
-    const heatingThreshold = this.states.HeatingThreshold;
+    const heatingThreshold = this.HeatingThreshold;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Heating Threshold Temperature: ${this.displayTemperature(heatingThreshold)}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryName}] Getting Heating Threshold Temperature: ${this.displayTemperature(heatingThreshold)}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
 
     return heatingThreshold;
   }
 
   async setTemperatureDisplayUnits(value: CharacteristicValue) {
-    this.states.TemperatureDisplayUnits = value as number;
+    this.TemperatureDisplayUnits = value as number;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Temperature Display Units: ${HeaterCooler.getTemperatureDisplayUnitsName(this.states.TemperatureDisplayUnits)}`);
+    this.log.info(`[${this.accessoryName}] Setting Temperature Display Units: ${TemperatureDisplayUnits.getName(this.TemperatureDisplayUnits)}`);
   }
 
   async getTemperatureDisplayUnits(): Promise<CharacteristicValue> {
-    const temperatureDisplayUnits = this.states.TemperatureDisplayUnits;
+    const temperatureDisplayUnits = this.TemperatureDisplayUnits;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Temperature Display Units: ${HeaterCooler.getTemperatureDisplayUnitsName(temperatureDisplayUnits)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Temperature Display Units: ${TemperatureDisplayUnits.getName(temperatureDisplayUnits)}`);
 
     return temperatureDisplayUnits;
   }
@@ -288,41 +274,39 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   // Fan Handlers
 
   async setRotationSpeed(value: CharacteristicValue) {
-    this.states.FanRotationSpeed = value as number;
+    this.FanRotationSpeed = value as number;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.FanRotationSpeed}%`);
+    this.log.info(`[${this.accessoryName}] Setting Rotation Speed: ${this.FanRotationSpeed}%`);
   }
 
   async getRotationSpeed(): Promise<CharacteristicValue> {
-    const fanRotationSpeed = this.states.FanRotationSpeed;
+    const fanRotationSpeed = this.FanRotationSpeed;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Speed: ${fanRotationSpeed}%`);
+    this.log.debug(`[${this.accessoryName}] Getting Rotation Speed: ${fanRotationSpeed}%`);
 
     return fanRotationSpeed;
   }
 
-  protected getJsonState(): string {
+  //
+
+  protected override getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.HeaterCoolerActive,
-      [this.targetStateStorageKey]: this.states.HeaterCoolerTargetState,
-      [this.coolingThresholdStorageKey]: this.states.CoolingThreshold,
-      [this.heatingThresholdStorageKey]: this.states.HeatingThreshold,
-      [this.temperatureDisplayUnitsStorageKey]: this.states.TemperatureDisplayUnits,
+      [this.stateStorageKey]: this.Active,
+      [this.targetStateStorageKey]: this.TargetState,
+      [this.coolingThresholdStorageKey]: this.CoolingThreshold,
+      [this.heatingThresholdStorageKey]: this.HeatingThreshold,
+      [this.temperatureDisplayUnitsStorageKey]: this.TemperatureDisplayUnits,
     };
 
     if (this.accessoryConfiguration.heaterCooler.hasFan) {
-      Object.assign(jsonState, { [this.fanRotatioSpeedStorageKey]: this.states.FanRotationSpeed });
+      Object.assign(jsonState, { [this.fanRotatioSpeedStorageKey]: this.FanRotationSpeed });
     }
 
     const json = JSON.stringify(jsonState);
 
     return json;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return HeaterCooler.ACCESSORY_TYPE_NAME;
   }
 
   private heats(): boolean {
@@ -334,93 +318,38 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   }
 
   private setDeviceOperationalCondition() {
-    if (this.states.HeaterCoolerActive === HeaterCooler.INACTIVE) {
-      this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
+    if (this.Active === Active.INACTIVE) {
+      this.CurrentState = CurrentHeaterCoolerState.INACTIVE;
     }
-    else {  // (this.states.HeaterCoolerActive === HeaterCooler.ACTIVE)
-      if (this.states.HeaterCoolerTargetState === HeaterCooler.HEAT) {
-        this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_HEATING;
+    else {  // (this.HeaterCoolerActive === HeaterCooler.ACTIVE)
+      if (this.TargetState === TargetHeaterCoolerState.HEAT) {
+        this.CurrentState = CurrentHeaterCoolerState.HEATING;
       }
-      else if (this.states.HeaterCoolerTargetState === HeaterCooler.COOL) {
-        this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_COOLING;
+      else if (this.TargetState === TargetHeaterCoolerState.COOL) {
+        this.CurrentState = CurrentHeaterCoolerState.COOLING;
       }
-      else {  // (this.states.HeaterCoolerTargetState === HeaterCooler.AUTO)
-        if (this.states.CurrentTemperature < this.states.HeatingThreshold) {
+      else {  // (this.HeaterCoolerTargetState === HeaterCooler.AUTO)
+        if (this.CurrentTemperature < this.HeatingThreshold) {
           if (this.heats()) {
-            this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_HEATING;
+            this.CurrentState = CurrentHeaterCoolerState.HEATING;
           }
         }
-        else if (this.states.CurrentTemperature > this.states.CoolingThreshold) {
+        else if (this.CurrentTemperature > this.CoolingThreshold) {
           if (this.cools()) {
-            this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_COOLING;
+            this.CurrentState = CurrentHeaterCoolerState.COOLING;
           }
         }
         else {
-          this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_IDLE;
+          this.CurrentState = CurrentHeaterCoolerState.IDLE;
         }
       }
     }
 
-    this.service?.setCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.states.HeaterCoolerCurrentState));
+    this.service?.setCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.CurrentState));
 
     this.storeState();
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Heater/Cooler current state: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
-  }
-
-  static getActiveName(status: number): string {
-    let activeName: string;
-
-    switch (status) {
-    case undefined: { activeName = 'undefined'; break; }
-    case HeaterCooler.INACTIVE: { activeName = 'INACTIVE'; break; }
-    case HeaterCooler.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = status.toString(); }
-    }
-
-    return activeName;
-  }
-
-  static getCurrentStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HeaterCooler.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
-    case HeaterCooler.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
-    case HeaterCooler.CURRENTLY_HEATING: { stateName = 'HEATING'; break; }
-    case HeaterCooler.CURRENTLY_COOLING: { stateName = 'COOLING'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
-  }
-
-  static getTargetStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HeaterCooler.AUTO: { stateName = 'AUTO'; break; }
-    case HeaterCooler.HEAT: { stateName = 'HEAT'; break; }
-    case HeaterCooler.COOL: { stateName = 'COOL'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
-  }
-
-  static getTemperatureDisplayUnitsName(state: number): string {
-    let unitsName: string;
-
-    switch (state) {
-    case undefined: { unitsName = 'undefined'; break; }
-    case HeaterCooler.CELSIUS: { unitsName = 'CELSIUS'; break; }
-    case HeaterCooler.FAHRENHEIT: { unitsName = 'FAHRENHEIT'; break; }
-    default: { unitsName = state.toString(); }
-    }
-
-    return unitsName;
+    this.log.debug(`[${this.accessoryName}] Heater/Cooler current state: ${CurrentHeaterCoolerState.getName(this.CurrentState)}`);
   }
 
   /**
@@ -455,7 +384,7 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       // Remove this only if we want manual operation only
       //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater ${this.deviceType === HeaterType.Sauna ? '(sauna)' : ''}`);
+      this.log.debug(`[${this.accessoryName}] Is a Heater ${this.deviceType === HeaterType.Sauna ? '(sauna)' : ''}`);
     }
     else if (this.deviceType === HeaterType.Cooler) {
       currentStateValues.delete(CurrentHeaterCoolerState.HEATING);
@@ -464,31 +393,31 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       // Remove this only if we want manual operation only
       //targetStateValues.delete(TargetHeaterCoolerState.AUTO);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Cooler`);
+      this.log.debug(`[${this.accessoryName}] Is a Cooler`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Heater/Cooler`);
+      this.log.debug(`[${this.accessoryName}] Is a Heater/Cooler`);
     }
 
     if (currentStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
 
       service.getCharacteristic(CurrentHeaterCoolerState)
         .setProps({
           validValues: Array.from(currentStateValues),
         });
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHeaterCoolerState).props)}`);
+      this.log.debug(`[${this.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHeaterCoolerState).props)}`);
     }
     if (targetStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
 
       service.getCharacteristic(TargetHeaterCoolerState)
         .setProps({
           validValues: Array.from(targetStateValues),
         });
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHeaterCoolerState).props)}`);
+      this.log.debug(`[${this.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHeaterCoolerState).props)}`);
     }
 
     if (this.deviceType === HeaterType.Sauna) {
@@ -505,7 +434,7 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     const labels: string[] = [];
 
     values.forEach(value => {
-      labels.push(HeaterCooler.getCurrentStateName(value));
+      labels.push(CurrentHeaterCoolerState.getName(value));
     });
 
     return labels;
@@ -515,56 +444,43 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     const labels: string[] = [];
 
     values.forEach(value => {
-      labels.push(HeaterCooler.getTargetStateName(value));
+      labels.push(TargetHeaterCoolerState.getName(value));
     });
 
     return labels;
   }
 
   private displayTemperature(temperature: number): number {
-    const displayTemperature = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature * 9/5) + 32;
+    const displayTemperature = (this.TemperatureDisplayUnits === TemperatureDisplayUnits.CELSIUS) ? temperature : (temperature * 9/5) + 32;
 
     return Math.round(displayTemperature * 10) / 10;
-  }
-
-  private getDegreeUnits(): string {
-    let units: string;
-
-    switch (this.states.TemperatureDisplayUnits) {
-    case undefined: { units = 'º'; break; }
-    case HeaterCooler.CELSIUS: { units = 'ºC'; break; }
-    case HeaterCooler.FAHRENHEIT: { units = 'ºF'; break; }
-    default: { units = 'º'; }
-    }
-
-    return units;
   }
 
   // Updatable Sensor interface
 
   updateMeasurementSensor(value: number, accessoryId: string): void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryName}] Request update temperature sensor to ${value}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
 
-    if (accessoryId !== this.accessoryConfiguration.accessoryID) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+    if (accessoryId !== this.accessoryId) {
+      this.log.error(`[${this.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Heater/Cooler sensor`);
+      this.log.error(`[${this.accessoryName}] Value ${value} is not valid for Heater/Cooler sensor`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating temperature sensor to ${value}${this.getDegreeUnits()}`);
+      this.log.debug(`[${this.accessoryName}] Updating temperature sensor to ${value}${TemperatureDisplayUnits.getUnits(this.TemperatureDisplayUnits)}`);
 
-      this.states.CurrentTemperature = this.toCelsius(value);
+      this.CurrentTemperature = this.toCelsius(value);
       this.setDeviceOperationalCondition();
     }
   }
 
   private toCelsius(temperature: number): number {
-    const temperatureCelsius = (this.states.TemperatureDisplayUnits === HeaterCooler.CELSIUS) ? temperature : (temperature - 32) * 5/9;
+    const temperatureCelsius = (this.TemperatureDisplayUnits === TemperatureDisplayUnits.CELSIUS) ? temperature : (temperature - 32) * 5/9;
 
     return Math.round(temperatureCelsius * 10) / 10;
   }

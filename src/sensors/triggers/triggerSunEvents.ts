@@ -1,3 +1,5 @@
+import { Service } from 'homebridge';
+
 import { BinarySensor } from '../binarySensor.js';
 import { SunEventsTriggerConfiguration } from '../../configuration/triggers/configurationSunEventsTrigger.js';
 import { Trigger } from './trigger.js';
@@ -7,6 +9,7 @@ import { Cron } from 'croner';
 import { DateTimeFormatter, LocalDate, LocalDateTime } from '@js-joda/core';
 import { Type, deserialize } from 'typeserializer';
 import 'reflect-metadata';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 /**
  * SunEventsTrigger - Trigger implementation
@@ -20,7 +23,7 @@ export class SunEventsTrigger extends Trigger {
   private dataCronJob!: Cron;
 
   constructor(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     name: string,
   ) {
     super(sensor, name);
@@ -73,7 +76,7 @@ export class SunEventsTrigger extends Trigger {
   private async setupSunEvent(
     triggerConfig: SunEventsTriggerConfiguration,
     timezone: string,
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
   ) {
     const today: string = LocalDate.now().toString();
     this.log.debug(`[${this.accessoryName}] Today: ${today}`);
@@ -171,7 +174,7 @@ export class SunEventsTrigger extends Trigger {
     event: string,
     offset: number,
     dailyDetails: DailyDetails,
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
   ) {
     let eventTime: string | undefined;
     switch (event) {
@@ -217,9 +220,9 @@ export class SunEventsTrigger extends Trigger {
         const now = Utils.now().toString();
         this.log.debug(`[${this.accessoryName}] Now ${now} matched event time '${cronRunTimestamp}'. Triggering sensor`);
 
-        sensor.triggerSensorState(BinarySensor.TRIGGERED, this);
+        sensor.triggerSensorState(TriggeredState.TRIGGERED, this);
         await Utils.delay(resetDelayMillis, this.accessoryName, this.log);
-        sensor.triggerSensorState(BinarySensor.NORMAL, this);
+        sensor.triggerSensorState(TriggeredState.NORMAL, this);
       }),
     );
 

@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { Units, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -8,22 +8,14 @@ import { Accessory } from './accessory.js';
 
 import { Utils } from '../utils/utils.js';
 import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRequest, TLVReaderKeyResponse, TLVRequest, TLVUtils } from '../utils/tlv.js';
+import { LockCurrentState, LockLastKnownAction, LockTargetState } from './accessoryCharacteristics.js';
 
 /**
  * Lock - Accessory implementation
  */
-export class Lock extends Accessory {
+export class Lock extends Accessory<typeof Service.LockMechanism> {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Lock';
-
-  static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED
-  static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED
-  static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED
-  static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN
-
-  static readonly SECURED_REMOTELY: number = 6;                 // Characteristic.LockLastKnownAction.SECURED_REMOTELY
-  static readonly UNSECURED_REMOTELY: number = 7;               // Characteristic.LockLastKnownAction.UNSECURED_REMOTELY
-  static readonly SECURED_BY_AUTO_SECURE_TIMEOUT: number = 8;   // Characteristic.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT
+  private static readonly ACCESSORY_TYPE_NAME: string = 'Lock';
 
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
@@ -52,34 +44,39 @@ export class Lock extends Accessory {
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
-  private states = {
-    LockCurrentState: Lock.SECURED,
-    LockTargetState: Lock.SECURED,
-    LockManagementAutoSecurityTimeout: 0,
-    LockLastKnownAction: Lock.UNSECURED_REMOTELY,
-  };
+  // Device states
+  private CurrentState: number = LockCurrentState.SECURED;
+  private TargetState: number = LockTargetState.SECURED;
+  private ManagementAutoSecurityTimeout: number = 0;
+  private LastKnownAction: number = LockLastKnownAction.UNSECURED_REMOTELY;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(
+      platform,
+      accessory,
+      accessoryConfiguration,
+      platform.Service.LockMechanism,
+      Lock.ACCESSORY_TYPE_NAME,
+    );
 
     // First configure the device based on the accessory details
-    this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
+    this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? LockCurrentState.UNSECURED : LockCurrentState.SECURED;
     const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
     // const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
     // HomeKey appears to be broken right now, so temporarily leaving NFC out if no HomeKey card color is selected
     const walletKeyColor = (this.accessoryConfiguration.lock.walletKeyColor !== undefined) ? this.accessoryConfiguration.lock.walletKeyColor : undefined;
     this.setupHomeKey = (walletKeyColor === undefined) ? false : true;
 
-    this.states.LockCurrentState = this.defaultState;
-    this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
-    this.states.LockLastKnownAction = Lock.UNSECURED_REMOTELY;      // There is no "unknown" value
+    this.CurrentState = this.defaultState;
+    this.ManagementAutoSecurityTimeout = autoSecurityTimeout;
+    this.LastKnownAction = LockLastKnownAction.UNSECURED_REMOTELY;      // There is no "unknown" value
 
     // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
+    if (this.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
       const cachedSecurityTimeout: number = accessoryState[this.securityTimeoutStorageKey] as number;
@@ -91,13 +88,13 @@ export class Lock extends Accessory {
       const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? Utils.jsonToMap(jsonReaderPrivateKeys) : undefined;
 
       if (cachedState !== undefined) {
-        this.states.LockCurrentState = cachedState;
+        this.CurrentState = cachedState;
       }
       if (cachedSecurityTimeout !== undefined) {
-        this.states.LockManagementAutoSecurityTimeout = cachedSecurityTimeout;
+        this.ManagementAutoSecurityTimeout = cachedSecurityTimeout;
       }
       if (cachedLastKnownAction !== undefined) {
-        this.states.LockLastKnownAction = cachedLastKnownAction;
+        this.LastKnownAction = cachedLastKnownAction;
       }
       if (cachedDeviceCredentialPublicKeys !== undefined) {
         this.deviceCredentialPublicKeys = cachedDeviceCredentialPublicKeys;
@@ -107,20 +104,18 @@ export class Lock extends Accessory {
       }
     }
 
-    this.states.LockTargetState = this.states.LockCurrentState;
+    this.TargetState = this.CurrentState;
 
     if (this.setupHomeKey) {
       this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor as string]);
     }
 
-    this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockTargetState));
+    this.log.debug(`[${this.accessoryName}] Setting Lock Current State: ${LockCurrentState.getName(this.CurrentState)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.CurrentState));
+    this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.TargetState));
+    this.service.updateCharacteristic(this.platform.Characteristic.LockLastKnownAction, (this.LastKnownAction));
+    this.service.updateCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout, (this.ManagementAutoSecurityTimeout));
 
     // register handlers
 
@@ -143,7 +138,7 @@ export class Lock extends Accessory {
      */
 
     // Creating Lock Management service
-    const lockManagementServiceName = `${this.accessoryConfiguration.accessoryName} Management`;
+    const lockManagementServiceName = `${this.accessoryName} Management`;
     const lockManagementService = this.accessory.getService(lockManagementServiceName)
       || this.accessory.addService(this.platform.Service.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
 
@@ -165,7 +160,7 @@ export class Lock extends Accessory {
 
     if (this.setupHomeKey) {
     // Creating Nfc Access service
-      const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
+      const nfcAccessServiceName = `${this.accessoryName} Nfc Access`;
       const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
         || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
 
@@ -182,37 +177,37 @@ export class Lock extends Accessory {
   // Handlers
 
   async getLockCurrentState(): Promise<CharacteristicValue> {
-    const lockState = this.states.LockCurrentState;
+    const lockState = this.CurrentState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${Lock.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current State: ${LockCurrentState.getName(lockState)}`);
 
     return lockState;
   }
 
   async setLockTargetState(value: CharacteristicValue) {
-    this.states.LockTargetState = value as number;
+    this.TargetState = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${Lock.getStateName(this.states.LockTargetState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Target State: ${LockTargetState.getName(this.TargetState)}`);
 
-    this.states.LockCurrentState = this.states.LockTargetState;
-    this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
+    this.CurrentState = this.TargetState;
+    this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.CurrentState));
 
-    this.states.LockLastKnownAction = (this.states.LockCurrentState === Lock.SECURED) ?
-      Lock.SECURED_REMOTELY :
-      Lock.UNSECURED_REMOTELY;
+    this.LastKnownAction = (this.CurrentState === LockCurrentState.SECURED) ?
+      LockLastKnownAction.SECURED_REMOTELY :
+      LockLastKnownAction.UNSECURED_REMOTELY;
 
     this.storeState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Current State: ${LockTargetState.getName(this.CurrentState)}`);
 
     // Run auto lock timeout
     this.startAutoSecurityTimeout();
   }
 
   async getLockTargetState(): Promise<CharacteristicValue> {
-    const lockState = this.states.LockTargetState;
+    const lockState = this.TargetState;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${Lock.getStateName(lockState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Target State: ${LockTargetState.getName(lockState)}`);
 
     return lockState;
   }
@@ -222,36 +217,36 @@ export class Lock extends Accessory {
   async setLockControlPoint(value: CharacteristicValue) {
     const lockControlPoint = value;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Control Point: ${lockControlPoint}`);
+    this.log.info(`[${this.accessoryName}] Setting Lock Control Point: ${lockControlPoint}`);
   }
 
   async getVersion(): Promise<CharacteristicValue> {
     const version = '1.0.0';
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Version: ${version}`);
+    this.log.debug(`[${this.accessoryName}] Getting Lock Management Version: ${version}`);
 
     return version;
   }
 
   async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
-    this.states.LockManagementAutoSecurityTimeout = value as number;
+    this.ManagementAutoSecurityTimeout = value as number;
 
-    // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.states.LockManagementAutoSecurityTimeout}`);
+     
+    this.log.info(`[${this.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.ManagementAutoSecurityTimeout}`);
   }
 
   async getLockManagementAutoSecurityTimeout(): Promise<CharacteristicValue> {
-    const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
+    const lockManagementAutoSecurityTimeout = this.ManagementAutoSecurityTimeout;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
+    this.log.debug(`[${this.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
 
     return lockManagementAutoSecurityTimeout;
   }
 
   async getLockLastKnownAction(): Promise<CharacteristicValue> {
-    const lockLastKnownAction = this.states.LockLastKnownAction;
+    const lockLastKnownAction = this.LastKnownAction;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Last Known Action: ${lockLastKnownAction}`);
+    this.log.debug(`[${this.accessoryName}] Getting Lock Last Known Action: ${LockLastKnownAction.getName(lockLastKnownAction)}`);
 
     return lockLastKnownAction;
   }
@@ -261,7 +256,7 @@ export class Lock extends Accessory {
   async getConfigurationState(): Promise<CharacteristicValue> {
     const configurationState = 0;   // Successful
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Configuration State: ${configurationState}`);
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Configuration State: ${configurationState}`);
 
     return configurationState;
   }
@@ -272,8 +267,8 @@ export class Lock extends Accessory {
     try {
       const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
+      this.log.debug(`[${this.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
+      this.log.debug(`[${this.accessoryName}] NFC Access Control Point Response: "${response}"`);
 
       return response;
     }
@@ -291,7 +286,7 @@ export class Lock extends Accessory {
   async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
     const nfcAccessControlPoint = '';
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
 
     return nfcAccessControlPoint;
   }
@@ -299,16 +294,18 @@ export class Lock extends Accessory {
   async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
     const nfcAccessSupportedConfiguration = this.nfcAccessSupportedConfiguration;
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
 
     return nfcAccessSupportedConfiguration;
   }
 
-  protected getJsonState(): string {
+  //
+
+  protected override getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.LockCurrentState,
-      [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
-      [this.lastKnownActionStorageKey]: this.states.LockLastKnownAction,
+      [this.stateStorageKey]: this.CurrentState,
+      [this.securityTimeoutStorageKey]: this.ManagementAutoSecurityTimeout,
+      [this.lastKnownActionStorageKey]: this.LastKnownAction,
     };
 
     if (this.setupHomeKey) {
@@ -321,45 +318,28 @@ export class Lock extends Accessory {
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Lock.ACCESSORY_TYPE_NAME;
-  }
-
-  static getStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Lock.UNSECURED: { stateName = 'UNSECURED'; break; }
-    case Lock.SECURED: { stateName = 'SECURED'; break; }
-    case Lock.JAMMED: { stateName = 'JAMMED'; break; }
-    case Lock.UNKNOWN: { stateName = 'UNKNOWN'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
-  }
-
   private startAutoSecurityTimeout(): void {
-    if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
-      const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;
+    if (this.TargetState !== this.defaultState && this.ManagementAutoSecurityTimeout > 0) {
+      const securityTimeoutMillis: number = this.ManagementAutoSecurityTimeout * 1000;
       this.securityTimerId = setTimeout(() => {
         // Reset timer
         clearTimeout(this.securityTimerId);
 
         this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
 
-        this.states.LockLastKnownAction = Lock.SECURED_BY_AUTO_SECURE_TIMEOUT;
+        this.LastKnownAction = LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT;
       }, securityTimeoutMillis)
         .unref();
  
-      const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);
+      const timeout: string = Utils.secondsToHHmmss(this.ManagementAutoSecurityTimeout);
+      this.log.info(`[${this.accessoryName}] Security Timeout in ${timeout}`);
     }
     else {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] No Security Timeout defined`);
+      this.log.info(`[${this.accessoryName}] No Security Timeout defined`);
     }
   }
+
+  // Security
 
   private readonly GET_DEVICE_CREDENTIAL_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_GET, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
   private readonly GET_READER_KEY_REQUEST: number =             Utils.concatenate(TLVUtils.OPERATION_GET, TLVUtils.READER_KEY_REQUEST);
@@ -372,7 +352,7 @@ export class Lock extends Accessory {
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest, this.log);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
+    this.log.debug(`[${this.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
 
     let hexTlvResponse: string = '';
 
@@ -381,7 +361,7 @@ export class Lock extends Accessory {
     switch (controlPointRequest) {
     // Not called
     case this.GET_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Device Credential`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: GET Device Credential`);
 
       if (this.deviceCredentialPublicKeys.size > 0) {
         const issuerKeyIdentifier = this.deviceCredentialPublicKeys.keys().next().value;
@@ -395,7 +375,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: GET Reader Key`);
 
       if (this.readerPrivateKeys.size > 0) {
         const readerKeyIdentifier = this.readerPrivateKeys.keys().next().value;
@@ -409,7 +389,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.ADD_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Device Credential`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: ADD Device Credential`);
 
       const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
       const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
@@ -434,7 +414,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.ADD_GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: ADD Reader Key`);
 
       const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
       const readerPrivateKey = request.readerPrivateKey!.value as string;
@@ -460,7 +440,7 @@ export class Lock extends Accessory {
     }
     // Not called
     case this.RFEMOVE_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Device Credential`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: REMOVE Device Credential`);
 
       const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
       const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
@@ -480,7 +460,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.REMOVE_GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: REMOVE Reader Key`);
 
       const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
       const keyIdentifier = request.keyIdentifier!.value as string;
@@ -500,15 +480,15 @@ export class Lock extends Accessory {
     }
     default: {
       if (!TLVUtils.OPERATIONS.includes(tlvRequest.operation.type)) {
-        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
+        this.log.error(`[${this.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
       }
       if (!TLVUtils.REQUESTS.includes(tlvRequest.request.type)) {
-        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
+        this.log.error(`[${this.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
       }
     }
     }
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
+    this.log.debug(`[${this.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
 
     const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
     return base64TlvResponse;

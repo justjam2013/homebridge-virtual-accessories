@@ -17,9 +17,10 @@ import { ContactSensor } from '../virtualSensorContact.js';
 import { LeakSensor } from '../virtualSensorLeak.js';
 import { OccupancySensor } from '../virtualSensorOccupancy.js';
 import { SmokeSensor } from '../virtualSensorSmoke.js';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 export interface TriggerableCompanionSensor {
-  triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean): void;
+  triggerCompanionSensorState(sensorState: number, accessory: Accessory<typeof Service>, isLoggingDisabled: boolean): void;
 }
 
 export class CompanionSensor {
@@ -62,20 +63,39 @@ export class CompanionSensor {
 
     return virtualSensor;
   }
+
+  static getCompanionSensorServiceUUIDs(
+    platform: VirtualAccessoriesPlatform,
+  ): string[] {
+    const companionSensorServiceUUIDs: string[] =
+    [
+      platform.Service.CarbonDioxideSensor.UUID,
+      platform.Service.CarbonMonoxideSensor.UUID,
+      platform.Service.ContactSensor.UUID,
+      platform.Service.LeakSensor.UUID,
+      platform.Service.MotionSensor.UUID,
+      platform.Service.OccupancySensor.UUID,
+      platform.Service.SmokeSensor.UUID,
+    ];
+    return companionSensorServiceUUIDs;
+  }
 }
 
 // Mixin
 
-function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
+function Companion<T extends abstract new (...args: any[]) => BinarySensor<typeof Service.Switch>>(
   SensorInstance: T,
 ) {
   abstract class CompanionSensor extends SensorInstance implements TriggerableCompanionSensor {
 
     private uuidPostfix: string = '-sensor';
 
-    companionConstructor(companionSensorName: string): void {
+    companionConstructor(
+      companionSensorName: string,
+      sensorService: WithUUID<typeof Service>,
+    ): void {
       // Replace the Sensor Service
-      const sensorService: WithUUID<typeof Service> = this.getService();
+      //const sensorService: WithUUID<typeof Service> = this.getPrimaryService();
       const service = this.accessory.getService(sensorService);
       if (service !== undefined) {
         this.accessory.removeService(service);
@@ -92,17 +112,17 @@ function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
     /**
      * This method is called by the accessory that has this sensor as a companion
      */
-    async triggerCompanionSensorState(sensorState: number, accessory: Accessory, isLoggingDisabled: boolean = false) {
+    async triggerCompanionSensorState(sensorState: number, accessory: Accessory<typeof Service>, isLoggingDisabled: boolean = false) {
       if (accessory.accessory.UUID !== this.accessory.UUID) {
-        throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
+        throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryName} is not allowed to trigger this sensor`);
       }
 
-      this.states.SensorState = sensorState;
+      this.State = sensorState;
 
-      this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
+      this.service!.updateCharacteristic(this.eventDetected, (this.State));
 
-      // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+       
+      this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${TriggeredState.getName(this.State)}`, isLoggingDisabled);
     }
   };
   return CompanionSensor;
@@ -118,7 +138,7 @@ class CompanionCarbonDioxideSensor extends Companion(CarbonDioxideSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.CarbonDioxideSensor);
   }
 }
 
@@ -132,7 +152,7 @@ class CompanionCarbonMonoxideSensor extends Companion(CarbonMonoxideSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.CarbonMonoxideSensor);
   }
 }
 
@@ -146,7 +166,7 @@ class CompanionContactSensor extends Companion(ContactSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.ContactSensor);
   }
 }
 
@@ -160,7 +180,7 @@ class CompanionLeakSensor extends Companion(LeakSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.LeakSensor);
   }
 }
 
@@ -174,7 +194,7 @@ class CompanionMotionSensor extends Companion(MotionSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.MotionSensor);
   }
 }
 
@@ -188,7 +208,7 @@ class CompanionOccupancySensor extends Companion(OccupancySensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.OccupancySensor);
   }
 }
 
@@ -202,6 +222,6 @@ class CompanionSmokeSensor extends Companion(SmokeSensor) {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.companionConstructor(companionSensorName);
+    this.companionConstructor(companionSensorName, platform.Service.SmokeSensor);
   }
 }

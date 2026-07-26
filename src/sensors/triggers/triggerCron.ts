@@ -1,3 +1,5 @@
+import { Service } from 'homebridge';
+
 import { CronTriggerConfiguration } from '../../configuration/triggers/configurationCronTrigger.js';
 import { Trigger } from './trigger.js';
 import { BinarySensor } from '../binarySensor.js';
@@ -6,6 +8,7 @@ import { Utils } from '../../utils/utils.js';
 import { Cron } from 'croner';
 import { DateTimeFormatter, LocalDateTime, ZonedDateTime, ZoneId } from '@js-joda/core';
 import '@js-joda/timezone';
+import { TriggeredState } from '../sensorCharacteristics.js';
 
 /**
  * CronTrigger - Trigger implementation
@@ -15,7 +18,7 @@ export class CronTrigger extends Trigger {
   private cronJob!: Cron;
 
   constructor(
-    sensor: BinarySensor,
+    sensor: BinarySensor<typeof Service>,
     name: string,
   ) {
     super(sensor, name);
@@ -77,13 +80,13 @@ export class CronTrigger extends Trigger {
 
         this.log.debug(`[${this.accessoryName}] Matched cron pattern '${triggerConfig.pattern}'. Triggering sensor`);
 
-        sensor.triggerSensorState(BinarySensor.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerSensorState(TriggeredState.TRIGGERED, this, triggerConfig.disableTriggerEventLogging);
         await Utils.delay(
           resetDelayMillis,
           this.accessoryName,
           this.log,
         );
-        sensor.triggerSensorState(BinarySensor.NORMAL, this, triggerConfig.disableTriggerEventLogging);
+        sensor.triggerSensorState(TriggeredState.NORMAL, this, triggerConfig.disableTriggerEventLogging);
 
         if (!this.cronJob.nextRun()) {
           this.log.info(`[${this.accessoryName}] Stopping cron job`);
