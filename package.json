@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.14.20",
+  "version": "3.14.21",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2013",
   "license": "MIT",
@@ -98,7 +98,7 @@
     "schemas": "schemas/"
   },
   "engines": {
-    "node": "^20.0.0 || ^22.0.0 || ^24.0.0",
+    "node": "^22.0.0 || ^24.0.0",
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "scripts": {
@@ -131,11 +131,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.46.4"
   },
-  "overrides": {
-    "net-ping": {
-      "raw-socket": {
-        "nan": "^2.23.*"
-      }
-    }
+  "allowScripts": {
+    "@justjam2013/raw-socket": true,
+    "fsevents": true
   }
 }
