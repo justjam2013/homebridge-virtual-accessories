@@ -231,7 +231,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
       // If there is no configured device for this cached accessory
       if (!configuredDevice) {
-        this.log.info(`Removing deleted accessory: ${cachedAccessory.displayName}`);
+        this.log.warn(`Removing deleted accessory: ${cachedAccessory.displayName}`);
 
         // Unregister the accessory from the platform
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
