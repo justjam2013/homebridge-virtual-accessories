@@ -63,7 +63,7 @@ export class TemperatureSensor extends MeasurementSensor {
   // Updatable Sensor interface
 
   updateMeasurementSensor(value: number, accessoryId: string): void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}${this.getDegreeUnits()}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
       this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
