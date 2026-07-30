@@ -205,18 +205,14 @@ export class Switch extends Accessory {
   // Setup stuff
 
   private setupResetTimer(timerConfig: TimerConfiguration): void {
-    const duration: number = timerConfig.durationIsRandom ?
-      Math.floor(
-        Math.random() *
-        (timerConfig.durationRandomMax.toSeconds() + 1 - timerConfig.durationRandomMin.toSeconds()) +
-       timerConfig.durationRandomMin.toSeconds(),
-      ):
-      timerConfig.duration.toSeconds();
     this.resetTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.log,
       this.accessoryConfiguration.resetTimer.isResettable,
-      duration,
+      (timerConfig.duration !== undefined) ? timerConfig.duration.toSeconds() : 0,
+      this.accessoryConfiguration.resetTimer.durationIsRandom,
+      (timerConfig.durationRandomMin !== undefined) ? timerConfig.durationRandomMin.toSeconds() : 0,
+      (timerConfig.durationRandomMax !== undefined) ? timerConfig.durationRandomMax.toSeconds() : 0,
     );
   }
 
