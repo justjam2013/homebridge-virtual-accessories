@@ -913,20 +913,18 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "description": "Measurement sensor type",
                   "type": "string",
                   "oneOf": [
                     { "title": "Humidity", "enum": ["humidity"] },
                     { "title": "Temperature", "enum": ["temperature"] }
                   ]
                 },
-                "temperatureUnits": {
-                  "title": "Temperature Units *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
-                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
-                  ],
+                "": {
+                  "title": " ",
+                  "description": "Note: Temperature units are set in Homebridge UI under Settings - Display (default: Celsius).",
+                  "type": "object",
+                  "properties": {},
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].measurement && model.devices[arrayIndices].measurement.type === 'temperature';"
                   }
@@ -934,20 +932,7 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'measurement';"
-              },
-              "allOf": [
-                {
-                  "if": {
-                    "properties": {
-                      "type": { "const": "temperature" }
-                    },
-                    "required": [ "type" ]
-                  },
-                  "then": {
-                    "required": [ "temperatureUnits" ]
-                  }
-                }
-              ]
+              }
             },
             "resetTimer": {
               "title": "Reset Timer",
