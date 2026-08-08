@@ -184,6 +184,10 @@ export class Utils {
     return (value >= 0 && value <= 360);
   }
 
+  static isValidTiltAngle(value: number): boolean {
+    return (value >= -90 && value <= 90);
+  }
+
   static isValidTransition(value: number): boolean {
     return (value >= 0);
   }

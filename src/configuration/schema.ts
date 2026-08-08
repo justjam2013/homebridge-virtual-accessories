@@ -110,6 +110,28 @@ export class OpenableState {
 }
 
 /**
+ *
+ */
+export class TiltType {
+
+  static Horizontal: string = 'horizontal';
+  static Vertical: string = 'vertical';
+
+  static Types: string[] = [ TiltType.Horizontal, TiltType.Vertical ];
+}
+
+/**
+ *
+ */
+export class TiltAngle {
+
+  // HomeKit units: degrees
+
+  static AngleMin: number = -90;
+  static AngleMax: number = 90;
+}
+
+/**
  * 
  */
 export class TemperatureUnit {

@@ -867,7 +867,51 @@
             },
             "windowCovering": {
               "title": "Window Covering",
-              "$ref": "#/$defs/doorAndWindowAccessory",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "hasTilt": {
+                  "title": "Has Tilt",
+                  "description": "Enable slat tilt angle control (blinds)",
+                  "type": "boolean"
+                },
+                "tiltType": {
+                  "title": "Tilt Type *",
+                  "description": "Direction of the tilt characteristic",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Horizontal", "enum": ["horizontal"] },
+                    { "title": "Vertical", "enum": ["vertical"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
+                "defaultTiltAngle": {
+                  "title": "Default Tilt Angle",
+                  "description": "Initial tilt angle in degrees, from -90 to 90 (default: 0)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
