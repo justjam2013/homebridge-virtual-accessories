@@ -18,6 +18,7 @@ export class AccessoryType {
   static SecuritySystem: string = 'securitysystem';
   static SensorBinary: string = 'sensor';
   static SensorMeasurement: string = 'measurement';
+  static Slats: string = 'slats';
   static Speaker: string = 'speaker';
   static Switch: string = 'switch';
   static Television: string = 'television';
@@ -123,12 +124,23 @@ export class TiltType {
 /**
  *
  */
-export class TiltAngle {
+export class SlatType {
 
-  // HomeKit units: degrees
+  static Horizontal: string = 'horizontal';
+  static Vertical: string = 'vertical';
 
-  static AngleMin: number = -90;
-  static AngleMax: number = 90;
+  static Types: string[] = [ SlatType.Horizontal, SlatType.Vertical ];
+}
+
+/**
+ *
+ */
+export class SwingMode {
+
+  static Disabled: string = 'disabled';
+  static Enabled: string = 'enabled';
+
+  static Modes: string[] = [ SwingMode.Disabled, SwingMode.Enabled ];
 }
 
 /**
