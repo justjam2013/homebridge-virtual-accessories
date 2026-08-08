@@ -572,6 +572,8 @@ These are example configurations of the virtual accessories and provided for ref
             "slats": {
                 "slatType": "horizontal",
                 "defaultSwingMode": "disabled",
+                "minTiltAngle": -90,
+                "maxTiltAngle": 90,
                 "defaultTiltAngle": 0,
                 "transitionDuration": 3
             }
@@ -663,6 +665,8 @@ These are example configurations of the virtual accessories and provided for ref
                 "transitionDuration": 3,
                 "hasTilt": true,
                 "tiltType": "horizontal",
+                "minTiltAngle": -90,
+                "maxTiltAngle": 90,
                 "defaultTiltAngle": 0
             }
         }
@@ -672,7 +676,7 @@ These are example configurations of the virtual accessories and provided for ref
 ```
 
 > [!NOTE]
-> Tilt is optional. Omit `hasTilt` (or set it to `false`) for a plain covering with no tilt. When enabled, `tiltType` selects the tilt direction (`horizontal` or `vertical`) and `defaultTiltAngle` sets the initial angle, from -90 to 90 degrees (default 0). If the accessory is stateful, the tilt angle is restored after a restart.
+> Tilt is optional. Omit `hasTilt` (or set it to `false`) for a plain covering with no tilt. When enabled, `tiltType` selects the tilt direction (`horizontal` or `vertical`). `minTiltAngle` and `maxTiltAngle` set the travel range in degrees (defaults -90 and 90); they must be within -90 to 90 and `minTiltAngle` must be less than `maxTiltAngle`. `defaultTiltAngle` sets the initial angle and must fall within that range (default 0). If the accessory is stateful, the tilt angle is restored after a restart.
 
 ### Window
 

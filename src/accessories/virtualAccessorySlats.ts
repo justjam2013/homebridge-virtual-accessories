@@ -39,6 +39,9 @@ export class Slats extends Accessory {
       this.platform.Characteristic.SwingMode.SWING_ENABLED :
       this.platform.Characteristic.SwingMode.SWING_DISABLED;
 
+    const minTiltAngle: number = this.accessoryConfiguration.slats.minTiltAngle ?? Tilt.ANGLE_MIN;
+    const maxTiltAngle: number = this.accessoryConfiguration.slats.maxTiltAngle ?? Tilt.ANGLE_MAX;
+
     let initialTiltAngle: number = this.accessoryConfiguration.slats.defaultTiltAngle ?? 0;
 
     // If the accessory is stateful retrieve stored state
@@ -81,6 +84,8 @@ export class Slats extends Accessory {
       this.platform.Characteristic.TargetTiltAngle,
       this.log,
       this.accessoryConfiguration.accessoryName,
+      minTiltAngle,
+      maxTiltAngle,
       initialTiltAngle,
       this.accessoryConfiguration.slats.transitionDuration,
       this.storeState.bind(this),

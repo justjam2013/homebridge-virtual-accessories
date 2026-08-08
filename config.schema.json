@@ -762,9 +762,23 @@
                     { "title": "Enabled", "enum": ["enabled"] }
                   ]
                 },
+                "minTiltAngle": {
+                  "title": "Minimum Tilt Angle",
+                  "description": "Minimum tilt angle in degrees, from -90 to 90 (default: -90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "maxTiltAngle": {
+                  "title": "Maximum Tilt Angle",
+                  "description": "Maximum tilt angle in degrees, from -90 to 90 (default: 90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90
+                },
                 "defaultTiltAngle": {
                   "title": "Default Tilt Angle",
-                  "description": "Initial tilt angle in degrees, from -90 to 90 (default: 0)",
+                  "description": "Initial tilt angle in degrees, within the configured min/max range (default: 0)",
                   "type": "integer",
                   "minimum": -90,
                   "maximum": 90
@@ -943,9 +957,29 @@
                     "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
                   }
                 },
+                "minTiltAngle": {
+                  "title": "Minimum Tilt Angle",
+                  "description": "Minimum tilt angle in degrees, from -90 to 90 (default: -90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
+                "maxTiltAngle": {
+                  "title": "Maximum Tilt Angle",
+                  "description": "Maximum tilt angle in degrees, from -90 to 90 (default: 90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
                 "defaultTiltAngle": {
                   "title": "Default Tilt Angle",
-                  "description": "Initial tilt angle in degrees, from -90 to 90 (default: 0)",
+                  "description": "Initial tilt angle in degrees, within the configured min/max range (default: 0)",
                   "type": "integer",
                   "minimum": -90,
                   "maximum": 90,

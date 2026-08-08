@@ -11,10 +11,9 @@ import { Timer } from '../utils/timer.js';
  */
 export class Tilt {
 
-  // Tilt angle range in degrees: -90 (fully one way) to 90 (fully the other way)
+  // HomeKit tilt angle hard limits in degrees: -90 (fully one way) to 90 (fully the other way)
   static readonly ANGLE_MIN: number = -90;
   static readonly ANGLE_MAX: number = 90;
-  static readonly ANGLE_RANGE: number = Tilt.ANGLE_MAX - Tilt.ANGLE_MIN;   // 180
 
   private static readonly MIN_TIMEOUT_SECS: number = 1;
   private static readonly DEFAULT_TIMEOUT_SECS: number = 3;
@@ -24,6 +23,9 @@ export class Tilt {
   private readonly targetTiltCharacteristic: WithUUID<new () => Characteristic>;
   private readonly log: VirtualLogger;
   private readonly accessoryName: string;
+  private readonly minTiltAngle: number;
+  private readonly maxTiltAngle: number;
+  private readonly tiltAngleRange: number;
   private readonly transitionDuration?: number;
 
   // Invoked when a transition completes so the owning accessory can persist its state
@@ -43,6 +45,8 @@ export class Tilt {
     targetTiltCharacteristic: WithUUID<new () => Characteristic>,
     log: VirtualLogger,
     accessoryName: string,
+    minTiltAngle: number,
+    maxTiltAngle: number,
     initialTiltAngle: number,
     transitionDuration: number | undefined,
     onTransitionComplete: () => void,
@@ -52,6 +56,9 @@ export class Tilt {
     this.targetTiltCharacteristic = targetTiltCharacteristic;
     this.log = log;
     this.accessoryName = accessoryName;
+    this.minTiltAngle = minTiltAngle;
+    this.maxTiltAngle = maxTiltAngle;
+    this.tiltAngleRange = this.maxTiltAngle - this.minTiltAngle;
     this.transitionDuration = transitionDuration;
     this.onTransitionComplete = onTransitionComplete;
 
@@ -65,6 +72,12 @@ export class Tilt {
       timerIsResettable,
       // No default timer duration
     );
+
+    // Constrain the characteristics to the configured range so the Home app slider matches
+    this.service.getCharacteristic(this.currentTiltCharacteristic)
+      .setProps({ minValue: this.minTiltAngle, maxValue: this.maxTiltAngle });
+    this.service.getCharacteristic(this.targetTiltCharacteristic)
+      .setProps({ minValue: this.minTiltAngle, maxValue: this.maxTiltAngle });
 
     // Update the initial tilt state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Current Tilt Angle: ${this.states.CurrentTiltAngle}º`);
@@ -108,7 +121,7 @@ export class Tilt {
     this.log.debug(`[${this.accessoryName}] Tilt Transition Steps: ${this.transitionSteps}`);
     const proportionalTransitionDelay: number = Math.max(
       // Round up to the nearest second
-      Math.ceil(transitionDelay / Tilt.ANGLE_RANGE * Math.abs(this.transitionSteps)),
+      Math.ceil(transitionDelay / this.tiltAngleRange * Math.abs(this.transitionSteps)),
       Tilt.MIN_TIMEOUT_SECS);
     this.log.debug(`[${this.accessoryName}] Tilt Proportional Delay: ${proportionalTransitionDelay}/(${transitionDelay})`);
 

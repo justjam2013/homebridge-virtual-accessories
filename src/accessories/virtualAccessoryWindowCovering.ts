@@ -47,6 +47,9 @@ export class WindowCovering extends OpeningAccessory {
       targetTiltCharacteristic = this.platform.Characteristic.TargetHorizontalTiltAngle;
     }
 
+    const minTiltAngle: number = this.accessoryConfiguration.windowCovering.minTiltAngle ?? Tilt.ANGLE_MIN;
+    const maxTiltAngle: number = this.accessoryConfiguration.windowCovering.maxTiltAngle ?? Tilt.ANGLE_MAX;
+
     let initialTiltAngle: number = this.accessoryConfiguration.windowCovering.defaultTiltAngle ?? 0;
 
     // If the accessory is stateful retrieve stored tilt state
@@ -65,6 +68,8 @@ export class WindowCovering extends OpeningAccessory {
       targetTiltCharacteristic,
       this.log,
       this.accessoryConfiguration.accessoryName,
+      minTiltAngle,
+      maxTiltAngle,
       initialTiltAngle,
       this.accessoryConfiguration.windowCovering.transitionDuration,
       this.storeState.bind(this),
