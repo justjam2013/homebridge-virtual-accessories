@@ -15,10 +15,15 @@ export class Timer {
   private accessoryName: string;
   private log: VirtualLogger;
 
-  private timerIsResettable: boolean = false;
-
   private id: ReturnType<typeof setInterval> | undefined;
+
+  private timerIsResettable: boolean = false;
+  private durationIsRandom: boolean = false;
+
   private defaultDuration: number = 0;
+  private durationRandomMin: number = 0;
+  private durationRandomMax: number = 0;
+
   private updateIntervalMillis: number = this.oneSecond;
   private startTime: ZonedDateTime;
 
@@ -34,6 +39,10 @@ export class Timer {
   constructor(
     accessoryName: string,
     log: VirtualLogger,
+  );
+  constructor(
+    accessoryName: string,
+    log: VirtualLogger,
     timerIsResettable: boolean,
   );
   constructor(
@@ -45,18 +54,32 @@ export class Timer {
   constructor(
     accessoryName: string,
     log: VirtualLogger,
+    timerIsResettable: boolean,
+    duration: number,             // seconds
+    durationIsRandom: boolean,
+    durationMin: number,          // seconds
+    durationMax: number,          // seconds
+  );
+  constructor(
+    accessoryName: string,
+    log: VirtualLogger,
     timerIsResettable: boolean = false,
-    duration?: number,       // seconds
+    duration: number = 0,         // seconds
+    durationIsRandom: boolean = false,
+    durationRandomMin: number = 0,      // seconds
+    durationRandomMax: number = 0,      // seconds
   ) {
     this.accessoryName = accessoryName;
     this.log = log;
     this.timerIsResettable = timerIsResettable;
+    this.durationIsRandom = durationIsRandom;
+
+    this.setDefaultDuration(duration);
+
+    this.durationRandomMin = durationRandomMin;
+    this.durationRandomMax = durationRandomMax;
 
     this.startTime = Utils.now();
-
-    if (duration !== undefined) {
-      this.setDefaultDuration(duration);
-    }
   }
 
   /**
@@ -87,8 +110,9 @@ export class Timer {
     this.stop();
 
     // Now setup new run
-    this.runtime = (oneOffDuration === undefined) ? this.defaultDuration : oneOffDuration;
+    this.runtime = (oneOffDuration === undefined) ? this.calculateRuntime() : oneOffDuration;
     this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
+    this.log.debug(`[${this.accessoryName} Timer] Runtime: ${this.runtime} seconds`);
 
     if (this.updateIntervalMillis < 1) {
       this.log.error(`[${this.accessoryName} Timer] updateIntervalMillis is less than 1: ${this.updateIntervalMillis} seconds. Setting to 1s/1000 ms`);
@@ -135,6 +159,36 @@ export class Timer {
     this.logDebugCountdown = false;
 
     this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.getRemainingDuration()} seconds`);
+  }
+
+  private calculateRuntime(): number {
+    // If the duration is random, get random duration between random max and random min
+    if (this.durationIsRandom) {
+      let randomDuration: number = 0;
+
+      // Validate that random max and random min are not negative, and max is not less than min
+      if (this.durationRandomMax < 0 ||
+          this.durationRandomMin < 0 ||
+          (this.durationRandomMax < this.durationRandomMin)) {
+        return randomDuration;
+      }
+
+      // If random max and random min are the same value, return that value
+      if (this.durationRandomMax === this.durationRandomMin) {
+        return this.durationRandomMin;
+      }
+
+      // Calculate the random duration
+      randomDuration = 
+      Math.floor(
+        Math.random() * (this.durationRandomMax - this.durationRandomMin + 1)
+        + this.durationRandomMin,
+      );
+      return randomDuration;
+    }
+    else {
+      return this.defaultDuration;
+    }
   }
 
   getStartTime(): ZonedDateTime {

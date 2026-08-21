@@ -1,3 +1,4 @@
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Categories, Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';

@@ -73,16 +73,18 @@ export class IkeaMatterStockTrigger extends Trigger {
     }
     trigger.log.debug(`[${trigger.accessoryName}] Country code: ${triggerConfig.country} - ${countryCode}`);
 
-    const itemCode: string | undefined = trigger.getItemCode(countryCode, triggerConfig.itemName);
-    if (itemCode === undefined) {
+    const itemInfo: string[] | undefined = trigger.getItemInfo(countryCode, triggerConfig.itemName);
+    if (itemInfo === undefined) {
       trigger.log.error(`[${trigger.accessoryName}] Item not supported: ${triggerConfig.itemName}`);
       return;
     }
-    else if (itemCode === '') {
-      trigger.log.error(`[${trigger.accessoryName}] Unknown item code for: ${triggerConfig.itemName} in ${triggerConfig.country}`);
+    const itemCode: string = itemInfo[0];
+    const displayName: string = itemInfo[1];
+    if (itemCode === '') {
+      trigger.log.error(`[${trigger.accessoryName}] Unknown item code for: ${displayName} in ${triggerConfig.country}`);
       return;
     }
-    trigger.log.debug(`[${trigger.accessoryName}] Item code: ${triggerConfig.itemName} - ${itemCode}`);
+    trigger.log.debug(`[${trigger.accessoryName}] Item code: ${displayName} - ${itemCode}`);
 
     const html: string | undefined = await trigger.getHtml(countryCode, itemCode, trigger);
     if (html === undefined) {
@@ -116,27 +118,27 @@ export class IkeaMatterStockTrigger extends Trigger {
         }
         else if (countNum > 0) {
           if (trigger.sensor.getSensorState() !== BinarySensor.TRIGGERED || firstRun === true || countNum !== trigger.count) {
-            // eslint-disable-next-line max-len
-            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+             
+            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
 
             trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
             trigger.count = countNum;
           }
           else {
             // eslint-disable-next-line max-len
-            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
           }
         }
         else {
           if (trigger.sensor.getSensorState() !== BinarySensor.NORMAL || firstRun === true) {
-            // eslint-disable-next-line max-len
-            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+             
+            trigger.log.info(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
 
             trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
           }
           else {
             // eslint-disable-next-line max-len
-            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${triggerConfig.itemName} in ${triggerConfig.storeLocation}`);
+            trigger.log.debug(`[${trigger.accessoryName}] Ikea matter stock data shows a count of ${countNum} ${displayName} in ${triggerConfig.storeLocation}`);
           }
         }
 
@@ -157,6 +159,7 @@ export class IkeaMatterStockTrigger extends Trigger {
     const productCodes: string[] = [itemCode, itemCode.replaceAll('.', '')];
 
     let validProductNumber: boolean = true;
+    const errorMessages: string[] = [];
 
     for (const productCode of productCodes) {
       const request = new Request(trigger.easyrebuildURL(countryCode, productCode), { method: 'GET' });
@@ -166,18 +169,18 @@ export class IkeaMatterStockTrigger extends Trigger {
       try {
         htmlFetchResponse = await fetch(request);
       } catch (error) {
-        trigger.log.error(`[${trigger.accessoryName}] Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
+        errorMessages.push( `Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
         continue;
       }
 
       if (htmlFetchResponse === undefined || !htmlFetchResponse.ok) {
-        trigger.log.error(`[${trigger.accessoryName}] Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
+        errorMessages.push(`Error retrieving Ikea matter stock data. Response status: ${htmlFetchResponse?.status}`);
         continue;
       }
 
       const html: string | undefined = await htmlFetchResponse!.text();
       if (html === undefined) {
-        trigger.log.error(`[${trigger.accessoryName}] Response did not return html`);
+        errorMessages.push('Response did not return html');
         continue;
       }
       else if (html.includes('is not a valid product number')) {
@@ -192,6 +195,11 @@ export class IkeaMatterStockTrigger extends Trigger {
     if (validProductNumber !== true) {
       const itemName = trigger.sensorConfig.ikeaMatterStockTrigger.itemName;
       trigger.log.error(`[${trigger.accessoryName}] Not a valid product number for ${itemName}: "${productCodes[0]}" / "${productCodes[1]}"`);
+    }
+    else {
+      for (const errorMsg of errorMessages) {
+        trigger.log.error(`[${trigger.accessoryName}] ${errorMsg}`);
+      }
     }
 
     return undefined;
@@ -215,97 +223,125 @@ export class IkeaMatterStockTrigger extends Trigger {
     return countryCodes.get(countryName);
   }
 
-  private getItemCode(
+  private getItemInfo(
     countryCode: string,
     itemName: string,
-  ): string | undefined {
-    const countryCodes = new Map<string, Map<string, string>>([
+  ): string[] | undefined {
+    const countryCodes = new Map<string, Map<string, string[]>>([
       // ***** North America *****
       [
         // USA
-        'us', new Map<string, string>([
-          ['ALPSTUGA', '706.093.96'],
-          ['BILRESA', '806.178.76'],
-          ['GRILLPLATS', '706.247.40'],
-          ['KLIPPBOK', '506.177.69'],
-          ['MYGGBETT', '606.176.41'],
-          ['MYGGSPRAY', '806.194.51 '],
-          ['TIMMERFLOTTE', '506.189.57 '],
+        'us', new Map<string, string[]>([
+          ['ALPSTUGA',     ['706.093.96', 'ALPSTUGA']],
+          ['BILRESA',      ['806.178.76', 'BILRESA']],
+          ['GRILLPLATS',   ['706.247.40', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['506.177.69', 'KLIPPBOK']],
+          ['MYGGBETT',     ['606.176.41', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['806.194.51', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['506.189.57', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['306.114.62', 'KAJPLATS E26 Color 1100lm']],
+          ['KAJPLATS-WHITE-S', ['606.113.09', 'KAJPLATS E26 White 450lm']],
+          ['KAJPLATS-WHITE-M', ['506.113.00', 'KAJPLATS E26 White 1100lm']],
+          ['KAJPLATS-WHITE-L', ['406.113.05', 'KAJPLATS E26 White 1600lm']],
         ]),
       ],
       [
         // Canada
-        'ca', new Map<string, string>([
-          ['ALPSTUGA', '706.093.96'],
-          ['BILRESA', '806.178.76'],
-          ['GRILLPLATS', '706.247.40'],
-          ['KLIPPBOK', '506.177.69'],
-          ['MYGGBETT', '606.176.41'],
-          ['MYGGSPRAY', '806.194.51 '],
-          ['TIMMERFLOTTE', '506.189.57 '],
+        'ca', new Map<string, string[]>([
+          ['ALPSTUGA',     ['706.093.96', 'ALPSTUGA']],
+          ['BILRESA',      ['806.178.76', 'BILRESA']],
+          ['GRILLPLATS',   ['706.247.40', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['506.177.69', 'KLIPPBOK']],
+          ['MYGGBETT',     ['606.176.41', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['806.194.51', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['506.189.57', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['106.114.63', 'KAJPLATS E26 Color 1100lm']],
+          ['KAJPLATS-WHITE-S', ['606.113.09', 'KAJPLATS E26 White 450lm']],
+          ['KAJPLATS-WHITE-M', ['506.113.00', 'KAJPLATS E26 White 1100lm']],
+          ['KAJPLATS-WHITE-L', ['406.113.05', 'KAJPLATS E26 White 1600lm']],
         ]),
       ],
       // ***** Europe *****
       [
         // UK
-        'gb', new Map<string, string>([
-          ['ALPSTUGA', '506.041.87'],
-          ['BILRESA', '706.178.72'],
-          ['GRILLPLATS', '606.247.45'],
-          ['KLIPPBOK', '906.246.40'],
-          ['MYGGBETT', '006.247.05'],
-          ['MYGGSPRAY', '306.246.95'],
-          ['TIMMERFLOTTE', '606.189.52'],
+        'gb', new Map<string, string[]>([
+          ['ALPSTUGA',     ['506.041.87', 'ALPSTUGA']],
+          ['BILRESA',      ['706.178.72', 'BILRESA']],
+          ['GRILLPLATS',   ['606.247.45', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['906.246.40', 'KLIPPBOK']],
+          ['MYGGBETT',     ['006.247.05', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['306.246.95', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['606.189.52', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['506.114.61', 'KAJPLATS E27 Color 1055lm']],
+          ['KAJPLATS-WHITE-S', ['806.113.08', 'KAJPLATS E27 White 470lm']],
+          ['KAJPLATS-WHITE-M', ['106.112.98', 'KAJPLATS E27 White 1055lm']],
+          ['KAJPLATS-WHITE-L', ['906.113.03', 'KAJPLATS E27 White 1521lm']],
         ]),
       ],
       // ***** Asia *****
       [
         // Japan
-        'jp', new Map<string, string>([
-          ['ALPSTUGA', ''],
-          ['BILRESA', '506.178.68'],
-          ['GRILLPLATS', ''],
-          ['KLIPPBOK', '706.177.68'],
-          ['MYGGBETT', '406.176.42'],
-          ['MYGGSPRAY', '006.194.50'],
-          ['TIMMERFLOTTE', ''],
+        'jp', new Map<string, string[]>([
+          ['ALPSTUGA',     ['',           'ALPSTUGA']],
+          ['BILRESA',      ['506.178.68', 'BILRESA']],
+          ['GRILLPLATS',   ['106.247.43', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['706.177.68', 'KLIPPBOK']],
+          ['MYGGBETT',     ['406.176.42', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['006.194.50', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['',           'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['406.192.74', 'KAJPLATS E26 Color 1160lm']],
+          ['KAJPLATS-WHITE-S', ['506.189.76', 'KAJPLATS E26 White 485lm']],
+          ['KAJPLATS-WHITE-M', ['406.189.86', 'KAJPLATS E26 White 1160lm']],
+          ['KAJPLATS-WHITE-L', ['806.190.12', 'KAJPLATS E26 White 1520lm']],
         ]),
       ],
       [
         // Korea
-        'kr', new Map<string, string>([
-          ['ALPSTUGA', ''],
-          ['BILRESA', ''],
-          ['GRILLPLATS', ''],
-          ['KLIPPBOK', '706.177.68'],
-          ['MYGGBETT', '406.176.42'],
-          ['MYGGSPRAY', '006.194.50'],
-          ['TIMMERFLOTTE', ''],
+        'kr', new Map<string, string[]>([
+          ['ALPSTUGA',     ['',           'ALPSTUGA']],
+          ['BILRESA',      ['406.415.24', 'BILRESA']],
+          ['GRILLPLATS',   ['506.247.41', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['706.177.68', 'KLIPPBOK']],
+          ['MYGGBETT',     ['406.176.42', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['006.194.50', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['006.189.50', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['606.192.73', 'KAJPLATS E26 Color 1055lm']],
+          ['KAJPLATS-WHITE-S', ['306.189.77', 'KAJPLATS E26 White 470lm']],
+          ['KAJPLATS-WHITE-M', ['206.189.87', 'KAJPLATS E26 White 1055lm']],
+          ['KAJPLATS-WHITE-L', ['006.190.11', 'KAJPLATS E26 White 1521lm']],
         ]),
       ],
       // ***** Oceania *****
       [
         // Australia
-        'au', new Map<string, string>([
-          ['ALPSTUGA', '706.093.77'],
-          ['BILRESA', '506.178.68'],
-          ['GRILLPLATS', '306.247.42'],
-          ['KLIPPBOK', '706.177.68'],
-          ['MYGGBETT', '406.176.42'],
-          ['MYGGSPRAY', '006.194.50'],
-          ['TIMMERFLOTTE', '006.189.50'],
+        'au', new Map<string, string[]>([
+          ['ALPSTUGA',     ['706.093.77', 'ALPSTUGA']],
+          ['BILRESA',      ['506.178.68', 'BILRESA']],
+          ['GRILLPLATS',   ['306.247.42', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['706.177.68', 'KLIPPBOK']],
+          ['MYGGBETT',     ['406.176.42', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['006.194.50', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['006.189.50', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['206.192.70', 'KAJPLATS E27 Color 1055lm']],
+          ['KAJPLATS-WHITE-S', ['206.189.68', 'KAJPLATS E27 White 470lm']],
+          ['KAJPLATS-WHITE-M', ['106.189.83', 'KAJPLATS E27 White 1055lm']],
+          ['KAJPLATS-WHITE-L', ['806.190.07', 'KAJPLATS E27 White 1521lm']],
         ]),
       ],
       [
         // New Zealand
-        'nz', new Map<string, string>([
-          ['ALPSTUGA', '706.093.77'],
-          ['BILRESA', '506.178.68'],
-          ['GRILLPLATS', '306.247.42'],
-          ['KLIPPBOK', '706.177.68'],
-          ['MYGGBETT', '406.176.42'],
-          ['MYGGSPRAY', '006.194.50'],
-          ['TIMMERFLOTTE', '006.189.50'],
+        'nz', new Map<string, string[]>([
+          ['ALPSTUGA',     ['706.093.77', 'ALPSTUGA']],
+          ['BILRESA',      ['506.178.68', 'BILRESA']],
+          ['GRILLPLATS',   ['306.247.42', 'GRILLPLATS']],
+          ['KLIPPBOK',     ['706.177.68', 'KLIPPBOK']],
+          ['MYGGBETT',     ['406.176.42', 'MYGGBETT']],
+          ['MYGGSPRAY',    ['006.194.50', 'MYGGSPRAY']],
+          ['TIMMERFLOTTE', ['006.189.50', 'TIMMERFLOTTE']],
+          ['KAJPLATS-COLOR-M', ['206.192.70', 'KAJPLATS E27 Color 1055lm']],
+          ['KAJPLATS-WHITE-S', ['206.189.68', 'KAJPLATS E27 White 470lm']],
+          ['KAJPLATS-WHITE-M', ['106.189.83', 'KAJPLATS E27 White 1055lm']],
+          ['KAJPLATS-WHITE-L', ['806.190.07', 'KAJPLATS E27 White 1521lm']],
         ]),
       ],
     ]);

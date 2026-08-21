@@ -51,7 +51,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
     // This should catch the "TimeoutNegativeWarning: -1 is a negative number." warning
     // and show where it is occurring
     process.on('warning', (warning) => {
-      console.log('WARNING:', warning.name);
+      this.log.warn(`WARNING: ${warning.name}`);
       console.log(warning.message);
       console.log(warning.stack);
     });
@@ -237,7 +237,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
       // If there is no configured device for this cached accessory
       if (!configuredDevice) {
-        this.log.info(`Removing deleted accessory: ${cachedAccessory.displayName}`);
+        this.log.warn(`Removing deleted accessory: ${cachedAccessory.displayName}`);
 
         // Unregister the accessory from the platform
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);

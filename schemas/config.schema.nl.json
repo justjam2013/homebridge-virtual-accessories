@@ -2,7 +2,7 @@
   "pluginAlias": "VirtualAccessoriesForHomebridge",
   "pluginType": "platform",
   "singular": true,
-  "footerDisplay": "* = required fields",
+  "footerDisplay": "* = verplicht in te vullen velden",
   "strictValidation": true,
   "schema": {
     "type": "object",
@@ -17,25 +17,25 @@
         "type": "object",
         "properties": {
           "days": {
-            "title": "Days *",
+            "title": "Dagen *",
             "type": "integer",
             "minimum": 0,
             "maximum": 7
           },
           "hours": {
-            "title": "Hours *",
+            "title": "Uren *",
             "type": "integer",
             "minimum": 0,
             "maximum": 23
           },
           "minutes": {
-            "title": "Minutes *",
+            "title": "Minuten *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
           },
           "seconds": {
-            "title": "Seconds *",
+            "title": "Seconden *",
             "type": "integer",
             "minimum": 0,
             "maximum": 59
@@ -57,16 +57,16 @@
         "type": "object",
         "properties": {
           "defaultState": {
-            "title": "Default State *",
+            "title": "Standaard Status *",
             "type": "string",
             "oneOf": [
-              { "title": "Closed", "enum": ["closed"] },
+              { "title": "Gesloten", "enum": ["closed"] },
               { "title": "Open", "enum": ["open"] }
             ]
           },
           "transitionDuration": {
-            "title": "Transition Duration",
-            "description": "Open & close transition duration in seconds (default: 3 seconds)",
+            "title": "Looptijd",
+            "description": "Open & gesloten looptijd in seconden (standaard: 3 seconden)",
             "type": "integer",
             "minimum": 1,
             "maximum": 60
@@ -76,7 +76,7 @@
     },
     "properties": {
       "name": {
-        "title": "Platform Name",
+        "title": "Platform Naam",
         "type": "string",
         "required": true,
         "default": "Virtual Accessories Platform",
@@ -89,12 +89,12 @@
         "expanded": false,
         "properties": {
           "enabled": {
-            "title": "Enabled",
-            "description": "Update sensors via web calls",
+            "title": "Ingeschakeld",
+            "description": "Update sensors via web oproep",
             "type": "boolean"
           },
           "port": {
-            "title": "Server Port",
+            "title": "Server Poort",
             "type": "string",
             "pattern": "^(4915[2-9]|491[6-9][0-9]|49[2-9][0-9]{2}|5[0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
             "placeholder": "60221"
@@ -102,72 +102,72 @@
         }
       },
       "devices": {
-        "title": "Accessories",
+        "title": "Accessoires",
         "type": "array",
         "orderable": true,
         "uniqueItemProperties": [ "accessoryID" ],
         "items": {
-          "title": " {{ value.accessoryName || 'New Accessory' }}",
+          "title": " {{ value.accessoryName || 'Nieuw Accessoire' }}",
           "type": "object",
           "expandable": true,
           "expanded": false,
           "properties": {
             "accessoryID": {
-              "title": "Accessory ID",
-              "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
+              "title": "Accessoire ID",
+              "description": "Uniek ID voor het Accessoire (https://www.random.org/). Niet meer veranderen als het toegewezen is!",
               "type": "string",
               "required": true,
               "pattern": "^[A-Za-z0-9\\-]{5,}$"
             },
             "accessoryName": {
-              "title": "Accessory Name",
-              "description": "Accessory name as it will be displayed in HomeKit",
+              "title": "Accessoire Naam",
+              "description": "Accessoire naam zoals het wordt weergegeven in HomeKit",
               "type": "string",
               "required": true,
               "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
-              "title": "Accessory Type",
+              "title": "Accessoire Type",
               "type": "string",
               "required": true,
               "oneOf": [
-                { "title": "Air Purifier", "enum": ["airpurifier"] },
-                { "title": "Battery", "enum": ["battery"] },
-                { "title": "Door", "enum": ["door"] },
-                { "title": "Doorbell", "enum": ["doorbell"] },
-                { "title": "Fan", "enum": ["fan"] },
-                { "title": "Filter Maintenance", "enum": ["filtermaintenance"] },
-                { "title": "Garage Door", "enum": ["garagedoor"] },
-                { "title": "Heater/Cooler (AC)", "enum": ["heatercooler"] },
-                { "title": "Humidifier/Dehumidifier", "enum": ["humidifierdehumidifier"] },
-                { "title": "Lightbulb", "enum": ["lightbulb"] },
-                { "title": "Lock", "enum": ["lock"] },
-                { "title": "Microphone", "enum": ["microphone"] },
-                { "title": "Security System", "enum": ["securitysystem"] },
-                { "title": "Sensor - Measurement", "enum": ["measurement"] },
-                { "title": "Sensor - Triggered", "enum": ["sensor"] },
-                { "title": "Speaker", "enum": ["speaker"] },
-                { "title": "Switch", "enum": ["switch"] },
-                { "title": "Television", "enum": ["television"] },
-                { "title": "Valve", "enum": ["valve"] },
-                { "title": "Window", "enum": ["window"] },
-                { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
+                { "title": "Luchtreiniger", "enum": ["airpurifier"] },
+                { "title": "Batterij", "enum": ["battery"] },
+                { "title": "Deur", "enum": ["door"] },
+                { "title": "Deurbel", "enum": ["doorbell"] },
+                { "title": "Ventilator", "enum": ["fan"] },
+                { "title": "Filteronderhoud", "enum": ["filtermaintenance"] },
+                { "title": "Garagepoort", "enum": ["garagedoor"] },
+                { "title": "Verwarmer/Koeler (Airco)", "enum": ["heatercooler"] },
+                { "title": "luchtbevochtiger/Luchtontvochtigers", "enum": ["humidifierdehumidifier"] },
+                { "title": "Lamp", "enum": ["lightbulb"] },
+                { "title": "Slot", "enum": ["lock"] },
+                { "title": "microfoon", "enum": ["microphone"] },
+                { "title": "Beveiligingssysteem", "enum": ["securitysystem"] },
+                { "title": "Sensor - Meting", "enum": ["measurement"] },
+                { "title": "Sensor - Geactiveerd", "enum": ["sensor"] },
+                { "title": "Luidspreker", "enum": ["speaker"] },
+                { "title": "Schakelaar", "enum": ["switch"] },
+                { "title": "Televisie", "enum": ["television"] },
+                { "title": "Klep", "enum": ["valve"] },
+                { "title": "Raam", "enum": ["window"] },
+                { "title": "Raam Afsluiting (Rolluiken, jaloeziën)", "enum": ["windowcovering"] }
               ]
             },
             "accessoryIsStateful": {
-              "title": "Accessory Is Stateful",
-              "description": "Accessory state survives Homebridge restart",
+              "title": "Accessoire Status",
+              "description": "Accessoire status overleeft Homebridge herstart",
               "type": "boolean",
               "condition": {
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
-              "title": "Air Purifier",
+              "title": "Luchtreiniger",
               "type": "object",
               "properties": {
                 "rotationSpeed": {
-                  "title": "Rotation Speed (0% - 100%) *",
+                  "title": "Draaisnelheid (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -178,15 +178,15 @@
               }
             },
             "battery": {
-              "title": "Battery",
+              "title": "Batterij",
               "type": "object",
               "properties": {
                 "isRechargeable": {
-                  "title": "Is Rechargeable",
+                  "title": "Is oplaadbaar",
                   "type": "boolean"
                 },
                 "lowLevelThreshold": {
-                  "title": "Battery low threshold (5% - 25%) *",
+                  "title": "Batterij laag drempelwaarde (5% - 25%) *",
                   "type": "integer",
                   "minimum": 5,
                   "maximum": 25
@@ -197,14 +197,14 @@
               }
             },
             "door": {
-              "title": "Door",
+              "title": "Deur",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'door';"
               }
             },
             "doorbell": {
-              "title": "Doorbell",
+              "title": "Deurbel",
               "type": "object",
               "properties": {
                 "volume": { "$ref": "#/$defs/volume" }
@@ -214,19 +214,19 @@
               }
             },
             "fan": {
-              "title": "Fan",
+              "title": "Ventilator",
               "type": "object",
               "properties": {
                 "rotationDirection": {
-                  "title": "Rotation Direction *",
+                  "title": "Draairichting *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Clockwise", "enum": ["clockwise"] },
-                    { "title": "Counter Clockwise", "enum": ["counterclockwise"] }
+                    { "title": "Met de klok mee", "enum": ["clockwise"] },
+                    { "title": "Tegen de klok in", "enum": ["counterclockwise"] }
                   ]
                 },
                 "rotationSpeed": {
-                  "title": "Rotation Speed (0% - 100%) *",
+                  "title": "Draaisnelheid (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100
@@ -237,16 +237,16 @@
               }
             },
             "filterMaintenance": {
-              "title": "Filter Maintenance",
+              "title": "Filteronderhoud",
               "type": "object",
-              "description": "Filter Lifetime (30 days max)",
+              "description": "Levensduur van Filter (30 dagen maximaal)",
               "properties": {
                 "lifespan": {
                   "title": " ",
                   "type": "object",
                   "properties": {
                     "days": {
-                      "title": "Days *",
+                      "title": "Dagen *",
                       "type": "integer",
                       "minimum": 0,
                       "maximum": 30
@@ -290,35 +290,35 @@
               }
             },
             "garageDoor": {
-              "title": "Garage Door",
+              "title": "Garagepoort",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'garagedoor';"
               }
             },
             "heaterCooler": {
-              "title": "Heater/Cooler",
+              "title": "Verwarmer/Koeler (Airco)",
               "type": "object",
               "properties": {
                 "type": {
                   "title": "Type *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Heater", "enum": ["heater"] },
-                    { "title": "Cooler (AC)", "enum": ["cooler"] },
-                    { "title": "Heater and Cooler (AC)", "enum": ["auto"] },
+                    { "title": "Verwarmen", "enum": ["heater"] },
+                    { "title": "Koelen", "enum": ["cooler"] },
+                    { "title": "Verwarmen en Koelen (Automatisch)", "enum": ["auto"] },
                     { "title": "Sauna", "enum": ["sauna"] }
                   ]
                 },
                 "hasFan": {
-                  "title": "Has Fan",
+                  "title": "Heeft Ventilator",
                   "type": "boolean",
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].heaterCooler && ['heater', 'cooler', 'auto'].includes(model.devices[arrayIndices].heaterCooler.type);"
                   }
                 },
                 "temperatureDisplayUnits": {
-                  "title": "Temperature Display Units *",
+                  "title": "Eenheid voor temperatuurweergave *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -326,8 +326,8 @@
                   ]
                 },
                 "heatingThresholdCelsius": {
-                  "title": "Heating Threshold ºC *",
-                  "description": "Temperature level below which the heater turns on (0ºC - 25ºC)",
+                  "title": "Verwarming instelling ºC *",
+                  "description": "Temperatuur waaronder de verwarming wordt ingeschakeld (0ºC - 25ºC)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 25,
@@ -336,8 +336,8 @@
                   }
                 },
                 "coolingThresholdCelsius": {
-                  "title": "Cooling Threshold ºC *",
-                  "description": "Temperature level above which the cooler (AC) turns on (10ºC - 35ºC)",
+                  "title": "Koeling instelling ºC *",
+                  "description": "Temperatuur waarboven de koeling (Airco) wordt ingeschakeld (10ºC - 35ºC)",
                   "type": "integer",
                   "minimum": 10,
                   "maximum": 35,
@@ -346,8 +346,8 @@
                   }
                 },
                 "heatingThresholdFahrenheit": {
-                  "title": "Heating Threshold ºF *",
-                  "description": "Temperature level below which the heater turns on (32ºF - 77ºF)",
+                  "title": "Verwarming instelling ºF *",
+                  "description": "Temperatuur waaronder de verwarming wordt ingeschakeld (32ºF - 77ºF)",
                   "type": "integer",
                   "minimum": 32,
                   "maximum": 77,
@@ -356,8 +356,8 @@
                   }
                 },
                 "coolingThresholdFahrenheit": {
-                  "title": "Cooling Threshold ºF *",
-                  "description": "Temperature level above which the cooler (AC) turns on (50ºF - 95ºF)",
+                  "title": "Koeling instelling ºF *",
+                  "description": "Temperatuur waarboven de koeling (Airco) wordt ingeschakeld (50ºF - 95ºF)",
                   "type": "integer",
                   "minimum": 50,
                   "maximum": 95,
@@ -366,8 +366,8 @@
                   }
                 },
                 "saunaHeatingThresholdCelsius": {
-                  "title": "Sauna Heating Threshold ºC *",
-                  "description": "Temperature level below which the sauna heater turns on (15ºC - 90ºC)",
+                  "title": "Sauna Verwarmings instelling ºC *",
+                  "description": "Temperatuur waaronder de sauna verwarming wordt ingeschakeld (15ºC - 90ºC)",
                   "type": "integer",
                   "minimum": 15,
                   "maximum": 90,
@@ -376,8 +376,8 @@
                   }
                 },
                 "saunaHeatingThresholdFahrenheit": {
-                  "title": "Sauna Heating Threshold ºF *",
-                  "description": "Temperature level below which the sauna heater turns on (59ºF - 194ºF)",
+                  "title": "Sauna Verwarmings instelling ºF *",
+                  "description": "Temperatuur waaronder de sauna verwarming wordt ingeschakeld (59ºF - 194ºF)",
                   "type": "integer",
                   "minimum": 59,
                   "maximum": 194,
@@ -387,7 +387,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The heating threshold value **must be lower** than the cooling threshold value",
+                  "description": "Opmerking: De Verwarmings instelling **moet lager zijn** dan de Koelings instelling.",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -474,21 +474,21 @@
               ]
             },
             "humidifierDehumidifier": {
-              "title": "Humidifier/Dehumidifier",
+              "title": "luchtbevochtiger/Luchtontvochtigers",
               "type": "object",
               "properties": {
                 "type": {
                   "title": "Type *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Humidifier", "enum": ["humidifier"] },
-                    { "title": "Dehumidifier", "enum": ["dehumidifier"] },
-                    { "title": "Humidifier and Dehumidifier", "enum": ["auto"] }
+                    { "title": "luchtbevochtiger", "enum": ["humidifier"] },
+                    { "title": "Luchtontvochtigers", "enum": ["dehumidifier"] },
+                    { "title": "luchtbevochtiger en Luchtontvochtigers (Auto)", "enum": ["auto"] }
                   ]
                 },
                 "humidifierThreshold": {
-                  "title": "Humidifying Threshold *",
-                  "description": "Humidity level below which the humidifier turns on (0% - 100%)",
+                  "title": "luchtbevochtiger instelling *",
+                  "description": "Luchtvochtigheid waarbij de luchtbevochtiger wordt uitgeschakeld (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -497,8 +497,8 @@
                   }
                 },
                 "dehumidifierThreshold": {
-                  "title": "Dehumidifying Threshold *",
-                  "description": "Humidity level above which the dehumidifier turns on (0% - 100%)",
+                  "title": "Luchtontvochtigers instelling *",
+                  "description": "Luchtvochtigheid waarbij de luchtontvochtiger wordt ingeschakeld (0% - 100%)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -508,7 +508,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The humidifier threshold value **must be lower** than the dehumidifier threshold value",
+                  "description": "Opmerking: De instelling voor de luchtbevochtiger **moet lager zijn** dan de instelling voor de luchtontvochtiger.",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -556,28 +556,28 @@
               ]
             },
             "lightbulb": {
-              "title": "Lightbulb",
+              "title": "Lamp",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Standaard Status *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Off", "enum": ["off"] },
-                    { "title": "On", "enum": ["on"] }
+                    { "title": "Uit", "enum": ["off"] },
+                    { "title": "Aan", "enum": ["on"] }
                   ]
                 },
                 "type": {
                   "title": "Type *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "White", "enum": ["white"] },
-                    { "title": "White Ambiance", "enum": ["ambiance"] },
-                    { "title": "Color", "enum": ["color"] }
+                    { "title": "Wit", "enum": ["white"] },
+                    { "title": "Wit Ambiance", "enum": ["ambiance"] },
+                    { "title": "Kleur", "enum": ["color"] }
                   ]
                 },
                 "brightness": {
-                  "title": "Brightness (0% - 100%) *",
+                  "title": "Helderheid (0% - 100%) *",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 100,
@@ -586,8 +586,8 @@
                   }
                 },
                 "colorTemperatureKelvin": {
-                  "title": "Color Temperature *",
-                  "description": "Color temperature in Kelvin (2200 K to 6500 K)",
+                  "title": "Kleurtemperatuur *",
+                  "description": "De kleurtemperatuur is in Kelvin (2200 K to 6500 K)",
                   "type": "integer",
                   "minimum": 2200,
                   "maximum": 6500,
@@ -597,7 +597,7 @@
                   }
                 },
                 "colorHex": {
-                  "title": "Color *",
+                  "title": "Kleur *",
                   "type": "string",
                   "format": "color",
                   "condition": {
@@ -645,36 +645,36 @@
               ]
             },
             "lock": {
-              "title": "Lock",
+              "title": "Slot",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Standaard Status *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Locked", "enum": ["locked"] },
-                    { "title": "Unlocked", "enum": ["unlocked"] }
+                    { "title": "Gesloten", "enum": ["locked"] },
+                    { "title": "Open", "enum": ["unlocked"] }
                   ]
                 },
                 "autoSecurityTimeout": {
-                  "title": "Auto Security Timeout *",
-                  "description": "Lock auto-lock time in seconds (0 = off)",
+                  "title": "Automatische beveiligingstime-out *",
+                  "description": "Tijd voor automatische vergrendeling in seconden (0 = off)",
                   "type": "integer",
                   "minimum": 0
                 },
                 "walletKeyColor": {
-                  "title": "HomeKey Color",
-                  "description": "HomeKey card color in Wallet app (default: Tan)",
+                  "title": "HomeKey Kleur",
+                  "description": "Kleur van de HomeKey-kaart in de Wallet-app (Standaard: Beige)",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Tan", "enum": ["tan"] },
-                    { "title": "Gold", "enum": ["gold"] },
-                    { "title": "Silver", "enum": ["silver"] },
-                    { "title": "Black", "enum": ["black"] }
+                    { "title": "Beige", "enum": ["tan"] },
+                    { "title": "Goud", "enum": ["gold"] },
+                    { "title": "Zilver", "enum": ["silver"] },
+                    { "title": "Zwart", "enum": ["black"] }
                   ]
                 },
                 "": {
-                  "description": "Note: HomeKey appears to currently be broken. If you are experiencing issues, set HomeKey Color to None.",
+                  "description": "Opmerking: HomeKey lijkt momenteel niet te werken. Als je problemen ondervindt, stel dan de kleur van HomeKey in op ‘None’.",
                   "type": "object",
                   "properties": {}
                 }
@@ -684,7 +684,7 @@
               }
             },
             "microphone": {
-              "title": "Microphone",
+              "title": "Microfoon",
               "type": "object",
               "properties": {
                 "volume": { "$ref": "#/$defs/volume" }
@@ -694,42 +694,42 @@
               }
             },
             "securitySystem": {
-              "title": "Security System",
+              "title": "Beveiligingssysteem",
               "type": "object",
               "properties": {
                 "armedModesTitle": {
-                  "title": "Armed Modes",
-                  "description": "Security system modes (Away and Home modes are required)",
+                  "title": "Beveiligingsmodus",
+                  "description": "Beveiligingsmodus (de modus ‘Afwezig’ en ‘Thuis’ zijn verplicht)",
                   "type": "object",
                   "properties": {}
                 },
                 "hasAwayMode": {
-                  "title": "❎ Away Mode",
+                  "title": "❎ Afwezig",
                   "type": "object",
                   "properties": {}
                 },
                 "hasHomeMode": {
-                  "title": "❎ Home Mode",
+                  "title": "❎ Thuis",
                   "type": "object",
                   "properties": {}
                 },
                 "hasNightMode": {
-                  "title": "Night Mode",
+                  "title": "Nacht",
                   "type": "boolean"
                 },
                 "defaultState": {
-                  "title": "Default State *",
-                  "description": "The default state **must be** either 'Disarmed' or one of the available armed states",
+                  "title": "Standaard Status *",
+                  "description": "De standaardstatus **moet** ‘Uitgeschakeld’ zijn of een van de beschikbare ingeschakelde statussen",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Armed - Away", "enum": ["armedaway"] },
-                    { "title": "Armed - Home", "enum": ["armedstay"] },
-                    { "title": "Disarmed", "enum": ["disarmed"] }
+                    { "title": "Ingeschakeld - Afwezig", "enum": ["armedaway"] },
+                    { "title": "Ingeschakeld - Thuis", "enum": ["armedstay"] },
+                    { "title": "Uitgeschakeld", "enum": ["disarmed"] }
                   ]
                 },
                 "awayArmingDelay": {
-                  "title": "Away Arming Delay",
-                  "description": "Away Mode arming delay in seconds (default 0 = immediate)",
+                  "title": "Vertraging bij inschakelen 'Afwezig'",
+                  "description": "Vertraging bij het inschakelen van de modus ‘Afwezig’ in seconden (standaard 0 = onmiddellijk)",
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 60
@@ -740,11 +740,11 @@
               }
             },
             "speaker": {
-              "title": "Speaker",
+              "title": "Luidspreker",
               "type": "object",
               "properties": {
                 "mute": {
-                  "title": "Muted",
+                  "title": "Mute",
                   "type": "boolean"
                 },
                 "volume": { "$ref": "#/$defs/volume" }
@@ -754,30 +754,30 @@
               }
             },
             "switch": {
-              "title": "Switch",
+              "title": "Schakelaar",
               "type": "object",
               "properties": {
                 "defaultState": {
-                  "title": "Default State *",
+                  "title": "Standaard Status *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Off", "enum": ["off"] },
-                    { "title": "On", "enum": ["on"] }
+                    { "title": "Uit", "enum": ["off"] },
+                    { "title": "Aan", "enum": ["on"] }
                   ]
                 },
                 "hasResetTimer": {
-                  "title": "Has a Reset Timer",
-                  "description": "Switch resets to default state when timer ends",
+                  "title": "Heeft Reset Tijd",
+                  "description": "De schakelaar keert terug naar de standaardinstelling wanneer de timer afloopt",
                   "type": "boolean"
                 },
                 "hasCompanionSensor": {
-                  "title": "Has a Companion Sensor",
-                  "description": "Switch triggers a sensor when its state changes",
+                  "title": "Beschikt over een bijbehorende sensor",
+                  "description": "De schakelaar activeert een sensor wanneer de toestand ervan verandert",
                   "type": "boolean"
                 },
                 "muteLogging" : {
-                  "title": "Mute Logging",
-                  "description": "Log information will only be visible when running in debug mode",
+                  "title": "Logging uitschakelen",
+                  "description": "Loggegevens zijn alleen zichtbaar wanneer men in de debugmodus is",
                   "type": "boolean"
                 }
               },
@@ -786,7 +786,7 @@
               }
             },
             "television": {
-              "title": "Television Inputs",
+              "title": "Televisie Kanalen",
               "type": "object",
               "properties": {
                 "inputs": {
@@ -796,7 +796,7 @@
                   "orderable": true,
                   "uniqueItems": true,
                   "items": {
-                    "title": "{{ $index ? ' Input ' + $index : 'Input' }}",
+                    "title": "{{ $index ? ' Kanaal ' + $index : 'Kanaal' }}",
                     "type": "string",
                     "minLength": 1,
                     "placeholder": "HDMI"
@@ -808,26 +808,26 @@
               }
             },
             "valve": {
-              "title": "Valve",
+              "title": "Klep",
               "type": "object",
               "properties": {
                 "type": {
                   "title": "Type *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Generic Valve", "enum": ["generic"] },
-                    { "title": "Irrigation", "enum": ["irrigation"] },
-                    { "title": "Shower Head", "enum": ["showerhead"] },
-                    { "title": "Water Faucet", "enum": ["waterfaucet"] }
+                    { "title": "Standaardklep", "enum": ["generic"] },
+                    { "title": "Beregening", "enum": ["irrigation"] },
+                    { "title": "Douchekop", "enum": ["showerhead"] },
+                    { "title": "Waterkraan", "enum": ["waterfaucet"] }
                   ]
                 },
                 "duration": {
-                  "title": "Runtime",
-                  "description": "Valve auto shut-off time (1hr max - 0 = manual off)",
+                  "title": "Looptijd",
+                  "description": "Tijd voor automatische uitschakeling van de kraan (max. 1 uur – 0 = handmatig uitschakelen)",
                   "type": "object",
                   "properties": {
                     "minutes": {
-                      "title": "Minutes *",
+                      "title": "Minuten *",
                       "type": "integer",
                       "minimum": 0,
                       "maximum": 60
@@ -859,47 +859,47 @@
               }
             },
             "window": {
-              "title": "Window",
+              "title": "Raam",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'window';"
               }
             },
             "windowCovering": {
-              "title": "Window Covering",
+              "title": "Raam Afsluiting (Rolluiken, jaloeziën)",
               "$ref": "#/$defs/doorAndWindowAccessory",
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
             },
             "sensor": {
-              "title": "Sensor - Triggered",
+              "title": "Sensor - Geactiveerd",
               "type": "object",
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "description": "Sensortype (Meldingen van kritieke sensoren negeren de modus ‘Niet storen’)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
-                    { "title": "Leak (critical)", "enum": ["leak"] },
-                    { "title": "Motion", "enum": ["motion"] },
-                    { "title": "Occupancy", "enum": ["occupancy"] },
-                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                    { "title": "Lek (kritiek)", "enum": ["leak"] },
+                    { "title": "Beweging", "enum": ["motion"] },
+                    { "title": "Aanwezigheid", "enum": ["occupancy"] },
+                    { "title": "Koolstofdioxide (kritiek)", "enum": ["carbonDioxide"] },
+                    { "title": "Koolmonoxide (kritiek)", "enum": ["carbonMonoxide"] },
+                    { "title": "Rook (kritiek)", "enum": ["smoke"] }
                   ]
                 },
                 "trigger": {
-                  "title": "Trigger *",
+                  "title": "Activering *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Ping Host", "enum": ["ping"] },
-                    { "title": "Cron Schedule", "enum": ["cron"] },
-                    { "title": "Sun Events (Sunrise/Sunset)", "enum": ["sunevents"] },
+                    { "title": "Ping een Host", "enum": ["ping"] },
+                    { "title": "Cron Tijdschema", "enum": ["cron"] },
+                    { "title": "Zonnecyclus (zonsopgang/zonsondergang)", "enum": ["sunevents"] },
                     { "title": "Webhook", "enum": ["webhook"] },
-                    { "title": "Homebridge Startup Trigger", "enum": ["startup"] },
-                    { "title": "Ikea Matter Stock Trigger", "enum": ["ikeamatterstock"] }
+                    { "title": "Homebridge opstart activering", "enum": ["startup"] },
+                    { "title": "Ikea Matter activering", "enum": ["ikeamatterstock"] }
                   ]
                 }
               },
@@ -908,20 +908,20 @@
               }
             },
             "measurement": {
-              "title": "Sensor - Measurement",
+              "title": "Sensor - Meting",
               "type": "object",
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "description": "Sensortype (Meldingen van kritieke sensoren negeren de focusmodus ‘Niet storen’)",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Humidity", "enum": ["humidity"] },
-                    { "title": "Temperature", "enum": ["temperature"] }
+                    { "title": "Luchtvochtigheid", "enum": ["humidity"] },
+                    { "title": "Temperatuur", "enum": ["temperature"] }
                   ]
                 },
                 "temperatureUnits": {
-                  "title": "Temperature Units *",
+                  "title": "Eenheid voor temperatuurweergave *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -954,12 +954,12 @@
               "type": "object",
               "properties": {
                 "durationIsRandom": {
-                  "title": "Duration is Random",
+                  "title": "De duur is willekeurig",
                   "type": "boolean"
                 },
                 "duration": {
-                  "title": "Duration",
-                  "description": "Timer reset delay (7 days max)",
+                  "title": "looptijd",
+                  "description": "Tijd voor het resetten van de timer (max. 7 dagen)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -990,8 +990,8 @@
                   }
                 },
                 "durationRandomMin": {
-                  "title": "Min Duration",
-                  "description": "Minimum timer reset delay (7 days max)",
+                  "title": "Min Looptijd",
+                  "description": "Minimum reset wachttijd (7 dagen max.)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -1022,8 +1022,8 @@
                   }
                 },
                 "durationRandomMax": {
-                  "title": "Max Duration",
-                  "description": "Maximum timer reset delay (7 days max)",
+                  "title": "Max Looptijd",
+                  "description": "Maximum reset wachttijd (7 dagen max.)",
                   "type": "object",
                   "properties": {
                     "days": { "$ref": "#/$defs/duration/properties/days" },
@@ -1055,7 +1055,7 @@
                 },
                 "": {
                   "title": "",
-                  "description": "Note: The minimum duration value **must be shorter** than the maximum duration value",
+                  "description": "Opmerking: De minimale duur **moet korter zijn** dan de maximale duur",
                   "type": "object",
                   "properties": {},
                   "condition": {
@@ -1063,8 +1063,8 @@
                   }
                 },
                 "isResettable": {
-                  "title": "Is Resettable",
-                  "description": "The timer is reset every time the accessory is triggered, even if the state of the accessory does not change",
+                  "title": "Kan worden gereset",
+                  "description": "De timer wordt elke keer gereset wanneer het accessoire wordt geactiveerd, zelfs als de status van het accessoire niet verandert",
                   "type": "boolean"
                 }
               },
@@ -1102,26 +1102,26 @@
               ]
             },
             "companionSensor": {
-              "title": "Companion Sensor",
+              "title": "bijbehorende sensor",
               "type": "object",
               "properties": {
                 "name": {
-                  "title": "Name *",
-                  "description": "Sensor name as it will be displayed in HomeKit",
+                  "title": "Naam *",
+                  "description": "Naam van de sensor zoals deze in HomeKit wordt weergegeven",
                   "type": "string"
                 },
                 "type": {
                   "title": "Type *",
-                  "description": "Sensor type triggered by accessory state change (Critical sensor notifications bypass 'Do Not Disturb' focus mode)",
+                  "description": "Sensortype dat wordt geactiveerd door een verandering in de status van het accessoire (meldingen van kritieke sensoren omzeilen de modus ‘Niet storen’)",
                   "type": "string",
                   "oneOf": [
                     { "title": "Contact", "enum": ["contact"] },
-                    { "title": "Leak (critical)", "enum": ["leak"] },
-                    { "title": "Motion", "enum": ["motion"] },
-                    { "title": "Occupancy", "enum": ["occupancy"] },
-                    { "title": "Carbon Dioxide (critical)", "enum": ["carbonDioxide"] },
-                    { "title": "Carbon Monoxide (critical)", "enum": ["carbonMonoxide"] },
-                    { "title": "Smoke (critical)", "enum": ["smoke"] }
+                    { "title": "Lek (kritiek)", "enum": ["leak"] },
+                    { "title": "Beweging", "enum": ["motion"] },
+                    { "title": "Aanwezigheid", "enum": ["occupancy"] },
+                    { "title": "Koolstofdioxide (kritiek)", "enum": ["carbonDioxide"] },
+                    { "title": "Koolmonoxide (kritiek)", "enum": ["carbonMonoxide"] },
+                    { "title": "Rook (kritiek)", "enum": ["smoke"] }
                   ]
                 }
               },
@@ -1130,31 +1130,31 @@
               }
             },
             "pingTrigger": {
-              "title": "Ping Host Trigger",
+              "title": "Ping een Host als activering",
               "type": "object",
               "properties": {
                 "host": {
                   "title": "Host *",
-                  "description": "IP address (142.250.178.4) or domain name (www.google.com) of host to ping",
+                  "description": "IP adres (142.250.178.4) of domain naam (www.google.com) of host om te pingen",
                   "placeholder": "192.168.0.1",
                   "type": "string"
                 },
                 "failureRetryCount": {
-                  "title": "Retries Before Failure *",
-                  "description": "Failed ping count before triggering the sensor",
+                  "title": "Aantal pogingen voor mislukt *",
+                  "description": "Aantal mislukte pings voordat de sensor wordt geactiveerd",
                   "type": "integer",
                   "minimum": 0
                 },
                 "interval": {
-                  "title": "Interval Between Pings",
-                  "description": "Interval between pings in minutes - low for crical infrastructure, higher for non-critical devices (default: 1 minute)",
+                  "title": "Interval Tussen Pings",
+                  "description": "Interval tussen pings in minuten - laag voor kritieke infrastructuur, hoger voor niet-kritieke apparaten (standaard: 1 minuut)",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 15
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "activering uitschakelen",
+                  "description": "uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1163,25 +1163,25 @@
               }
             },
             "cronTrigger": {
-              "title": "Cron Schedule Trigger",
+              "title": "Cron Tijdschema activering",
               "type": "object",
               "properties": {
                 "pattern": {
-                  "title": "Cron Pattern *",
-                  "description": "Standard unix cron pattern - minute, hour, day, month, weekday (https://crontab.guru/)",
+                  "title": "Cron Patroon *",
+                  "description": "Standard unix cron Patroon - minuut, uur, dag, maand, weekdag (https://crontab.guru/)",
                   "type": "string",
                   "placeholder": "* * * * *",
                   "pattern": "(^((\\*\\/)?([0-5]?[0-9])((,|-|\\/)([0-5]?[0-9]))*|\\*)\\s((\\*\\/)?((2[0-3]|1[0-9]|[0-9]|00))((,|-|\\/)(2[0-3]|1[0-9]|[0-9]|00))*|\\*)\\s((\\*\\/)?([1-9]|[12][0-9]|3[01])((,|-|\\/)([1-9]|[12][0-9]|3[01]))*|\\*)\\s((\\*\\/)?([1-9]|1[0-2])((,|-|\\/)([1-9]|1[0-2]))*|\\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))\\s((\\*\\/)?[0-6]((,|-|\\/)[0-6])*|\\*|00|(sun|mon|tue|wed|thu|fri|sat))$)"
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Standaard ingesteld op systeem zone id",
                   "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "startDateTime": {
-                  "title": "Start Date-Time",
+                  "title": "Start Datum-Tijd",
                   "type": "string",
                   "format": "iso-date-time",
                   "widget":"datetime-local",
@@ -1190,7 +1190,7 @@
                   }
                 },
                 "endDateTime": {
-                  "title": "End Date-Time ",
+                  "title": "Eind Datum-Tijd ",
                   "type": "string",
                   "format": "iso-date-time",
                   "widget":"datetime-local",
@@ -1199,13 +1199,13 @@
                   }
                 },
                 "disableTriggerEventLogging": {
-                  "title": "Disable Trigger Event Logging",
-                  "description": "Disable logging for high frequency trigger events",
+                  "title": "Uitschakelen activering Event Logging",
+                  "description": "uitschakeling voor veelvoorkomende activerings gebeurtenissen",
                   "type": "boolean"
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1214,40 +1214,40 @@
               }
             },
             "sunEventsTrigger": {
-              "title": "Sunrise/Sunset Trigger",
+              "title": "Zonsopgang/zonsondergang activering",
               "type": "object",
               "properties": {
                 "event": {
-                  "title": "Event *",
-                  "description": "Sun event",
+                  "title": "gebeurtenis *",
+                  "description": "Zonsopgang gebeurtenis",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Sunrise", "enum": ["sunrise"] },
-                    { "title": "Sunset", "enum": ["sunset"] },
-                    { "title": "Golden Hour", "enum": ["goldenhour"] }
+                    { "title": "Zonsopgang", "enum": ["sunrise"] },
+                    { "title": "zonsondergang", "enum": ["sunset"] },
+                    { "title": "Gouden uur", "enum": ["goldenhour"] }
                   ]
                 },
                 "offset": {
-                  "title": "Time Offset",
-                  "description": "Minutes before (-) or after (+) the event",
+                  "title": "Tijd Offset",
+                  "description": "Minuten voor (-) of na (+) de gebeurtenis",
                   "type": "integer",
                   "placeholder": 0
                 },
                 "latitude": {
-                  "title": "Latitude *",
-                  "description": "Latitude for your location (https://www.latlong.net/)",
+                  "title": "Breedtegraad *",
+                  "description": "Breedtegraad voor jouw locatie (https://www.latlong.net/)",
                   "type": "string",
                   "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
                 },
                 "longitude": {
-                  "title": "Longitude *",
-                  "description": "Longitude for your location (https://www.latlong.net/)",
+                  "title": "Lengtegraad *",
+                  "description": "Lengtegraad voor jouw locatie (https://www.latlong.net/)",
                   "type": "string",
                   "pattern": "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
                 },
                 "zoneId": {
                   "title": "Zone Id",
-                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Defaults to system zone id",
+                  "description": "Zone id (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Standaard ingesteld op systeem zone id",
                   "placeholder": "America/Los_Angeles",
                   "type": "string",
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
@@ -1281,8 +1281,8 @@
               "type": "object",
               "properties": {
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1291,25 +1291,25 @@
               }
             },
             "ikeaMatterStockTrigger": {
-              "title": "Ikea Matter Device Available Trigger",
+              "title": "Ikea Matter Toestel beschikbaar activering",
               "type": "object",
               "properties": {
                 "country": {
                   "title": "Country *",
                   "type": "string",
                   "oneOf": [
-                    { "title": "Australia", "enum": ["Australia"] },
+                    { "title": "Australië", "enum": ["Australia"] },
                     { "title": "Canada", "enum": ["Canada"] },
                     { "title": "Japan", "enum": ["Japan"] },
                     { "title": "Korea", "enum": ["Korea"] },
-                    { "title": "New Zealand", "enum": ["New Zealand"] },
-                    { "title": "UK", "enum": ["UK"] },
-                    { "title": "USA", "enum": ["USA"] }
+                    { "title": "Nieuw-Zeeland", "enum": ["New Zealand"] },
+                    { "title": "Verenigd Koninkrijk", "enum": ["UK"] },
+                    { "title": "Verenigde Staten van Amerika", "enum": ["USA"] }
                   ]
                 },
                 "storeLocation": {
-                  "title": "Store Location *",
-                  "description": "Store location (use Ikea store locator)",
+                  "title": "Opslaan Locatie *",
+                  "description": "sla locatie op (gebruikt Ikea locatie winkelzoeker)",
                   "type": "string"
                 },
                 "itemName": {
@@ -1330,8 +1330,8 @@
                   ]
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1348,7 +1348,7 @@
                 }
               },
               "then": {
-                "required": [ "switch" ],
+                "required": [ "switch", "deviceType" ],
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]
@@ -1792,7 +1792,7 @@
       },
       "": {
         "title": " ",
-        "description": "Note: You can change the accessory order by dragging them to a new location in the list. Click the 'Save' button to update the configuration.",
+        "description": "Opmerking: U kunt de volgorde van de accessoires wijzigen door ze naar een nieuwe locatie in de lijst te slepen. Klik op de knop ‘Opslaan’ om de configuratie bij te werken.",
         "type": "object",
         "properties": {}
       }
