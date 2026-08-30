@@ -15,7 +15,9 @@ export class TemperatureSensor extends MeasurementSensor {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'TemperatureSensor';
 
-  static readonly DEFAULT_TEMPERATURE_CELSIUS = 20;
+  static readonly DEFAULT_TEMPERATURE_CELSIUS: number = 20;
+
+  private platformSettingsURL: string = 'http://localhost:8581/api/auth/settings';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -41,28 +43,13 @@ export class TemperatureSensor extends MeasurementSensor {
     return TemperatureSensor.ACCESSORY_TYPE_NAME;
   }
 
-  private getDegreeUnits(): string {
-    let units: string;
-
-    switch (this.states.SensorUnits) {
-    case undefined: { units = 'º'; break; }
-    case TemperatureUnit.Celsius: { units = 'ºC'; break; }
-    case TemperatureUnit.Fahrenheit: { units = 'ºF'; break; }
-    default: { units = 'º'; }
-    }
-
-    return units;
-  }
-
-  private toCelsius(temperature: number): number {
-    const temperatureCelsius = (this.states.SensorUnits === TemperatureUnit.Celsius) ? temperature : (temperature - 32) * 5/9;
-
-    return Math.round(temperatureCelsius * 10) / 10;
-  }
-
   // Updatable Sensor interface
 
-  updateMeasurementSensor(value: number, accessoryId: string): void {
+  async updateMeasurementSensor(value: number, accessoryId: string): Promise<void> {
+    if (this.states.SensorUnits === '') {
+      this.states.SensorUnits = await this.getPlatformTemperatureUnits();
+    }
+
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update temperature sensor to ${value}${this.getDegreeUnits()}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
@@ -81,4 +68,57 @@ export class TemperatureSensor extends MeasurementSensor {
       this.states.SensorValue = this.toCelsius(value);
     }
   }
+
+  private getDegreeUnits(): string {
+    let units: string;
+
+    switch (this.states.SensorUnits) {
+    case undefined: { units = 'º'; break; }
+    case TemperatureUnit.Celsius: { units = 'ºC'; break; }
+    case TemperatureUnit.Fahrenheit: { units = 'ºF'; break; }
+    default: { units = 'º'; }
+    }
+
+    return units;
+  }
+
+  private async getPlatformTemperatureUnits(): Promise<string> {
+    let sensorUnits: string = TemperatureUnit.Celsius;
+
+    try {
+      const response = await fetch(this.platformSettingsURL);
+
+      if (response.ok) {
+        const jsonString: string = await response.text();
+        const hbSettings: SettingsResponse = JSON.parse(jsonString);
+
+        const temperatureUnits: string | undefined =  (hbSettings.environment.temperatureUnits ?? hbSettings.temperatureUnits ?? 'c').toUpperCase();
+        sensorUnits = (temperatureUnits === 'F') ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
+      }
+      else {
+        this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(response.status)}`);
+      }
+    }
+    catch (error) {
+      this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(error)}`);
+      this.log.error(`[${this.accessoryName}] Defaulting to Celsius (ºC)`);
+    }
+
+    return sensorUnits;
+  }
+
+  private toCelsius(temperature: number): number {
+    const temperatureCelsius = (this.states.SensorUnits === TemperatureUnit.Celsius) ? temperature : (temperature - 32) * 5/9;
+
+    return Math.round(temperatureCelsius * 10) / 10;
+  }
+}
+
+interface SettingsResponse {
+  environment: EnvironmentResponse;
+  temperatureUnits?: string;
+}
+
+interface EnvironmentResponse {
+  temperatureUnits?: string;
 }
