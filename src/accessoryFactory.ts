@@ -1,4 +1,6 @@
+ 
 import type { PlatformAccessory } from 'homebridge';
+import type { MatterAccessory } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from './platform.js';
 
@@ -51,6 +53,8 @@ import { WebhookTrigger } from './sensors/triggers/triggerWebhook.js';
 import { AccessoryType, BinarySensorType, MeasurementSensorType, TriggerType } from './configuration/schema.js';
 import { AccessoryConfiguration } from './configuration/configurationAccessory.js';
 
+import { MatterSwitch } from './accessories/matter/Switch.js';
+
 /**
  * Virtual Accessory Factory
  * Factory class to create virtual accessories
@@ -62,7 +66,7 @@ export abstract class AccessoryFactory {
     // 
   }
 
-  static createVirtualAccessory(
+  static createVirtualHapAccessory(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
@@ -134,6 +138,26 @@ export abstract class AccessoryFactory {
       break;
     case AccessoryType.SensorMeasurement:
       virtualAccessory = AccessoryFactory.createVirtualMeasurementSensor(platform, accessory, accessoryConfiguration);
+      break;
+    default:
+      platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
+    }
+
+    return virtualAccessory;
+  }
+
+  static createVirtualMatterAccessory(
+    platform: VirtualAccessoriesPlatform,
+    accessory: MatterAccessory,
+    accessoryConfiguration: AccessoryConfiguration,
+  ): Accessory | undefined {
+    let virtualAccessory: Accessory | undefined;
+
+    const accessoryType: string = accessoryConfiguration.accessoryType;
+
+    switch (accessoryType) {
+    case AccessoryType.Switch:
+      virtualAccessory = new MatterSwitch(platform, accessory, accessoryConfiguration);
       break;
     default:
       platform.log.error(`Error creating accessory. Invalid accessory type: ${accessoryType}`);
