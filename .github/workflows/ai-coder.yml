@@ -16,9 +16,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
+        with:
+          ref: latest
 
       - name: Generate Code and Open PR
-        uses: alexanmtz/AIPR@latest
+        uses: alexanmtz/AIPR@main
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
