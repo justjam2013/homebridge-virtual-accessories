@@ -1,0 +1,24 @@
+name: AI Pull Request Generator
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  create-pr:
+    if: github.event.label.name == 'AIPR'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Generate Code and Open PR
+        uses: alexanmtz/AIPR@v1.0.1
+        with:
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
