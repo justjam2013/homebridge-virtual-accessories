@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Generate Code and Open PR
-        uses: alexanmtz/AIPR@main
+        uses: alexanmtz/AIPR@latest
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
