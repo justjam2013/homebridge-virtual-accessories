@@ -17,6 +17,7 @@ import { LightbulbConfiguration } from './accessories/configurationLightbulb.js'
 import { LockConfiguration } from './accessories/configurationLock.js';
 import { MicrophoneConfiguration } from './accessories/configurationMicrophone.js';
 import { SecuritySystemConfiguration } from './accessories/configurationSecuritySystem.js';
+import { SlatsConfiguration } from './accessories/configurationSlats.js';
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
 import { TelevisionConfiguration } from './accessories/configurationTelevision.js';
@@ -111,6 +112,10 @@ export class AccessoryConfiguration {
   // SecuritySystem
   @Type(SecuritySystemConfiguration)
     securitySystem!: SecuritySystemConfiguration;
+
+  // Slats
+  @Type(SlatsConfiguration)
+    slats!: SlatsConfiguration;
 
   // Speaker
   @Type(SpeakerConfiguration)
@@ -263,6 +268,8 @@ export class AccessoryConfiguration {
       return this.isErrorless(this.microphone, this.fieldNames.microphone!);
     case AccessoryType.SecuritySystem:
       return this.isErrorless(this.securitySystem, this.fieldNames.securitySystem!);
+    case AccessoryType.Slats:
+      return this.isErrorless(this.slats, this.fieldNames.slats!);
     case AccessoryType.Speaker:
       this.category = Categories.SPEAKER;
       return this.isErrorless(this.speaker, this.fieldNames.speaker!);

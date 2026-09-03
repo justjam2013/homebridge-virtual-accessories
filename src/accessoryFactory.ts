@@ -16,6 +16,7 @@ import { Lightbulb } from './accessories/virtualAccessoryLightbulb.js';
 import { Lock } from './accessories/virtualAccessoryLock.js';
 import { Microphone } from './accessories/virtualAccessoryMicrophone.js';
 import { SecuritySystem } from './accessories/virtualAccessorySecuritySystem.js';
+import { Slats } from './accessories/virtualAccessorySlats.js';
 import { SmartSpeaker } from './accessories/virtualAccessorySmartSpeaker.js';
 //import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
@@ -110,6 +111,9 @@ export abstract class AccessoryFactory {
       break;
     case AccessoryType.SecuritySystem:
       virtualAccessory = new SecuritySystem(platform, accessory, accessoryConfiguration);
+      break;
+    case AccessoryType.Slats:
+      virtualAccessory = new Slats(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Speaker:
       virtualAccessory = new SmartSpeaker(platform, accessory, accessoryConfiguration);
