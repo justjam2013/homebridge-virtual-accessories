@@ -13,6 +13,11 @@ import { Utils } from '../utils/utils.js';
 
 import { Duration } from '@js-joda/core';
 
+class SwitchStatus {
+  On: boolean = false;
+}
+
+
 /**
  * Switch - Accessory implementation
  */
@@ -35,6 +40,8 @@ export class Switch extends Accessory {
 
   protected muteLogging: boolean;
 
+  private status: SwitchStatus = new SwitchStatus();
+
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
@@ -48,7 +55,7 @@ export class Switch extends Accessory {
     this.defaultState = this.accessoryConfiguration.switch.defaultState === 'on' ? Switch.ON : Switch.OFF;
     this.muteLogging = this.accessoryConfiguration.switch.muteLogging;
 
-    let On: boolean = this.defaultState;
+    this.status.On = this.defaultState;
     this.sensorState = BinarySensor.NORMAL;
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
@@ -63,7 +70,7 @@ export class Switch extends Accessory {
       const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
 
       if (cachedState !== undefined) {
-        On = cachedState;
+        this.status.On = cachedState;
       }
 
       if (this.accessoryConfiguration.switch.hasResetTimer) {
@@ -88,8 +95,8 @@ export class Switch extends Accessory {
     this.service = this.accessory.getService(ServiceType.Switch) || this.accessory.addService(ServiceType.Switch);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryName}] Setting Switch Current State: ${Switch.getStateName(On)}`);
-    this.updateOn(On);
+    this.log.debug(`[${this.accessoryName}] Setting On: ${Switch.getStateName(this.status.On)}`);
+    this.updateCharacteristicValue(this.platform.Characteristic.On, (this.status.On));
 
     // register handlers
 
@@ -109,7 +116,7 @@ export class Switch extends Accessory {
   // On
 
   async getOnHandler(): Promise<CharacteristicValue> {
-    const On: boolean = this.getOn();
+    const On: boolean = this.status.On;
     this.log.debug(`[${this.accessoryName}] Getting State: ${Switch.getStateName(On)}`);
 
     return On;
@@ -117,12 +124,12 @@ export class Switch extends Accessory {
 
   async setOnHandler(value: CharacteristicValue) {
     const On: boolean = value as boolean;
-    this.updateOn(On);
+    this.status.On = On;
     this.log.info(`[${this.accessoryName}] Setting State: ${Switch.getStateName(On)}`, this.muteLogging);
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
       // switch is reset: turn off timer
-      if (this.getOn() === this.defaultState) {
+      if (this.status.On === this.defaultState) {
         this.resetTimer!.stop();
       }
       else {
@@ -142,11 +149,9 @@ export class Switch extends Accessory {
     }
   }
 
-  // *** Handlers ***
-
   protected getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.getOn(),
+      [this.stateStorageKey]: this.status.On,
     };
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
@@ -168,6 +173,8 @@ export class Switch extends Accessory {
     return Switch.ACCESSORY_TYPE_NAME;
   }
 
+  // Static
+
   static getStateName(state: boolean): string {
     let stateName: string;
 
@@ -183,7 +190,7 @@ export class Switch extends Accessory {
 
   private determineSensorState(): number {
     let sensorState: number;
-    const On: boolean = this.getOn();
+    const On: boolean = this.status.On;
 
     if (this.defaultState === Switch.OFF) {
       sensorState = (On === Switch.OFF) ? BinarySensor.NORMAL : BinarySensor.TRIGGERED;
@@ -262,17 +269,5 @@ export class Switch extends Accessory {
 
   protected setupStaticFields() {
     //
-  }
-
-  // On
-
-  protected getOn(): boolean {
-    return this.getCharacteristicValue(CharacteristicType.On) as boolean;
-  }
-
-  protected updateOn(
-    value: boolean,
-  ) {
-    this.updateCharacteristicValue(CharacteristicType.On, value);
   }
 }
