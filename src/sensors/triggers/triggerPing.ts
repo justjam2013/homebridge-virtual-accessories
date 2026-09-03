@@ -110,7 +110,7 @@ export class PingTrigger extends Trigger {
     const options = {
       networkProtocol: protocol,
       packetSize: 16,
-      retries: 3,
+      retries: 0,
       sessionId: 1 + Math.floor(Math.random() * 65534),
       timeout: pingTimeoutMillis,
       ttl: 128,
