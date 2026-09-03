@@ -1,15 +1,23 @@
 /* eslint-disable brace-style */
 /* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
 import { InvalidObstructionValueType, ObstructionValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableObstruction } from './updatableObstruction.js';
 import { Timer } from '../utils/timer.js';
+
+class GarageDoorStatus {
+  CurrentDoorState: number = GarageDoor.CLOSED;
+  TargetDoorState: number = GarageDoor.CLOSED;
+  ObstructionDetected: boolean = false;
+
+  transitionDuration: number = 0;
+}
 
 /**
  * GarageDoor - Accessory implementation
@@ -18,24 +26,19 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'GarageDoor';
 
-  static readonly OPEN: number = 0;     // Characteristic.CurrentDoorState.OPEN   - Characteristic.TargetDoorState.OPEN
-  static readonly CLOSED: number = 1;   // Characteristic.CurrentDoorState.CLOSED - Characteristic.TargetDoorState.CLOSED
-  static readonly OPENING: number = 2;  // Characteristic.CurrentDoorState.OPENING
-  static readonly CLOSING: number = 3;  // Characteristic.CurrentDoorState.CLOSING
-  static readonly STOPPED: number = 4;  // Characteristic.CurrentDoorState.STOPPED
+  static readonly OPEN: number =      CharacteristicType.CurrentDoorState.OPEN;   // Characteristic.TargetDoorState.OPEN;
+  static readonly CLOSED: number =    CharacteristicType.CurrentDoorState.CLOSED; // Characteristic.TargetDoorState.CLOSED;
+  static readonly OPENING: number =   CharacteristicType.CurrentDoorState.OPENING;
+  static readonly CLOSING: number =   CharacteristicType.CurrentDoorState.CLOSING;
+  static readonly STOPPED: number =   CharacteristicType.CurrentDoorState.STOPPED;
 
   private static readonly DEFAULT_TIMEOUT_SECS: number = 10;
 
   private readonly stateStorageKey: string = 'GarageDoorState';
 
   private transitionTimer: Timer;
-  private transitionDuration: number;
 
-  private states = {
-    GarageDoorCurrentState: GarageDoor.CLOSED,
-    GarageDoorTargetState: GarageDoor.CLOSED,
-    ObstructionDetected: false,
-  };
+  private status: GarageDoorStatus = new GarageDoorStatus();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -46,16 +49,15 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.garageDoor.defaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
+    this.status.CurrentDoorState = this.defaultState;
 
-    this.states.GarageDoorCurrentState = this.defaultState;
-
-    this.transitionDuration = (this.accessoryConfiguration.garageDoor.transitionDuration !== undefined) ? this.accessoryConfiguration.garageDoor.transitionDuration : GarageDoor.DEFAULT_TIMEOUT_SECS;
+    this.status.transitionDuration = (this.accessoryConfiguration.garageDoor.transitionDuration !== undefined) ? this.accessoryConfiguration.garageDoor.transitionDuration : GarageDoor.DEFAULT_TIMEOUT_SECS;
     const timerIsResettable: boolean = false;
     this.transitionTimer = new Timer(
       this.accessoryConfiguration.accessoryName,
       this.log,
       timerIsResettable,
-      this.transitionDuration,
+      this.status.transitionDuration,
     );
 
     // If the accessory is stateful retrieve stored state
@@ -64,126 +66,128 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.GarageDoorCurrentState = cachedState;
+        this.status.CurrentDoorState = cachedState;
       }
     }
 
-    this.states.GarageDoorTargetState = this.states.GarageDoorCurrentState;
-
-    this.service = this.accessory.getService(this.platform.Service.GarageDoorOpener) || this.accessory.addService(this.platform.Service.GarageDoorOpener);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
-    // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Garage Door Current State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorTargetState));
+    this.status.TargetDoorState = this.status.CurrentDoorState;
 
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentDoorState)
-      .onGet(this.getCurrentDoorState.bind(this));
+      .onGet(this.getCurrentDoorStateHandler.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState)
-      .onSet(this.setTargetDoorState.bind(this))
-      .onGet(this.getTargetDoorState.bind(this));
+      .onSet(this.setTargetDoorStateHandler.bind(this))
+      .onGet(this.getTargetDoorStateHandler.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.ObstructionDetected)
-      .onGet(this.getObstructionDetected.bind(this));
+      .onGet(this.getObstructionDetectedHandler.bind(this));
   }
 
-  // Handlers
+  // *** Handlers ***
 
-  async getCurrentDoorState(): Promise<CharacteristicValue> {
-    const garageDoorCurrentState = this.states.GarageDoorCurrentState;
+  // CurrentDoorState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Door State: ${GarageDoor.getStateName(garageDoorCurrentState)}`);
+  async getCurrentDoorStateHandler(): Promise<CharacteristicValue> {
+    const GarageDoorCurrentState = this.status.CurrentDoorState;
+    this.log.debug(`[${this.accessoryName}] Getting Current Door State: ${GarageDoor.getStateName(GarageDoorCurrentState)}`);
 
-    return garageDoorCurrentState;
+    return GarageDoorCurrentState;
   }
 
-  async setTargetDoorState(value: CharacteristicValue) {
-    this.states.GarageDoorTargetState = value as number;
+  // TargetDoorState
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
+  async getTargetDoorStateHandler(): Promise<CharacteristicValue> {
+    const GarageDoorTargetState = this.status.TargetDoorState;
+    this.log.debug(`[${this.accessoryName}] Getting Target Door State: ${GarageDoor.getStateName(GarageDoorTargetState)}`);
+
+    return GarageDoorTargetState;
+  }
+
+  async setTargetDoorStateHandler(value: CharacteristicValue) {
+    this.status.TargetDoorState = value as number;
+    this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.status.TargetDoorState)}`);
 
     // Check if door already in position
     if (
-      (this.states.GarageDoorTargetState === GarageDoor.OPEN && this.states.GarageDoorCurrentState === GarageDoor.OPEN) ||
-      (this.states.GarageDoorTargetState === GarageDoor.CLOSED && this.states.GarageDoorCurrentState === GarageDoor.CLOSED)
+      (this.status.TargetDoorState === GarageDoor.OPEN && this.status.CurrentDoorState === GarageDoor.OPEN) ||
+      (this.status.TargetDoorState === GarageDoor.CLOSED && this.status.CurrentDoorState === GarageDoor.CLOSED)
     ) {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Current Door State already: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.log.info(`[${this.accessoryName}] Current Door State already: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
     }
     // Check if obstruction is detected when trying to close
-    else if (this.states.GarageDoorTargetState === GarageDoor.CLOSED && this.states.ObstructionDetected === true) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Obstruction Detected. Refusing to close`);
+    else if (this.status.TargetDoorState === GarageDoor.CLOSED && this.status.ObstructionDetected === true) {
+      this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
     }
     // Check if door should be Stopped
     else if (
-      (this.states.GarageDoorTargetState === GarageDoor.CLOSED && this.states.GarageDoorCurrentState === GarageDoor.OPENING) ||
-      (this.states.GarageDoorTargetState === GarageDoor.OPEN && this.states.GarageDoorCurrentState === GarageDoor.CLOSING)
+      (this.status.TargetDoorState === GarageDoor.CLOSED && this.status.CurrentDoorState === GarageDoor.OPENING) ||
+      (this.status.TargetDoorState === GarageDoor.OPEN && this.status.CurrentDoorState === GarageDoor.CLOSING)
     ) {
-      this.states.GarageDoorCurrentState = GarageDoor.STOPPED;
-      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.status.CurrentDoorState = GarageDoor.STOPPED;
+      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.status.CurrentDoorState));
+      this.log.info(`[${this.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
 
       this.transitionTimer.stop();
     }
     // Check if door is already moving in the right direction
     else if (
-      (this.states.GarageDoorTargetState === GarageDoor.OPEN && this.states.GarageDoorCurrentState === GarageDoor.OPENING) ||
-      (this.states.GarageDoorTargetState === GarageDoor.CLOSED && this.states.GarageDoorCurrentState === GarageDoor.CLOSING)
+      (this.status.TargetDoorState === GarageDoor.OPEN && this.status.CurrentDoorState === GarageDoor.OPENING) ||
+      (this.status.TargetDoorState === GarageDoor.CLOSED && this.status.CurrentDoorState === GarageDoor.CLOSING)
     ) {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Current Door State already: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.log.info(`[${this.accessoryName}] Current Door State already: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
     }
     else {
       // GarageDoorCurrentState CLOSED && GarageDoorTargetState OPEN -> GarageDoorCurrentState.OPENING
       // GarageDoorCurrentState OPEN && GarageDoorTargetState CLOSED -> GarageDoorCurrentState.CLOSING
 
-      this.states.GarageDoorCurrentState = (this.states.GarageDoorTargetState === GarageDoor.OPEN) ?  GarageDoor.OPENING : GarageDoor.CLOSING;
-      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.status.CurrentDoorState = (this.status.TargetDoorState === GarageDoor.OPEN) ?  GarageDoor.OPENING : GarageDoor.CLOSING;
+      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.status.CurrentDoorState));
+      this.log.info(`[${this.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
 
       this.transitionTimer.stop();
 
       this.transitionTimer.start(
         () => {
-          this.states.GarageDoorCurrentState = this.states.GarageDoorTargetState;
-          this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
+          this.status.CurrentDoorState = this.status.TargetDoorState;
+          this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.status.CurrentDoorState));
 
           this.storeState();
 
-          this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
-        }, this.transitionDuration);
+          this.log.info(`[${this.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
+        }, this.status.transitionDuration);
     }
   }
 
-  async getTargetDoorState(): Promise<CharacteristicValue> {
-    const garageDoorTargetState = this.states.GarageDoorTargetState;
+  // ObstructionDetected
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Door State: ${GarageDoor.getStateName(garageDoorTargetState)}`);
+  async getObstructionDetectedHandler(): Promise<CharacteristicValue> {
+    const obstructionDetected = this.status.ObstructionDetected;
 
-    return garageDoorTargetState;
-  }
-
-  async getObstructionDetected(): Promise<CharacteristicValue> {
-    const obstructionDetected = this.states.ObstructionDetected;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);
+    this.log.debug(`[${this.accessoryName}] Getting Obstruction Detected: ${obstructionDetected}`);
 
     return obstructionDetected;
   }
 
-  protected getJsonState(): string {
-    const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.GarageDoorCurrentState,
-    });
-    return json;
-  }
+  // Absract method implementations
 
   protected getAccessoryTypeName(): string {
     return GarageDoor.ACCESSORY_TYPE_NAME;
   }
+
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return ServiceType.GarageDoorOpener;
+  }
+
+  protected getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.status.CurrentDoorState,
+    });
+    return json;
+  }
+
+  // Static
 
   static getStateName(state: number): string {
     let stateName: string;
@@ -204,46 +208,46 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   // Updatable Obstruction interface
 
   updateObstruction(value: boolean, accessoryId: string): void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update obstruction detected to ${value}`);
+    this.log.debug(`[${this.accessoryName}] Request update obstruction detected to ${value}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+      this.log.error(`[${this.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new ObstructionValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'boolean') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Garage Door obstruction detected`);
+      this.log.error(`[${this.accessoryName}] Value ${value} is not valid for Garage Door obstruction detected`);
 
       throw new InvalidObstructionValueType(`Invalid sensor value: ${value}`);
     }
 
-    this.states.ObstructionDetected = value;
-    this.service!.setCharacteristic(this.platform.Characteristic.ObstructionDetected, (this.states.ObstructionDetected));
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Obstruction Detected: ${value}`);
+    this.status.ObstructionDetected = value;
+    this.service!.setCharacteristic(this.platform.Characteristic.ObstructionDetected, (this.status.ObstructionDetected));
+    this.log.info(`[${this.accessoryName}] Setting Obstruction Detected: ${value}`);
 
     // If the door is closing, it should reverse back to Open
-    if (this.states.GarageDoorCurrentState === GarageDoor.CLOSING && this.states.ObstructionDetected === true) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Obstruction Detected. Rolling back to Open`);
+    if (this.status.CurrentDoorState === GarageDoor.CLOSING && this.status.ObstructionDetected === true) {
+      this.log.error(`[${this.accessoryName}] Obstruction Detected. Rolling back to Open`);
 
-      this.states.GarageDoorTargetState = GarageDoor.OPEN;
-      this.service!.setCharacteristic(this.platform.Characteristic.TargetDoorState, (this.states.GarageDoorTargetState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.states.GarageDoorTargetState)}`);
+      this.status.TargetDoorState = GarageDoor.OPEN;
+      this.service!.setCharacteristic(this.platform.Characteristic.TargetDoorState, (this.status.TargetDoorState));
+      this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getStateName(this.status.TargetDoorState)}`);
 
-      this.states.GarageDoorCurrentState = GarageDoor.OPENING;
-      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
+      this.status.CurrentDoorState = GarageDoor.OPENING;
+      this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.status.CurrentDoorState));
+      this.log.info(`[${this.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
 
       this.transitionTimer.stop();
 
       this.transitionTimer.start(
         () => {
-          this.states.GarageDoorCurrentState = this.states.GarageDoorTargetState;
-          this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.states.GarageDoorCurrentState));
+          this.status.CurrentDoorState = this.status.TargetDoorState;
+          this.service!.setCharacteristic(this.platform.Characteristic.CurrentDoorState, (this.status.CurrentDoorState));
 
           this.storeState();
 
-          this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.states.GarageDoorCurrentState)}`);
-        }, this.transitionDuration);
+          this.log.info(`[${this.accessoryName}] Setting Current Door State: ${GarageDoor.getStateName(this.status.CurrentDoorState)}`);
+        }, this.status.transitionDuration);
     }
   }
 }

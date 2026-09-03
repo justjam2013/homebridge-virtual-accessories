@@ -2,7 +2,7 @@
  
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -83,11 +83,9 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
     this.states.SecuritySystemTargetState = this.states.SecuritySystemCurrentState;
 
-    this.service = this.accessory.getService(this.platform.Service.SecuritySystem) || this.accessory.addService(this.platform.Service.SecuritySystem);
+    this.service = this.accessory.getService(ServiceType.SecuritySystem) || this.accessory.addService(ServiceType.SecuritySystem);
 
     this.setSecurityServiceProperties(this.service!);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
     // eslint-disable-next-line max-len

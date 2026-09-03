@@ -87,8 +87,6 @@ export class Switch extends Accessory {
 
     this.service = this.accessory.getService(ServiceType.Switch) || this.accessory.addService(ServiceType.Switch);
 
-    this.setValue(CharacteristicType.Name, this.accessoryName);
-
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Switch Current State: ${Switch.getStateName(On)}`);
     this.updateOn(On);
@@ -153,8 +151,8 @@ export class Switch extends Accessory {
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
       const timerStartTime: string = this.resetTimer!.getStartTime().toString();
-      const timerDuration: number = (this.resetTimer!.getRuntime() > 0) ? this.resetTimer!.getRuntime() : this.resetTimer!.getDefaultDuration();
-      const timerIsRunning: boolean = this.resetTimer!.isTimerRunning();
+      const timerDuration: number = (this.resetTimer!.getDuration() > 0) ? this.resetTimer!.getDuration() : this.resetTimer!.getDefaultDuration();
+      const timerIsRunning: boolean = this.resetTimer!.isRunning();
 
       Object.assign(jsonState, { [this.timerStartTimeStorageKey]: timerStartTime });
       Object.assign(jsonState, { [this.timerDurationStorageKey]: timerDuration });
@@ -269,12 +267,12 @@ export class Switch extends Accessory {
   // On
 
   protected getOn(): boolean {
-    return this.getValue(CharacteristicType.On) as boolean;
+    return this.getCharacteristicValue(CharacteristicType.On) as boolean;
   }
 
   protected updateOn(
     value: boolean,
   ) {
-    this.updateValue(CharacteristicType.On, value);
+    this.updateCharacteristicValue(CharacteristicType.On, value);
   }
 }

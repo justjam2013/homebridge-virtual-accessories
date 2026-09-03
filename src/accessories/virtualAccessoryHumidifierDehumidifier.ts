@@ -3,7 +3,7 @@
 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -100,15 +100,13 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     this.setDeviceOperationalCondition();
 
     // get the HumidifierDehumidifier service if it exists, otherwise create a new LightBulb service
-    this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
+    this.service = this.accessory.getService(ServiceType.HumidifierDehumidifier) || this.accessory.addService(ServiceType.HumidifierDehumidifier);
+
     // These characteristics will be added back as needed
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold));
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold));
 
     this.setHumidifierDehumidifierServiceProperties(this.service!);
-
-    // set the service name, this is what is displayed as the default name on the Home app
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Humidifier/Dehumidifier Current State: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);

@@ -101,8 +101,6 @@ export class Lightbulb extends Accessory {
 
     this.service = this.accessory.getService(ServiceType.Lightbulb) || this.accessory.addService(ServiceType.Lightbulb);
 
-    this.setValue(CharacteristicType.Name, this.accessoryName);
-
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Lightbulb Current State: ${Lightbulb.getStateName(On)}`);
     this.updateOn(On);
@@ -323,60 +321,60 @@ export class Lightbulb extends Accessory {
   // On
 
   private getOn(): boolean {
-    return this.getValue(CharacteristicType.On) as boolean;
+    return this.getCharacteristicValue(CharacteristicType.On) as boolean;
   }
 
   private updateOn(
     value: boolean,
   ) {
-    this.updateValue(CharacteristicType.On, value);
+    this.updateCharacteristicValue(CharacteristicType.On, value);
   }
 
   // Brightness
 
   private getBrightness(): number {
-    return this.getValue(CharacteristicType.Brightness) as number;
+    return this.getCharacteristicValue(CharacteristicType.Brightness) as number;
   }
 
   private updateBrightness(
     value: number,
   ) {
-    this.updateValue(CharacteristicType.Brightness, value);
+    this.updateCharacteristicValue(CharacteristicType.Brightness, value);
   }
 
   // ColorTemperature
 
   private getColorTemperature(): number {
-    return this.getValue(CharacteristicType.ColorTemperature) as number;
+    return this.getCharacteristicValue(CharacteristicType.ColorTemperature) as number;
   }
 
   private updateColorTemperature(
     value: number,
   ) {
-    this.updateValue(CharacteristicType.ColorTemperature, value);
+    this.updateCharacteristicValue(CharacteristicType.ColorTemperature, value);
   }
 
   // Hue
 
   private getHue(): number {
-    return this.getValue(CharacteristicType.Hue) as number;
+    return this.getCharacteristicValue(CharacteristicType.Hue) as number;
   }
 
   private updateHue(
     value: number,
   ) {
-    this.updateValue(CharacteristicType.Hue, value);
+    this.updateCharacteristicValue(CharacteristicType.Hue, value);
   }
 
   // Saturation
 
   private getSaturation(): number {
-    return this.getValue(CharacteristicType.Saturation) as number;
+    return this.getCharacteristicValue(CharacteristicType.Saturation) as number;
   }
 
   private updateSaturation(
     value: number,
   ) {
-    this.updateValue(CharacteristicType.Saturation, value);
+    this.updateCharacteristicValue(CharacteristicType.Saturation, value);
   }
 }

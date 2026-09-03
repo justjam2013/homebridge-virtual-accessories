@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -87,9 +87,7 @@ export class Valve extends Accessory {
       this.accessoryConfiguration.valve.duration.toSeconds(),
     );
 
-    this.service = this.accessory.getService(this.platform.Service.Valve) || this.accessory.addService(this.platform.Service.Valve);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    this.service = this.accessory.getService(ServiceType.Valve) || this.accessory.addService(ServiceType.Valve);
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Valve Current State: ${Valve.getActiveName(this.states.ValveActive)}`);

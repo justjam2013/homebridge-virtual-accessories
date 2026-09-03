@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
@@ -71,9 +71,7 @@ export class SmartSpeaker extends ExternalAccessory {
     this.states.TargetMediaState = this.states.CurrentMediaState;
 
     // set accessory information
-    this.service = this.accessory.getService(this.platform.Service.SmartSpeaker) || this.accessory.addService(this.platform.Service.SmartSpeaker);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    this.service = this.accessory.getService(ServiceType.SmartSpeaker) || this.accessory.addService(ServiceType.SmartSpeaker);
 
     // register handlers
 

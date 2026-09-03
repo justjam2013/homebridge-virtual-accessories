@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,6 +9,14 @@ import { Accessory } from './accessory.js';
 import { UpdatableCharging } from './updatableChargingState.js';
 import { ChargingStateUpdateNotAllowed, InvalidChargingStateType } from '../errors.js';
 
+class BatteryStatus {
+  ChargingState: number = Battery.NOT_CHARGING;
+  BatteryLevel: number = 100;
+  StatusLowBattery: number = Battery.BATTERY_LEVEL_NORMAL;
+
+  lowLevelThreshold: number = 5;
+}
+
 /**
  * Battery - Accessory implementation
  */
@@ -16,17 +24,17 @@ export class Battery extends Accessory implements UpdatableCharging {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Battery';
 
-  static BATTERY_LEVEL_NORMAL: number;  // Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
-  static BATTERY_LEVEL_LOW: number;     // Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+  static readonly BATTERY_LEVEL_NORMAL: number =  CharacteristicType.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+  static readonly BATTERY_LEVEL_LOW: number =     CharacteristicType.StatusLowBattery.BATTERY_LEVEL_LOW;
 
-  static NOT_CHARGING: number;          // Characteristic.ChargingState.NOT_CHARGING
-  static CHARGING: number;              // Characteristic.ChargingState.CHARGING
-  static NOT_CHARGEABLE: number;        // Characteristic.ChargingState.NOT_CHARGEABLE
+  static readonly NOT_CHARGING: number =          CharacteristicType.ChargingState.NOT_CHARGING;
+  static readonly CHARGING: number =              CharacteristicType.ChargingState.CHARGING;
+  static readonly NOT_CHARGEABLE: number =        CharacteristicType.ChargingState.NOT_CHARGEABLE;
 
   private readonly batteryLevelStorageKey: string = 'BatteryLevel';
   private readonly chargingStateStorageKey: string = 'ChargingState';
 
-  private lowLevelThreshold: number;
+  private status: BatteryStatus = new BatteryStatus();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -35,37 +43,27 @@ export class Battery extends Accessory implements UpdatableCharging {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.setupStaticFields();
-
     // First configure the device based on the accessory details
-    let ChargingState = this.accessoryConfiguration.battery.isRechargeable ? Battery.NOT_CHARGING : Battery.NOT_CHARGEABLE;
-    this.lowLevelThreshold = this.accessoryConfiguration.battery.lowLevelThreshold;
+    this.status.ChargingState = this.accessoryConfiguration.battery.isRechargeable ? Battery.NOT_CHARGING : Battery.NOT_CHARGEABLE;
+    this.status.lowLevelThreshold = this.accessoryConfiguration.battery.lowLevelThreshold;
 
-    let BatteryLevel = 100;
-    let StatusLowBattery = Battery.BATTERY_LEVEL_NORMAL;
-
+    // If the accessory is stateful retrieve stored state
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
     if (!this.isEmptyAccessoryState(accessoryState)) {
       const cachedBatteryLevel = accessoryState[this.batteryLevelStorageKey] as number;
       const cachedChargingState = accessoryState[this.chargingStateStorageKey] as number;
 
       if (cachedBatteryLevel !== undefined) {
-        BatteryLevel = cachedBatteryLevel;
-        StatusLowBattery = (BatteryLevel <= this.lowLevelThreshold) ? Battery.BATTERY_LEVEL_LOW : Battery.BATTERY_LEVEL_NORMAL;
+        this.status.BatteryLevel = cachedBatteryLevel;
+        this.status.StatusLowBattery = (this.status.BatteryLevel <= this.status.lowLevelThreshold) ? Battery.BATTERY_LEVEL_LOW : Battery.BATTERY_LEVEL_NORMAL;
       }
 
       if (cachedChargingState !== undefined) {
-        ChargingState = cachedChargingState;
+        this.status.ChargingState = cachedChargingState;
       }
     }
 
-    this.service = this.accessory.getService(ServiceType.Battery) || this.accessory.addService(ServiceType.Battery);
-
-    this.service.setCharacteristic(CharacteristicType.Name, this.accessoryName);
-
-    this.updateChargingState(ChargingState);
-    this.updateBatteryLevel(BatteryLevel);
-    this.updateStatusLowBattery(StatusLowBattery);
+    // register handlers
 
     this.service.getCharacteristic(CharacteristicType.StatusLowBattery)
       .onGet(this.getStatusLowBatteryHandler.bind(this));
@@ -82,7 +80,7 @@ export class Battery extends Accessory implements UpdatableCharging {
   // StatusLowBattery
 
   async getStatusLowBatteryHandler(): Promise<CharacteristicValue> {
-    const StatusLowBattery = this.getStatusLowBattery();
+    const StatusLowBattery = this.status.StatusLowBattery;
     this.log.debug(`[${this.accessoryName}] Getting Status Low Battery: ${Battery.getStatusLowBatteryName(StatusLowBattery)}`);
 
     return StatusLowBattery;
@@ -91,7 +89,7 @@ export class Battery extends Accessory implements UpdatableCharging {
   // BatteryLevel
 
   async getBatteryLevelHandler(): Promise<CharacteristicValue> {
-    const BatteryLevel = this.getBatteryLevel();
+    const BatteryLevel = this.status.BatteryLevel;
     this.log.debug(`[${this.accessoryName}] Getting Battery Level: ${BatteryLevel}%`);
 
     return BatteryLevel;
@@ -100,18 +98,18 @@ export class Battery extends Accessory implements UpdatableCharging {
   // ChargingState
 
   async getChargingStateHandler(): Promise<CharacteristicValue> {
-    const ChargingState = this.getChargingState();
+    const ChargingState = this.status.ChargingState;
     this.log.debug(`[${this.accessoryName}] Getting Charging State: ${Battery.getChargingStateName(ChargingState)}`);
 
     return ChargingState;
   }
 
-  // *** Handlers ***
+  // Absract method implementations
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.batteryLevelStorageKey]: this.getBatteryLevel(),
-      [this.chargingStateStorageKey]: this.getChargingState(),
+      [this.batteryLevelStorageKey]: this.status.BatteryLevel,
+      [this.chargingStateStorageKey]: this.status.ChargingState,
     };
 
     const json = JSON.stringify(jsonState);
@@ -122,6 +120,12 @@ export class Battery extends Accessory implements UpdatableCharging {
   protected getAccessoryTypeName(): string {
     return Battery.ACCESSORY_TYPE_NAME;
   }
+
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return ServiceType.Battery;
+  }
+
+  // Static
 
   static getStatusLowBatteryName(level: number): string {
     let levelName: string;
@@ -173,8 +177,8 @@ export class Battery extends Accessory implements UpdatableCharging {
         throw new InvalidChargingStateType(`Invalid charging value: ${charging}`);
       }
       else {
-        if (this.getChargingState() !== Battery.NOT_CHARGEABLE) {
-          this.updateChargingState(charging ? Battery.CHARGING : Battery.NOT_CHARGING);
+        if (this.status.ChargingState !== Battery.NOT_CHARGEABLE) {
+          this.status.ChargingState = charging ? Battery.CHARGING : Battery.NOT_CHARGING;
         }
       }
     }
@@ -187,58 +191,11 @@ export class Battery extends Accessory implements UpdatableCharging {
       }
       else {
         const BatteryLevel: number = Math.min(charge, 100);
-        this.updateBatteryLevel(BatteryLevel);
-        this.updateStatusLowBattery((BatteryLevel <= this.lowLevelThreshold) ? Battery.BATTERY_LEVEL_LOW : Battery.BATTERY_LEVEL_NORMAL);
+        this.status.BatteryLevel = BatteryLevel;
+        this.status.StatusLowBattery = (BatteryLevel <= this.status.lowLevelThreshold) ? Battery.BATTERY_LEVEL_LOW : Battery.BATTERY_LEVEL_NORMAL;
       }
     }
 
     this.storeState();
-  }
-
-  // Convenience methods
-
-  private setupStaticFields() {
-    Battery.BATTERY_LEVEL_NORMAL  = CharacteristicType.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-    Battery.BATTERY_LEVEL_LOW     = CharacteristicType.StatusLowBattery.BATTERY_LEVEL_LOW;
-
-    Battery.NOT_CHARGING          = CharacteristicType.ChargingState.NOT_CHARGING;
-    Battery.CHARGING              = CharacteristicType.ChargingState.CHARGING;
-    Battery.NOT_CHARGEABLE        = CharacteristicType.ChargingState.NOT_CHARGEABLE;
-  }
-
-  // StatusLowBattery
-
-  private getStatusLowBattery(): number {
-    return this.getValue(CharacteristicType.StatusLowBattery) as number;
-  }
-
-  private updateStatusLowBattery(
-    value: number,
-  ) {
-    this.updateValue(CharacteristicType.StatusLowBattery, value);
-  }
-
-  // BatteryLevel
-
-  private getBatteryLevel(): number {
-    return this.getValue(CharacteristicType.BatteryLevel) as number;
-  }
-
-  private updateBatteryLevel(
-    value: number,
-  ) {
-    this.updateValue(CharacteristicType.BatteryLevel, value);
-  }
-
-  // ChargingState
-
-  private getChargingState(): number {
-    return this.getValue(CharacteristicType.ChargingState) as number;
-  }
-
-  private updateChargingState(
-    value: number,
-  ) {
-    this.updateValue(CharacteristicType.ChargingState, value);
   }
 }

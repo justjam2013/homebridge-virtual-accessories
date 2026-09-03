@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -11,6 +11,12 @@ import { SwitchConfiguration } from '../configuration/accessories/configurationS
 import { TimerConfiguration } from '../configuration/configurationTimer.js';
 import { DurationConfiguration } from '../configuration/configurationDuration.js';
 
+class DoorbellStatus {
+  Volume: number = 0;
+  Mute: boolean = false;
+  ProgrammableSwitchEvent: number = Doorbell.SINGLE_PRESS;
+}
+
 /**
  * Doorbell - Accessory implementation
  */
@@ -18,9 +24,9 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Doorbell';
 
-  static SINGLE_PRESS: number;  // Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
-  static DOUBLE_PRESS: number;  // Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS
-  static LONG_PRESS: number;    // Characteristic.ProgrammableSwitchEvent.LONG_PRESS
+  static readonly SINGLE_PRESS: number =  CharacteristicType.ProgrammableSwitchEvent.SINGLE_PRESS;
+  static readonly DOUBLE_PRESS: number =  CharacteristicType.ProgrammableSwitchEvent.DOUBLE_PRESS;
+  static readonly LONG_PRESS: number =    CharacteristicType.ProgrammableSwitchEvent.LONG_PRESS;
 
   private static readonly COMPANION_TIMER_RESET: number = 1;
 
@@ -29,6 +35,8 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   private companionSwitch?: CompanionSwitch;
 
+  private status: DoorbellStatus = new DoorbellStatus();
+
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
@@ -36,32 +44,26 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    this.setupStaticFields();
-
     // First configure the device based on the accessory details
-    let Volume: number = this.accessoryConfiguration.doorbell.volume;
-    let Mute: boolean = this.accessoryConfiguration.doorbell.mute;
+    this.status.Volume = this.accessoryConfiguration.doorbell.volume;
+    this.status.Mute = this.accessoryConfiguration.doorbell.mute;
 
+    // If the accessory is stateful retrieve stored state
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
     if (!this.isEmptyAccessoryState(accessoryState)) {
       const cachedDoorbellMute = accessoryState[this.muteStorageKey] as boolean;
       const cachedDoorbellVolume = accessoryState[this.volumeStorageKey] as number;
 
       if (cachedDoorbellMute !== undefined) {
-        Mute = cachedDoorbellMute;
+        this.status.Mute = cachedDoorbellMute;
       }
 
       if (cachedDoorbellVolume !== undefined) {
-        Volume = cachedDoorbellVolume;
+        this.status.Volume = cachedDoorbellVolume;
       }
     }
 
-    this.service = this.accessory.getService(ServiceType.Doorbell) || this.accessory.addService(ServiceType.Doorbell);
-
-    this.service.setCharacteristic(CharacteristicType.Name, this.accessoryName);
-
-    this.updateMute(Mute);
-    this.updateVolume(Volume);
+    // register handlers
 
     this.service.getCharacteristic(CharacteristicType.ProgrammableSwitchEvent)
       .onGet(this.getProgrammableSwitchEventHandler.bind(this));
@@ -83,7 +85,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   // ProgrammableSwitchEvent
 
   async getProgrammableSwitchEventHandler(): Promise<CharacteristicValue> {
-    const ProgrammableSwitchEventHandler: number = this.getProgrammableSwitchEvent();
+    const ProgrammableSwitchEventHandler: number = this.status.ProgrammableSwitchEvent;
     this.log.debug(`[${this.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(ProgrammableSwitchEventHandler)}`);
 
     return ProgrammableSwitchEventHandler;
@@ -92,7 +94,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   // Mute
 
   async getMuteHandler(): Promise<CharacteristicValue> {
-    const Mute: boolean = this.getMute();
+    const Mute: boolean = this.status.Mute;
     this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
 
     return Mute;
@@ -100,8 +102,8 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   async setMuteHandler(value: CharacteristicValue) {
     const Mute: boolean = value as boolean;
-    this.updateMute(Mute);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${Mute}`);
+    this.status.Mute = Mute;
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
 
     this.storeState();
   }
@@ -109,39 +111,47 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   // Volume
 
   async getVolumeHandler(): Promise<CharacteristicValue> {
-    const Volume: number = this.getVolume();
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${Volume}`);
+    const Volume: number = this.status.Volume;
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
 
     return Volume;
   }
 
   async setVolumeHandler(value: CharacteristicValue) {
     const Volume: number = value as number;
-    this.updateVolume(Volume);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${Volume}`);
+    this.status.Volume = Volume;
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
 
     this.storeState();
   }
 
-  // *** Handlers ***
-
   /**
-   * This method is called by the comoanion switch to ring the doorbell
+   * This method is called by the companion switch to ring the doorbell
    */
   async triggerEvent(companionAccessory: Accessory) {
     if (!(companionAccessory.accessoryConfiguration.accessoryID === this.accessoryConfiguration.accessoryID)) {
       throw new AccessoryNotAllowedError(`Switch ${companionAccessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
     }
 
-    this.updateProgrammableSwitchEvent(Doorbell.SINGLE_PRESS);
+    this.status.ProgrammableSwitchEvent = Doorbell.SINGLE_PRESS;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Triggered Doorbell Event: ${Doorbell.getEventName(Doorbell.SINGLE_PRESS)}`);
+    this.log.info(`[${this.accessoryName}] Triggered Doorbell Event: ${Doorbell.getEventName(Doorbell.SINGLE_PRESS)}`);
+  }
+
+  // Absract method implementations
+
+  protected getAccessoryTypeName(): string {
+    return Doorbell.ACCESSORY_TYPE_NAME;
+  }
+
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return ServiceType.Doorbell;
   }
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.muteStorageKey]: this.getMute(),
-      [this.volumeStorageKey]: this.getVolume(),
+      [this.muteStorageKey]: this.status.Mute,
+      [this.volumeStorageKey]: this.status.Volume,
     };
 
     const json = JSON.stringify(jsonState);
@@ -149,9 +159,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Doorbell.ACCESSORY_TYPE_NAME;
-  }
+  // Static
 
   static getEventName(event: number): string {
     let eventName: string;
@@ -192,49 +200,5 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
     );
 
     return companionSwitch;
-  }
-
-  // Convenience methods
-
-  private setupStaticFields() {
-    Doorbell.SINGLE_PRESS = CharacteristicType.ProgrammableSwitchEvent.SINGLE_PRESS;
-    Doorbell.DOUBLE_PRESS = CharacteristicType.ProgrammableSwitchEvent.DOUBLE_PRESS;
-    Doorbell.LONG_PRESS   = CharacteristicType.ProgrammableSwitchEvent.LONG_PRESS;
-  }
-
-  // ProgrammableSwitchEvent
-
-  private getProgrammableSwitchEvent(): number {
-    return Doorbell.SINGLE_PRESS;
-  }
-
-  private updateProgrammableSwitchEvent(
-    value: number,
-  ) {
-    this.updateValue(CharacteristicType.ProgrammableSwitchEvent, value);
-  }
-
-  // Mute
-
-  private getMute(): boolean {
-    return this.getValue(CharacteristicType.Mute) as boolean;
-  }
-
-  private updateMute(
-    value: boolean,
-  ) {
-    this.updateValue(CharacteristicType.Mute, value);
-  }
-
-  // Volume
-
-  private getVolume(): number {
-    return this.getValue(CharacteristicType.Volume) as number;
-  }
-
-  private updateVolume(
-    value: number,
-  ) {
-    this.updateValue(CharacteristicType.Volume, value);
   }
 }

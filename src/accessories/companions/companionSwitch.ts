@@ -43,7 +43,7 @@ export class CompanionSwitch extends Switch {
                      this.accessory.addService(ServiceType.Switch, this.companionName, accessory.UUID + this.postfix);
 
     // Replace the Name Characteristic
-    this.setValue(CharacteristicType.Name, this.accessoryName);
+    this.setCharacteristicValue(CharacteristicType.Name, this.accessoryName);
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(this.getOn())}`);

@@ -50,7 +50,7 @@ export abstract class Accessory {
       this.deleteAccessoryState(this.storagePath);
     }
 
-    // set accessory information
+    // Set accessory information
     this.accessoryInformationService = this.accessory.getService(ServiceType.AccessoryInformation);
     this.accessoryInformationService!
       .setCharacteristic(CharacteristicType.Manufacturer, 'Virtual Accessories for Homebridge')
@@ -58,6 +58,12 @@ export abstract class Accessory {
       .setCharacteristic(CharacteristicType.SerialNumber, this.accessory.UUID)
       .setCharacteristic(CharacteristicType.Name, this.accessoryName)
       .setCharacteristic(CharacteristicType.FirmwareRevision, this.accessory.context.firmwareVersion);
+
+    // Set accessory service info
+    const implService: WithUUID<typeof Service> = this.getAccessoryService();
+    this.service = this.accessory.getService(implService) || this.accessory.addService(implService as unknown as Service);
+
+    this.setCharacteristicValue(CharacteristicType.Name, this.accessoryName);
   }
 
   isExternalAccessory(): boolean {
@@ -130,26 +136,28 @@ export abstract class Accessory {
     }
   }
 
+  // Absract methods
+
   protected abstract getAccessoryTypeName(): string;
+
+  protected abstract getAccessoryService(): WithUUID<typeof Service>;
 
   protected abstract getJsonState(): string;
 
-  // Convenience methods
-
-  protected getValue(
+  getCharacteristicValue(
     characteristic: WithUUID<new () => Characteristic>,
   ): CharacteristicValue {
     return this.service.getCharacteristic(characteristic).value as CharacteristicValue;
   }
 
-  protected setValue(
+  setCharacteristicValue(
     characteristic: WithUUID<new () => Characteristic>,
     value: CharacteristicValue,
   ) {
     this.service.setCharacteristic(characteristic, value);
   }
 
-  protected updateValue(
+  updateCharacteristicValue(
     characteristic: WithUUID<new () => Characteristic>,
     value: CharacteristicValue,
   ) {

@@ -1,8 +1,18 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
+
+/**
+ * FanStatus - Accessory status
+ */
+
+class FanStatus {
+  On: boolean = Fan.OFF;
+  RotationDirection: number = Fan.CLOCKWISE;
+  RotationSpeed: number = 0;
+}
 
 /**
  * Fan - Accessory implementation
@@ -14,18 +24,14 @@ export class Fan extends Accessory {
   static readonly ON: boolean = true;
   static readonly OFF: boolean = false;
 
-  static readonly CLOCKWISE: number = 0;          // Characteristic.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE
-  static readonly COUNTER_CLOCKWISE: number = 1;  // Characteristic.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE
+  static readonly CLOCKWISE: number =             CharacteristicType.ProgrammableSwitchEvent.RotationDirection.CLOCKWISE;
+  static readonly COUNTER_CLOCKWISE: number =     CharacteristicType.ProgrammableSwitchEvent.RotationDirection.COUNTER_CLOCKWISE;
 
   private readonly stateStorageKey: string = 'FanState';
   private readonly rotatioDirectionStorageKey: string = 'FanRotationDirection';
   private readonly rotatioSpeedStorageKey: string = 'FanRotationSpeed';
 
-  private states = {
-    FanState: Fan.OFF,
-    FanRotationDirection: Fan.CLOCKWISE,
-    FanRotationSpeed: 100,
-  };
+  private status: FanStatus = new FanStatus();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -35,12 +41,8 @@ export class Fan extends Accessory {
     super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
-    const rotationDirection: number = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
-    const rotationSpeed: number = this.accessoryConfiguration.fan.rotationSpeed as number;
-
-    this.states.FanState = Fan.OFF;
-    this.states.FanRotationDirection = rotationDirection;
-    this.states.FanRotationSpeed = rotationSpeed;
+    this.status.RotationDirection = this.accessoryConfiguration.fan.rotationDirection === 'clockwise' ? Fan.CLOCKWISE : Fan.COUNTER_CLOCKWISE;
+    this.status.RotationSpeed = this.accessoryConfiguration.fan.rotationSpeed;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -50,99 +52,100 @@ export class Fan extends Accessory {
       const cachedRotationSpeed: number = accessoryState[this.rotatioSpeedStorageKey] as number;
 
       if (cachedState !== undefined && cachedRotationDirection !== undefined && cachedRotationSpeed !== undefined) {
-        this.states.FanState = cachedState;
-        this.states.FanRotationDirection = cachedRotationDirection;
-        this.states.FanRotationSpeed = cachedRotationSpeed;
+        this.status.On = cachedState;
+        this.status.RotationDirection = cachedRotationDirection;
+        this.status.RotationSpeed = cachedRotationSpeed;
       }
     }
-
-    this.service = this.accessory.getService(this.platform.Service.Fan) || this.accessory.addService(this.platform.Service.Fan);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
-    // Update the initial state of the accessory     
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Fan Current State: ${Fan.getStateName(this.states.FanState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.On, (this.states.FanState));
-    this.service.updateCharacteristic(this.platform.Characteristic.RotationDirection, (this.states.FanRotationDirection));
-    this.service.updateCharacteristic(this.platform.Characteristic.RotationSpeed, (this.states.FanRotationSpeed));
 
     // register handlers
 
     this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this))
-      .onGet(this.getOn.bind(this));
+      .onSet(this.setOnHamdler.bind(this))
+      .onGet(this.getOnHamdler.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.RotationDirection)
-      .onSet(this.setRotationDirection.bind(this))
-      .onGet(this.getRotationDirection.bind(this));
+      .onSet(this.setRotationDirectionHamdler.bind(this))
+      .onGet(this.getRotationDirectionHamdler.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-      .onSet(this.setRotationSpeed.bind(this))
-      .onGet(this.getRotationSpeed.bind(this));
+      .onSet(this.setRotationSpeedHamdler.bind(this))
+      .onGet(this.getRotationSpeedHamdler.bind(this));
   }
 
-  // Handlers
+  // *** Handlers ***
 
-  async setOn(value: CharacteristicValue) {
-    this.states.FanState = value as boolean;
+  // On
+
+  async getOnHamdler(): Promise<CharacteristicValue> {
+    const On: boolean = this.status.On;
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Fan.getStateName(On)}`);
+
+    return On;
+  }
+
+  async setOnHamdler(value: CharacteristicValue) {
+    const On = value as boolean;
+    this.status.On = On;
+    this.log.info(`[${this.accessoryName}] Setting State: ${Fan.getStateName(On)}`);
 
     this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(this.states.FanState)}`);
   }
 
-  async getOn(): Promise<CharacteristicValue> {
-    const fanState = this.states.FanState;
+  // RotationDirection
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Fan.getStateName(fanState)}`);
+  async getRotationDirectionHamdler(): Promise<CharacteristicValue> {
+    const RotationDirection = this.status.RotationDirection;
+    this.log.debug(`[${this.accessoryName}] Getting Rotation Direction: ${RotationDirection}%`);
 
-    return fanState;
+    return RotationDirection;
   }
 
-  async setRotationDirection(value: CharacteristicValue) {
-    this.states.FanRotationDirection = value as number;
+  async setRotationDirectionHamdler(value: CharacteristicValue) {
+    const RotationDirection = value as number;
+    this.status.RotationDirection = RotationDirection;
+    this.log.info(`[${this.accessoryName}] Setting Rotation Direction: ${RotationDirection}%`);
 
     this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${this.states.FanRotationDirection}`);
   }
 
-  async getRotationDirection(): Promise<CharacteristicValue> {
-    const fanRotationDirection = this.states.FanRotationDirection;
+  // RotationSpeed
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${fanRotationDirection}`);
+  async getRotationSpeedHamdler(): Promise<CharacteristicValue> {
+    const RotationSpeed = this.status.RotationSpeed;
+    this.log.debug(`[${this.accessoryName}] Getting Rotation Speed: ${RotationSpeed}%`);
 
-    return fanRotationDirection;
+    return RotationSpeed;
   }
 
-  async setRotationSpeed(value: CharacteristicValue) {
-    this.states.FanRotationSpeed = value as number;
+  async setRotationSpeedHamdler(value: CharacteristicValue) {
+    const RotationSpeed = value as number;
+    this.status.RotationSpeed = RotationSpeed;
+    this.log.info(`[${this.accessoryName}] Setting Rotation Speed: ${RotationSpeed}%`);
 
     this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.FanRotationSpeed}%`);
   }
 
-  async getRotationSpeed(): Promise<CharacteristicValue> {
-    const fanRotationSpeed = this.states.FanRotationSpeed;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Speed: ${fanRotationSpeed}%`);
-
-    return fanRotationSpeed;
-  }
-
-  protected getJsonState(): string {
-    const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.FanState,
-      [this.rotatioDirectionStorageKey]: this.states.FanRotationDirection,
-      [this.rotatioSpeedStorageKey]: this.states.FanRotationSpeed,
-    });
-    return json;
-  }
+  // Absract method implementations
 
   protected getAccessoryTypeName(): string {
     return Fan.ACCESSORY_TYPE_NAME;
   }
+
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return ServiceType.Fan;
+  }
+
+  protected getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.status.On,
+      [this.rotatioDirectionStorageKey]: this.status.RotationDirection,
+      [this.rotatioSpeedStorageKey]: this.status.RotationSpeed,
+    });
+    return json;
+  }
+
+  // Static
 
   static getStateName(state: boolean): string {
     let stateName: string;

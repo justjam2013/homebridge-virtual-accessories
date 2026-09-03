@@ -2,14 +2,14 @@ import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { OpeningAccessory } from './openingAccessory.js';
+import { PositionAccessory } from './positionAccessory.js';
 
 import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
 
 /**
  * WindowCovering - Accessory implementation
  */
-export class WindowCovering extends OpeningAccessory {
+export class WindowCovering extends PositionAccessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'Window Covering';
 

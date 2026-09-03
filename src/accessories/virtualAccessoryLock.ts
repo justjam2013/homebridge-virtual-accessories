@@ -2,7 +2,7 @@
 
 import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -113,9 +113,7 @@ export class Lock extends Accessory {
       this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor as string]);
     }
 
-    this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    this.service = this.accessory.getService(ServiceType.LockMechanism) || this.accessory.addService(ServiceType.LockMechanism);
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
