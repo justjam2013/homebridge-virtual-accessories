@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -52,10 +52,7 @@ export class InputSource extends Accessory {
     this.states.InputSourceIdentifier = this.accessoryConfiguration.inputSource!.identifier;
 
     // set accessory information
-    this.service = this.accessory.getService(inputName) ||
-                   this.accessory.addService(this.platform.Service.InputSource, inputName, accessory.UUID + inputName);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, inputName);
+    this.service = this.accessory.getService(inputName) || this.accessory.addService(ServiceType, inputName, accessory.UUID + inputName);
 
     // register handlers
 

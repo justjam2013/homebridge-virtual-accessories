@@ -3,13 +3,27 @@
 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { UpdatableMeasurementSensor } from '../sensors/updatableSensor.js';
 import { HeaterType, TemperatureUnit, ThresholdTemperature } from '../configuration/schema.js';
+
+class HeaterCoolerStatus {
+  Active: number = HeaterCooler.INACTIVE;
+  CurrentHeaterCoolerState: number = HeaterCooler.CURRENTLY_INACTIVE;
+  TargetHeaterCoolerState: number = HeaterCooler.AUTO;
+
+  // HomeKit units are in celsius
+  HeatingThreshold: number = 18;           // 18ºC considered a minimum for health and safety
+  CoolingThreshold: number = 27;           // 27ºC
+
+  CurrentTemperature: number = 22;         // This value comes from sensor, set to 22ºC for now - room temperature
+  TemperatureDisplayUnits: number = HeaterCooler.CELSIUS;
+  FanRotationSpeed: number = 0;
+}
 
 /**
  * HeaterCooler - Accessory implementation
@@ -18,20 +32,20 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
   static readonly ACCESSORY_TYPE_NAME: string = 'HeaterCooler';
 
-  static readonly CURRENTLY_INACTIVE: number = 0;       // Characteristic.CurrentHeaterCoolerState.INACTIVE
-  static readonly CURRENTLY_IDLE: number = 1;           // Characteristic.CurrentHeaterCoolerState.IDLE
-  static readonly CURRENTLY_HEATING: number = 2;        // Characteristic.CurrentHeaterCoolerState.HEATING
-  static readonly CURRENTLY_COOLING: number = 3;        // Characteristic.CurrentHeaterCoolerState.COOLING
+  static readonly CURRENTLY_INACTIVE: number =          CharacteristicType.CurrentHeaterCoolerState.INACTIVE;
+  static readonly CURRENTLY_IDLE: number =              CharacteristicType.CurrentHeaterCoolerState.IDLE;
+  static readonly CURRENTLY_HEATING: number =           CharacteristicType.CurrentHeaterCoolerState.HEATING;
+  static readonly CURRENTLY_COOLING: number =           CharacteristicType.CurrentHeaterCoolerState.COOLING;
 
-  static readonly AUTO: number = 0;                     // Characteristic.TargetHeaterCoolerState.AUTO 
-  static readonly HEAT: number = 1;                     // Characteristic.TargetHeaterCoolerState.HEAT
-  static readonly COOL: number = 2;                     // Characteristic.TargetHeaterCoolerState.COOL
+  static readonly AUTO: number =                        CharacteristicType.TargetHeaterCoolerState.AUTO; 
+  static readonly HEAT: number =                        CharacteristicType.TargetHeaterCoolerState.HEAT;
+  static readonly COOL: number =                        CharacteristicType.TargetHeaterCoolerState.COOL;
 
-  static readonly INACTIVE: number = 0;                 // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;                   // Characteristic.Active.ACTIVE
+  static readonly INACTIVE: number =                    CharacteristicType.Active.INACTIVE;
+  static readonly ACTIVE: number =                      CharacteristicType.Active.ACTIVE;
 
-  static readonly CELSIUS: number = 0;                  // Characteristic.TemperatureDisplayUnits.CELSIUS
-  static readonly FAHRENHEIT: number = 1;               // Characteristic.TemperatureDisplayUnits.FAHRENHEIT
+  static readonly CELSIUS: number =                     CharacteristicType.TemperatureDisplayUnits.CELSIUS;
+  static readonly FAHRENHEIT: number =                  CharacteristicType.TemperatureDisplayUnits.FAHRENHEIT;
 
   private readonly stateStorageKey: string = 'HeaterCoolerActive';
   private readonly targetStateStorageKey: string = 'HeaterCoolerTargetState';
@@ -42,17 +56,7 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
   private deviceType: string;
 
-  private states = {
-    HeaterCoolerActive: HeaterCooler.INACTIVE,
-    HeaterCoolerCurrentState: HeaterCooler.CURRENTLY_INACTIVE,
-    HeaterCoolerTargetState: HeaterCooler.AUTO,
-    // HomeKit units are in celsius
-    HeatingThreshold: 18,           // 18ºC considered a minimum for health and safety
-    CoolingThreshold: 27,           // 27ºC
-    CurrentTemperature: 22,         // This value comes from sensor, set to 22ºC for now - room temperature
-    TemperatureDisplayUnits: HeaterCooler.CELSIUS,
-    FanRotationSpeed: 0,
-  };
+  private status: HeaterCoolerStatus = new HeaterCoolerStatus();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -62,25 +66,20 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     super(platform, accessory, accessoryConfiguration);
 
     // First configure the device based on the accessory details
-    this.states.HeaterCoolerActive = HeaterCooler.INACTIVE;
-    this.states.HeaterCoolerCurrentState = HeaterCooler.CURRENTLY_INACTIVE;
-    this.states.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
-    this.states.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold as number;
-    this.states.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold as number;
-
-    // set to 22ºC
-    this.states.CurrentTemperature = 22;
+    this.status.TemperatureDisplayUnits = this.accessoryConfiguration.heaterCooler.temperatureDisplayUnits === TemperatureUnit.Celsius ? HeaterCooler.CELSIUS : HeaterCooler.FAHRENHEIT;
+    this.status.HeatingThreshold = this.accessoryConfiguration.heaterCooler.heatingThreshold as number;
+    this.status.CoolingThreshold = this.accessoryConfiguration.heaterCooler.coolingThreshold as number;
 
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
 
     if (this.deviceType === HeaterType.Heater) {
-      this.states.HeaterCoolerTargetState = HeaterCooler.HEAT;
+      this.status.TargetHeaterCoolerState = HeaterCooler.HEAT;
     }
     else if (this.deviceType === HeaterType.Cooler) {
-      this.states.HeaterCoolerTargetState = HeaterCooler.COOL;
+      this.status.TargetHeaterCoolerState = HeaterCooler.COOL;
     }
     else {
-      this.states.HeaterCoolerTargetState = HeaterCooler.AUTO;
+      this.status.TargetHeaterCoolerState = HeaterCooler.AUTO;
     }
 
     // If the accessory is stateful retrieve stored state
@@ -92,27 +91,27 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       const cachedFanRotationSpeed: number = accessoryState[this.fanRotatioSpeedStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.HeaterCoolerActive = cachedState;
+        this.status.Active = cachedState;
       }
       if (cachedTargetState !== undefined) {
-        this.states.HeaterCoolerTargetState = cachedTargetState;
+        this.status.TargetHeaterCoolerState = cachedTargetState;
       }
       if (cachedTemperatureDisplayUnits !== undefined) {
-        this.states.TemperatureDisplayUnits = cachedTemperatureDisplayUnits;
+        this.status.TemperatureDisplayUnits = cachedTemperatureDisplayUnits;
       }
       if (cachedFanRotationSpeed !== undefined) {
-        this.states.FanRotationSpeed = cachedFanRotationSpeed;
+        this.status.FanRotationSpeed = cachedFanRotationSpeed;
       }
       if (this.cools()) {
         const cachedCoolingThreshold: number = accessoryState[this.coolingThresholdStorageKey] as number;
         if (cachedCoolingThreshold !== undefined) {
-          this.states.CoolingThreshold = cachedCoolingThreshold;
+          this.status.CoolingThreshold = cachedCoolingThreshold;
         }
       }
       if (this.heats()) {
         const cachedHeatingThreshold: number = accessoryState[this.heatingThresholdStorageKey] as number;
         if (cachedHeatingThreshold !== undefined) {
-          this.states.HeatingThreshold = cachedHeatingThreshold;
+          this.status.HeatingThreshold = cachedHeatingThreshold;
         }
       }
     }
@@ -120,20 +119,18 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     this.setDeviceOperationalCondition();
 
     // get the HeaterCooler service if it exists, otherwise create a new LightBulb service
-    this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
+    this.service = this.accessory.getService(ServiceType.HeaterCooler) || this.accessory.addService(ServiceType.HeaterCooler);
+
     // These characteristics will be added back as needed
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature));
     this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature));
 
     this.setHeaterCoolerServiceProperties(this.service!);
 
-    // set the service name, this is what is displayed as the default name on the Home app
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Heater/Cooler Current State: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.states.HeaterCoolerCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState, (this.states.HeaterCoolerTargetState));
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Heater/Cooler Current State: ${HeaterCooler.getCurrentStateName(this.status.HeaterCoolerCurrentState)}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, (this.status.HeaterCoolerCurrentState));
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState, (this.status.HeaterCoolerTargetState));
 
     // register handlers
 
@@ -185,52 +182,55 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     }
   }
 
-  // Handlers
+  // *** Handlers ***
 
-  async setActive(value: CharacteristicValue) {
-    this.states.HeaterCoolerActive = value as number;
-
-    this.setDeviceOperationalCondition();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${HeaterCooler.getActiveName(this.states.HeaterCoolerActive)}`);
-  }
+  // Active
 
   async getActive(): Promise<CharacteristicValue> {
-    const heaterCoolerActive = this.states.HeaterCoolerActive;
-
+    const heaterCoolerActive = this.status.Active;
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${HeaterCooler.getActiveName(heaterCoolerActive)}`);
 
     return heaterCoolerActive;
   }
 
-  async getCurrentHeaterCoolerState(): Promise<CharacteristicValue> {
-    const heaterCoolerCurrentState = this.states.HeaterCoolerCurrentState;
+  async setActive(value: CharacteristicValue) {
+    this.status.Active = value as number;
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${HeaterCooler.getActiveName(this.status.HeaterCoolerActive)}`);
 
+    this.setDeviceOperationalCondition();
+  }
+
+  // CurrentHeaterCoolerState
+
+  async getCurrentHeaterCoolerState(): Promise<CharacteristicValue> {
+    const heaterCoolerCurrentState = this.status.CurrentHeaterCoolerState;
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(heaterCoolerCurrentState)}`);
 
     return heaterCoolerCurrentState;
   }
 
-  async setTargetHeaterCoolerState(value: CharacteristicValue) {
-    this.states.HeaterCoolerTargetState = value as number;
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(this.states.HeaterCoolerTargetState)}`);
-
-    this.setDeviceOperationalCondition();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
-  }
+  // TargetHeaterCoolerState
 
   async getTargetHeaterCoolerState(): Promise<CharacteristicValue> {
-    const heaterCoolerTargetState = this.states.HeaterCoolerTargetState;
-
+    const heaterCoolerTargetState = this.status.TargetHeaterCoolerState;
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(heaterCoolerTargetState)}`);
 
     return heaterCoolerTargetState;
   }
 
+  async setTargetHeaterCoolerState(value: CharacteristicValue) {
+    this.status.TargetHeaterCoolerState = value as number;
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(this.status.TargetHeaterCoolerState)}`);
+
+    this.setDeviceOperationalCondition();
+
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(this.status.CurrentHeaterCoolerState)}`);
+  }
+
+  // CurrentTemperature
+
   async getCurrentTemperature(): Promise<CharacteristicValue> {
-    const currentTemperature = this.states.CurrentTemperature;
+    const currentTemperature = this.status.CurrentTemperature;
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Temperature: ${this.displayTemperature(currentTemperature)}${this.getDegreeUnits()}`);
 
@@ -367,6 +367,8 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
 
     this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Heater/Cooler current state: ${HeaterCooler.getCurrentStateName(this.states.HeaterCoolerCurrentState)}`);
   }
+
+  // Static
 
   static getActiveName(status: number): string {
     let activeName: string;

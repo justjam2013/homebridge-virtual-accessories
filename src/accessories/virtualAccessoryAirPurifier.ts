@@ -1,11 +1,17 @@
 /* eslint-disable brace-style */
-/* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
+
+class AirPurifierStatus {
+  Active: number = AirPurifier.INACTIVE;
+  CurrentAirPurifierState: number = AirPurifier.CURRENTLY_INACTIVE;
+  TargetAirPurifierState: number = AirPurifier.MANUAL;
+  RotationSpeed: number = 0;
+}
 
 /**
  * AirPurifier - Accessory implementation
@@ -14,26 +20,23 @@ export class AirPurifier extends Accessory {
 
   static readonly ACCESSORY_TYPE_NAME: string = 'AirPurifier';
 
-  static readonly CURRENTLY_INACTIVE: number = 0;       // Characteristic.CurrentAirPurifierState.INACTIVE
-  static readonly CURRENTLY_IDLE: number = 1;           // Characteristic.CurrentAirPurifierState.IDLE
-  static readonly CURRENTLY_PURIFYING_AIR: number = 2;  // Characteristic.CurrentAirPurifierState.PURIFYING_AIR
+  // Because of how Homebridge works, these are not initialized until the constructor runs
 
-  static readonly MANUAL: number = 0;                   // Characteristic.TargetAirPurifierState.MANUAL
-  static readonly AUTO: number = 1;                     // Characteristic.TargetAirPurifierState.AUTO
+  static readonly CURRENTLY_INACTIVE: number =      CharacteristicType.CurrentAirPurifierState.INACTIVE;
+  static readonly CURRENTLY_IDLE: number =          CharacteristicType.CurrentAirPurifierState.IDLE;
+  static readonly CURRENTLY_PURIFYING_AIR: number = CharacteristicType.CurrentAirPurifierState.PURIFYING_AIR;
 
-  static readonly INACTIVE: number = 0;                 // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;                   // Characteristic.Active.ACTIVE
+  static readonly MANUAL: number =                  CharacteristicType.TargetAirPurifierState.MANUAL;
+  static readonly AUTO: number =                    CharacteristicType.TargetAirPurifierState.AUTO;
+
+  static readonly INACTIVE: number =                CharacteristicType.Active.INACTIVE;
+  static readonly ACTIVE: number =                  CharacteristicType.Active.ACTIVE;
 
   private readonly stateStorageKey: string = 'AirPurifierActive';
   private readonly targetStateStorageKey: string = 'AirPurifierTargetState';
   private readonly rotatioSpeedStorageKey: string = 'AirPurifierRotationSpeed';
 
-  private states = {
-    AirPurifierActive: AirPurifier.INACTIVE,
-    AirPurifierCurrentState: AirPurifier.CURRENTLY_INACTIVE,
-    AirPurifierTargetState: AirPurifier.MANUAL,
-    AirPurifierRotationSpeed: 100,
-  };
+  private status: AirPurifierStatus = new AirPurifierStatus();
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -45,10 +48,7 @@ export class AirPurifier extends Accessory {
     // First configure the device based on the accessory details
     const rotationSpeed: number = this.accessoryConfiguration.airPurifier.rotationSpeed as number;
 
-    this.states.AirPurifierActive = AirPurifier.INACTIVE;
-    this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_INACTIVE;
-    this.states.AirPurifierTargetState = AirPurifier.MANUAL;
-    this.states.AirPurifierRotationSpeed = rotationSpeed;
+    this.status.RotationSpeed = rotationSpeed;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -58,138 +58,143 @@ export class AirPurifier extends Accessory {
       const cachedRotationSpeed: number = accessoryState[this.rotatioSpeedStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.AirPurifierActive = cachedState;
+        this.status.Active = cachedState;
       }
       if (cachedTargetState !== undefined) {
-        this.states.AirPurifierTargetState = cachedTargetState;
+        this.status.TargetAirPurifierState = cachedTargetState;
       }
       if (cachedRotationSpeed !== undefined) {
-        this.states.AirPurifierRotationSpeed = cachedRotationSpeed;
+        this.status.RotationSpeed = cachedRotationSpeed;
       }
     }
 
+    // Adjust CurrentAirPurifierState
     this.setDeviceOperationalCondition();
-
-    this.service = this.accessory.getService(this.platform.Service.AirPurifier) || this.accessory.addService(this.platform.Service.AirPurifier);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
-    // Update the initial state of the accessory     
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Air Purifier Current State: ${AirPurifier.getCurrentStateName(this.states.AirPurifierActive)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, (this.states.AirPurifierCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, (this.states.AirPurifierTargetState));
-    this.service.updateCharacteristic(this.platform.Characteristic.RotationSpeed, (this.states.AirPurifierRotationSpeed));
 
     // register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.Active)
-      .onSet(this.setActive.bind(this))
-      .onGet(this.getActive.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Active)
+      .onGet(this.getActiveHamdler.bind(this))
+      .onSet(this.setActiveHamdler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
-      .onGet(this.getCurrentAirPurifierState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.CurrentAirPurifierState)
+      .onGet(this.getCurrentAirPurifierStateHamdler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
-      .onSet(this.setTargetAirPurifierState.bind(this))
-      .onGet(this.getTargetAirPurifierState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.TargetAirPurifierState)
+      .onGet(this.getTargetAirPurifierStateHamdler.bind(this))
+      .onSet(this.setTargetAirPurifierStateHamdler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-      .onSet(this.setRotationSpeed.bind(this))
-      .onGet(this.getRotationSpeed.bind(this));
+    this.service.getCharacteristic(CharacteristicType.RotationSpeed)
+      .onGet(this.getRotationSpeedHamdler.bind(this))
+      .onSet(this.setRotationSpeedHamdler.bind(this));
   }
 
-  // Handlers
+  // *** Handlers ***
 
-  async setActive(value: CharacteristicValue) {
-    this.states.AirPurifierActive = value as number;
+  // Active
+
+  async getActiveHamdler(): Promise<CharacteristicValue> {
+    const Active: number = this.status.Active;
+    this.log.debug(`[${this.accessoryName}] Getting State: ${AirPurifier.getActiveName(Active)}`);
+
+    return Active;
+  }
+
+  async setActiveHamdler(value: CharacteristicValue) {
+    const Active: number = value as number;
+
+    this.status.Active = Active;
+    this.log.info(`[${this.accessoryName}] Setting State: ${AirPurifier.getActiveName(Active)}`);
 
     this.setDeviceOperationalCondition();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${AirPurifier.getActiveName(this.states.AirPurifierActive)}`);
   }
 
-  async getActive(): Promise<CharacteristicValue> {
-    const airPurifierActive = this.states.AirPurifierActive;
+  // CurrentAirPurifierState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${AirPurifier.getActiveName(airPurifierActive)}`);
+  async getCurrentAirPurifierStateHamdler(): Promise<CharacteristicValue> {
+    const CurrentAirPurifierState: number = this.status.CurrentAirPurifierState;
+    this.log.debug(`[${this.accessoryName}] Getting Current Air Purifier State: ${AirPurifier.getCurrentStateName(CurrentAirPurifierState)}`);
 
-    return airPurifierActive;
+    return CurrentAirPurifierState;
   }
 
-  async getCurrentAirPurifierState(): Promise<CharacteristicValue> {
-    const airPurifierCurrentState = this.states.AirPurifierCurrentState;
+  // TargetAirPurifierState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Air Purifier State: ${AirPurifier.getCurrentStateName(airPurifierCurrentState)}`);
+  async getTargetAirPurifierStateHamdler(): Promise<CharacteristicValue> {
+    const TargetAirPurifierState: number = this.status.TargetAirPurifierState;
+    this.log.debug(`[${this.accessoryName}] Getting Target Air Purifier State: ${AirPurifier.getTargetStateName(TargetAirPurifierState)}`);
 
-    return airPurifierCurrentState;
+    return TargetAirPurifierState;
   }
 
-  async setTargetAirPurifierState(value: CharacteristicValue) {
-    this.states.AirPurifierTargetState = value as number;
+  async setTargetAirPurifierStateHamdler(value: CharacteristicValue) {
+    const TargetAirPurifierState:number = value as number;
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Air Purifier State: ${AirPurifier.getTargetStateName(this.states.AirPurifierTargetState)}`);
+    this.status.TargetAirPurifierState = TargetAirPurifierState;
+    this.log.info(`[${this.accessoryName}] Setting Target Air Purifier State: ${AirPurifier.getTargetStateName(TargetAirPurifierState)}`);
 
     this.setDeviceOperationalCondition();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Air Purifier State: ${AirPurifier.getCurrentStateName(this.states.AirPurifierCurrentState)}`);
   }
 
-  async getTargetAirPurifierState(): Promise<CharacteristicValue> {
-    const airPurifierTargetState = this.states.AirPurifierTargetState;
+  // RotationSpeed
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Air Purifier State: ${AirPurifier.getTargetStateName(airPurifierTargetState)}`);
+  async getRotationSpeedHamdler(): Promise<CharacteristicValue> {
+    const RotationSpeed = this.status.RotationSpeed;
+    this.log.debug(`[${this.accessoryName}] Getting Rotation Speed: ${RotationSpeed}%`);
 
-    return airPurifierTargetState;
+    return RotationSpeed;
   }
 
-  async setRotationSpeed(value: CharacteristicValue) {
-    this.states.AirPurifierRotationSpeed = value as number;
+  async setRotationSpeedHamdler(value: CharacteristicValue) {
+    const RotationSpeed = value as number;
+
+    this.status.RotationSpeed = RotationSpeed;
+    this.log.info(`[${this.accessoryName}] Setting Rotation Speed: ${RotationSpeed}%`);
 
     this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Speed: ${this.states.AirPurifierRotationSpeed}%`);
   }
 
-  async getRotationSpeed(): Promise<CharacteristicValue> {
-    const airPurifierRotationSpeed = this.states.AirPurifierRotationSpeed;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Speed: ${airPurifierRotationSpeed}%`);
-
-    return airPurifierRotationSpeed;
-  }
-
-  protected getJsonState(): string {
-    const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.AirPurifierActive,
-      [this.targetStateStorageKey]: this.states.AirPurifierTargetState,
-      [this.rotatioSpeedStorageKey]: this.states.AirPurifierRotationSpeed,
-    });
-    return json;
-  }
+  // Absract method implementations
 
   protected getAccessoryTypeName(): string {
     return AirPurifier.ACCESSORY_TYPE_NAME;
   }
 
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return ServiceType.AirPurifier;
+  }
+
+  protected getJsonState(): string {
+    const json = JSON.stringify({
+      [this.stateStorageKey]: this.status.Active,
+      [this.targetStateStorageKey]: this.status.TargetAirPurifierState,
+      [this.rotatioSpeedStorageKey]: this.status.RotationSpeed,
+    });
+    return json;
+  }  
+
   private setDeviceOperationalCondition() {
-    if (this.states.AirPurifierActive === AirPurifier.ACTIVE) {
-      this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_PURIFYING_AIR;
+    if (this.status.Active === AirPurifier.ACTIVE) {
+      this.status.CurrentAirPurifierState = AirPurifier.CURRENTLY_PURIFYING_AIR;
     }
     else {  // (this.states.AirPurifierActive === AirPurifier.INACTIVE)
-      if (this.states.AirPurifierTargetState === AirPurifier.AUTO) {
-        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_IDLE;
+      const TargetAirPurifierState = this.status.TargetAirPurifierState;
+
+      if (TargetAirPurifierState === AirPurifier.AUTO) {
+        this.status.CurrentAirPurifierState = AirPurifier.CURRENTLY_IDLE;
       }
-      else if (this.states.AirPurifierTargetState === AirPurifier.MANUAL) {
-        this.states.AirPurifierCurrentState = AirPurifier.CURRENTLY_INACTIVE;
+      else if (TargetAirPurifierState === AirPurifier.MANUAL) {
+        this.status.CurrentAirPurifierState = AirPurifier.CURRENTLY_INACTIVE;
       }
     }
 
-    this.service?.setCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, (this.states.AirPurifierCurrentState));
+    const CurrentAirPurifierState: number = this.status.CurrentAirPurifierState;
+    this.log.debug(`[${this.accessoryName}] Air Purifier current state: ${AirPurifier.getCurrentStateName(CurrentAirPurifierState)}`);
 
     this.storeState();
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Air Purifier current state: ${AirPurifier.getCurrentStateName(this.states.AirPurifierCurrentState)}`);
   }
+
+  // Static
 
   static getActiveName(status: number): string {
     let activeName: string;

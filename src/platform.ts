@@ -21,6 +21,9 @@ import fs from 'fs';
 // @ts-ignore <-- TODO remove this line, unless that gives an error
 import packageInfo from '../package.json' with { type: 'json' };
 
+export let CharacteristicType: typeof Characteristic;
+export let ServiceType: typeof Service;
+
 /**
  * HomebridgePlatform
  */
@@ -55,6 +58,9 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+
+    CharacteristicType = this.Characteristic;
+    ServiceType = this.Service;
 
     // This is for dev purposes only to control the output of this plugin
     this.log = new VirtualLogger(log, VirtualLogLevel.DEBUG);

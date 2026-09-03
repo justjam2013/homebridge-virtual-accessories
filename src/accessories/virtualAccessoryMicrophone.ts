@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -37,9 +37,7 @@ export class Microphone extends Accessory {
       }
     }
 
-    this.service = this.accessory.getService(this.platform.Service.Microphone) || this.accessory.addService(this.platform.Service.Microphone);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    this.service = this.accessory.getService(ServiceType.Microphone) || this.accessory.addService(ServiceType.Microphone);
 
     this.service.getCharacteristic(this.platform.Characteristic.Mute)
       .onSet(this.setMute.bind(this))

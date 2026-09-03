@@ -27,8 +27,8 @@ export class Timer {
   private updateIntervalMillis: number = this.oneSecond;
   private startTime: ZonedDateTime;
 
-  private isRunning: boolean = false;
-  private runtime: number = 0;
+  private _isRunning: boolean = false;
+  private duration: number = 0;
   private remainingDurationMillis: number = 0;
 
   private logDebugCountdown: boolean = false;
@@ -102,7 +102,7 @@ export class Timer {
     oneOffDuration?: number,
     updateIntervalMillis?: number,
   ): void {
-    if (this.isRunning && !this.timerIsResettable) {
+    if (this._isRunning && !this.timerIsResettable) {
       return;
     }
 
@@ -110,18 +110,18 @@ export class Timer {
     this.stop();
 
     // Now setup new run
-    this.runtime = (oneOffDuration === undefined) ? this.calculateRuntime() : oneOffDuration;
+    this.duration = (oneOffDuration === undefined) ? this.calculateDuration() : oneOffDuration;
     this.updateIntervalMillis = (updateIntervalMillis === undefined) ? this.oneSecond : updateIntervalMillis;
-    this.log.debug(`[${this.accessoryName} Timer] Runtime: ${this.runtime} seconds`);
+    this.log.debug(`[${this.accessoryName} Timer] Runtime: ${this.duration} seconds`);
 
     if (this.updateIntervalMillis < 1) {
       this.log.error(`[${this.accessoryName} Timer] updateIntervalMillis is less than 1: ${this.updateIntervalMillis} seconds. Setting to 1s/1000 ms`);
       this.updateIntervalMillis = this.oneSecond;
     }
 
-    if (this.runtime > 0) {
-      this.remainingDurationMillis = this.runtime * 1000;
-      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.runtime} seconds`);
+    if (this.duration > 0) {
+      this.remainingDurationMillis = this.duration * 1000;
+      this.log.debug(`[${this.accessoryName} Timer] Start - Duration: ${this.duration} seconds`);
 
       this.id = setInterval(() => {
         if (shutdownSignal.isShuttingDown) {return;}
@@ -141,7 +141,7 @@ export class Timer {
         .unref();
 
       this.startTime = Utils.now();
-      this.isRunning = true;
+      this._isRunning = true;
     }
     else {
       callback();
@@ -151,8 +151,8 @@ export class Timer {
   stop(): void {
     clearInterval(this.id);
 
-    this.isRunning = false;
-    this.runtime = 0;
+    this._isRunning = false;
+    this.duration = 0;
     this.remainingDurationMillis = 0;
     this.updateIntervalMillis = this.oneSecond;
 
@@ -161,7 +161,7 @@ export class Timer {
     this.log.debug(`[${this.accessoryName} Timer] Stop - Cleared Duration: ${this.getRemainingDuration()} seconds`);
   }
 
-  private calculateRuntime(): number {
+  private calculateDuration(): number {
     // If the duration is random, get random duration between random max and random min
     if (this.durationIsRandom) {
       let randomDuration: number = 0;
@@ -198,8 +198,8 @@ export class Timer {
   /**
    * Returns runtime in seconds
    */
-  getRuntime(): number {
-    return this.runtime;
+  getDuration(): number {
+    return this.duration;
   }
 
   /**
@@ -241,8 +241,8 @@ export class Timer {
     return this.remainingDurationMillis;
   }
 
-  isTimerRunning(): boolean {
-    return this.isRunning;
+  isRunning(): boolean {
+    return this._isRunning;
   }
 
   debugCountdown() {
