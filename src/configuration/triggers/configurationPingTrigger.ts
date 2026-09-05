@@ -10,7 +10,7 @@ import { Utils } from '../../utils/utils.js';
 export class PingTriggerConfiguration implements Validatable {
   host!: string;
   failureRetryCount!: number;
-  interval: number = 1;
+  interval: number = 60000;
   isDisabled: boolean = false;
 
   private errorFields: string[] = [];
@@ -27,7 +27,7 @@ export class PingTriggerConfiguration implements Validatable {
     );
 
     const isValidInterval: boolean = (
-      this.interval >= 1 && this.interval <= 15
+      this.interval >= 100 && this.interval <= 900000
     );
 
     if (!isValidHost) this.errorFields.push(prefix + '.' + this.fieldNames.host!);

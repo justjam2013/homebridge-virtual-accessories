@@ -76,8 +76,8 @@ export class PingTrigger extends Trigger {
     }
     this.log.debug(`[${this.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
-    const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;
-    this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
+    const intervalBetweenPingsMillis = triggerConfig.interval;
+    this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis}ms`);
     const pingTimeoutMillis = 10 * 1000;
 
     setInterval(
@@ -110,8 +110,8 @@ export class PingTrigger extends Trigger {
     const options = {
       networkProtocol: protocol,
       packetSize: 16,
-      retries: 3,
-      sessionId: (process.pid % 65535),
+      retries: 0,
+      sessionId: 1 + Math.floor(Math.random() * 65534),
       timeout: pingTimeoutMillis,
       ttl: 128,
     };
