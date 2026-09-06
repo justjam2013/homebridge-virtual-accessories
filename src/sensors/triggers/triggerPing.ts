@@ -111,7 +111,7 @@ export class PingTrigger extends Trigger {
       networkProtocol: protocol,
       packetSize: 16,
       retries: triggerConfig.failureRetryCount,
-      sessionId: Math.floor(Math.random() * 65535) + 1,
+      sessionId: Math.floor(Math.random() * 65534) + 1,
       timeout: pingTimeoutMillis,
       ttl: 128,
     };
