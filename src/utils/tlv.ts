@@ -267,7 +267,7 @@ export class TLVDeviceCredentialResponse {
       responseValue = this.status!.toHexString();
     }
 
-    const responseType: string = TLVUtils.toHexString(TLVUtils.1. READER_KEY_RESPONSE);
+    const responseType: string = TLVUtils.toHexString(TLVUtils.DEVICE_CREDENTIAL_RESPONSE);
     const responseLength = TLVUtils.toHexString(responseValue.length / 2);   // hex values are two characters
 
     return `${responseType}${responseLength}${responseValue}`;
