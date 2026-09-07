@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,8 +9,6 @@ import { ExternalAccessory } from './externalAccessory.js';
  */
 export class Speaker extends ExternalAccessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Speaker;
-
   private readonly stateStorageKey: string = 'SpeakerState';
   private readonly muteStorageKey: string = 'SpeakerMuteState';
   private readonly volumeStorageKey: string = 'SpeakerVolume';
@@ -20,7 +18,7 @@ export class Speaker extends ExternalAccessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Speaker);
 
     let Active: number = Speaker.INACTIVE;
     let Mute: boolean = Speaker.UNMUTED;
@@ -130,10 +128,6 @@ export class Speaker extends ExternalAccessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Speaker.ACCESSORY_SERVICE_TYPE;
   }
 
   //

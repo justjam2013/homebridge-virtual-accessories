@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 /* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -15,8 +15,6 @@ import { HumidifierType } from '../configuration/schema.js';
  * HumidifierDehumidifier - Accessory implementation
  */
 export class HumidifierDehumidifier extends Accessory implements UpdatableMeasurementSensor {
-
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.HumidifierDehumidifier;
 
   private readonly stateStorageKey: string = 'HumidifierDehumidifierActive';
   private readonly targetStateStorageKey: string = 'HumidifierDehumidifierTargetState';
@@ -33,7 +31,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.HumidifierDehumidifier);
 
     let Active: number = HumidifierDehumidifier.INACTIVE;
     const CurrentHumidifierDehumidifierState: number = HumidifierDehumidifier.CURRENTLY_INACTIVE;
@@ -246,10 +244,6 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return HumidifierDehumidifier.ACCESSORY_SERVICE_TYPE;
   }
 
   //

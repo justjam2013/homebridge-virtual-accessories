@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
  
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -16,8 +16,6 @@ import { Timer } from '../utils/timer.js';
  */
 export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.SecuritySystem;
-
   private readonly stateStorageKey: string = 'SecuritySystemState';
 
   private awayArmingDelayTimer: Timer;
@@ -27,7 +25,7 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.SecuritySystem);
 
     let SecuritySystemCurrentState: number = SecuritySystem.DISARMED;
     let SecuritySystemTargetState: number = SecuritySystem.DISARMED;
@@ -149,10 +147,6 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return SecuritySystem.ACCESSORY_SERVICE_TYPE;
   }
 
   /**

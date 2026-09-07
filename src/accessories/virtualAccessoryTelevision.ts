@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -12,8 +12,6 @@ import { InputSourceConfiguration } from '../configuration/accessories/configura
  */
 export class Television extends ExternalAccessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Television;
-
   private readonly stateStorageKey: string = 'TelevisionState';
   private readonly inputActiveIdStorageKey: string = 'TelevisionInputActiveId';
   private readonly configuredNameStorageKey: string = 'TelevisionConfiguredName';
@@ -25,7 +23,7 @@ export class Television extends ExternalAccessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Television);
 
     let Active: number = Television.INACTIVE;
     let ActiveIdentifier: number = 0;
@@ -186,10 +184,6 @@ export class Television extends ExternalAccessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Television.ACCESSORY_SERVICE_TYPE;
   }
 
   //

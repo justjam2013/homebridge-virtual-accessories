@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,8 +9,6 @@ import { Accessory } from './accessory.js';
  */
 export class Fan extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Fan;
-
   private readonly stateStorageKey: string = 'FanState';
   private readonly rotatioDirectionStorageKey: string = 'FanRotationDirection';
   private readonly rotatioSpeedStorageKey: string = 'FanRotationSpeed';
@@ -20,7 +18,7 @@ export class Fan extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Fan);
 
     let On: boolean = Fan.OFF;
     let RotationDirection: number = Fan.CLOCKWISE;
@@ -130,10 +128,6 @@ export class Fan extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Fan.ACCESSORY_SERVICE_TYPE;
   }
   
   //

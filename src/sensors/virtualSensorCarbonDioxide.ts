@@ -1,4 +1,4 @@
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,24 +9,12 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class CarbonDioxideSensor extends BinarySensor {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.CarbonDioxideSensor;
-
-  static readonly EVENT_DETECTED_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.CarbonDioxideDetected;
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return CarbonDioxideSensor.ACCESSORY_SERVICE_TYPE;
-  }
-
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return CarbonDioxideSensor.EVENT_DETECTED_CHARACTERISTIC;
+    super(platform, accessory, accessoryConfiguration, ServiceType.CarbonDioxideSensor, CharacteristicType.CarbonDioxideDetected);
   }
 
   protected getStateName(state: number): string {

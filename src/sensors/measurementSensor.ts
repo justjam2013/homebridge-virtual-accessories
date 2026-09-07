@@ -1,4 +1,4 @@
-import type { Characteristic, CharacteristicValue, PlatformAccessory, WithUUID } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -19,12 +19,14 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
+    measurementCharacteristic: WithUUID<{ new (): Characteristic; }>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
 
     let SensorValue: number = 0;
 
-    this.MeasurementCharacteristic = this.getMeasurementCharacteristic();
+    this.MeasurementCharacteristic = measurementCharacteristic;
 
     // First configure the device based on the accessory details
     SensorValue = this.getDefaultValue(); 
@@ -43,8 +45,6 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
   getSensorValue(): number {
     return this.getCharacteristicValue(this.MeasurementCharacteristic) as number;
   }
-
-  protected abstract getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }>;
 
   //
   // ****************************** Handlers ******************************

@@ -1,4 +1,4 @@
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,24 +9,12 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class ContactSensor extends BinarySensor {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.ContactSensor;
-
-  static readonly EVENT_DETECTED_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.ContactSensorState;
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return ContactSensor.ACCESSORY_SERVICE_TYPE;
-  }
-
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return ContactSensor.EVENT_DETECTED_CHARACTERISTIC;
+    super(platform, accessory, accessoryConfiguration, ServiceType.ContactSensor, CharacteristicType.ContactSensorState);
   }
 
   protected getStateName(state: number): string {

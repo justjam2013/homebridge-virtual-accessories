@@ -1,4 +1,4 @@
-import { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { CharacteristicType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -26,8 +26,9 @@ export abstract class PositionAccessory extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
 
     // Default state
     let CurrentPosition: number = PositionAccessory.CLOSED;

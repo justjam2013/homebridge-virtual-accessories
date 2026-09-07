@@ -1,5 +1,5 @@
 /* eslint-disable brace-style */
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -12,10 +12,6 @@ import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.j
  */
 export class HumiditySensor extends MeasurementSensor {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.HumiditySensor;
-
-  static readonly MEASUREMENT_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.CurrentRelativeHumidity;
-
   static readonly DEFAULT_RELATIVE_HUMIDITY = 50;
 
   constructor(
@@ -23,15 +19,7 @@ export class HumiditySensor extends MeasurementSensor {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return HumiditySensor.ACCESSORY_SERVICE_TYPE;
-  }
-
-  protected getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return HumiditySensor.MEASUREMENT_CHARACTERISTIC;
+    super(platform, accessory, accessoryConfiguration, ServiceType.HumiditySensor, CharacteristicType.CurrentRelativeHumidity);
   }
 
   protected getDefaultValue(): number {

@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,8 +9,6 @@ import { Accessory } from './accessory.js';
  */
 export class Microphone extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Microphone;
-
   private readonly muteStorageKey: string = 'MicrophoneMute';
 
   constructor(
@@ -18,7 +16,7 @@ export class Microphone extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Microphone);
 
     let Mute: boolean = false;
     let Volume: number = 100;
@@ -96,9 +94,5 @@ export class Microphone extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Microphone.ACCESSORY_SERVICE_TYPE;
   }
 }

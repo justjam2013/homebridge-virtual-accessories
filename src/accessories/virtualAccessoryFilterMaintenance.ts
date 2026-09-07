@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -14,8 +14,6 @@ import { Utils } from '../utils/utils.js';
  */
 export class FilterMaintenance extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.FilterMaintenance;
-
   private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
   private readonly timerDurationStorageKey: string = 'TimerDuration';
   private readonly timerIsRunningStorageKey: string = 'TimerIsRunning';
@@ -28,7 +26,7 @@ export class FilterMaintenance extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.FilterMaintenance);
 
     let FilterChangeIndication: number = FilterMaintenance.FILTER_OK;
     const FilterLifeLevel: number = 100;
@@ -167,10 +165,6 @@ export class FilterMaintenance extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return FilterMaintenance.ACCESSORY_SERVICE_TYPE;
   }
 
   private onTimerExpiredHandler(): void {

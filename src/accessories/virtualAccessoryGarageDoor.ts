@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
 /* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -16,8 +16,6 @@ import { Timer } from '../utils/timer.js';
  */
 export class GarageDoor extends Accessory implements UpdatableObstruction {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.GarageDoorOpener;
-
   private static readonly DEFAULT_TIMEOUT_SECS: number = 10;
 
   private readonly stateStorageKey: string = 'GarageDoorState';
@@ -30,7 +28,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.GarageDoorOpener);
 
     let GarageDoorCurrentState: number = GarageDoor.CLOSED;
     let GarageDoorTargetState: number = GarageDoor.CLOSED;
@@ -177,10 +175,6 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return GarageDoor.ACCESSORY_SERVICE_TYPE;
   }
 
   // Updatable Obstruction interface

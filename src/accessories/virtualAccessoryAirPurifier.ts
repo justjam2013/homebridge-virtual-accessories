@@ -1,7 +1,7 @@
 /* eslint-disable brace-style */
  
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -12,8 +12,6 @@ import { Accessory } from './accessory.js';
  */
 export class AirPurifier extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.AirPurifier;
-
   private readonly stateStorageKey: string = 'AirPurifierActive';
   private readonly targetStateStorageKey: string = 'AirPurifierTargetState';
   private readonly rotatioSpeedStorageKey: string = 'AirPurifierRotationSpeed';
@@ -23,7 +21,7 @@ export class AirPurifier extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.AirPurifier);
 
     let Active: number = AirPurifier.INACTIVE;
     const CurrentAirPurifierState: number = AirPurifier.CURRENTLY_INACTIVE;
@@ -155,10 +153,6 @@ export class AirPurifier extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return AirPurifier.ACCESSORY_SERVICE_TYPE;
   }
 
   private refreshDeviceOperationalCondition() {

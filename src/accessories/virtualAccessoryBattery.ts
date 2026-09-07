@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -14,8 +14,6 @@ import { ChargingStateUpdateNotAllowed, InvalidChargingStateType } from '../erro
  */
 export class Battery extends Accessory implements UpdatableChargingStatus {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Battery;
-
   private readonly batteryLevelStorageKey: string = 'BatteryLevel';
   private readonly chargingStateStorageKey: string = 'ChargingState';
 
@@ -26,7 +24,7 @@ export class Battery extends Accessory implements UpdatableChargingStatus {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Battery);
 
     let StatusLowBattery: number = Battery.BATTERY_LEVEL_NORMAL;
     let BatteryLevel: number = 100;
@@ -111,10 +109,6 @@ export class Battery extends Accessory implements UpdatableChargingStatus {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Battery.ACCESSORY_SERVICE_TYPE;
   }
 
   // Updatable Charging State interface

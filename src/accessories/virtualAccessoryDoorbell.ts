@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -16,8 +16,6 @@ import { DurationConfiguration } from '../configuration/configurationDuration.js
  */
 export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Doorbell;
-
   private static readonly COMPANION_TIMER_RESET: number = 1;
 
   private readonly muteStorageKey: string = 'DoorbellMute';
@@ -29,7 +27,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Doorbell);
 
     let Mute: boolean = false;
     let Volume: number = 100;
@@ -124,10 +122,6 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Doorbell.ACCESSORY_SERVICE_TYPE;
   }
 
   //

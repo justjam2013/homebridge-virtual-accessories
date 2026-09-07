@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -9,14 +9,12 @@ import { Accessory } from './accessory.js';
  */
 export class InputSource extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.InputSource;
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.InputSource);
 
     let ConfiguredName: string = '';
     let InputSourceType: number = InputSource.HDMI;
@@ -134,10 +132,6 @@ export class InputSource extends Accessory {
 
 
     return JSON.stringify({});
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return InputSource.ACCESSORY_SERVICE_TYPE;
   }
 
   //

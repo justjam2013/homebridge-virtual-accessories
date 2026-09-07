@@ -23,6 +23,7 @@ export abstract class Accessory extends CharacteristicUtils {
   readonly accessoryConfiguration: AccessoryConfiguration;
   readonly log: VirtualLogger;
 
+  protected serviceType: WithUUID<typeof Service>;
   protected accessoryName: string = '';
   protected defaultState!: number | boolean;
 
@@ -34,11 +35,13 @@ export abstract class Accessory extends CharacteristicUtils {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
   ) {
     super();
 
     this.accessory = accessory;
     this.platform = platform;
+    this.serviceType = serviceType;
 
     // The accessory configuration is stored in the context in VirtualAccessoryPlatform.discoverDevices()
     this.accessoryConfiguration = accessoryConfiguration;
@@ -53,19 +56,17 @@ export abstract class Accessory extends CharacteristicUtils {
       this.deleteState(this.storagePath);
     }
 
-    const accessoryService: WithUUID<typeof Service> = this.getAccessoryService();
-
     // Set accessory information
     this.accessoryInformationService = this.accessory.getService(ServiceType.AccessoryInformation);
     this.accessoryInformationService!
       .setCharacteristic(CharacteristicType.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(CharacteristicType.Model, `Virtual Accessory - ${this.getServiceTypeName(accessoryService)}`)
+      .setCharacteristic(CharacteristicType.Model, `Virtual Accessory - ${this.getServiceTypeName(serviceType)}`)
       .setCharacteristic(CharacteristicType.SerialNumber, this.accessory.UUID)
       .setCharacteristic(CharacteristicType.Name, this.accessoryName)
       .setCharacteristic(CharacteristicType.FirmwareRevision, this.accessory.context.firmwareVersion);
 
     // Set accessory service info
-    this.service = this.accessory.getService(accessoryService) || this.accessory.addService(accessoryService as unknown as Service);
+    this.service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType as unknown as Service);
     this.updateName(this.accessoryName);
   }
 
@@ -139,7 +140,11 @@ export abstract class Accessory extends CharacteristicUtils {
     }
   }
 
-  private getServiceTypeName(serviceType: WithUUID<typeof Service>): string {
+  getServiceType(): WithUUID<typeof Service> {
+    return this.serviceType;
+  }
+
+  getServiceTypeName(serviceType: WithUUID<typeof Service>): string {
     let accessoryTypeName: string;
 
     switch(serviceType) {
@@ -171,8 +176,6 @@ export abstract class Accessory extends CharacteristicUtils {
   }
 
   // Absract methods
-
-  protected abstract getAccessoryService(): WithUUID<typeof Service>;
 
   protected abstract getJsonState(): string;
 }

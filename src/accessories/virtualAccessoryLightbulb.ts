@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable brace-style */
  
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -14,8 +14,6 @@ import { Utils } from '../utils/utils.js';
  * Lightbulb - Accessory implementation
  */
 export class Lightbulb extends Accessory {
-
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Lightbulb;
 
   static readonly WHITE: string = 'white';
   static readonly AMBIANCE: string = 'ambiance';
@@ -37,7 +35,7 @@ export class Lightbulb extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Lightbulb);
 
     let On: boolean = Lightbulb.OFF;
     let Brightness: number = 0;
@@ -288,10 +286,6 @@ export class Lightbulb extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Lightbulb.ACCESSORY_SERVICE_TYPE;
   }
 
   // micro-reciprocal degrees (mired): 1,000,000 divided by the color temperature in kelvins

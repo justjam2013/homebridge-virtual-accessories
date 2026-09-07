@@ -1,4 +1,4 @@
-import type { Characteristic, CharacteristicValue, PlatformAccessory, WithUUID } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -27,10 +27,12 @@ export abstract class BinarySensor extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
+    eventDetectedCharacteristic: WithUUID<{ new (): Characteristic; }>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
 
-    this.EventDetectedCharacteristic = this.getEventDetectedCharacteristic();
+    this.EventDetectedCharacteristic = eventDetectedCharacteristic;
 
     // First configure the device based on the accessory details
     const SensorState: number = BinarySensor.NORMAL;
@@ -57,8 +59,6 @@ export abstract class BinarySensor extends Accessory {
   getSensorState(): number {
     return this.getCharacteristicValue(this.EventDetectedCharacteristic) as number;
   }
-
-  protected abstract getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }>;
 
   //
   // ****************************** Handlers ******************************

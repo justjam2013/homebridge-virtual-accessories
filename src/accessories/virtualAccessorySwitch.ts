@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -17,8 +17,6 @@ import { Duration } from '@js-joda/core';
  */
 export class Switch extends Accessory {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Switch;
-
   private readonly stateStorageKey: string = 'SwitchState';
   private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
   private readonly timerDurationStorageKey: string = 'TimerDuration';
@@ -36,7 +34,7 @@ export class Switch extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Switch);
 
     let On: boolean = Switch.OFF;
 
@@ -164,10 +162,6 @@ export class Switch extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Switch.ACCESSORY_SERVICE_TYPE;
   }
 
   //

@@ -1,6 +1,6 @@
 /* eslint-disable brace-style */
 
-import { Units, CharacteristicValue, PlatformAccessory, WithUUID, Service } from 'homebridge';
+import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -13,8 +13,6 @@ import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRe
  * Lock - Accessory implementation
  */
 export class Lock extends Accessory {
-
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.LockMechanism;
 
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
@@ -47,7 +45,7 @@ export class Lock extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.LockMechanism);
 
     let LockCurrentState: number = Lock.SECURED;
     let LockTargetState: number = Lock.SECURED;
@@ -309,10 +307,6 @@ export class Lock extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Lock.ACCESSORY_SERVICE_TYPE;
   }
 
   //

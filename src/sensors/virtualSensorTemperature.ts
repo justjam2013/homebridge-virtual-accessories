@@ -1,5 +1,5 @@
 /* eslint-disable brace-style */
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -13,10 +13,6 @@ import { TemperatureUnit } from '../configuration/schema.js';
  */
 export class TemperatureSensor extends MeasurementSensor {
 
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.TemperatureSensor;
-
-  static readonly MEASUREMENT_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.CurrentTemperature;
-
   static readonly DEFAULT_TEMPERATURE_CELSIUS = 20;
 
   constructor(
@@ -24,15 +20,7 @@ export class TemperatureSensor extends MeasurementSensor {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return TemperatureSensor.ACCESSORY_SERVICE_TYPE;
-  }
-
-  protected getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return TemperatureSensor.MEASUREMENT_CHARACTERISTIC;
+    super(platform, accessory, accessoryConfiguration, ServiceType.TemperatureSensor, CharacteristicType.CurrentTemperature);
   }
 
   protected getDefaultValue(): number {

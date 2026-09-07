@@ -75,7 +75,7 @@ function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
 
     companionConstructor(companionSensorName: string): void {
       // Replace the Sensor Service
-      const sensorService: WithUUID<typeof Service> = this.getAccessoryService();
+      const sensorService: WithUUID<typeof Service> = this.getServiceType();
       const service = this.accessory.getService(sensorService);
       if (service !== undefined) {
         this.accessory.removeService(service);

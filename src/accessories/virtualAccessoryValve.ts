@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -10,8 +10,6 @@ import { Timer } from '../utils/timer.js';
  * Valve - Accessory implementation
  */
 export class Valve extends Accessory {
-
-  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Valve;
 
   private durationTimer: Timer;
 
@@ -25,7 +23,7 @@ export class Valve extends Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Valve);
 
     let ValveType: number = Valve.GENERIC_VALVE;
     let Active: number = Valve.INACTIVE;
@@ -198,10 +196,6 @@ export class Valve extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryService(): WithUUID<typeof Service> {
-    return Valve.ACCESSORY_SERVICE_TYPE;
   }
 
   //
