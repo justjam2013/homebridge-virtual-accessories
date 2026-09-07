@@ -75,7 +75,7 @@ function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
 
     companionConstructor(companionSensorName: string): void {
       // Replace the Sensor Service
-      const sensorService: WithUUID<typeof Service> = this.getService();
+      const sensorService: WithUUID<typeof Service> = this.getAccessoryService();
       const service = this.accessory.getService(sensorService);
       if (service !== undefined) {
         this.accessory.removeService(service);
@@ -97,12 +97,9 @@ function Companion<T extends abstract new (...args: any[]) => BinarySensor>(
         throw new AccessoryNotAllowedError(`Switch ${accessory.accessoryConfiguration.accessoryName} is not allowed to trigger this sensor`);
       }
 
-      this.states.SensorState = sensorState;
-
-      this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
-
-      // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+      const SensorState: number = sensorState;
+      this.service!.updateCharacteristic(this.EventDetectedCharacteristic, (SensorState));
+      this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
     }
   };
   return CompanionSensor;

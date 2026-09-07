@@ -1,21 +1,21 @@
-/* eslint-disable max-len */
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { PlatformAccessory, Service } from 'homebridge';
-import { Categories } from 'homebridge';
+import { Categories, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 
 import { VirtualLogger } from '../utils/virtualLogger.js';
+import { CharacteristicUtils } from '../characteristicsUtils.js';
 
 import fs from 'fs';
 
 /**
  * Abstract Accessory
  */
-export abstract class Accessory {
-  service?: Service;
+export abstract class Accessory extends CharacteristicUtils {
+  //service!: Service;
 
   readonly platform: VirtualAccessoriesPlatform;
   readonly accessory: PlatformAccessory;
@@ -24,8 +24,7 @@ export abstract class Accessory {
   readonly log: VirtualLogger;
 
   protected accessoryName: string = '';
-
-  protected defaultState;
+  protected defaultState!: number | boolean;
 
   protected storagePath: string;
 
@@ -36,6 +35,8 @@ export abstract class Accessory {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
+    super();
+
     this.accessory = accessory;
     this.platform = platform;
 
@@ -49,25 +50,31 @@ export abstract class Accessory {
     this.storagePath = accessory.context.storagePath;
 
     if (!this.accessoryConfiguration.accessoryIsStateful) {
-      this.deleteAccessoryState(this.storagePath);
+      this.deleteState(this.storagePath);
     }
 
-    // set accessory information
-    this.accessoryInformationService = this.accessory.getService(this.platform.Service.AccessoryInformation) || this.accessory.addService(this.platform.Service.AccessoryInformation);
+    const accessoryService: WithUUID<typeof Service> = this.getAccessoryService();
+
+    // Set accessory information
+    this.accessoryInformationService = this.accessory.getService(ServiceType.AccessoryInformation);
     this.accessoryInformationService!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Virtual Accessories for Homebridge')
-      .setCharacteristic(this.platform.Characteristic.Model, `Virtual Accessory - ${this.getAccessoryTypeName()}`)
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.UUID)
-      .setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName)
-      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.accessory.context.firmwareVersion);
+      .setCharacteristic(CharacteristicType.Manufacturer, 'Virtual Accessories for Homebridge')
+      .setCharacteristic(CharacteristicType.Model, `Virtual Accessory - ${this.getServiceTypeName(accessoryService)}`)
+      .setCharacteristic(CharacteristicType.SerialNumber, this.accessory.UUID)
+      .setCharacteristic(CharacteristicType.Name, this.accessoryName)
+      .setCharacteristic(CharacteristicType.FirmwareRevision, this.accessory.context.firmwareVersion);
+
+    // Set accessory service info
+    this.service = this.accessory.getService(accessoryService) || this.accessory.addService(accessoryService as unknown as Service);
+    this.updateName(this.accessoryName);
   }
 
   isExternalAccessory(): boolean {
     return [Categories.SPEAKER, Categories.TELEVISION].includes(this.accessory.category);
   }
 
-  updateConfiguredName() {
-    const configuredName = this.accessoryInformationService!.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+  updateInformationServiceConfiguredName() {
+    const configuredName = this.accessoryInformationService!.getCharacteristic(CharacteristicType.ConfiguredName);
     if (configuredName !== undefined) {
       this.accessoryInformationService!.removeCharacteristic(configuredName);
     }
@@ -112,7 +119,7 @@ export abstract class Accessory {
     }
   }
 
-  protected deleteAccessoryState(
+  protected deleteState(
     storagePath: string,
   ) {
     this.log.debug(`[${this.accessoryName}] Deleting state file ${storagePath}`);
@@ -126,13 +133,46 @@ export abstract class Accessory {
   }
 
   // Store device state if stateful
-  protected storeState() {
+  protected saveState() {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       this.saveAccessoryState(this.storagePath, this.getJsonState());
     }
   }
 
-  protected abstract getAccessoryTypeName(): string;
+  private getServiceTypeName(serviceType: WithUUID<typeof Service>): string {
+    let accessoryTypeName: string;
+
+    switch(serviceType) {
+    case ServiceType.AirPurifier: { accessoryTypeName = 'AirPurifier'; break; }
+    case ServiceType.Battery: { accessoryTypeName = 'Battery'; break; }
+    case ServiceType.Door: { accessoryTypeName = 'Door'; break; }
+    case ServiceType.Doorbell: { accessoryTypeName = 'Doorbell'; break; }
+    case ServiceType.Fan: { accessoryTypeName = 'Fan'; break; }
+    case ServiceType.FilterMaintenance: { accessoryTypeName = 'Filter'; break; }
+    case ServiceType.GarageDoorOpener: { accessoryTypeName = 'GarageDoor'; break; }
+    case ServiceType.HeaterCooler: { accessoryTypeName = 'HeaterCooler'; break; }
+    case ServiceType.HumidifierDehumidifier: { accessoryTypeName = 'HumidifierDehumidifier'; break; }
+    case ServiceType.InputSource: { accessoryTypeName = 'InputSource'; break; }
+    case ServiceType.Lightbulb: { accessoryTypeName = 'Lightbulb'; break; }
+    case ServiceType.LockMechanism: { accessoryTypeName = 'Lock'; break; }
+    case ServiceType.Microphone: { accessoryTypeName = 'Microphone'; break; }
+    case ServiceType.SecuritySystem: { accessoryTypeName = 'SecuritySystem'; break; }
+    case ServiceType.SmartSpeaker: { accessoryTypeName = 'SmartSpeaker'; break; }
+    case ServiceType.Speaker: { accessoryTypeName = 'Speaker'; break; }
+    case ServiceType.Switch: { accessoryTypeName = 'Switch'; break; }
+    case ServiceType.Television: { accessoryTypeName = 'Television'; break; }
+    case ServiceType.Valve: { accessoryTypeName = 'Valve'; break; }
+    case ServiceType.Window: { accessoryTypeName = 'Window'; break; }
+    case ServiceType.WindowCovering: { accessoryTypeName = 'WindowCovering'; break; }
+    default: { accessoryTypeName = 'unknown'; }
+    }
+
+    return accessoryTypeName;
+  }
+
+  // Absract methods
+
+  protected abstract getAccessoryService(): WithUUID<typeof Service>;
 
   protected abstract getJsonState(): string;
 }

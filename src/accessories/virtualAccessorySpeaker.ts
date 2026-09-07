@@ -1,35 +1,19 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
-
-import { AudioAccessoryConfiguration } from '../configuration/configurationAudioAccessoryConfiguration.js';
 
 /**
  * Speaker - Accessory implementation
  */
 export class Speaker extends ExternalAccessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Speaker';
-
-  static readonly INACTIVE: number = 0;       //	Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;         //	Characteristic.Active.ACTIVE
-
-  static readonly MUTED: boolean = true;      //	Characteristic.Mute
-  static readonly UNMUTED: boolean = false;   //	Characteristic.Mute
+  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.Speaker;
 
   private readonly stateStorageKey: string = 'SpeakerState';
   private readonly muteStorageKey: string = 'SpeakerMuteState';
   private readonly volumeStorageKey: string = 'SpeakerVolume';
-
-  private audioAccessoryConfiguration: AudioAccessoryConfiguration;
-
-  private states = {
-    Active: Speaker.INACTIVE,
-    Mute: Speaker.UNMUTED,
-    Volume: 100,
-  };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -38,14 +22,13 @@ export class Speaker extends ExternalAccessory {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
-    // First configure the device based on the accessory details
-    this.audioAccessoryConfiguration = this.accessoryConfiguration.speaker;
-    const mute: boolean = (this.audioAccessoryConfiguration.mute !== undefined) ? this.audioAccessoryConfiguration.mute : Speaker.UNMUTED;
-    const volume: number = this.audioAccessoryConfiguration.volume;
+    let Active: number = Speaker.INACTIVE;
+    let Mute: boolean = Speaker.UNMUTED;
+    let Volume: number = 100;
 
-    this.states.Active = Speaker.INACTIVE;
-    this.states.Mute = mute;
-    this.states.Volume = volume;
+    // First configure the device based on the accessory details
+    Mute = (this.accessoryConfiguration.speaker.mute !== undefined) ? this.accessoryConfiguration.speaker.mute : Speaker.UNMUTED;
+    Volume = this.accessoryConfiguration.speaker.volume;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -55,97 +38,113 @@ export class Speaker extends ExternalAccessory {
       const cachedVolume: number = accessoryState[this.volumeStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.Active = cachedState;
+        Active = cachedState;
       }
       if (cachedMute !== undefined) {
-        this.states.Mute = cachedMute;
+        Mute = cachedMute;
       }
       if (cachedVolume !== undefined) {
-        this.states.Volume = cachedVolume;
+        Volume = cachedVolume;
       }
     }
 
-    // set accessory information
-    this.service = this.accessory.getService(this.platform.Service.Speaker) || this.accessory.addService(this.platform.Service.Speaker);
+    // Update the initial state of the accessory
+    this.setActive(Active);
+    this.setMute(Mute);
+    this.setVolume(Volume);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // Last register handlers
 
-    // register handlers
+    this.service.getCharacteristic(CharacteristicType.Active)
+      .onSet(this.setActiveHandler.bind(this))
+      .onGet(this.getActiveHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.Active)
-      .onSet(this.setActive.bind(this))
-      .onGet(this.getActive.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Mute)
+      .onSet(this.setMuteHandler.bind(this))
+      .onGet(this.getMuteHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.Mute)
-      .onSet(this.setMute.bind(this))
-      .onGet(this.getMute.bind(this));
-
-    this.service.getCharacteristic(this.platform.Characteristic.Volume)
-      .onSet(this.setVolume.bind(this))
-      .onGet(this.getVolume.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Volume)
+      .onSet(this.setVolumeHandler.bind(this))
+      .onGet(this.getVolumeHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async setActive(value: CharacteristicValue) {
-    this.states.Active = value as number;
+  // Active
 
-    this.storeState();
+  async getActiveHandler(): Promise<CharacteristicValue> {
+    const Active: number = this.getActive();
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Speaker.getStateName(Active)}`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Speaker.getStateName(this.states.Active)}`);
+    return Active;
   }
 
-  async getActive(): Promise<CharacteristicValue> {
-    const speakerState = this.states.Active;
+  async setActiveHandler(value: CharacteristicValue) {
+    let Active: number = value as number;
+    Active = this.updateActive(Active);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Speaker.getStateName(Active)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Speaker.getStateName(speakerState)}`);
-
-    return speakerState;
+    this.saveState();
   }
 
-  async setVolume(value: CharacteristicValue) {
-    this.states.Volume = value as number;
+  // Volume
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
+  async getVolumeHandler(): Promise<CharacteristicValue> {
+    const Volume: number = this.getVolume();
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+
+    return Volume;
   }
 
-  async getVolume(): Promise<CharacteristicValue> {
-    const volume = this.states.Volume;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
-
-    return volume;
+  async setVolumeHandler(value: CharacteristicValue) {
+    let Volume: number = value as number;
+    Volume = this.updateVolume(Volume);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
   }
 
-  async setMute(value: CharacteristicValue) {
-    this.states.Mute = value as boolean;
+  // Mute
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${this.states.Mute}`);
+  async getMuteHandler(): Promise<CharacteristicValue> {
+    const Mute: boolean = this.getMute();
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+
+    return Mute;
   }
 
-  async getMute(): Promise<CharacteristicValue> {
-    const mute = this.states.Mute;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Mute: ${mute}`);
-
-    return mute;
+  async setMuteHandler(value: CharacteristicValue) {
+    let Mute: boolean = value as boolean;
+    Mute = this.updateMute(Mute);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.Active,
-      [this.muteStorageKey]: this.states.Mute,
-      [this.volumeStorageKey]: this.states.Volume,
+      [this.stateStorageKey]: this.getActive(),
+      [this.muteStorageKey]: this.getMute(),
+      [this.volumeStorageKey]: this.getVolume(),
     };
 
     const json = JSON.stringify(jsonState);
-
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Speaker.ACCESSORY_TYPE_NAME;
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return Speaker.ACCESSORY_SERVICE_TYPE;
   }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  static readonly INACTIVE: number =            CharacteristicType.Active.INACTIVE;
+  static readonly ACTIVE: number =              CharacteristicType.Active.ACTIVE;
+
+  static readonly MUTED: boolean = true;        // CharacteristicType.Mute
+  static readonly UNMUTED: boolean = false;     // CharacteristicType.Mute
 
   static getStateName(state: number): string {
     let stateName: string;

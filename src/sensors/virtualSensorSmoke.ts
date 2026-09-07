@@ -1,6 +1,6 @@
 import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { BinarySensor } from './binarySensor.js';
 
@@ -9,10 +9,9 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class SmokeSensor extends BinarySensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'SmokeSensor';
+  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.SmokeSensor;
 
-  static readonly SMOKE_NOT_DETECTED: number = 0;   // Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
-  static readonly SMOKE_DETECTED: number = 1;       // Characteristic.SmokeDetected.SMOKE_DETECTED;
+  static readonly EVENT_DETECTED_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.SmokeDetected;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -22,12 +21,12 @@ export class SmokeSensor extends BinarySensor {
     super(platform, accessory, accessoryConfiguration);
   }
 
-  protected getService(): WithUUID<typeof Service> {
-    return this.platform.Service.SmokeSensor;
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return SmokeSensor.ACCESSORY_SERVICE_TYPE;
   }
 
   protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return this.platform.Characteristic.SmokeDetected;
+    return SmokeSensor.EVENT_DETECTED_CHARACTERISTIC;
   }
 
   protected getStateName(state: number): string {
@@ -43,7 +42,10 @@ export class SmokeSensor extends BinarySensor {
     return sensorStateName;
   }
 
-  protected getAccessoryTypeName(): string {
-    return SmokeSensor.ACCESSORY_TYPE_NAME;
-  }
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  static readonly SMOKE_NOT_DETECTED: number =      CharacteristicType.SmokeDetected.SMOKE_NOT_DETECTED;
+  static readonly SMOKE_DETECTED: number =          CharacteristicType.SmokeDetected.SMOKE_DETECTED;
 }

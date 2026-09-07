@@ -1,7 +1,7 @@
 /**
  * 
  */
-export interface UpdatableChargingState {
+export interface UpdatableChargingStatus {
 
-  updateChargingState(charging: boolean, charge: number, accessoryId: string): void;
+  updateChargingStatus(charging: boolean, charge: number, accessoryId: string): void;
 }

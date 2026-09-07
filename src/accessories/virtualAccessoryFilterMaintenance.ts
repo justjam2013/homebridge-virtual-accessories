@@ -1,8 +1,8 @@
 /* eslint-disable brace-style */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -14,10 +14,7 @@ import { Utils } from '../utils/utils.js';
  */
 export class FilterMaintenance extends Accessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Filter';
-
-  static readonly FILTER_OK: number = 0;      // Characteristic.FilterChangeIndication.FILTER_OK
-  static readonly CHANGE_FILTER: number = 1;  // Characteristic.FilterChangeIndication.CHANGE_FILTER
+  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.FilterMaintenance;
 
   private readonly timerStartTimeStorageKey: string = 'TimerStartTime';
   private readonly timerDurationStorageKey: string = 'TimerDuration';
@@ -26,17 +23,15 @@ export class FilterMaintenance extends Accessory {
   private lifespan: number;
   private lifespanTimer: Timer;
 
-  private filterChangeIndicator: number;
-
-  private states = {
-  };
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
     super(platform, accessory, accessoryConfiguration);
+
+    let FilterChangeIndication: number = FilterMaintenance.FILTER_OK;
+    const FilterLifeLevel: number = 100;
 
     // First configure the device based on the accessory details
 
@@ -49,7 +44,7 @@ export class FilterMaintenance extends Accessory {
 
     const timerIsResettable: boolean = true;
     this.lifespanTimer = new Timer(
-      this.accessoryConfiguration.accessoryName,
+      this.accessoryName,
       this.log,
       timerIsResettable,
       this.lifespan,
@@ -59,9 +54,9 @@ export class FilterMaintenance extends Accessory {
     if (this.isEmptyAccessoryState(accessoryState)) {
       // No stored state -> First run
       this.lifespanTimer.start(
-        this.onTimerExpired.bind(this),
+        this.onTimerExpiredHandler.bind(this),
       );
-      this.storeState();
+      this.saveState();
     }
     else {
       const cachedTimerStartTime = accessoryState[this.timerStartTimeStorageKey] as string;
@@ -75,78 +70,89 @@ export class FilterMaintenance extends Accessory {
             this.lifespanTimer,
             cachedTimerStartTime,
             cachedTimerDuration,
-            this.onTimerExpired.bind(this),
-            this.accessoryConfiguration.accessoryName,
+            this.onTimerExpiredHandler.bind(this),
+            this.accessoryName,
             this.log,
           );
 
-        // Do not store state if the timer was restored!
-        // Store state only when the timer started or reset
+          // Do not store state if the timer was restored!
+          // Store state only when the timer started or reset
         }
       }
       else {
-        // eslint-disable-next-line max-len
-        this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Lifespan was changed from: ${cachedTimerDuration} to: ${this.lifespan}. Restart the timer`);
+         
+        this.log.debug(`[${this.accessoryName}] Lifespan was changed from: ${cachedTimerDuration} to: ${this.lifespan}. Restart the timer`);
 
         // The lifetime was changed, restart the timer
         this.lifespanTimer.start(
-          this.onTimerExpired.bind(this),
+          this.onTimerExpiredHandler.bind(this),
         );
-        this.storeState();
+        this.saveState();
       }
     }
 
-    this.filterChangeIndicator = this.lifespanTimer?.isTimerRunning() ? FilterMaintenance.FILTER_OK : FilterMaintenance.CHANGE_FILTER;
+    FilterChangeIndication = this.lifespanTimer?.isTimerRunning() ? FilterMaintenance.FILTER_OK : FilterMaintenance.CHANGE_FILTER;
 
-    this.service = this.accessory.getService(this.platform.Service.FilterMaintenance) || this.accessory.addService(this.platform.Service.FilterMaintenance);
+    // Update the initial state of the accessory
+    this.setFilterChangeIndication(FilterChangeIndication);
+    this.setFilterLifeLevel(FilterLifeLevel);
+    //this.updateResetFilterIndication(ResetFilterIndication);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
-      .onGet(this.getFilterChangeIndication.bind(this));
+    this.service.getCharacteristic(CharacteristicType.FilterChangeIndication)
+      .onGet(this.getFilterChangeIndicationHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
-      .onGet(this.getFilterLifeLevel.bind(this));
+    this.service.getCharacteristic(CharacteristicType.FilterLifeLevel)
+      .onGet(this.getFilterLifeLevelHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.ResetFilterIndication)
-      .onSet(this.setResetFilterIndication.bind(this));
+    this.service.getCharacteristic(CharacteristicType.ResetFilterIndication)
+      .onSet(this.setResetFilterIndicationHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async getFilterChangeIndication(): Promise<CharacteristicValue> {
-    const filterChangeIndicator = this.filterChangeIndicator;
+  // FilterChangeIndication
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Change Indication: ${FilterMaintenance.getStateName(filterChangeIndicator)}`);
+  async getFilterChangeIndicationHandler(): Promise<CharacteristicValue> {
+    const FilterChangeIndication: number = this.getFilterChangeIndication();
+    this.log.debug(`[${this.accessoryName}] Getting Filter Change Indication: ${FilterMaintenance.getStateName(FilterChangeIndication)}`);
 
-    return filterChangeIndicator;
+    return FilterChangeIndication;
   }
 
-  async getFilterLifeLevel(): Promise<CharacteristicValue> {
-    const filterLifeLevel = this.lifespanTimer.getRemainingDuration() / this.lifespan * 100;
+  // FilterLifeLevel
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Filter Life Level: ${filterLifeLevel.toFixed(2)}%`);
+  async getFilterLifeLevelHandler(): Promise<CharacteristicValue> {
+    const FilterLifeLevel: number = this.lifespanTimer.getRemainingDuration() / this.lifespan * 100;
+    this.log.debug(`[${this.accessoryName}] Getting Filter Life Level: ${FilterLifeLevel.toFixed(2)}%`);
 
-    return filterLifeLevel;
+    return FilterLifeLevel;
   }
 
-  async setResetFilterIndication(value: CharacteristicValue) {
-    const reset = value as number;
+  // ResetFilterIndication
 
-    if (reset === 1) {
+  async setResetFilterIndicationHandler(value: CharacteristicValue) {
+    const ResetFilterIndication: number = value as number;
+
+    if (ResetFilterIndication === 1) {
       this.lifespanTimer.stop();
       this.lifespanTimer.start(
-        this.onTimerExpired.bind(this),
+        this.onTimerExpiredHandler.bind(this),
       );
-      this.filterChangeIndicator = FilterMaintenance.FILTER_OK;
-      this.storeState();
+      this.updateFilterChangeIndication(FilterMaintenance.FILTER_OK);
+      this.log.info(`[${this.accessoryName}] Reset Filter Indication`);
 
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Reset Filter Indication`);
+      this.saveState();
     }
     else {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Reset Filter Indication called with invalid value ${reset}`);
+      this.log.error(`[${this.accessoryName}] Reset Filter Indication called with invalid value ${ResetFilterIndication}`);
     }
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
     const timerStartTime: string = this.lifespanTimer.getStartTime().toString();
@@ -160,13 +166,26 @@ export class FilterMaintenance extends Accessory {
     };
 
     const json = JSON.stringify(jsonState);
-
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return FilterMaintenance.ACCESSORY_TYPE_NAME;
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return FilterMaintenance.ACCESSORY_SERVICE_TYPE;
   }
+
+  private onTimerExpiredHandler(): void {
+    this.updateResetFilterIndication(FilterMaintenance.CHANGE_FILTER);
+    this.log.info(`[${this.accessoryName}] Filter lifetime expired`);
+
+    this.saveState();
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  static readonly FILTER_OK: number =         CharacteristicType.FilterChangeIndication.FILTER_OK;
+  static readonly CHANGE_FILTER: number =     CharacteristicType.FilterChangeIndication.CHANGE_FILTER;
 
   static getStateName(event: number): string {
     let stateName: string;
@@ -179,12 +198,5 @@ export class FilterMaintenance extends Accessory {
     }
 
     return stateName;
-  }
-
-  private onTimerExpired(): void {
-    this.filterChangeIndicator = FilterMaintenance.CHANGE_FILTER;
-    this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Filter lifetime expired`);
   }
 }

@@ -1,6 +1,6 @@
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { CharacteristicValue, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { ExternalAccessory } from './externalAccessory.js';
 
@@ -9,29 +9,12 @@ import { ExternalAccessory } from './externalAccessory.js';
  */
 export class SmartSpeaker extends ExternalAccessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'SmartSpeaker';
-
-  static readonly PLAY: number = 0;           //	Characteristic.CurrentMediaState.PLAY - Characteristic.TargetMediaState.PLAY
-  static readonly PAUSE: number = 1;          //	Characteristic.CurrentMediaState.PAUSE - Characteristic.TargetMediaState.PAUSE
-  static readonly STOP: number = 2;           //	Characteristic.CurrentMediaState.STOP - Characteristic.TargetMediaState.STOP
-  static readonly LOADING: number = 3;        //	Characteristic.CurrentMediaState.LOADING
-  static readonly INTERRUPTED: number = 4;    //	Characteristic.CurrentMediaState.INTERRUPTED
-
-  static readonly MUTED: boolean = true;      //	Characteristic.Mute
-  static readonly UNMUTED: boolean = false;   //	Characteristic.Mute
+  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.SmartSpeaker;
 
   private readonly stateStorageKey: string = 'SmartSpeakerState';
   private readonly muteStorageKey: string = 'SmartSpeakerMuteState';
   private readonly volumeStorageKey: string = 'SmartSpeakerVolume';
   private readonly configuredNameStorageKey: string = 'SmartSpeakerConfiguredName';
-
-  private states = {
-    CurrentMediaState: SmartSpeaker.STOP,
-    TargetMediaState: SmartSpeaker.STOP,
-    ConfiguredName: '',
-    Mute: SmartSpeaker.UNMUTED,
-    Volume: 100,
-  };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -40,11 +23,16 @@ export class SmartSpeaker extends ExternalAccessory {
   ) {
     super(platform, accessory, accessoryConfiguration);
 
+    let CurrentMediaState: number = SmartSpeaker.STOP;
+    let TargetMediaState: number = SmartSpeaker.STOP;
+    let ConfiguredName: string = '';
+    let Mute: boolean = SmartSpeaker.UNMUTED;
+    let Volume: number = 100;
+
     // First configure the device based on the accessory details
-    this.states.CurrentMediaState = SmartSpeaker.STOP;
-    this.states.ConfiguredName = this.accessoryConfiguration.accessoryName;
-    this.states.Mute = (this.accessoryConfiguration.speaker.mute !== undefined) ? this.accessoryConfiguration.speaker.mute : SmartSpeaker.UNMUTED;
-    this.states.Volume = this.accessoryConfiguration.speaker.volume;
+    ConfiguredName = this.accessoryName;
+    Mute = (this.accessoryConfiguration.speaker.mute !== undefined) ? this.accessoryConfiguration.speaker.mute : SmartSpeaker.UNMUTED;
+    Volume = this.accessoryConfiguration.speaker.volume;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -55,135 +43,162 @@ export class SmartSpeaker extends ExternalAccessory {
       const cachedConfiguredName: string = accessoryState[this.configuredNameStorageKey] as string;
 
       if (cachedState !== undefined) {
-        this.states.CurrentMediaState = cachedState;
+        CurrentMediaState = cachedState;
       }
       if (cachedMute !== undefined) {
-        this.states.Mute = cachedMute;
+        Mute = cachedMute;
       }
       if (cachedVolume !== undefined) {
-        this.states.Volume = cachedVolume;
+        Volume = cachedVolume;
       }
       if (cachedConfiguredName !== undefined) {
-        this.states.ConfiguredName = cachedConfiguredName;
+        ConfiguredName = cachedConfiguredName;
       }
     }
 
-    this.states.TargetMediaState = this.states.CurrentMediaState;
+    TargetMediaState = CurrentMediaState;
 
-    // set accessory information
-    this.service = this.accessory.getService(this.platform.Service.SmartSpeaker) || this.accessory.addService(this.platform.Service.SmartSpeaker);
+    // Update the initial state of the accessory
+    this.setCurrentMediaState(CurrentMediaState);
+    this.setTargetMediaState(TargetMediaState);
+    this.setConfiguredName(ConfiguredName);
+    this.setMute(Mute);
+    this.setVolume(Volume);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // Last register handlers
 
-    // register handlers
+    this.service.getCharacteristic(CharacteristicType.CurrentMediaState)
+      .onGet(this.getCurrentMediaStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentMediaState)
-      .onGet(this.getCurrentMediaState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.TargetMediaState)
+      .onSet(this.setTargetMediaStateHandler.bind(this))
+      .onGet(this.getTargetMediaStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetMediaState)
-      .onSet(this.setTargetMediaState.bind(this))
-      .onGet(this.getTargetMediaState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.ConfiguredName)
+      .onSet(this.setConfiguredNameHandler.bind(this))
+      .onGet(this.getConfiguredNameHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
-      .onSet(this.setConfiguredName.bind(this))
-      .onGet(this.getConfiguredName.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Mute)
+      .onSet(this.setMuteHandler.bind(this))
+      .onGet(this.getMuteHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.Mute)
-      .onSet(this.setMute.bind(this))
-      .onGet(this.getMute.bind(this));
-
-    this.service.getCharacteristic(this.platform.Characteristic.Volume)
-      .onSet(this.setVolume.bind(this))
-      .onGet(this.getVolume.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Volume)
+      .onSet(this.setVolumeHandler.bind(this))
+      .onGet(this.getVolumeHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async getCurrentMediaState(): Promise<CharacteristicValue> {
-    const speakerState = this.states.CurrentMediaState;
+  // CurrentMediaState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Media State: ${SmartSpeaker.getStateName(speakerState)}`);
+  async getCurrentMediaStateHandler(): Promise<CharacteristicValue> {
+    const CurrentMediaState: number = this.getCurrentMediaState();
+    this.log.debug(`[${this.accessoryName}] Getting Current Media State: ${SmartSpeaker.getStateName(CurrentMediaState)}`);
 
-    return speakerState;
+    return CurrentMediaState;
   }
 
-  async setTargetMediaState(value: CharacteristicValue) {
-    this.states.TargetMediaState = value as number;
-    this.states.CurrentMediaState = this.states.TargetMediaState;
+  // TargetMediaState
 
-    this.storeState();
+  async getTargetMediaStateHandler(): Promise<CharacteristicValue> {
+    const TargetMediaState = this.getTargetMediaState();
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Media State: ${SmartSpeaker.getStateName(this.states.TargetMediaState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Target Media State: ${SmartSpeaker.getStateName(TargetMediaState)}`);
+
+    return TargetMediaState;
   }
 
-  async getTargetMediaState(): Promise<CharacteristicValue> {
-    const speakerState = this.states.TargetMediaState;
+  async setTargetMediaStateHandler(value: CharacteristicValue) {
+    let TargetMediaState: number = value as number;
+    TargetMediaState = this.updateTargetMediaState(TargetMediaState);
+    this.log.info(`[${this.accessoryName}] Setting Target Media State: ${SmartSpeaker.getStateName(TargetMediaState)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Media State: ${SmartSpeaker.getStateName(speakerState)}`);
+    const CurrentMediaState: number = TargetMediaState;
+    this.updateCurrentMediaState(CurrentMediaState);
 
-    return speakerState;
+    this.saveState();
+
   }
 
-  async setConfiguredName(value: CharacteristicValue) {
-    this.states.ConfiguredName = value as string;
+  // ConfiguredName
 
-    this.storeState();
+  async getConfiguredNameHandler(): Promise<CharacteristicValue> {
+    const ConfiguredName: string = this.getConfiguredName();
+    this.log.debug(`[${this.accessoryName}] Getting Configured Name: ${ConfiguredName}`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Configured Name: ${this.states.ConfiguredName}`);
+    return ConfiguredName;
   }
 
-  async getConfiguredName(): Promise<CharacteristicValue> {
-    const configuredName = this.states.ConfiguredName;
+  async setConfiguredNameHandler(value: CharacteristicValue) {
+    let ConfiguredName: string = value as string;
+    ConfiguredName = this.updateConfiguredName(ConfiguredName);
+    this.log.info(`[${this.accessoryName}] Setting Configured Name: ${ConfiguredName}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configured Name: ${configuredName}`);
-
-    return configuredName;
+    this.saveState();
   }
 
-  async setVolume(value: CharacteristicValue) {
-    this.states.Volume = value as number;
+  // Volume
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
+  async getVolumeHandler(): Promise<CharacteristicValue> {
+    const Volume: number = this.getVolume();
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+
+    return Volume;
   }
 
-  async getVolume(): Promise<CharacteristicValue> {
-    const volume = this.states.Volume;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
-
-    return volume;
+  async setVolumeHandler(value: CharacteristicValue) {
+    let Volume: number = value as number;
+    Volume = this.updateVolume(Volume);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
   }
 
-  async setMute(value: CharacteristicValue) {
-    this.states.Mute = value as boolean;
+  // Mute
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${this.states.Mute}`);
+  async getMuteHandler(): Promise<CharacteristicValue> {
+    const Mute: boolean = this.getMute();
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+
+    return Mute;
   }
 
-  async getMute(): Promise<CharacteristicValue> {
-    const mute = this.states.Mute;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Mute: ${mute}`);
-
-    return mute;
+  async setMuteHandler(value: CharacteristicValue) {
+    let Mute: boolean = value as boolean;
+    Mute = this.updateMute(Mute);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.CurrentMediaState,
-      [this.configuredNameStorageKey]: this.states.ConfiguredName,
-      [this.muteStorageKey]: this.states.Mute,
-      [this.volumeStorageKey]: this.states.Volume,
+      [this.stateStorageKey]: this.getCurrentMediaState(),
+      [this.configuredNameStorageKey]: this.getConfiguredName(),
+      [this.muteStorageKey]: this.getMute(),
+      [this.volumeStorageKey]: this.getVolume(),
     };
 
     const json = JSON.stringify(jsonState);
-
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return SmartSpeaker.ACCESSORY_TYPE_NAME;
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return SmartSpeaker.ACCESSORY_SERVICE_TYPE;
   }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  static readonly PLAY: number =                CharacteristicType.CurrentMediaState.PLAY;    // Characteristic.TargetMediaState.PLAY
+  static readonly PAUSE: number =               CharacteristicType.CurrentMediaState.PAUSE;   // Characteristic.TargetMediaState.PAUSE;
+  static readonly STOP: number =                CharacteristicType.CurrentMediaState.STOP;    // Characteristic.TargetMediaState.STOP;
+  static readonly LOADING: number =             CharacteristicType.CurrentMediaState.LOADING;
+  static readonly INTERRUPTED: number =         CharacteristicType.CurrentMediaState.INTERRUPTED;
+
+  static readonly MUTED: boolean = true;        // CharacteristicType.Mute
+  static readonly UNMUTED: boolean = false;     // CharacteristicType.Mute
 
   static getStateName(state: number): string {
     let stateName: string;

@@ -1,6 +1,6 @@
 import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { BinarySensor } from './binarySensor.js';
 
@@ -9,10 +9,9 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class LeakSensor extends BinarySensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'LeakSensor';
+  static readonly ACCESSORY_SERVICE_TYPE: WithUUID<typeof Service> = ServiceType.LeakSensor;
 
-  static readonly LEAK_NOT_DETECTED: number = 0;  // Characteristic.LeakDetected.LEAK_NOT_DETECTED;
-  static readonly LEAK_DETECTED: number = 1;      // Characteristic.LeakDetected.LEAK_DETECTED;
+  static readonly EVENT_DETECTED_CHARACTERISTIC: WithUUID<{ new (): Characteristic; }> = CharacteristicType.LeakDetected;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -22,12 +21,12 @@ export class LeakSensor extends BinarySensor {
     super(platform, accessory, accessoryConfiguration);
   }
 
-  protected getService(): WithUUID<typeof Service> {
-    return this.platform.Service.LeakSensor;
+  protected getAccessoryService(): WithUUID<typeof Service> {
+    return LeakSensor.ACCESSORY_SERVICE_TYPE;
   }
 
   protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return this.platform.Characteristic.LeakDetected;
+    return LeakSensor.EVENT_DETECTED_CHARACTERISTIC;
   }
 
   protected getStateName(state: number): string {
@@ -43,7 +42,10 @@ export class LeakSensor extends BinarySensor {
     return sensorStateName;
   }
 
-  protected getAccessoryTypeName(): string {
-    return LeakSensor.ACCESSORY_TYPE_NAME;
-  }
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  static readonly LEAK_NOT_DETECTED: number =       CharacteristicType.LeakDetected.LEAK_NOT_DETECTED;
+  static readonly LEAK_DETECTED: number =           CharacteristicType.LeakDetected.LEAK_DETECTED;
 }
