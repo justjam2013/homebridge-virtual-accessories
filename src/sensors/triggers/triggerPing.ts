@@ -110,8 +110,8 @@ export class PingTrigger extends Trigger {
     const options = {
       networkProtocol: protocol,
       packetSize: 16,
-      retries: 3,
-      sessionId: (process.pid % 65535),
+      retries: triggerConfig.failureRetryCount,
+      sessionId: Math.floor(Math.random() * 65534) + 1,
       timeout: pingTimeoutMillis,
       ttl: 128,
     };
