@@ -29,6 +29,20 @@ export class AccessoryType {
 /**
  * 
  */
+export class DeviceType {
+
+  static HomeKit: string = 'homekit';
+  static Matter: string = 'matter';
+
+  static Types: string[] = [
+    DeviceType.HomeKit,
+    DeviceType.Matter,
+  ];
+}
+
+/**
+ * 
+ */
 export class BinarySensorType {
 
   static CarbonDioxide: string = 'carbonDioxide';

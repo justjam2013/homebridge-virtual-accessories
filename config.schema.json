@@ -162,6 +162,18 @@
                 "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
+            "deviceType": {
+              "title": "Device Type *",
+              "description": "Accessory is HomeKit or Matter device",
+              "type": "string",
+              "oneOf": [
+                { "title": "HomeKit", "const": "homekit" },
+                { "title": "Matter", "const": "matter" }
+              ],
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType == 'switch';"
+              }
+            },
             "airPurifier": {
               "title": "Air Purifier",
               "type": "object",
@@ -1348,7 +1360,7 @@
                 }
               },
               "then": {
-                "required": [ "switch" ],
+                "required": [ "switch", "deviceType" ],
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]

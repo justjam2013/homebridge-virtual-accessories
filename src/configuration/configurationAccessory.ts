@@ -58,6 +58,9 @@ export class AccessoryConfiguration {
   // Optional
   accessoryIsStateful: boolean = false;
 
+  // Optional
+  deviceType!: string;
+
   // Accessories
 
   // Battery
