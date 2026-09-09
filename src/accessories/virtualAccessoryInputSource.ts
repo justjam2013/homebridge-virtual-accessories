@@ -9,12 +9,14 @@ import { Accessory } from './accessory.js';
  */
 export class InputSource extends Accessory {
 
+  private static DO_NOT_CREATE_SERVICE: boolean = false;
+
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration, ServiceType.InputSource);
+    super(platform, accessory, accessoryConfiguration, ServiceType.InputSource, InputSource.DO_NOT_CREATE_SERVICE);
 
     let ConfiguredName: string = '';
     let InputSourceType: number = InputSource.HDMI;

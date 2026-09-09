@@ -36,6 +36,7 @@ export abstract class Accessory extends CharacteristicUtils {
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
     serviceType: WithUUID<typeof Service>,
+    createService: boolean = true,
   ) {
     super();
 
@@ -66,7 +67,9 @@ export abstract class Accessory extends CharacteristicUtils {
       .setCharacteristic(CharacteristicType.FirmwareRevision, this.accessory.context.firmwareVersion);
 
     // Set accessory service info
-    this.service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType as unknown as Service);
+    if (createService) {
+      this.service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType as unknown as Service);
+    }
     this.updateName(this.accessoryName);
   }
 
