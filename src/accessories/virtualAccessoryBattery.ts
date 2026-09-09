@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
@@ -160,37 +158,39 @@ export class Battery extends Accessory implements UpdatableChargingStatus {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly BATTERY_LEVEL_NORMAL: number =      CharacteristicType.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-  static readonly BATTERY_LEVEL_LOW: number =         CharacteristicType.StatusLowBattery.BATTERY_LEVEL_LOW;
+  // Lazy static getters
 
-  static readonly NOT_CHARGING: number =              CharacteristicType.ChargingState.NOT_CHARGING;
-  static readonly CHARGING: number =                  CharacteristicType.ChargingState.CHARGING;
-  static readonly NOT_CHARGEABLE: number =            CharacteristicType.ChargingState.NOT_CHARGEABLE;
+  static get BATTERY_LEVEL_NORMAL(): number { return CharacteristicType.StatusLowBattery.BATTERY_LEVEL_NORMAL; }
+  static get BATTERY_LEVEL_LOW(): number    { return CharacteristicType.StatusLowBattery.BATTERY_LEVEL_LOW; }
+
+  static get NOT_CHARGING(): number         { return CharacteristicType.ChargingState.NOT_CHARGING; }
+  static get CHARGING(): number             { return CharacteristicType.ChargingState.CHARGING; }
+  static get NOT_CHARGEABLE(): number       { return CharacteristicType.ChargingState.NOT_CHARGEABLE; }
 
   static getStatusLowBatteryName(level: number): string {
-    let levelName: string;
+    let name: string;
 
     switch (level) {
-    case undefined: { levelName = 'undefined'; break; }
-    case Battery.BATTERY_LEVEL_NORMAL: { levelName = 'BATTERY LEVEL NORMAL'; break; }
-    case Battery.BATTERY_LEVEL_LOW: { levelName = 'BATTERY LEVEL LOW'; break; }
-    default: { levelName = level.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Battery.BATTERY_LEVEL_NORMAL: { name = 'BATTERY LEVEL NORMAL'; break; }
+    case Battery.BATTERY_LEVEL_LOW: { name = 'BATTERY LEVEL LOW'; break; }
+    default: { name = level.toString(); }
     }
 
-    return levelName;
+    return name;
   }
 
   static getChargingStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Battery.NOT_CHARGING: { stateName = 'NOT CHARGING'; break; }
-    case Battery.CHARGING: { stateName = 'CHARGING'; break; }
-    case Battery.NOT_CHARGEABLE: { stateName = 'NOT CHARGEABLE'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Battery.NOT_CHARGING: { name = 'NOT CHARGING'; break; }
+    case Battery.CHARGING: { name = 'CHARGING'; break; }
+    case Battery.NOT_CHARGEABLE: { name = 'NOT CHARGEABLE'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }

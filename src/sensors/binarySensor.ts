@@ -102,19 +102,21 @@ export abstract class BinarySensor extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly NORMAL: number = 0;
-  static readonly TRIGGERED: number = 1;
+  // Lazy static getters
+
+  static get NORMAL(): number     { return 0; }
+  static get TRIGGERED(): number  { return 1; }
 
   static getStateName(state: number): string {
-    let sensorStateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    case BinarySensor.NORMAL: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
-    case BinarySensor.TRIGGERED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
-    default: { sensorStateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case BinarySensor.NORMAL: { name = BinarySensor.NORMAL_INACTIVE; break; }
+    case BinarySensor.TRIGGERED: { name = BinarySensor.TRIGGERED_ACTIVE; break; }
+    default: { name = state.toString();}
     }
 
-    return sensorStateName;
+    return name;
   }
 }

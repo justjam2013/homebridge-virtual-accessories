@@ -34,6 +34,8 @@ export class OccupancySensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly OCCUPANCY_NOT_DETECTED: number =      CharacteristicType.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
-  static readonly OCCUPANCY_DETECTED: number =          CharacteristicType.OccupancyDetected.OCCUPANCY_DETECTED;
+  // Lazy static getters
+
+  static get OCCUPANCY_NOT_DETECTED(): number { return CharacteristicType.OccupancyDetected.OCCUPANCY_NOT_DETECTED; }
+  static get OCCUPANCY_DETECTED(): number     { return CharacteristicType.OccupancyDetected.OCCUPANCY_DETECTED; }
 }

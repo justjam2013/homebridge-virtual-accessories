@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
@@ -116,7 +114,7 @@ export class FilterMaintenance extends Accessory {
 
   async getFilterChangeIndicationHandler(): Promise<CharacteristicValue> {
     const FilterChangeIndication: number = this.getFilterChangeIndication();
-    this.log.debug(`[${this.accessoryName}] Getting Filter Change Indication: ${FilterMaintenance.getStateName(FilterChangeIndication)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Filter Change Indication: ${FilterMaintenance.getFilterChangeIndicationName(FilterChangeIndication)}`);
 
     return FilterChangeIndication;
   }
@@ -178,19 +176,21 @@ export class FilterMaintenance extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly FILTER_OK: number =         CharacteristicType.FilterChangeIndication.FILTER_OK;
-  static readonly CHANGE_FILTER: number =     CharacteristicType.FilterChangeIndication.CHANGE_FILTER;
+  // Lazy static getters
 
-  static getStateName(event: number): string {
-    let stateName: string;
+  static get FILTER_OK(): number      { return CharacteristicType.FilterChangeIndication.FILTER_OK; }
+  static get CHANGE_FILTER(): number  { return CharacteristicType.FilterChangeIndication.CHANGE_FILTER; }
+
+  static getFilterChangeIndicationName(event: number): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { stateName = 'undefined'; break; }
-    case FilterMaintenance.FILTER_OK: { stateName = 'FILTER OK'; break; }
-    case FilterMaintenance.CHANGE_FILTER: { stateName = 'CHANGE FILTER'; break; }
-    default: { stateName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case FilterMaintenance.FILTER_OK: { name = 'FILTER OK'; break; }
+    case FilterMaintenance.CHANGE_FILTER: { name = 'CHANGE FILTER'; break; }
+    default: { name = event.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }

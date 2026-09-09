@@ -46,7 +46,7 @@ export class CompanionSwitch extends Switch {
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.companionName!);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getStateName(this.getOn())}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Companion Switch Current State: ${Switch.getOnName(this.getOn())}`);
     this.updateOn(this.getOn());
 
     // register handlers

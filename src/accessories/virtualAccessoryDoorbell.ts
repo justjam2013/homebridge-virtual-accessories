@@ -29,7 +29,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   ) {
     super(platform, accessory, accessoryConfiguration, ServiceType.Doorbell);
 
-    let Mute: boolean = false;
+    let Mute: boolean = Doorbell.UNMUTED;
     let Volume: number = 100;
     const ProgrammableSwitchEvent: number = Doorbell.SINGLE_PRESS;
 
@@ -76,7 +76,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   async getProgrammableSwitchEventHandler(): Promise<CharacteristicValue> {
     const ProgrammableSwitchEvent: number = this.getProgrammableSwitchEvent();
-    this.log.debug(`[${this.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getEventName(ProgrammableSwitchEvent)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Programmable Switch Event: ${Doorbell.getProgrammableSwitchEventName(ProgrammableSwitchEvent)}`);
 
     return ProgrammableSwitchEvent;
   }
@@ -85,7 +85,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   async getMuteHandler(): Promise<CharacteristicValue> {
     const Mute: boolean = this.getMute();
-    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Doorbell.getMuteName(Mute)}`);
 
     return Mute;
   }
@@ -93,7 +93,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   async setMuteHandler(value: CharacteristicValue) {
     let Mute: boolean = value as boolean;
     Mute = this.updateMute(Mute);
-    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Doorbell.getMuteName(Mute)}`);
 
     this.saveState();
   }
@@ -102,7 +102,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
   async getVolumeHandler(): Promise<CharacteristicValue> {
     const Volume: number = this.getVolume();
-    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}%`);
 
     return Volume;
   }
@@ -110,7 +110,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   async setVolumeHandler(value: CharacteristicValue) {
     let Volume = value as number;
     Volume = this.updateVolume(Volume);
-    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}%`);
   }
 
   // Abstract methods impl
@@ -136,7 +136,7 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
 
     const ProgrammableSwitchEvent: number = this.updateProgrammableSwitchEvent(Doorbell.SINGLE_PRESS);
 
-    this.log.info(`[${this.accessoryName}] Triggered Doorbell Event: ${Doorbell.getEventName(ProgrammableSwitchEvent)}`);
+    this.log.info(`[${this.accessoryName}] Triggered Doorbell Event: ${Doorbell.getProgrammableSwitchEventName(ProgrammableSwitchEvent)}`);
   }
 
   private createCompanionSwitch(): CompanionSwitch {
@@ -170,21 +170,39 @@ export class Doorbell extends Accessory implements TriggerableEventAccessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly SINGLE_PRESS: number =      CharacteristicType.ProgrammableSwitchEvent.SINGLE_PRESS;
-  static readonly DOUBLE_PRESS: number =      CharacteristicType.ProgrammableSwitchEvent.DOUBLE_PRESS;
-  static readonly LONG_PRESS: number =        CharacteristicType.ProgrammableSwitchEvent.LONG_PRESS;
+  // Lazy static getters
 
-  static getEventName(event: number): string {
-    let eventName: string;
+  static get MUTED(): boolean       { return true; }    // CharacteristicType.Mute
+  static get UNMUTED(): boolean     { return false; }   // CharacteristicType.Mute
+
+  static get SINGLE_PRESS(): number { return CharacteristicType.ProgrammableSwitchEvent.SINGLE_PRESS; }
+  static get DOUBLE_PRESS(): number { return CharacteristicType.ProgrammableSwitchEvent.DOUBLE_PRESS; }
+  static get LONG_PRESS(): number   { return CharacteristicType.ProgrammableSwitchEvent.LONG_PRESS; }
+
+  static getMuteName(event: boolean): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Doorbell.SINGLE_PRESS: { eventName = 'SINGLE PRESS'; break; }
-    case Doorbell.DOUBLE_PRESS: { eventName = 'DOUBLE PRESS'; break; }
-    case Doorbell.LONG_PRESS: { eventName = 'LONG PRESS'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Doorbell.MUTED: { name = 'MUTED'; break; }
+    case Doorbell.UNMUTED: { name = 'UNMUTED'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
+  }
+
+  static getProgrammableSwitchEventName(event: number): string {
+    let name: string;
+
+    switch (event) {
+    case undefined: { name = 'undefined'; break; }
+    case Doorbell.SINGLE_PRESS: { name = 'SINGLE PRESS'; break; }
+    case Doorbell.DOUBLE_PRESS: { name = 'DOUBLE PRESS'; break; }
+    case Doorbell.LONG_PRESS: { name = 'LONG PRESS'; break; }
+    default: { name = event.toString(); }
+    }
+
+    return name;
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable brace-style */
 /* eslint-disable max-len */
 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
@@ -416,57 +415,59 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CURRENTLY_INACTIVE: number =                CharacteristicType.CurrentHumidifierDehumidifierState.INACTIVE;
-  static readonly CURRENTLY_IDLE: number =                    CharacteristicType.CurrentHumidifierDehumidifierState.IDLE;
-  static readonly CURRENTLY_HUMIDIFYING: number =             CharacteristicType.CurrentHumidifierDehumidifierState.HUMIDIFYING;
-  static readonly CURRENTLY_DEHUMIDIFYING: number =           CharacteristicType.CurrentHumidifierDehumidifierState.DEHUMIDIFYING;
+  // Lazy static getters
 
-  static readonly AUTOMATIC: number =                         CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER; 
-  static readonly HUMIDIFY: number =                          CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER;
-  static readonly DEHUMIDIFY: number =                        CharacteristicType.TargetHumidifierDehumidifierState.DEHUMIDIFIER;
+  static get CURRENTLY_INACTIVE(): number       { return CharacteristicType.CurrentHumidifierDehumidifierState.INACTIVE; }
+  static get CURRENTLY_IDLE(): number           { return CharacteristicType.CurrentHumidifierDehumidifierState.IDLE; }
+  static get CURRENTLY_HUMIDIFYING(): number    { return CharacteristicType.CurrentHumidifierDehumidifierState.HUMIDIFYING; }
+  static get CURRENTLY_DEHUMIDIFYING(): number  { return CharacteristicType.CurrentHumidifierDehumidifierState.DEHUMIDIFYING; }
 
-  static readonly INACTIVE: number =                          CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =                            CharacteristicType.Active.ACTIVE;
+  static get AUTOMATIC(): number                { return CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER; } 
+  static get HUMIDIFY(): number                 { return CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER; }
+  static get DEHUMIDIFY(): number               { return CharacteristicType.TargetHumidifierDehumidifierState.DEHUMIDIFIER; }
+
+  static get INACTIVE(): number                 { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number                   { return CharacteristicType.Active.ACTIVE; }
 
   static getActiveName(status: number): string {
-    let activeName: string;
+    let name: string;
 
     switch (status) {
-    case undefined: { activeName = 'undefined'; break; }
-    case HumidifierDehumidifier.INACTIVE: { activeName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = status.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.INACTIVE: { name = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = status.toString(); }
     }
 
-    return activeName;
+    return name;
   }
 
   static getCurrentStateName(state: number): string { 
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HumidifierDehumidifier.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
-    case HumidifierDehumidifier.CURRENTLY_HUMIDIFYING: { stateName = 'HUMIDIFYING'; break; }
-    case HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING: { stateName = 'DEHUMIDIFYING'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.CURRENTLY_INACTIVE: { name = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_IDLE: { name = 'IDLE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_HUMIDIFYING: { name = 'HUMIDIFYING'; break; }
+    case HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING: { name = 'DEHUMIDIFYING'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 
   static getTargetStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HumidifierDehumidifier.AUTOMATIC: { stateName = 'AUTO'; break; }
-    case HumidifierDehumidifier.HUMIDIFY: { stateName = 'HUMIDIFY'; break; }
-    case HumidifierDehumidifier.DEHUMIDIFY: { stateName = 'DEHUMIDIFY'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.AUTOMATIC: { name = 'AUTO'; break; }
+    case HumidifierDehumidifier.HUMIDIFY: { name = 'HUMIDIFY'; break; }
+    case HumidifierDehumidifier.DEHUMIDIFY: { name = 'DEHUMIDIFY'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }

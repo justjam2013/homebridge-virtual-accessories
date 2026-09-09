@@ -34,6 +34,8 @@ export class LeakSensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly LEAK_NOT_DETECTED: number =       CharacteristicType.LeakDetected.LEAK_NOT_DETECTED;
-  static readonly LEAK_DETECTED: number =           CharacteristicType.LeakDetected.LEAK_DETECTED;
+  // Lazy static getters
+
+  static get LEAK_NOT_DETECTED(): number { return CharacteristicType.LeakDetected.LEAK_NOT_DETECTED; }
+  static get LEAK_DETECTED(): number     { return CharacteristicType.LeakDetected.LEAK_DETECTED; }
 }

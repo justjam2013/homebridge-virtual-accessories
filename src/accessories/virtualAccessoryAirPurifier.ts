@@ -1,6 +1,3 @@
-/* eslint-disable brace-style */
- 
-
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
@@ -182,53 +179,55 @@ export class AirPurifier extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CURRENTLY_INACTIVE: number =          CharacteristicType.CurrentAirPurifierState.INACTIVE;
-  static readonly CURRENTLY_IDLE: number =              CharacteristicType.CurrentAirPurifierState.IDLE;
-  static readonly CURRENTLY_PURIFYING_AIR: number =     CharacteristicType.CurrentAirPurifierState.PURIFYING_AIR;
+  // Lazy static getters
 
-  static readonly MANUAL: number =                      CharacteristicType.TargetAirPurifierState.MANUAL;
-  static readonly AUTO: number =                        CharacteristicType.TargetAirPurifierState.AUTO;
+  static get CURRENTLY_INACTIVE(): number       { return CharacteristicType.CurrentAirPurifierState.INACTIVE; }
+  static get CURRENTLY_IDLE(): number           { return CharacteristicType.CurrentAirPurifierState.IDLE; }
+  static get CURRENTLY_PURIFYING_AIR(): number  { return CharacteristicType.CurrentAirPurifierState.PURIFYING_AIR; }
 
-  static readonly INACTIVE: number =                    CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =                      CharacteristicType.Active.ACTIVE;
+  static get MANUAL(): number                   { return CharacteristicType.TargetAirPurifierState.MANUAL; }
+  static get AUTO(): number                     { return CharacteristicType.TargetAirPurifierState.AUTO; }
+
+  static get INACTIVE(): number                 { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number                   { return CharacteristicType.Active.ACTIVE; }
 
   static getActiveName(status: number): string {
-    let activeName: string;
+    let name: string;
 
     switch (status) {
-    case undefined: { activeName = 'undefined'; break; }
-    case AirPurifier.INACTIVE: { activeName = 'INACTIVE'; break; }
-    case AirPurifier.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = status.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case AirPurifier.INACTIVE: { name = 'INACTIVE'; break; }
+    case AirPurifier.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = status.toString(); }
     }
 
-    return activeName;
+    return name;
   }
 
   static getCurrentStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case AirPurifier.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
-    case AirPurifier.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
-    case AirPurifier.CURRENTLY_PURIFYING_AIR: { stateName = 'HEATING'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case AirPurifier.CURRENTLY_INACTIVE: { name = 'INACTIVE'; break; }
+    case AirPurifier.CURRENTLY_IDLE: { name = 'IDLE'; break; }
+    case AirPurifier.CURRENTLY_PURIFYING_AIR: { name = 'HEATING'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 
   static getTargetStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case AirPurifier.MANUAL: { stateName = 'MANUAL'; break; }
-    case AirPurifier.AUTO: { stateName = 'AUTO'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case AirPurifier.MANUAL: { name = 'MANUAL'; break; }
+    case AirPurifier.AUTO: { name = 'AUTO'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }

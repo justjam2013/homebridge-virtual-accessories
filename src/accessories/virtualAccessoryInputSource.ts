@@ -18,7 +18,7 @@ export class InputSource extends Accessory {
 
     let ConfiguredName: string = '';
     let InputSourceType: number = InputSource.HDMI;
-    const IsConfigured: boolean = true;
+    const IsConfigured: number = InputSource.CONFIGURED;
     const CurrentVisibilityState: number = InputSource.SHOWN;
     let Identifier: number = 0;
 
@@ -92,23 +92,23 @@ export class InputSource extends Accessory {
   // IsConfigured
 
   async getIsConfiguredHandler(): Promise<CharacteristicValue> {
-    const IsConfigured: boolean = this.getIsConfigured();
-    this.log.debug(`[${this.accessoryName}] Getting Is Configured: ${IsConfigured}`);
+    const IsConfigured: number = this.getIsConfigured();
+    this.log.debug(`[${this.accessoryName}] Getting Is Configured: ${InputSource.getIsConfiguredName(IsConfigured)}`);
 
     return IsConfigured;
   }
 
   async setIsConfiguredHandler(value: CharacteristicValue) {
-    let IsConfigured: boolean = value as boolean;
+    let IsConfigured: number = value as number;
     IsConfigured = this.updateIsConfigured(IsConfigured);
-    this.log.info(`[${this.accessoryName}] Setting Is Configured: ${IsConfigured}`);
+    this.log.info(`[${this.accessoryName}] Setting Is Configured: ${InputSource.getIsConfiguredName(IsConfigured)}`);
   }
 
   // CurrentVisibilityState
 
   async getCurrentVisibilityStateHandler(): Promise<CharacteristicValue> {
     const CurrentVisibilityState: number = this.getCurrentVisibilityState();
-    this.log.debug(`[${this.accessoryName}] Getting Current Visibility State: ${InputSource.getVisibilityName(CurrentVisibilityState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current Visibility State: ${InputSource.getCurrentVisibilityStateName(CurrentVisibilityState)}`);
 
     return CurrentVisibilityState;
   }
@@ -138,69 +138,71 @@ export class InputSource extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly OTHER =                 CharacteristicType.InputSourceType.OTHER;
-  static readonly HOME_SCREEN =           CharacteristicType.InputSourceType.HOME_SCREEN;
-  static readonly TUNER =                 CharacteristicType.InputSourceType.TUNER;
-  static readonly HDMI =                  CharacteristicType.InputSourceType.HDMI;
-  static readonly COMPOSITE_VIDEO =       CharacteristicType.InputSourceType.COMPOSITE_VIDEO;
-  static readonly S_VIDEO =               CharacteristicType.InputSourceType.S_VIDEO;
-  static readonly COMPONENT_VIDEO =       CharacteristicType.InputSourceType.COMPONENT_VIDEO;
-  static readonly DVI =                   CharacteristicType.InputSourceType.DVI;
-  static readonly AIRPLAY =               CharacteristicType.InputSourceType.AIRPLAY;
-  static readonly USB =                   CharacteristicType.InputSourceType.USB;
-  static readonly APPLICATION =           CharacteristicType.InputSourceType.APPLICATION;
-  
-  static readonly NOT_CONFIGURED =        CharacteristicType.IsConfigured.NOT_CONFIGURED;
-  static readonly CONFIGURED =            CharacteristicType.IsConfigured.CONFIGURED;
+  // Lazy static getters
 
-  static readonly SHOWN =                 CharacteristicType.CurrentVisibilityState.SHOWN;
-  static readonly HIDDEN =                CharacteristicType.CurrentVisibilityState.HIDDEN;
+  static get OTHER(): number            { return CharacteristicType.InputSourceType.OTHER; }
+  static get HOME_SCREEN(): number      { return CharacteristicType.InputSourceType.HOME_SCREEN; }
+  static get TUNER(): number            { return CharacteristicType.InputSourceType.TUNER; }
+  static get HDMI(): number             { return CharacteristicType.InputSourceType.HDMI; }
+  static get COMPOSITE_VIDEO(): number  { return CharacteristicType.InputSourceType.COMPOSITE_VIDEO; }
+  static get S_VIDEO(): number          { return CharacteristicType.InputSourceType.S_VIDEO; }
+  static get COMPONENT_VIDEO(): number  { return CharacteristicType.InputSourceType.COMPONENT_VIDEO; }
+  static get DVI(): number              { return CharacteristicType.InputSourceType.DVI; }
+  static get AIRPLAY(): number          { return CharacteristicType.InputSourceType.AIRPLAY; }
+  static get USB(): number              { return CharacteristicType.InputSourceType.USB; }
+  static get APPLICATION(): number      { return CharacteristicType.InputSourceType.APPLICATION; }
+  
+  static get NOT_CONFIGURED(): number   { return CharacteristicType.IsConfigured.NOT_CONFIGURED; }
+  static get CONFIGURED(): number       { return CharacteristicType.IsConfigured.CONFIGURED; }
+
+  static get SHOWN(): number            { return CharacteristicType.CurrentVisibilityState.SHOWN; }
+  static get HIDDEN(): number           { return CharacteristicType.CurrentVisibilityState.HIDDEN; }
 
   static getTypeName(event: number): string {
-    let eventName: string;
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.OTHER: { eventName = 'OTHER'; break; }
-    case InputSource.HOME_SCREEN: { eventName = 'HOME SCREEN'; break; }
-    case InputSource.TUNER: { eventName = 'TUNER'; break; }
-    case InputSource.HDMI: { eventName = 'HDMI'; break; }
-    case InputSource.COMPOSITE_VIDEO: { eventName = 'COMPOSITE VIDEO'; break; }
-    case InputSource.S_VIDEO: { eventName = 'S VIDEO'; break; }
-    case InputSource.COMPONENT_VIDEO: { eventName = 'COMPONENT VIDEO'; break; }
-    case InputSource.DVI: { eventName = 'DVI'; break; }
-    case InputSource.AIRPLAY: { eventName = 'AIRPLAY'; break; }
-    case InputSource.USB: { eventName = 'USB'; break; }
-    case InputSource.APPLICATION: { eventName = 'APPLICATION'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.OTHER: { name = 'OTHER'; break; }
+    case InputSource.HOME_SCREEN: { name = 'HOME SCREEN'; break; }
+    case InputSource.TUNER: { name = 'TUNER'; break; }
+    case InputSource.HDMI: { name = 'HDMI'; break; }
+    case InputSource.COMPOSITE_VIDEO: { name = 'COMPOSITE VIDEO'; break; }
+    case InputSource.S_VIDEO: { name = 'S VIDEO'; break; }
+    case InputSource.COMPONENT_VIDEO: { name = 'COMPONENT VIDEO'; break; }
+    case InputSource.DVI: { name = 'DVI'; break; }
+    case InputSource.AIRPLAY: { name = 'AIRPLAY'; break; }
+    case InputSource.USB: { name = 'USB'; break; }
+    case InputSource.APPLICATION: { name = 'APPLICATION'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
-  static getConfiguredName(event: number): string {
-    let eventName: string;
+  static getIsConfiguredName(event: number): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.NOT_CONFIGURED: { eventName = 'NOT CONFIGURED'; break; }
-    case InputSource.CONFIGURED: { eventName = 'CONFIGURED'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.NOT_CONFIGURED: { name = 'NOT CONFIGURED'; break; }
+    case InputSource.CONFIGURED: { name = 'CONFIGURED'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
-  static getVisibilityName(event: number): string {
-    let eventName: string;
+  static getCurrentVisibilityStateName(event: number): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.SHOWN: { eventName = 'SHOWN'; break; }
-    case InputSource.HIDDEN: { eventName = 'HIDDEN'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.SHOWN: { name = 'SHOWN'; break; }
+    case InputSource.HIDDEN: { name = 'HIDDEN'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 }

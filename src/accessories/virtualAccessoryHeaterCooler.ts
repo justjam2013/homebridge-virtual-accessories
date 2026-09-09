@@ -1,4 +1,3 @@
-/* eslint-disable brace-style */
 /* eslint-disable max-len */
 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
@@ -527,73 +526,75 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CURRENTLY_INACTIVE: number =          CharacteristicType.CurrentHeaterCoolerState.INACTIVE;
-  static readonly CURRENTLY_IDLE: number =              CharacteristicType.CurrentHeaterCoolerState.IDLE;
-  static readonly CURRENTLY_HEATING: number =           CharacteristicType.CurrentHeaterCoolerState.HEATING;
-  static readonly CURRENTLY_COOLING: number =           CharacteristicType.CurrentHeaterCoolerState.COOLING;
+  // Lazy static getters
 
-  static readonly AUTO: number =                        CharacteristicType.TargetHeaterCoolerState.AUTO; 
-  static readonly HEAT: number =                        CharacteristicType.TargetHeaterCoolerState.HEAT;
-  static readonly COOL: number =                        CharacteristicType.TargetHeaterCoolerState.COOL;
+  static get CURRENTLY_INACTIVE(): number { return CharacteristicType.CurrentHeaterCoolerState.INACTIVE; }
+  static get CURRENTLY_IDLE(): number     { return CharacteristicType.CurrentHeaterCoolerState.IDLE; }
+  static get CURRENTLY_HEATING(): number  { return CharacteristicType.CurrentHeaterCoolerState.HEATING; }
+  static get CURRENTLY_COOLING(): number  { return CharacteristicType.CurrentHeaterCoolerState.COOLING; }
 
-  static readonly INACTIVE: number =                    CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =                      CharacteristicType.Active.ACTIVE;
+  static get AUTO(): number               { return CharacteristicType.TargetHeaterCoolerState.AUTO; }
+  static get HEAT(): number               { return CharacteristicType.TargetHeaterCoolerState.HEAT; }
+  static get COOL(): number               { return CharacteristicType.TargetHeaterCoolerState.COOL; }
 
-  static readonly CELSIUS: number =                     CharacteristicType.TemperatureDisplayUnits.CELSIUS;
-  static readonly FAHRENHEIT: number =                  CharacteristicType.TemperatureDisplayUnits.FAHRENHEIT;
+  static get INACTIVE(): number           { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number             { return CharacteristicType.Active.ACTIVE; }
+
+  static get CELSIUS(): number            { return CharacteristicType.TemperatureDisplayUnits.CELSIUS; }
+  static get FAHRENHEIT(): number         { return CharacteristicType.TemperatureDisplayUnits.FAHRENHEIT; }
 
   static getActiveName(status: number): string {
-    let activeName: string;
+    let name: string;
 
     switch (status) {
-    case undefined: { activeName = 'undefined'; break; }
-    case HeaterCooler.INACTIVE: { activeName = 'INACTIVE'; break; }
-    case HeaterCooler.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = status.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HeaterCooler.INACTIVE: { name = 'INACTIVE'; break; }
+    case HeaterCooler.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = status.toString(); }
     }
 
-    return activeName;
+    return name;
   }
 
   static getCurrentStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HeaterCooler.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
-    case HeaterCooler.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
-    case HeaterCooler.CURRENTLY_HEATING: { stateName = 'HEATING'; break; }
-    case HeaterCooler.CURRENTLY_COOLING: { stateName = 'COOLING'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HeaterCooler.CURRENTLY_INACTIVE: { name = 'INACTIVE'; break; }
+    case HeaterCooler.CURRENTLY_IDLE: { name = 'IDLE'; break; }
+    case HeaterCooler.CURRENTLY_HEATING: { name = 'HEATING'; break; }
+    case HeaterCooler.CURRENTLY_COOLING: { name = 'COOLING'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 
   static getTargetStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HeaterCooler.AUTO: { stateName = 'AUTO'; break; }
-    case HeaterCooler.HEAT: { stateName = 'HEAT'; break; }
-    case HeaterCooler.COOL: { stateName = 'COOL'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HeaterCooler.AUTO: { name = 'AUTO'; break; }
+    case HeaterCooler.HEAT: { name = 'HEAT'; break; }
+    case HeaterCooler.COOL: { name = 'COOL'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 
   static getTemperatureDisplayUnitsName(state: number): string {
-    let unitsName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { unitsName = 'undefined'; break; }
-    case HeaterCooler.CELSIUS: { unitsName = 'CELSIUS'; break; }
-    case HeaterCooler.FAHRENHEIT: { unitsName = 'FAHRENHEIT'; break; }
-    default: { unitsName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case HeaterCooler.CELSIUS: { name = 'CELSIUS'; break; }
+    case HeaterCooler.FAHRENHEIT: { name = 'FAHRENHEIT'; break; }
+    default: { name = state.toString(); }
     }
 
-    return unitsName;
+    return name;
   }
 }

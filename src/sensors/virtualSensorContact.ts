@@ -34,6 +34,8 @@ export class ContactSensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CONTACT_DETECTED: number =            CharacteristicType.ContactSensorState.CONTACT_DETECTED;
-  static readonly CONTACT_NOT_DETECTED: number =        CharacteristicType.ContactSensorState.CONTACT_NOT_DETECTED;
+  // Lazy static getters
+
+  static get CONTACT_DETECTED(): number     { return CharacteristicType.ContactSensorState.CONTACT_DETECTED; }
+  static get CONTACT_NOT_DETECTED(): number { return CharacteristicType.ContactSensorState.CONTACT_NOT_DETECTED; }
 }

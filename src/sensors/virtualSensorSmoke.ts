@@ -34,6 +34,8 @@ export class SmokeSensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly SMOKE_NOT_DETECTED: number =      CharacteristicType.SmokeDetected.SMOKE_NOT_DETECTED;
-  static readonly SMOKE_DETECTED: number =          CharacteristicType.SmokeDetected.SMOKE_DETECTED;
+  // Lazy static getters
+
+  static get SMOKE_NOT_DETECTED(): number { return CharacteristicType.SmokeDetected.SMOKE_NOT_DETECTED; }
+  static get SMOKE_DETECTED(): number     { return CharacteristicType.SmokeDetected.SMOKE_DETECTED; }
 }

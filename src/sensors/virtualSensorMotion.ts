@@ -34,6 +34,8 @@ export class MotionSensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly MOTION_NOT_DETECTED: number = 0;  // No Charteristic exists for Motion sensor. Modeled on other sensors
-  static readonly MOTION_DETECTED: number = 1;      // No Charteristic exists for Motion sensor. Modeled on other sensors
+  // Lazy static getters
+
+  static get MOTION_NOT_DETECTED(): number  { return 0; }   // No Charteristic exists for Motion sensor. Modeled on other sensors
+  static get MOTION_DETECTED(): number      { return 1; }   // No Charteristic exists for Motion sensor. Modeled on other sensors
 }

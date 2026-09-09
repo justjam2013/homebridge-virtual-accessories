@@ -70,7 +70,7 @@ export class Fan extends Accessory {
 
   async getOnHandler(): Promise<CharacteristicValue> {
     const On: boolean = this.getOn();
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Fan.getStateName(On)}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting State: ${Fan.getOnName(On)}`);
 
     return On;
   }
@@ -78,7 +78,7 @@ export class Fan extends Accessory {
   async setOnHandler(value: CharacteristicValue) {
     let On = value as boolean;
     On = this.updateOn(On);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getStateName(On)}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting State: ${Fan.getOnName(On)}`);
 
     this.saveState();
   }
@@ -87,7 +87,7 @@ export class Fan extends Accessory {
 
   async getRotationDirectionHandler(): Promise<CharacteristicValue> {
     const RotationDirection = this.getRotationDirection();
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${RotationDirection}`);
+    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Rotation Direction: ${Fan.getRotationDirectionName(RotationDirection)}`);
 
     return RotationDirection;
   }
@@ -95,7 +95,7 @@ export class Fan extends Accessory {
   async setRotationDirectionHandler(value: CharacteristicValue) {
     let RotationDirection = value as number;
     RotationDirection = this.updateRotationDirection(RotationDirection);
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${RotationDirection}`);
+    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Rotation Direction: ${Fan.getRotationDirectionName(RotationDirection)}`);
 
     this.saveState();
   }
@@ -134,22 +134,37 @@ export class Fan extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly ON: boolean = true;
-  static readonly OFF: boolean = false;
+  // Lazy static getters
 
-  static readonly CLOCKWISE: number =               CharacteristicType.RotationDirection.CLOCKWISE;
-  static readonly COUNTER_CLOCKWISE: number =       CharacteristicType.RotationDirection.COUNTER_CLOCKWISE;
+  static get ON(): boolean                { return  true; }
+  static get OFF(): boolean               { return  false; }
 
-  static getStateName(state: boolean): string {
-    let stateName: string;
+  static get CLOCKWISE(): number          { return CharacteristicType.RotationDirection.CLOCKWISE; }
+  static get COUNTER_CLOCKWISE(): number  { return CharacteristicType.RotationDirection.COUNTER_CLOCKWISE; }
+
+  static getOnName(state: boolean): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Fan.ON: { stateName = 'ON'; break; }
-    case Fan.OFF: { stateName = 'OFF'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Fan.ON: { name = 'ON'; break; }
+    case Fan.OFF: { name = 'OFF'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getRotationDirectionName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Fan.CLOCKWISE: { name = 'CLOCKWISE'; break; }
+    case Fan.COUNTER_CLOCKWISE: { name = 'COUNTER CLOCKWISE'; break; }
+    default: { name = state.toString();}
+    }
+
+    return name;
   }
 }

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable brace-style */
  
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
@@ -9,15 +8,12 @@ import { Accessory } from './accessory.js';
 
 import { ColorHSL, Colors } from '../utils/colorUtils.js';
 import { Utils } from '../utils/utils.js';
+import { LightbulbType } from '../configuration/schema.js';
 
 /**
  * Lightbulb - Accessory implementation
  */
 export class Lightbulb extends Accessory {
-
-  static readonly WHITE: string = 'white';
-  static readonly AMBIANCE: string = 'ambiance';
-  static readonly COLOR: string = 'color';
 
   private readonly stateStorageKey: string = 'LightbulbState';
   private readonly brightnessStorageKey: string = 'LightbulbBrightness';
@@ -25,7 +21,7 @@ export class Lightbulb extends Accessory {
   private readonly hueStorageKey: string = 'LightbulbHue';
   private readonly saturationStorageKey: string = 'LightbulbSaturation';
 
-  private type: string;
+  private type: number;
 
   private states = {
   };
@@ -44,7 +40,12 @@ export class Lightbulb extends Accessory {
     let Saturation: number = 0;
 
     // First configure the device based on the accessory details
-    this.type = this.accessoryConfiguration.lightbulb.type;
+    this.type =
+      this.accessoryConfiguration.lightbulb.type === LightbulbType.Color ?
+        Lightbulb.COLOR :
+        (this.accessoryConfiguration.lightbulb.type === LightbulbType.Ambiance ?
+          Lightbulb.AMBIANCE :
+          Lightbulb.WHITE);
     this.defaultState = this.accessoryConfiguration.lightbulb.defaultState === 'on' ? Lightbulb.ON : Lightbulb.OFF;
 
     const brightness: number = this.accessoryConfiguration.lightbulb.brightness;
@@ -160,7 +161,7 @@ export class Lightbulb extends Accessory {
 
   async getOnHandler(): Promise<CharacteristicValue> {
     const On: boolean = this.getOn();
-    this.log.debug(`[${this.accessoryName}] Getting On: ${Lightbulb.getStateName(On)}`);
+    this.log.debug(`[${this.accessoryName}] Getting On: ${Lightbulb.getOnName(On)}`);
 
     return On;
   }
@@ -168,7 +169,7 @@ export class Lightbulb extends Accessory {
   async setOnHandler(value: CharacteristicValue) {
     let On: boolean = value as boolean;
     On = this.updateOn(On);
-    this.log.info(`[${this.accessoryName}] Setting On: ${Lightbulb.getStateName(On)}`);
+    this.log.info(`[${this.accessoryName}] Setting On: ${Lightbulb.getOnName(On)}`);
 
     // If brightness is 0% or 100%, ON = 100%, OFF = 0%
     let Brightness: number = this.getBrightness();
@@ -209,7 +210,7 @@ export class Lightbulb extends Accessory {
     }
 
     On = this.updateOn(On);
-    this.log.info(`[${this.accessoryName}] Setting On: ${Lightbulb.getStateName(On)}`);
+    this.log.info(`[${this.accessoryName}] Setting On: ${Lightbulb.getOnName(On)}`);
 
     this.saveState();
   }
@@ -305,19 +306,39 @@ export class Lightbulb extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly ON: boolean = true;
-  static readonly OFF: boolean = false;
+  // Lazy static getters
 
-  static getStateName(state: boolean): string {
-    let stateName: string;
+  static get ON(): boolean  { return true; }
+  static get OFF(): boolean { return false; }
+
+  static get WHITE(): number    { return 0; }
+  static get AMBIANCE(): number { return 1; }
+  static get COLOR(): number    { return 2; }
+
+  static getOnName(state: boolean): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Lightbulb.ON: { stateName = 'ON'; break; }
-    case Lightbulb.OFF: { stateName = 'OFF'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Lightbulb.ON: { name = 'ON'; break; }
+    case Lightbulb.OFF: { name = 'OFF'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getTypeName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Lightbulb.WHITE: { name = 'WHITE'; break; }
+    case Lightbulb.AMBIANCE: { name = 'AMBIANCE'; break; }
+    case Lightbulb.COLOR: { name = 'COLOR'; break; }
+    default: { name = state.toString();}
+    }
+
+    return name;
   }
 }

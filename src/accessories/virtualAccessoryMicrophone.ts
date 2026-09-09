@@ -18,7 +18,7 @@ export class Microphone extends Accessory {
   ) {
     super(platform, accessory, accessoryConfiguration, ServiceType.Microphone);
 
-    let Mute: boolean = false;
+    let Mute: boolean = Microphone.UNMUTED;
     let Volume: number = 100;
 
     // First configure the device based on the accessory details
@@ -57,7 +57,7 @@ export class Microphone extends Accessory {
 
   async getMuteHandler(): Promise<CharacteristicValue> {
     const Mute: boolean = this.getMute();
-    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Microphone.getMuteName(Mute)}`);
 
     return Mute;
   }
@@ -65,7 +65,7 @@ export class Microphone extends Accessory {
   async setMuteHandler(value: CharacteristicValue) {
     let Mute: boolean = value as boolean;
     Mute = this.updateMute(Mute);
-    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Microphone.getMuteName(Mute)}`);
 
     this.saveState();
   }
@@ -74,7 +74,7 @@ export class Microphone extends Accessory {
 
   async getVolumeHandler(): Promise<CharacteristicValue> {
     const Volume: number = this.getVolume();
-    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}%`);
 
     return Volume;
   }
@@ -82,7 +82,7 @@ export class Microphone extends Accessory {
   async setVolumeHandler(value: CharacteristicValue) {
     let Volume = value as number;
     Volume = this.updateVolume(Volume);
-    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}%`);
   }
 
   // Abstract methods impl
@@ -94,5 +94,27 @@ export class Microphone extends Accessory {
 
     const json = JSON.stringify(jsonState);
     return json;
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get MUTED(): boolean       { return true; }    // CharacteristicType.Mute
+  static get UNMUTED(): boolean     { return false; }   // CharacteristicType.Mute
+
+  static getMuteName(event: boolean): string {
+    let name: string;
+
+    switch (event) {
+    case undefined: { name = 'undefined'; break; }
+    case Microphone.MUTED: { name = 'MUTED'; break; }
+    case Microphone.UNMUTED: { name = 'UNMUTED'; break; }
+    default: { name = event.toString(); }
+    }
+
+    return name;
   }
 }

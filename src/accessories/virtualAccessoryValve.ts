@@ -202,55 +202,57 @@ export class Valve extends Accessory {
   // ****************************** Companion Switch ******************************
   //
 
-  static readonly GENERIC_VALVE: number =       CharacteristicType.ValveType.GENERIC_VALVE;
-  static readonly IRRIGATION: number =          CharacteristicType.ValveType.IRRIGATION;
-  static readonly SHOWER_HEAD: number =         CharacteristicType.ValveType.SHOWER_HEAD;
-  static readonly WATER_FAUCET: number =        CharacteristicType.ValveType.WATER_FAUCET;
+  // Lazy static getters
 
-  static readonly INACTIVE: number =            CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =              CharacteristicType.Active.ACTIVE;
+  static get GENERIC_VALVE(): number  { return CharacteristicType.ValveType.GENERIC_VALVE; }
+  static get IRRIGATION(): number     { return CharacteristicType.ValveType.IRRIGATION; }
+  static get SHOWER_HEAD(): number    { return CharacteristicType.ValveType.SHOWER_HEAD; }
+  static get WATER_FAUCET(): number   { return CharacteristicType.ValveType.WATER_FAUCET; }
 
-  static readonly NOT_IN_USE: number =          CharacteristicType.InUse.NOT_IN_USE;
-  static readonly IN_USE: number =              CharacteristicType.InUse.IN_USE;
+  static get INACTIVE(): number       { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number         { return CharacteristicType.Active.ACTIVE; }
+
+  static get NOT_IN_USE(): number     { return CharacteristicType.InUse.NOT_IN_USE; }
+  static get IN_USE(): number         { return CharacteristicType.InUse.IN_USE; }
 
   static getValveTypeName(event: number): string {
-    let eventName: string;
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.GENERIC_VALVE: { eventName = 'GENERIC VALVE'; break; }
-    case Valve.IRRIGATION: { eventName = 'IRRIGATION'; break; }
-    case Valve.SHOWER_HEAD: { eventName = 'SHOWER HEAD'; break; }
-    case Valve.WATER_FAUCET: { eventName = 'WATER FAUCET'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Valve.GENERIC_VALVE: { name = 'GENERIC VALVE'; break; }
+    case Valve.IRRIGATION: { name = 'IRRIGATION'; break; }
+    case Valve.SHOWER_HEAD: { name = 'SHOWER HEAD'; break; }
+    case Valve.WATER_FAUCET: { name = 'WATER FAUCET'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
   static getActiveName(event: number): string {
-    let eventName: string;
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.INACTIVE: { eventName = 'INACTIVE'; break; }
-    case Valve.ACTIVE: { eventName = 'ACTIVE'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Valve.INACTIVE: { name = 'INACTIVE'; break; }
+    case Valve.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
   static getInUseName(event: number): string {
-    let eventName: string;
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case Valve.NOT_IN_USE: { eventName = 'NOT IN USE'; break; }
-    case Valve.IN_USE: { eventName = 'IN USE'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Valve.NOT_IN_USE: { name = 'NOT IN USE'; break; }
+    case Valve.IN_USE: { name = 'IN USE'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 }

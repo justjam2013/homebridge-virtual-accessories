@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
- 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
@@ -250,26 +248,28 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly STAY_ARM: number =            CharacteristicType.SecuritySystemCurrentState.STAY_ARM;
-  static readonly AWAY_ARM: number =            CharacteristicType.SecuritySystemCurrentState.AWAY_ARM;
-  static readonly NIGHT_ARM: number =           CharacteristicType.SecuritySystemCurrentState.NIGHT_ARM;
-  static readonly DISARMED: number =            CharacteristicType.SecuritySystemCurrentState.DISARMED;
-  static readonly ALARM_TRIGGERED: number =     CharacteristicType.SecuritySystemCurrentState.ALARM_TRIGGERED;
+  // Lazy static getters
+
+  static get STAY_ARM(): number         { return CharacteristicType.SecuritySystemCurrentState.STAY_ARM; }    // CharacteristicType.SecuritySystemTargetState.STAY_ARM
+  static get AWAY_ARM(): number         { return CharacteristicType.SecuritySystemCurrentState.AWAY_ARM; }    // CharacteristicType.SecuritySystemTargetState.AWAY_ARM
+  static get NIGHT_ARM(): number        { return CharacteristicType.SecuritySystemCurrentState.NIGHT_ARM; }   // CharacteristicType.SecuritySystemTargetState.NIGHT_ARM
+  static get DISARMED(): number         { return CharacteristicType.SecuritySystemCurrentState.DISARMED; }    // CharacteristicType.SecuritySystemTargetState.DISARMED
+  static get ALARM_TRIGGERED(): number  { return CharacteristicType.SecuritySystemCurrentState.ALARM_TRIGGERED; }
 
   static getStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case SecuritySystem.STAY_ARM: { stateName = 'STAY_ARM'; break; }
-    case SecuritySystem.AWAY_ARM: { stateName = 'AWAY_ARM'; break; }
-    case SecuritySystem.NIGHT_ARM: { stateName = 'NIGHT_ARM'; break; }
-    case SecuritySystem.DISARMED: { stateName = 'DISARMED'; break; }
-    case SecuritySystem.ALARM_TRIGGERED: { stateName = 'ALARM_TRIGGERED'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case SecuritySystem.STAY_ARM: { name = 'STAY_ARM'; break; }
+    case SecuritySystem.AWAY_ARM: { name = 'AWAY_ARM'; break; }
+    case SecuritySystem.NIGHT_ARM: { name = 'NIGHT_ARM'; break; }
+    case SecuritySystem.DISARMED: { name = 'DISARMED'; break; }
+    case SecuritySystem.ALARM_TRIGGERED: { name = 'ALARM_TRIGGERED'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }
 

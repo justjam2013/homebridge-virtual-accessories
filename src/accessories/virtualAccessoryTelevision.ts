@@ -111,7 +111,7 @@ export class Television extends ExternalAccessory {
 
   async getActiveHelper(): Promise<CharacteristicValue> {
     const Active: number = this.getActive();
-    this.log.debug(`[${this.accessoryName}] Getting Active: ${Television.getStateName(Active)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Active: ${Television.getActiveName(Active)}`);
 
     return Active;
   }
@@ -119,7 +119,7 @@ export class Television extends ExternalAccessory {
   async setActiveHelper(value: CharacteristicValue) {
     let Active: number = value as number;
     Active = this.updateActive(Active);
-    this.log.info(`[${this.accessoryName}] Setting State: ${Television.getStateName(Active)}`);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Television.getActiveName(Active)}`);
 
     this.saveState();
   }
@@ -161,7 +161,7 @@ export class Television extends ExternalAccessory {
   async setRemoteKeyHelper(value: CharacteristicValue) {
     let RemoteKey: number = value as number;
     RemoteKey = this.updateRemoteKey(RemoteKey);
-    this.log.debug(`[${this.accessoryName}] Setting Remote Key: ${Television.getKeyName(RemoteKey)}`);
+    this.log.debug(`[${this.accessoryName}] Setting Remote Key: ${Television.getRemoteKeyName(RemoteKey)}`);
   }
 
   // SleepDiscoveryMode
@@ -190,60 +190,75 @@ export class Television extends ExternalAccessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly INACTIVE: number =                  CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =                    CharacteristicType.Active.ACTIVE;
+  // Lazy static getters
 
-  static readonly NOT_DISCOVERABLE: number =          CharacteristicType.SleepDiscoveryMode.NOT_DISCOVERABLE;
-  static readonly ALWAYS_DISCOVERABLE: number =       CharacteristicType.SleepDiscoveryMode.ALWAYS_DISCOVERABLE;
+  static get INACTIVE(): number             { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number               { return CharacteristicType.Active.ACTIVE; }
 
-  static readonly REWIND: number =                    CharacteristicType.RemoteKey.REWIND;
-  static readonly FAST_FORWARD: number =              CharacteristicType.RemoteKey.FAST_FORWARD;
-  static readonly NEXT_TRACK: number =                CharacteristicType.RemoteKey.NEXT_TRACK;
-  static readonly PREVIOUS_TRACK: number =            CharacteristicType.RemoteKey.PREVIOUS_TRACK;
-  static readonly ARROW_UP: number =                  CharacteristicType.RemoteKey.ARROW_UP;
-  static readonly ARROW_DOWN: number =                CharacteristicType.RemoteKey.ARROW_DOWN;
-  static readonly ARROW_LEFT: number =                CharacteristicType.RemoteKey.ARROW_LEFT;
-  static readonly ARROW_RIGHT: number =               CharacteristicType.RemoteKey.ARROW_RIGHT;
-  static readonly SELECT: number =                    CharacteristicType.RemoteKey.SELECT;
-  static readonly BACK: number =                      CharacteristicType.RemoteKey.BACK;
-  static readonly EXIT: number =                      CharacteristicType.RemoteKey.EXIT;
-  static readonly PLAY_PAUSE: number =                CharacteristicType.RemoteKey.PLAY_PAUSE;
-  static readonly INFORMATION: number =               CharacteristicType.RemoteKey.INFORMATION;
+  static get NOT_DISCOVERABLE(): number     { return CharacteristicType.SleepDiscoveryMode.NOT_DISCOVERABLE; }
+  static get ALWAYS_DISCOVERABLE(): number  { return CharacteristicType.SleepDiscoveryMode.ALWAYS_DISCOVERABLE; }
 
-  static getStateName(state: number): string {
-    let stateName: string;
+  static get REWIND(): number               { return CharacteristicType.RemoteKey.REWIND; }
+  static get FAST_FORWARD(): number         { return CharacteristicType.RemoteKey.FAST_FORWARD; }
+  static get NEXT_TRACK(): number           { return CharacteristicType.RemoteKey.NEXT_TRACK; }
+  static get PREVIOUS_TRACK(): number       { return CharacteristicType.RemoteKey.PREVIOUS_TRACK; }
+  static get ARROW_UP(): number             { return CharacteristicType.RemoteKey.ARROW_UP; }
+  static get ARROW_DOWN(): number           { return CharacteristicType.RemoteKey.ARROW_DOWN; }
+  static get ARROW_LEFT(): number           { return CharacteristicType.RemoteKey.ARROW_LEFT; }
+  static get ARROW_RIGHT(): number          { return CharacteristicType.RemoteKey.ARROW_RIGHT; }
+  static get SELECT(): number               { return CharacteristicType.RemoteKey.SELECT; }
+  static get BACK(): number                 { return CharacteristicType.RemoteKey.BACK; }
+  static get EXIT(): number                 { return CharacteristicType.RemoteKey.EXIT; }
+  static get PLAY_PAUSE(): number           { return CharacteristicType.RemoteKey.PLAY_PAUSE; }
+  static get INFORMATION(): number          { return CharacteristicType.RemoteKey.INFORMATION; }
+
+  static getActiveName(state: number): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Television.INACTIVE: { stateName = 'INACTIVE'; break; }
-    case Television.ACTIVE: { stateName = 'ACTIVE'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Television.INACTIVE: { name = 'INACTIVE'; break; }
+    case Television.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
   }
 
-  static getKeyName(state: number): string {
-    let stateName: string;
+  static getSleepDiscoveryModeName(state: number): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Television.REWIND: { stateName = 'REWIND'; break; }
-    case Television.FAST_FORWARD: { stateName = 'FAST FORWARD'; break; }
-    case Television.NEXT_TRACK: { stateName = 'NEXT TRACK'; break; }
-    case Television.PREVIOUS_TRACK: { stateName = 'PREVIOUS TRACK'; break; }
-    case Television.ARROW_UP: { stateName = 'ARROW UP'; break; }
-    case Television.ARROW_DOWN: { stateName = 'ARROW DOWN'; break; }
-    case Television.ARROW_LEFT: { stateName = 'ARROW LEFT'; break; }
-    case Television.ARROW_RIGHT: { stateName = 'ARROW RIGHT'; break; }
-    case Television.SELECT: { stateName = 'SELECT'; break; }
-    case Television.BACK: { stateName = 'BACK'; break; }
-    case Television.EXIT: { stateName = 'EXIT'; break; }
-    case Television.PLAY_PAUSE: { stateName = 'PLAY PAUSE'; break; }
-    case Television.INFORMATION: { stateName = 'INFORMATION'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Television.NOT_DISCOVERABLE: { name = 'NOT DISCOVERABLE'; break; }
+    case Television.ALWAYS_DISCOVERABLE: { name = 'ALWAYS DISCOVERABLE'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getRemoteKeyName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Television.REWIND: { name = 'REWIND'; break; }
+    case Television.FAST_FORWARD: { name = 'FAST FORWARD'; break; }
+    case Television.NEXT_TRACK: { name = 'NEXT TRACK'; break; }
+    case Television.PREVIOUS_TRACK: { name = 'PREVIOUS TRACK'; break; }
+    case Television.ARROW_UP: { name = 'ARROW UP'; break; }
+    case Television.ARROW_DOWN: { name = 'ARROW DOWN'; break; }
+    case Television.ARROW_LEFT: { name = 'ARROW LEFT'; break; }
+    case Television.ARROW_RIGHT: { name = 'ARROW RIGHT'; break; }
+    case Television.SELECT: { name = 'SELECT'; break; }
+    case Television.BACK: { name = 'BACK'; break; }
+    case Television.EXIT: { name = 'EXIT'; break; }
+    case Television.PLAY_PAUSE: { name = 'PLAY PAUSE'; break; }
+    case Television.INFORMATION: { name = 'INFORMATION'; break; }
+    default: { name = state.toString();}
+    }
+
+    return name;
   }
 }

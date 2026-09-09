@@ -97,7 +97,7 @@ export abstract class PositionAccessory extends Accessory {
     }
 
     const currentPosition = this.getCurrentPosition();
-    this.log.debug(`[${this.accessoryName}] Getting Current Position: ${PositionAccessory.getStateName(currentPosition)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current Position: ${PositionAccessory.getPositionName(currentPosition)}`);
 
     return currentPosition;
   }
@@ -106,7 +106,7 @@ export abstract class PositionAccessory extends Accessory {
 
   async getTargetPositionHandler(): Promise<CharacteristicValue> {
     const targetPosition: number = this.getCharacteristicValue(CharacteristicType.TargetPosition) as number;
-    this.log.debug(`[${this.accessoryName}] Getting Target Position: ${PositionAccessory.getStateName(targetPosition)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Target Position: ${PositionAccessory.getPositionName(targetPosition)}`);
 
     return targetPosition;
   }
@@ -114,12 +114,12 @@ export abstract class PositionAccessory extends Accessory {
   async setTargetPositionHandler(value: CharacteristicValue) {
     let TargetPosition: number = value as number;
     TargetPosition = this.updateTargetPosition(TargetPosition);
-    this.log.info(`[${this.accessoryName}] Setting Target Position: ${PositionAccessory.getStateName(TargetPosition)}`);
+    this.log.info(`[${this.accessoryName}] Setting Target Position: ${PositionAccessory.getPositionName(TargetPosition)}`);
 
     const CurrentPosition: number = this.getCurrentPosition();
     let PositionState: number = (TargetPosition > CurrentPosition) ? PositionAccessory.INCREASING : PositionAccessory.DECREASING;
     PositionState = this.updatePositionState(PositionState);
-    this.log.info(`[${this.accessoryName}] Setting Position State: ${PositionAccessory.getPositionName(PositionState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Position State: ${PositionAccessory.getPositionStateName(PositionState)}`);
 
     const transitionDuration = this.openableAccessoryConfiguration.transitionDuration;
     const transitionDelay: number = (transitionDuration ? transitionDuration : PositionAccessory.DEFAULT_TIMEOUT_SECS);
@@ -140,10 +140,10 @@ export abstract class PositionAccessory extends Accessory {
     this.transitionTimer.start(
       () => {
         const PositionState: number = this.updatePositionState(PositionAccessory.STOPPED);
-        this.log.info(`[${this.accessoryName}] Setting Position State: ${PositionAccessory.getPositionName(PositionState)}`);
+        this.log.info(`[${this.accessoryName}] Setting Position State: ${PositionAccessory.getPositionStateName(PositionState)}`);
 
         const CurrentPosition: number = this.updateCurrentPosition(this.getTargetPosition());
-        this.log.info(`[${this.accessoryName}] Setting Current Position: ${PositionAccessory.getStateName(CurrentPosition)}`);
+        this.log.info(`[${this.accessoryName}] Setting Current Position: ${PositionAccessory.getPositionName(CurrentPosition)}`);
 
         this.transitionSteps = 0;
 
@@ -158,7 +158,7 @@ export abstract class PositionAccessory extends Accessory {
 
   async getPositionStateHandler(): Promise<CharacteristicValue> {
     const positionState: number = this.getPositionState();
-    this.log.debug(`[${this.accessoryName}] Getting Position State: ${PositionAccessory.getPositionName(positionState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Position State: ${PositionAccessory.getPositionStateName(positionState)}`);
 
     return positionState;
   }
@@ -182,41 +182,43 @@ export abstract class PositionAccessory extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CLOSED: number = 0;   // 0%
-  static readonly OPEN: number = 100;   // 100%
+  // Lazy static getters
 
-  static readonly DECREASING: number =      CharacteristicType.PositionState.DECREASING;  // -> CLOSING
-  static readonly INCREASING: number =      CharacteristicType.PositionState.INCREASING;  // -> OPENING
-  static readonly STOPPED: number =         CharacteristicType.PositionState.STOPPED;     // -> OPEN or CLOSED
+  static get CLOSED(): number     { return 0; }   // 0%
+  static get OPEN(): number       { return 100; } // 100%
 
-  static getStateName(position: number): string {
-    let positionName: string;
+  static get DECREASING(): number { return CharacteristicType.PositionState.DECREASING; }  // -> CLOSING
+  static get INCREASING(): number { return CharacteristicType.PositionState.INCREASING; }  // -> OPENING
+  static get STOPPED(): number    { return CharacteristicType.PositionState.STOPPED; }     // -> OPEN or CLOSED
+
+  static getPositionName(position: number): string {
+    let name: string;
 
     switch (position) {
-    case undefined: { positionName = 'undefined'; break; }
-    case PositionAccessory.CLOSED: { positionName = 'CLOSED'; break; }
-    case PositionAccessory.OPEN: { positionName = 'OPEN'; break; }
-    default: { positionName = `POSITION: ${position.toString()}%`; }
+    case undefined: { name = 'undefined'; break; }
+    case PositionAccessory.CLOSED: { name = 'CLOSED'; break; }
+    case PositionAccessory.OPEN: { name = 'OPEN'; break; }
+    default: { name = `POSITION: ${position.toString()}%`; }
     }
 
     if (position > PositionAccessory.OPEN) {
-      positionName = `INVALID ${positionName}%`;
+      name = `INVALID ${name}%`;
     }
 
-    return positionName;
+    return name;
   }
 
-  static getPositionName(state: number): string {
-    let stateName: string;
+  static getPositionStateName(state: number): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case PositionAccessory.DECREASING: { stateName = 'DECREASING'; break; }
-    case PositionAccessory.INCREASING: { stateName = 'INCREASING'; break; }
-    case PositionAccessory.STOPPED: { stateName = 'STOPPED'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case PositionAccessory.DECREASING: { name = 'DECREASING'; break; }
+    case PositionAccessory.INCREASING: { name = 'INCREASING'; break; }
+    case PositionAccessory.STOPPED: { name = 'STOPPED'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
   }
 }

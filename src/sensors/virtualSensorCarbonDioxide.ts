@@ -34,6 +34,8 @@ export class CarbonDioxideSensor extends BinarySensor {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly CO2_LEVELS_NORMAL: number =         CharacteristicType.CarbonDioxideDetected.CO2_LEVELS_NORMAL;
-  static readonly CO2_LEVELS_ABNORMAL: number =       CharacteristicType.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL;
+  // Lazy static getters
+
+  static get CO2_LEVELS_NORMAL(): number    { return CharacteristicType.CarbonDioxideDetected.CO2_LEVELS_NORMAL; }
+  static get CO2_LEVELS_ABNORMAL(): number  { return CharacteristicType.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL; }
 }

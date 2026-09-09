@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
@@ -204,7 +202,7 @@ export class Lock extends Accessory {
       Lock.SECURED_REMOTELY :
       Lock.UNSECURED_REMOTELY;
     LockLastKnownAction = this.updateCharacteristicValue(CharacteristicType.LockLastKnownAction, LockLastKnownAction) as number;
-    this.log.info(`[${this.accessoryName}] Setting Lock Last Known Action: ${Lock.getStateName(LockLastKnownAction)}`);
+    this.log.info(`[${this.accessoryName}] Setting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
     this.saveState();
 
@@ -241,7 +239,7 @@ export class Lock extends Accessory {
 
   async getLockLastKnownAction(): Promise<CharacteristicValue> {
     const LockLastKnownAction: number = this.getCharacteristicValue(CharacteristicType.LockLastKnownAction) as number;
-    this.log.debug(`[${this.accessoryName}] Getting Lock Last Known Action: ${LockLastKnownAction}`);
+    this.log.debug(`[${this.accessoryName}] Getting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
     return LockLastKnownAction;
   }
@@ -491,27 +489,43 @@ export class Lock extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly UNSECURED: number =                       CharacteristicType.LockCurrentState.UNSECURED;
-  static readonly SECURED: number =                         CharacteristicType.LockCurrentState.SECURED;
-  static readonly JAMMED: number =                          CharacteristicType.LockCurrentState.JAMMED;
-  static readonly UNKNOWN: number =                         CharacteristicType.LockCurrentState.UNKNOWN;
+  // Lazy static getters
 
-  static readonly SECURED_REMOTELY: number =                CharacteristicType.LockLastKnownAction.SECURED_REMOTELY;
-  static readonly UNSECURED_REMOTELY: number =              CharacteristicType.LockLastKnownAction.UNSECURED_REMOTELY;
-  static readonly SECURED_BY_AUTO_SECURE_TIMEOUT: number =  CharacteristicType.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT;
+  static get UNSECURED(): number                      { return CharacteristicType.LockCurrentState.UNSECURED; }   // Lock.LockTargetState.UNSECURED
+  static get SECURED(): number                        { return CharacteristicType.LockCurrentState.SECURED; }     // Lock.LockTargetState.SECURED
+  static get JAMMED(): number                         { return CharacteristicType.LockCurrentState.JAMMED; }
+  static get UNKNOWN(): number                        { return CharacteristicType.LockCurrentState.UNKNOWN; }
+
+  static get SECURED_REMOTELY(): number               { return CharacteristicType.LockLastKnownAction.SECURED_REMOTELY; }
+  static get UNSECURED_REMOTELY(): number             { return CharacteristicType.LockLastKnownAction.UNSECURED_REMOTELY; }
+  static get SECURED_BY_AUTO_SECURE_TIMEOUT(): number { return CharacteristicType.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT; }
 
   static getStateName(state: number): string {
-    let stateName: string;
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Lock.UNSECURED: { stateName = 'UNSECURED'; break; }
-    case Lock.SECURED: { stateName = 'SECURED'; break; }
-    case Lock.JAMMED: { stateName = 'JAMMED'; break; }
-    case Lock.UNKNOWN: { stateName = 'UNKNOWN'; break; }
-    default: { stateName = state.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case Lock.UNSECURED: { name = 'UNSECURED'; break; }
+    case Lock.SECURED: { name = 'SECURED'; break; }
+    case Lock.JAMMED: { name = 'JAMMED'; break; }
+    case Lock.UNKNOWN: { name = 'UNKNOWN'; break; }
+    default: { name = state.toString(); }
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getLastKnownActionName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Lock.SECURED_REMOTELY: { name = 'SECURED REMOTELY'; break; }
+    case Lock.UNSECURED_REMOTELY: { name = 'UNSECURED REMOTELY'; break; }
+    case Lock.SECURED_BY_AUTO_SECURE_TIMEOUT: { name = 'SECURED BY AUTO SECURE TIMEOUT'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
   }
 }

@@ -93,7 +93,7 @@ export class SmartSpeaker extends ExternalAccessory {
 
   async getCurrentMediaStateHandler(): Promise<CharacteristicValue> {
     const CurrentMediaState: number = this.getCurrentMediaState();
-    this.log.debug(`[${this.accessoryName}] Getting Current Media State: ${SmartSpeaker.getStateName(CurrentMediaState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Current Media State: ${SmartSpeaker.getMediaStateName(CurrentMediaState)}`);
 
     return CurrentMediaState;
   }
@@ -103,7 +103,7 @@ export class SmartSpeaker extends ExternalAccessory {
   async getTargetMediaStateHandler(): Promise<CharacteristicValue> {
     const TargetMediaState = this.getTargetMediaState();
 
-    this.log.debug(`[${this.accessoryName}] Getting Target Media State: ${SmartSpeaker.getStateName(TargetMediaState)}`);
+    this.log.debug(`[${this.accessoryName}] Getting Target Media State: ${SmartSpeaker.getMediaStateName(TargetMediaState)}`);
 
     return TargetMediaState;
   }
@@ -111,7 +111,7 @@ export class SmartSpeaker extends ExternalAccessory {
   async setTargetMediaStateHandler(value: CharacteristicValue) {
     let TargetMediaState: number = value as number;
     TargetMediaState = this.updateTargetMediaState(TargetMediaState);
-    this.log.info(`[${this.accessoryName}] Setting Target Media State: ${SmartSpeaker.getStateName(TargetMediaState)}`);
+    this.log.info(`[${this.accessoryName}] Setting Target Media State: ${SmartSpeaker.getMediaStateName(TargetMediaState)}`);
 
     const CurrentMediaState: number = TargetMediaState;
     this.updateCurrentMediaState(CurrentMediaState);
@@ -141,7 +141,7 @@ export class SmartSpeaker extends ExternalAccessory {
 
   async getVolumeHandler(): Promise<CharacteristicValue> {
     const Volume: number = this.getVolume();
-    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}%`);
 
     return Volume;
   }
@@ -149,14 +149,14 @@ export class SmartSpeaker extends ExternalAccessory {
   async setVolumeHandler(value: CharacteristicValue) {
     let Volume: number = value as number;
     Volume = this.updateVolume(Volume);
-    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}%`);
   }
 
   // Mute
 
   async getMuteHandler(): Promise<CharacteristicValue> {
     const Mute: boolean = this.getMute();
-    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${SmartSpeaker.getMuteName(Mute)}`);
 
     return Mute;
   }
@@ -164,7 +164,7 @@ export class SmartSpeaker extends ExternalAccessory {
   async setMuteHandler(value: CharacteristicValue) {
     let Mute: boolean = value as boolean;
     Mute = this.updateMute(Mute);
-    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${SmartSpeaker.getMuteName(Mute)}`);
   }
 
   // Abstract methods impl
@@ -185,28 +185,43 @@ export class SmartSpeaker extends ExternalAccessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly PLAY: number =                CharacteristicType.CurrentMediaState.PLAY;    // Characteristic.TargetMediaState.PLAY
-  static readonly PAUSE: number =               CharacteristicType.CurrentMediaState.PAUSE;   // Characteristic.TargetMediaState.PAUSE;
-  static readonly STOP: number =                CharacteristicType.CurrentMediaState.STOP;    // Characteristic.TargetMediaState.STOP;
-  static readonly LOADING: number =             CharacteristicType.CurrentMediaState.LOADING;
-  static readonly INTERRUPTED: number =         CharacteristicType.CurrentMediaState.INTERRUPTED;
+  // Lazy static getters
 
-  static readonly MUTED: boolean = true;        // CharacteristicType.Mute
-  static readonly UNMUTED: boolean = false;     // CharacteristicType.Mute
+  static get PLAY(): number         { return CharacteristicType.CurrentMediaState.PLAY; }   // Characteristic.TargetMediaState.PLAY
+  static get PAUSE(): number        { return CharacteristicType.CurrentMediaState.PAUSE; }  // Characteristic.TargetMediaState.PAUSE;
+  static get STOP(): number         { return CharacteristicType.CurrentMediaState.STOP; }   // Characteristic.TargetMediaState.STOP;
+  static get LOADING(): number      { return CharacteristicType.CurrentMediaState.LOADING; }
+  static get INTERRUPTED(): number  { return CharacteristicType.CurrentMediaState.INTERRUPTED; }
 
-  static getStateName(state: number): string {
-    let stateName: string;
+  static get MUTED(): boolean       { return true; }    // CharacteristicType.Mute
+  static get UNMUTED(): boolean     { return false; }   // CharacteristicType.Mute
 
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case SmartSpeaker.PLAY: { stateName = 'PLAY'; break; }
-    case SmartSpeaker.PAUSE: { stateName = 'PAUSE'; break; }
-    case SmartSpeaker.STOP: { stateName = 'STOP'; break; }
-    case SmartSpeaker.LOADING: { stateName = 'LOADING'; break; }
-    case SmartSpeaker.INTERRUPTED: { stateName = 'INTERRUPTED'; break; }
-    default: { stateName = state.toString();}
+  static getMuteName(event: boolean): string {
+    let name: string;
+
+    switch (event) {
+    case undefined: { name = 'undefined'; break; }
+    case SmartSpeaker.MUTED: { name = 'MUTED'; break; }
+    case SmartSpeaker.UNMUTED: { name = 'UNMUTED'; break; }
+    default: { name = event.toString(); }
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getMediaStateName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case SmartSpeaker.PLAY: { name = 'PLAY'; break; }
+    case SmartSpeaker.PAUSE: { name = 'PAUSE'; break; }
+    case SmartSpeaker.STOP: { name = 'STOP'; break; }
+    case SmartSpeaker.LOADING: { name = 'LOADING'; break; }
+    case SmartSpeaker.INTERRUPTED: { name = 'INTERRUPTED'; break; }
+    default: { name = state.toString();}
+    }
+
+    return name;
   }
 }

@@ -74,7 +74,7 @@ export class Speaker extends ExternalAccessory {
 
   async getActiveHandler(): Promise<CharacteristicValue> {
     const Active: number = this.getActive();
-    this.log.debug(`[${this.accessoryName}] Getting State: ${Speaker.getStateName(Active)}`);
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Speaker.getActiveName(Active)}`);
 
     return Active;
   }
@@ -82,7 +82,7 @@ export class Speaker extends ExternalAccessory {
   async setActiveHandler(value: CharacteristicValue) {
     let Active: number = value as number;
     Active = this.updateActive(Active);
-    this.log.info(`[${this.accessoryName}] Setting State: ${Speaker.getStateName(Active)}`);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Speaker.getActiveName(Active)}`);
 
     this.saveState();
   }
@@ -91,7 +91,7 @@ export class Speaker extends ExternalAccessory {
 
   async getVolumeHandler(): Promise<CharacteristicValue> {
     const Volume: number = this.getVolume();
-    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}`);
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}%`);
 
     return Volume;
   }
@@ -99,14 +99,14 @@ export class Speaker extends ExternalAccessory {
   async setVolumeHandler(value: CharacteristicValue) {
     let Volume: number = value as number;
     Volume = this.updateVolume(Volume);
-    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}`);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}%`);
   }
 
   // Mute
 
   async getMuteHandler(): Promise<CharacteristicValue> {
     const Mute: boolean = this.getMute();
-    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Mute}`);
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Speaker.getMuteName(Mute)}`);
 
     return Mute;
   }
@@ -114,7 +114,7 @@ export class Speaker extends ExternalAccessory {
   async setMuteHandler(value: CharacteristicValue) {
     let Mute: boolean = value as boolean;
     Mute = this.updateMute(Mute);
-    this.log.info(`[${this.accessoryName}] Setting Mute: ${Mute}`);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Speaker.getMuteName(Mute)}`);
   }
 
   // Abstract methods impl
@@ -134,22 +134,37 @@ export class Speaker extends ExternalAccessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly INACTIVE: number =            CharacteristicType.Active.INACTIVE;
-  static readonly ACTIVE: number =              CharacteristicType.Active.ACTIVE;
+  // Lazy static getters
 
-  static readonly MUTED: boolean = true;        // CharacteristicType.Mute
-  static readonly UNMUTED: boolean = false;     // CharacteristicType.Mute
+  static get INACTIVE(): number { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number   { return CharacteristicType.Active.ACTIVE; }
 
-  static getStateName(state: number): string {
-    let stateName: string;
+  static get MUTED(): boolean   { return true; }  // CharacteristicType.Mute
+  static get UNMUTED(): boolean { return false; } // CharacteristicType.Mute
+
+  static getActiveName(state: number): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Speaker.INACTIVE: { stateName = 'INACTIVE'; break; }
-    case Speaker.ACTIVE: { stateName = 'ACTIVE'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Speaker.INACTIVE: { name = 'INACTIVE'; break; }
+    case Speaker.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
+  }
+
+  static getMuteName(event: boolean): string {
+    let name: string;
+
+    switch (event) {
+    case undefined: { name = 'undefined'; break; }
+    case Speaker.MUTED: { name = 'MUTED'; break; }
+    case Speaker.UNMUTED: { name = 'UNMUTED'; break; }
+    default: { name = event.toString(); }
+    }
+
+    return name;
   }
 }

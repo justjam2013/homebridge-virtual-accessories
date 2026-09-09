@@ -262,20 +262,20 @@ export class CharacteristicUtils {
 
   // IsConfigured
 
-  getIsConfigured(): boolean {
-    return this.getCharacteristicValue(CharacteristicType.IsConfigured) as boolean;
+  getIsConfigured(): number {
+    return this.getCharacteristicValue(CharacteristicType.IsConfigured) as number;
   }
 
   setIsConfigured(
-    value: boolean,
-  ): boolean {
-    return this.setCharacteristicValue(CharacteristicType.IsConfigured, value) as boolean;
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.IsConfigured, value) as number;
   }
 
   updateIsConfigured(
-    value: boolean,
-  ): boolean {
-    return this.updateCharacteristicValue(CharacteristicType.IsConfigured, value) as boolean;
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.IsConfigured, value) as number;
   }
 
   // Mute

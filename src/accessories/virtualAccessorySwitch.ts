@@ -113,7 +113,7 @@ export class Switch extends Accessory {
 
   async getOnHandler(): Promise<CharacteristicValue> {
     const On: boolean = this.getOn();
-    this.log.debug(`[${this.accessoryName}] Getting State: ${Switch.getStateName(On)}`);
+    this.log.debug(`[${this.accessoryName}] Getting State: ${Switch.getOnName(On)}`);
 
     return On;
   }
@@ -121,7 +121,7 @@ export class Switch extends Accessory {
   async setOnHandler(value: CharacteristicValue) {
     let On: boolean = value as boolean;
     On = this.updateOn(On);
-    this.log.info(`[${this.accessoryName}] Setting State: ${Switch.getStateName(On)}`, this.muteLogging);
+    this.log.info(`[${this.accessoryName}] Setting State: ${Switch.getOnName(On)}`, this.muteLogging);
 
     if (this.accessoryConfiguration.switch.hasResetTimer) {
       // switch is reset: turn off timer
@@ -238,19 +238,21 @@ export class Switch extends Accessory {
   // ****************************** Characteristics ******************************
   //
 
-  static readonly ON: boolean = true;
-  static readonly OFF: boolean = false;
+  // Lazy static getters
 
-  static getStateName(state: boolean): string {
-    let stateName: string;
+  static get ON(): boolean   { return true; }
+  static get OFF(): boolean { return false; }
+
+  static getOnName(state: boolean): string {
+    let name: string;
 
     switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Switch.ON: { stateName = 'ON'; break; }
-    case Switch.OFF: { stateName = 'OFF'; break; }
-    default: { stateName = state.toString();}
+    case undefined: { name = 'undefined'; break; }
+    case Switch.ON: { name = 'ON'; break; }
+    case Switch.OFF: { name = 'OFF'; break; }
+    default: { name = state.toString();}
     }
 
-    return stateName;
+    return name;
   }
 }
