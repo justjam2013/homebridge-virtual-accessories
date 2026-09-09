@@ -84,7 +84,8 @@ export class SunEventsTrigger extends Trigger {
           if (response !== undefined) {
             if (response.status !== SunEventsResponse.OK) {
               this.log.error(`[${this.accessoryName}] Sunrise/sunset server returned error response: ${response.status}`);
-            } else {
+            }
+            else {
               await this.setupTriggerCron(triggerConfig.event, triggerConfig.offset, response.results, sensor);
             }
           }
@@ -121,7 +122,8 @@ export class SunEventsTrigger extends Trigger {
     do {
       try {
         dataFetchResponse = await fetch(request);
-      } catch (error) {
+      }
+      catch (error) {
         this.log.error(`[${this.accessoryName}] Failed getting sunrise/sunset data: ${JSON.stringify(error)}`);
       }
 
@@ -134,7 +136,8 @@ export class SunEventsTrigger extends Trigger {
         if (attempts === maxAttempts) {
           gaveUp = true;
           this.log.error(`[${this.accessoryName}] ${baseErrorMsg} Giving up`);
-        } else {
+        }
+        else {
           const backoffMinutes: number = (attempts * waitMinutes);
           this.log.error(`[${this.accessoryName}] ${baseErrorMsg} Waiting ${backoffMinutes} minutes until next attempt`);
           await Utils.delay(backoffMinutes * 60 * 1000, this.accessoryName, this.log);
@@ -159,7 +162,8 @@ export class SunEventsTrigger extends Trigger {
 
     try {
       response = deserialize(dataResponse, SunEventsResponse);
-    } catch (error) {
+    }
+    catch (error) {
       this.log.error(`[${this.accessoryName}] Error deserializing response data: ${JSON.stringify(error)}`);
       this.log.debug(`[${this.accessoryName}] Response data: ${response}`);
     }

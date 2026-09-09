@@ -166,7 +166,8 @@ export class IkeaMatterStockTrigger extends Trigger {
       let htmlFetchResponse: globalThis.Response | undefined;
       try {
         htmlFetchResponse = await fetch(request);
-      } catch (error) {
+      }
+      catch (error) {
         errorMessages.push( `Failed retrieving Ikea matter stock data: ${JSON.stringify(error)}`);
         continue;
       }

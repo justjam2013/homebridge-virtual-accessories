@@ -52,8 +52,6 @@ export class CronTrigger extends Trigger {
     if (cronEnd && Utils.now().isAfter(cronEnd)) {
       this.log.info(`[${this.accessoryName}] After cron end: '${triggerConfig.endDateTime}'. Not setting up cron job`);
       return;
-
-      // eslint-disable-next-line brace-style
     }
     else if (cronStart && (Utils.now().isEqual(cronStart) || Utils.now().isBefore(cronStart))) {
       this.log.info(`[${this.accessoryName}] Before cron start: '${triggerConfig.startDateTime}'. Waiting for start time`);

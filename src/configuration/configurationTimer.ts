@@ -82,9 +82,10 @@ export class TimerConfiguration implements Validatable {
         this.errorFields.push(prefix + '.' + errorField);
       });
     }
-    if (!isValidDurationRandomRange) {this.errorFields.push(
-      prefix + '.' + this.fieldNames.durationRandomMin,
-      prefix + '.' + this.fieldNames.durationRandomMax);
+    if (!isValidDurationRandomRange) {
+      this.errorFields.push(
+        prefix + '.' + this.fieldNames.durationRandomMin,
+        prefix + '.' + this.fieldNames.durationRandomMax);
     }
 
     return [

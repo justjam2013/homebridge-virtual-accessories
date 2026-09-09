@@ -115,7 +115,8 @@ export abstract class Accessory extends CharacteristicUtils {
       );
 
       this.log.debug(`[${this.accessoryName}] Saved state: ${stateJson}`);
-    } catch (error) {
+    }
+    catch (error) {
       this.log.error(`[${this.accessoryName}] Error saving state: ${error}`);
     }
   }
@@ -127,7 +128,8 @@ export abstract class Accessory extends CharacteristicUtils {
     if (fs.existsSync(storagePath)) {
       try {
         fs.unlinkSync(storagePath); 
-      } catch (err) {
+      }
+      catch (err) {
         this.log.error(`[${this.accessoryName}] Error deleting state file ${storagePath}`);
       }
     }

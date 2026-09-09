@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';

@@ -1,3 +1,5 @@
+/* eslint-disable brace-style */
+
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';
@@ -394,7 +396,8 @@ export class WebhookServer {
         this.log.error(`[${this.serverName}] ${errorMsg}`);
         response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
       }
-    } else {
+    }
+    else {
       const errorMsg: string = `No accessory found  with id '${accessoryId}' and able to respond to request '${route}'`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.NotFound).send(`${errorMsg}`);

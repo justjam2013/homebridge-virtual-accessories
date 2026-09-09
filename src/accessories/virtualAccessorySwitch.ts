@@ -127,7 +127,8 @@ export class Switch extends Accessory {
       // switch is reset: turn off timer
       if (On === this.defaultState) {
         this.resetTimer!.stop();
-      } else {
+      }
+      else {
         this.resetTimer!.start(
           this.onTimerExpired.bind(this),
         );
@@ -172,7 +173,8 @@ export class Switch extends Accessory {
     const On: boolean = this.getOn();
     if (this.defaultState === Switch.OFF) {
       sensorState = (On === Switch.OFF) ? BinarySensor.NORMAL : BinarySensor.TRIGGERED;
-    } else {
+    }
+    else {
       sensorState = (On === Switch.ON) ? BinarySensor.NORMAL : BinarySensor.TRIGGERED;
     }
 
@@ -219,7 +221,8 @@ export class Switch extends Accessory {
 
     if (remainingTimerDuration === 1) {
       this.log.debug(`[${this.accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
-    } else {
+    }
+    else {
       this.log.debug(`[${this.accessoryName}] Setting Timer for remaining duration (${remainingTimerDuration} seconds)`);
     }
 
