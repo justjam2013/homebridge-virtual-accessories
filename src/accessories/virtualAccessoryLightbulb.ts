@@ -17,7 +17,7 @@ export class Lightbulb extends Accessory {
 
   private readonly stateStorageKey: string = 'LightbulbState';
   private readonly brightnessStorageKey: string = 'LightbulbBrightness';
-  private readonly colorTemperatureMiredStorageKey: string = 'LightbulbColorTemperature';
+  private readonly colorTemperatureStorageKey: string = 'LightbulbColorTemperatureMired';
   private readonly hueStorageKey: string = 'LightbulbHue';
   private readonly saturationStorageKey: string = 'LightbulbSaturation';
 
@@ -73,7 +73,7 @@ export class Lightbulb extends Accessory {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
       const cachedBrightness: number = accessoryState[this.brightnessStorageKey] as number;
-      const cachedColorTemperature: number = accessoryState[this.colorTemperatureMiredStorageKey] as number;
+      const cachedColorTemperature: number = accessoryState[this.colorTemperatureStorageKey] as number;
       const cachedHue: number = accessoryState[this.hueStorageKey] as number;
       const cachedSaturation: number = accessoryState[this.saturationStorageKey] as number;
 
@@ -277,7 +277,7 @@ export class Lightbulb extends Accessory {
     };
 
     if (this.type === Lightbulb.AMBIANCE) {
-      Object.assign(jsonState, { [this.colorTemperatureMiredStorageKey]: this.getColorTemperature() });
+      Object.assign(jsonState, { [this.colorTemperatureStorageKey]: this.getColorTemperature() });
     }
 
     if (this.type === Lightbulb.COLOR) {
