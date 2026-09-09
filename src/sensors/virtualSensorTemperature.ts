@@ -12,7 +12,9 @@ import { TemperatureUnit } from '../configuration/schema.js';
  */
 export class TemperatureSensor extends MeasurementSensor {
 
-  static readonly DEFAULT_TEMPERATURE_CELSIUS = 20;
+  static readonly DEFAULT_TEMPERATURE_CELSIUS: number = 20;
+
+  private platformSettingsURL: string = 'http://localhost:8581/api/auth/settings';
 
   constructor(
     platform: VirtualAccessoriesPlatform,
@@ -45,6 +47,31 @@ export class TemperatureSensor extends MeasurementSensor {
     return Math.round(temperatureCelsius * 10) / 10;
   }
 
+  private async getPlatformTemperatureUnits(): Promise<string> {
+    let sensorUnits: string = TemperatureUnit.Celsius;
+
+    try {
+      const response = await fetch(this.platformSettingsURL);
+
+      if (response.ok) {
+        const jsonString: string = await response.text();
+        const hbSettings: SettingsResponse = JSON.parse(jsonString);
+
+        const temperatureUnits: string | undefined =  (hbSettings.environment.temperatureUnits ?? hbSettings.temperatureUnits ?? 'c').toUpperCase();
+        sensorUnits = (temperatureUnits === 'F') ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
+      }
+      else {
+        this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(response.status)}`);
+      }
+    }
+    catch (error) {
+      this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(error)}`);
+      this.log.error(`[${this.accessoryName}] Defaulting to Celsius (ºC)`);
+    }
+
+    return sensorUnits;
+  }
+
   // Updatable Sensor interface
 
   updateMeasurementSensor(value: number, accessoryId: string): void {
@@ -67,4 +94,13 @@ export class TemperatureSensor extends MeasurementSensor {
       this.service.setCharacteristic(this.MeasurementCharacteristic, (SensorValue));
     }
   }
+}
+
+interface SettingsResponse {
+  environment: EnvironmentResponse;
+  temperatureUnits?: string;
+}
+
+interface EnvironmentResponse {
+  temperatureUnits?: string;
 }
