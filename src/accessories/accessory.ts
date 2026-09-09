@@ -69,8 +69,9 @@ export abstract class Accessory extends CharacteristicUtils {
     // Set accessory service info
     if (createService) {
       this.service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType as unknown as Service);
+
+      this.updateName(this.accessoryName);
     }
-    this.updateName(this.accessoryName);
   }
 
   isExternalAccessory(): boolean {

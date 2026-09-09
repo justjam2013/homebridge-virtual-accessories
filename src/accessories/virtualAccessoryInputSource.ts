@@ -34,7 +34,7 @@ export class InputSource extends Accessory {
       this.accessory.getService(ConfiguredName) ||
       this.accessory.addService(ServiceType.InputSource, ConfiguredName, accessory.UUID + ConfiguredName);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, ConfiguredName);
+    this.updateName(ConfiguredName);
 
     // Update the initial state of the accessory
     this.setConfiguredName(ConfiguredName);
