@@ -119,7 +119,7 @@ export class CharacteristicUtils {
   // ConfiguredName
 
   getConfiguredName(): string {
-    return this.getCharacteristicValue(CharacteristicType.ColorTemperature) as string;
+    return this.getCharacteristicValue(CharacteristicType.ConfiguredName) as string;
   }
 
   setConfiguredName(
