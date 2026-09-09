@@ -35,7 +35,7 @@ export class Lightbulb extends Accessory {
 
     let On: boolean = Lightbulb.OFF;
     let Brightness: number = 0;
-    let ColorTemperature: number = 2700;  // Kelvin
+    let ColorTemperature: number = this.kelvinToMired(2700);  // Kelvin
     let Hue: number = 0;
     let Saturation: number = 0;
 
@@ -59,7 +59,7 @@ export class Lightbulb extends Accessory {
     }
     else if (this.type === Lightbulb.AMBIANCE) {
       Brightness = brightness;
-      ColorTemperature = colorTemperatureKelvin;
+      ColorTemperature = this.kelvinToMired(colorTemperatureKelvin);
     }
     else if (this.type === Lightbulb.COLOR) {
       const hsl: ColorHSL = Colors.HexToHSL(colorHex)!;
@@ -219,17 +219,17 @@ export class Lightbulb extends Accessory {
 
   async getColorTemperatureHandler(): Promise<CharacteristicValue> {
     const ColorTemperature: number = this.getColorTemperature();
-    const miredValue: number = this.kelvinToMired(ColorTemperature);
-    this.log.debug(`[${this.accessoryName}] Getting Color Temperature: ${ColorTemperature}K (${miredValue} Mired)`);
+    const colorTemperatureKelvin: number = this.miredToKelvin(ColorTemperature);
+    this.log.debug(`[${this.accessoryName}] Getting Color Temperature: ${colorTemperatureKelvin}K (${ColorTemperature} Mired)`);
 
-    return miredValue;
+    return ColorTemperature;
   }
 
   async setColorTemperatureHandler(value: CharacteristicValue) {
-    const miredValue: number = value as number;
-    let ColorTemperature: number = this.miredToKelvin(miredValue as number);
+    let ColorTemperature: number = value as number;
+    const colorTemperatureKelvin: number = this.miredToKelvin(ColorTemperature as number);
     ColorTemperature = this.updateColorTemperature(ColorTemperature);
-    this.log.debug(`[${this.accessoryName}] Setting Color Temperature: ${ColorTemperature}K (${miredValue} Mired)`);
+    this.log.debug(`[${this.accessoryName}] Setting Color Temperature: ${colorTemperatureKelvin}K (${ColorTemperature} Mired)`);
 
     this.saveState();
   }

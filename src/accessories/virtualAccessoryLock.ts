@@ -1,4 +1,4 @@
-import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { Units, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -11,6 +11,9 @@ import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRe
  * Lock - Accessory implementation
  */
 export class Lock extends Accessory {
+
+  private lockManagementService: Service;
+  private nfcAccessService!: Service;
 
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
@@ -122,20 +125,20 @@ export class Lock extends Accessory {
 
     // Creating Lock Management service
     const lockManagementServiceName = `${this.accessoryName} Management`;
-    const lockManagementService =
+    this.lockManagementService =
       this.accessory.getService(lockManagementServiceName) ||
       this.accessory.addService(ServiceType.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
 
-    this.setCharacteristicValue(CharacteristicType.LockManagementAutoSecurityTimeout, LockManagementAutoSecurityTimeout);
-    this.setCharacteristicValue(CharacteristicType.LockLastKnownAction, LockLastKnownAction);
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout, LockManagementAutoSecurityTimeout);
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockLastKnownAction, LockLastKnownAction);
 
     // Last register handlers
 
-    lockManagementService.getCharacteristic(CharacteristicType.LockControlPoint)
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockControlPoint)
       .onSet(this.setLockControlPoint.bind(this));
-    lockManagementService.getCharacteristic(CharacteristicType.Version)
+    this.lockManagementService.getCharacteristic(CharacteristicType.Version)
       .onGet(this.getVersion.bind(this));
-    lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout)
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout)
       .onSet(this.setLockManagementAutoSecurityTimeout.bind(this))
       .onGet(this.getLockManagementAutoSecurityTimeout.bind(this))
       .setProps({
@@ -144,26 +147,26 @@ export class Lock extends Accessory {
         minStep: 1,
         unit: Units.SECONDS,
       });
-    lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction)
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
 
     // Creating Nfc Access service
     if (this.setupHomeKey) {
       const nfcAccessServiceName = `${this.accessoryName} Nfc Access`;
-      const nfcAccessService =
+      this.nfcAccessService =
         this.accessory.getService(nfcAccessServiceName) ||
         this.accessory.addService(ServiceType.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
 
-      this.setCharacteristicValue(CharacteristicType.NFCAccessSupportedConfiguration, NFCAccessSupportedConfiguration);
+      this.nfcAccessService.setCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration, NFCAccessSupportedConfiguration);
 
       // Last register handlers
 
-      nfcAccessService.getCharacteristic(CharacteristicType.ConfigurationState)
+      this.nfcAccessService.getCharacteristic(CharacteristicType.ConfigurationState)
         .onGet(this.getConfigurationState.bind(this));
-      nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessControlPoint)
+      this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessControlPoint)
         .onSet(this.setNFCAccessControlPoint.bind(this))
         .onGet(this.getNFCAccessControlPoint.bind(this));
-      nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration)
+      this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration)
         .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
     }
   }
@@ -225,7 +228,7 @@ export class Lock extends Accessory {
   }
 
   async getLockManagementAutoSecurityTimeout(): Promise<CharacteristicValue> {
-    const LockAutoSecurityTimeout: number = this.getCharacteristicValue(CharacteristicType.LockManagementAutoSecurityTimeout) as number;
+    const LockAutoSecurityTimeout: number = this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
     this.log.debug(`[${this.accessoryName}] Getting Lock Management Auto Security Timeout: ${LockAutoSecurityTimeout}`);
 
     return LockAutoSecurityTimeout;
@@ -233,12 +236,13 @@ export class Lock extends Accessory {
 
   async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
     let LockAutoSecurityTimeout: number = value as number;
-    LockAutoSecurityTimeout = this.updateCharacteristicValue(CharacteristicType.LockManagementAutoSecurityTimeout, LockAutoSecurityTimeout) as number;
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout, LockAutoSecurityTimeout);
+    LockAutoSecurityTimeout = this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
     this.log.info(`[${this.accessoryName}] Setting Lock Management Auto Security Timeout: ${LockAutoSecurityTimeout}`);
   }
 
   async getLockLastKnownAction(): Promise<CharacteristicValue> {
-    const LockLastKnownAction: number = this.getCharacteristicValue(CharacteristicType.LockLastKnownAction) as number;
+    const LockLastKnownAction: number = this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number;
     this.log.debug(`[${this.accessoryName}] Getting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
     return LockLastKnownAction;
@@ -283,7 +287,7 @@ export class Lock extends Accessory {
   }
 
   async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
-    const NFCAccessSupportedConfiguration: string = this.getCharacteristicValue(CharacteristicType.NFCAccessSupportedConfiguration) as string;
+    const NFCAccessSupportedConfiguration: string = this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration).value as string;
     this.log.debug(`[${this.accessoryName}] Getting NFC Access Supported Configuration: ${NFCAccessSupportedConfiguration}`);
 
     return NFCAccessSupportedConfiguration;
