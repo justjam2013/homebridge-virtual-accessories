@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../../errors.js';
 import { BinarySensor } from '../binarySensor.js';
 import { TriggerableSensor } from '../triggerableSensor.js';

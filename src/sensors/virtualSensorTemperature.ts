@@ -1,4 +1,3 @@
-/* eslint-disable brace-style */
 import type { PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';

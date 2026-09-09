@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { Server } from 'http';
 import { Accessory } from './accessories/accessory.js';
 import { SecurityServiceTriggerType } from './accessories/virtualAccessorySecuritySystem.js';

@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { BinarySensor } from '../binarySensor.js';
 import { IkeaMatterStockTriggerConfiguration } from '../../configuration/triggers/configurationIkeaMatterStockTrigger.js';
 import { Trigger } from './trigger.js';

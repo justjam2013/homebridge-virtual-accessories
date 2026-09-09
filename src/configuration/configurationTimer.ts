@@ -1,6 +1,4 @@
  
-/* eslint-disable brace-style */
-
 import { Validatable } from './validatable.js';
 import { DurationConfiguration } from './configurationDuration.js';
 

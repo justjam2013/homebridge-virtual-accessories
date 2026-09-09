@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { PingTriggerConfiguration } from '../../configuration/triggers/configurationPingTrigger.js';
 import { Trigger } from './trigger.js';
 import { BinarySensor } from '../binarySensor.js';
