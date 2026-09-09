@@ -11,53 +11,52 @@ import { UpdatableMeasurementSensor } from './updatableSensor.js';
  */
 export abstract class MeasurementSensor extends Accessory implements UpdatableMeasurementSensor {
 
-  protected valueMeasured: WithUUID<{ new (): Characteristic; }>;
-  
-  protected states = {
-    SensorValue: 0,
-    SensorUnits: '',
-  };
+  protected MeasurementCharacteristic: WithUUID<{ new (): Characteristic; }>;
 
+  protected SensorUnits: string = '';
+  
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
+    measurementCharacteristic: WithUUID<{ new (): Characteristic; }>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
+
+    let SensorValue: number = 0;
+
+    this.MeasurementCharacteristic = measurementCharacteristic;
 
     // First configure the device based on the accessory details
-    this.states.SensorValue = this.getDefaultValue();
-    this.states.SensorUnits = this.accessoryConfiguration.measurement.units;
-
-    this.valueMeasured = this.getMeasurementCharacteristic();
-
-    const sensorService: WithUUID<typeof Service> = this.getService();
-    this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService as unknown as Service);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    SensorValue = this.getDefaultValue(); 
+    this.SensorUnits = this.accessoryConfiguration.measurement.units;
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current Value: ${this.states.SensorValue}`);
-    this.service.updateCharacteristic(this.valueMeasured, (this.states.SensorValue));
+    this.log.debug(`[${this.accessoryName}] Setting Sensor Current Value: ${SensorValue}`);
+    this.service.setCharacteristic(this.MeasurementCharacteristic, (SensorValue));
 
-    // register handlers
+    // Last register handlers
 
-    this.service.getCharacteristic(this.valueMeasured)
-      .onGet(this.getValueMeasured.bind(this));
+    this.service.getCharacteristic(this.MeasurementCharacteristic)
+      .onGet(this.getMeasurementHandler.bind(this));
   }
 
-  protected abstract getService(): WithUUID<typeof Service>;
+  getSensorValue(): number {
+    return this.getCharacteristicValue(this.MeasurementCharacteristic) as number;
+  }
 
-  protected abstract getMeasurementCharacteristic(): WithUUID<{ new (): Characteristic; }>;
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  // Handlers
+  // Measurement
 
-  async getValueMeasured(): Promise<CharacteristicValue> {
-    const sensorValue = this.states.SensorValue;
+  async getMeasurementHandler(): Promise<CharacteristicValue> {
+    const SensorValue: number = this.getSensorValue();
+    this.log.debug(`[${this.accessoryName}] Getting Sensor Current Value: ${SensorValue}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${sensorValue}`);
-
-    return sensorValue;
+    return SensorValue;
   }
 
   protected abstract getDefaultValue(): number;

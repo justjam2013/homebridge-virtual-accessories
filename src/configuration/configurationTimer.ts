@@ -1,6 +1,4 @@
  
-/* eslint-disable brace-style */
-
 import { Validatable } from './validatable.js';
 import { DurationConfiguration } from './configurationDuration.js';
 
@@ -84,9 +82,10 @@ export class TimerConfiguration implements Validatable {
         this.errorFields.push(prefix + '.' + errorField);
       });
     }
-    if (!isValidDurationRandomRange) {this.errorFields.push(
-      prefix + '.' + this.fieldNames.durationRandomMin,
-      prefix + '.' + this.fieldNames.durationRandomMax);
+    if (!isValidDurationRandomRange) {
+      this.errorFields.push(
+        prefix + '.' + this.fieldNames.durationRandomMin,
+        prefix + '.' + this.fieldNames.durationRandomMax);
     }
 
     return [

@@ -220,7 +220,8 @@ export class Utils {
 
     if (timeRemaining === 1) {
       log.debug(`[${accessoryName}] Timer expired. Setting timer to 1 second to trigger switch off`);
-    } else {
+    }
+    else {
       log.debug(`[${accessoryName}] Setting Timer for remaining time of (${timeRemaining} seconds)`);
     }
 

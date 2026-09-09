@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -9,183 +9,202 @@ import { Accessory } from './accessory.js';
  */
 export class InputSource extends Accessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'InputSource';
-
-  static readonly OTHER = 0;              // Characteristic.InputSourceType.OTHER
-  static readonly HOME_SCREEN = 1;        // Characteristic.InputSourceType.HOME_SCREEN
-  static readonly TUNER = 2;              // Characteristic.InputSourceType.TUNER
-  static readonly HDMI = 3;               // Characteristic.InputSourceType.HDMI
-  static readonly COMPOSITE_VIDEO = 4;    // Characteristic.InputSourceType.COMPOSITE_VIDEO
-  static readonly S_VIDEO = 5;            // Characteristic.InputSourceType.S_VIDEO
-  static readonly COMPONENT_VIDEO = 6;    // Characteristic.InputSourceType.COMPONENT_VIDEO
-  static readonly DVI = 7;                // Characteristic.InputSourceType.DVI
-  static readonly AIRPLAY = 8;            // Characteristic.InputSourceType.AIRPLAY
-  static readonly USB = 9;                // Characteristic.InputSourceType.USB
-  static readonly APPLICATION = 10;       // Characteristic.InputSourceType.APPLICATION
-  
-  static readonly NOT_CONFIGURED = 0;     // Characteristic.IsConfigured.NOT_CONFIGURED
-  static readonly CONFIGURED = 1;         // Characteristic.IsConfigured.CONFIGURED
-
-  static readonly SHOWN = 0;              // Characteristic.CurrentVisibilityState.SHOWN
-  static readonly HIDDEN = 1;             // Characteristic.CurrentVisibilityState.HIDDEN
-
-  private states = {
-    InputSourceConfiguredName: '',
-    InputSourceType: InputSource.HDMI,
-    InputSourceIsConfigured: true,
-    InputSourceCurrentVisibilityState: InputSource.SHOWN,
-    InputSourceIdentifier: 0,
-  };
+  private static DO_NOT_CREATE_SERVICE: boolean = false;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.InputSource, InputSource.DO_NOT_CREATE_SERVICE);
 
-    const inputName: string = this.accessoryConfiguration.inputSource!.name;
+    let ConfiguredName: string = '';
+    let InputSourceType: number = InputSource.HDMI;
+    const IsConfigured: number = InputSource.CONFIGURED;
+    const CurrentVisibilityState: number = InputSource.SHOWN;
+    let Identifier: number = 0;
 
     // First configure the device based on the accessory details
-    this.states.InputSourceConfiguredName = inputName;
-    this.states.InputSourceType = this.accessoryConfiguration.inputSource!.inputSourceType;
-    this.states.InputSourceIdentifier = this.accessoryConfiguration.inputSource!.identifier;
+    ConfiguredName = this.accessoryConfiguration.inputSource!.name;
+    InputSourceType = this.accessoryConfiguration.inputSource!.inputSourceType;
+    Identifier = this.accessoryConfiguration.inputSource!.identifier;
 
     // set accessory information
-    this.service = this.accessory.getService(inputName) ||
-                   this.accessory.addService(this.platform.Service.InputSource, inputName, accessory.UUID + inputName);
+    this.service =
+      this.accessory.getService(ConfiguredName) ||
+      this.accessory.addService(ServiceType.InputSource, ConfiguredName, accessory.UUID + ConfiguredName);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, inputName);
+    this.updateName(ConfiguredName);
 
-    // register handlers
+    // Update the initial state of the accessory
+    this.setConfiguredName(ConfiguredName);
+    this.setInputSourceType(InputSourceType);
+    this.setIsConfigured(IsConfigured);
+    this.setCurrentVisibilityState(CurrentVisibilityState);
+    this.setIdentifier(Identifier);
 
-    this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
-      .onSet(this.setConfiguredName.bind(this))
-      .onGet(this.getConfiguredName.bind(this));
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.InputSourceType)
-      .onGet(this.getInputSourceType.bind(this));
+    this.service.getCharacteristic(CharacteristicType.ConfiguredName)
+      .onSet(this.setConfiguredNameHandler.bind(this))
+      .onGet(this.getConfiguredNameHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.IsConfigured)
-      .onSet(this.setIsConfigured.bind(this))
-      .onGet(this.getIsConfigured.bind(this));
+    this.service.getCharacteristic(CharacteristicType.InputSourceType)
+      .onGet(this.getInputSourceTypeHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentVisibilityState)
-      .onGet(this.getCurrentVisibilityState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.IsConfigured)
+      .onSet(this.setIsConfiguredHandler.bind(this))
+      .onGet(this.getIsConfiguredHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.Identifier)
-      .onGet(this.getIdentifier.bind(this));
+    this.service.getCharacteristic(CharacteristicType.CurrentVisibilityState)
+      .onGet(this.getCurrentVisibilityStateHandler.bind(this));
+
+    this.service.getCharacteristic(CharacteristicType.Identifier)
+      .onGet(this.getIdentifierHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async setConfiguredName(value: CharacteristicValue) {
-    // this.states.InputSourceConfiguredName = value as string;
-    const configuredName = value as string;
+  // ConfiguredName
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Configured Name: ${configuredName}`);
+  async getConfiguredNameHandler(): Promise<CharacteristicValue> {
+    const ConfiguredName: string = this.getConfiguredName();
+    this.log.debug(`[${this.accessoryName}] Getting Configured Name: ${ConfiguredName}`);
+
+    return ConfiguredName;
   }
 
-  async getConfiguredName(): Promise<CharacteristicValue> {
-    const configuredName = this.states.InputSourceConfiguredName;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Configured Name: ${configuredName}`);
-
-    return configuredName;
+  async setConfiguredNameHandler(value: CharacteristicValue) {
+    let ConfiguredName: string = value as string;
+    ConfiguredName = this.updateConfiguredName(ConfiguredName);
+    this.log.info(`[${this.accessoryName}] Setting Configured Name: ${ConfiguredName}`);
   }
 
-  async getInputSourceType(): Promise<CharacteristicValue> {
-    const inputSourceType = this.states.InputSourceType as number;
+  // InputSourceType
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Input Source Type: ${InputSource.getTypeName(inputSourceType)}`);
+  async getInputSourceTypeHandler(): Promise<CharacteristicValue> {
+    const InputSourceType: number = this.getInputSourceType();
+    this.log.debug(`[${this.accessoryName}] Getting Input Source Type: ${InputSource.getTypeName(InputSourceType)}`);
 
-    return inputSourceType;
+    return InputSourceType;
   }
 
-  async setIsConfigured(value: CharacteristicValue) {
-    // this.states.InputSourceIsConfigured = value as boolean;
-    const isConfigured = value as boolean;
+  // IsConfigured
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Is Configured: ${isConfigured}`);
+  async getIsConfiguredHandler(): Promise<CharacteristicValue> {
+    const IsConfigured: number = this.getIsConfigured();
+    this.log.debug(`[${this.accessoryName}] Getting Is Configured: ${InputSource.getIsConfiguredName(IsConfigured)}`);
+
+    return IsConfigured;
   }
 
-  async getIsConfigured(): Promise<CharacteristicValue> {
-    const isConfigured = this.states.InputSourceIsConfigured;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Is Configured: ${isConfigured}`);
-
-    return isConfigured;
+  async setIsConfiguredHandler(value: CharacteristicValue) {
+    let IsConfigured: number = value as number;
+    IsConfigured = this.updateIsConfigured(IsConfigured);
+    this.log.info(`[${this.accessoryName}] Setting Is Configured: ${InputSource.getIsConfiguredName(IsConfigured)}`);
   }
 
-  async getCurrentVisibilityState(): Promise<CharacteristicValue> {
-    const currentVisibilityState = this.states.InputSourceCurrentVisibilityState as number;
+  // CurrentVisibilityState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Visibility State: ${InputSource.getVisibilityName(currentVisibilityState)}`);
+  async getCurrentVisibilityStateHandler(): Promise<CharacteristicValue> {
+    const CurrentVisibilityState: number = this.getCurrentVisibilityState();
+    this.log.debug(`[${this.accessoryName}] Getting Current Visibility State: ${InputSource.getCurrentVisibilityStateName(CurrentVisibilityState)}`);
 
-    return currentVisibilityState;
+    return CurrentVisibilityState;
   }
 
-  async getIdentifier(): Promise<CharacteristicValue> {
-    const identifier = this.states.InputSourceIdentifier as number;
-     
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Identifier: ${identifier}`);
+  // Identifier
 
-    return identifier;
+  async getIdentifierHandler(): Promise<CharacteristicValue> {
+    const Identifier: number = this.getIdentifier();
+    this.log.debug(`[${this.accessoryName}] Getting Identifier: ${Identifier}`);
+
+    return Identifier;
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
+    const jsonState = {};
+
+    const json = JSON.stringify(jsonState);
+    return json;
+
+
     return JSON.stringify({});
   }
 
-  protected getAccessoryTypeName(): string {
-    return InputSource.ACCESSORY_TYPE_NAME;
-  }
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get OTHER(): number            { return CharacteristicType.InputSourceType.OTHER; }
+  static get HOME_SCREEN(): number      { return CharacteristicType.InputSourceType.HOME_SCREEN; }
+  static get TUNER(): number            { return CharacteristicType.InputSourceType.TUNER; }
+  static get HDMI(): number             { return CharacteristicType.InputSourceType.HDMI; }
+  static get COMPOSITE_VIDEO(): number  { return CharacteristicType.InputSourceType.COMPOSITE_VIDEO; }
+  static get S_VIDEO(): number          { return CharacteristicType.InputSourceType.S_VIDEO; }
+  static get COMPONENT_VIDEO(): number  { return CharacteristicType.InputSourceType.COMPONENT_VIDEO; }
+  static get DVI(): number              { return CharacteristicType.InputSourceType.DVI; }
+  static get AIRPLAY(): number          { return CharacteristicType.InputSourceType.AIRPLAY; }
+  static get USB(): number              { return CharacteristicType.InputSourceType.USB; }
+  static get APPLICATION(): number      { return CharacteristicType.InputSourceType.APPLICATION; }
+  
+  static get NOT_CONFIGURED(): number   { return CharacteristicType.IsConfigured.NOT_CONFIGURED; }
+  static get CONFIGURED(): number       { return CharacteristicType.IsConfigured.CONFIGURED; }
+
+  static get SHOWN(): number            { return CharacteristicType.CurrentVisibilityState.SHOWN; }
+  static get HIDDEN(): number           { return CharacteristicType.CurrentVisibilityState.HIDDEN; }
 
   static getTypeName(event: number): string {
-    let eventName: string;
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.OTHER: { eventName = 'OTHER'; break; }
-    case InputSource.HOME_SCREEN: { eventName = 'HOME SCREEN'; break; }
-    case InputSource.TUNER: { eventName = 'TUNER'; break; }
-    case InputSource.HDMI: { eventName = 'HDMI'; break; }
-    case InputSource.COMPOSITE_VIDEO: { eventName = 'COMPOSITE VIDEO'; break; }
-    case InputSource.S_VIDEO: { eventName = 'S VIDEO'; break; }
-    case InputSource.COMPONENT_VIDEO: { eventName = 'COMPONENT VIDEO'; break; }
-    case InputSource.DVI: { eventName = 'DVI'; break; }
-    case InputSource.AIRPLAY: { eventName = 'AIRPLAY'; break; }
-    case InputSource.USB: { eventName = 'USB'; break; }
-    case InputSource.APPLICATION: { eventName = 'APPLICATION'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.OTHER: { name = 'OTHER'; break; }
+    case InputSource.HOME_SCREEN: { name = 'HOME SCREEN'; break; }
+    case InputSource.TUNER: { name = 'TUNER'; break; }
+    case InputSource.HDMI: { name = 'HDMI'; break; }
+    case InputSource.COMPOSITE_VIDEO: { name = 'COMPOSITE VIDEO'; break; }
+    case InputSource.S_VIDEO: { name = 'S VIDEO'; break; }
+    case InputSource.COMPONENT_VIDEO: { name = 'COMPONENT VIDEO'; break; }
+    case InputSource.DVI: { name = 'DVI'; break; }
+    case InputSource.AIRPLAY: { name = 'AIRPLAY'; break; }
+    case InputSource.USB: { name = 'USB'; break; }
+    case InputSource.APPLICATION: { name = 'APPLICATION'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
-  static getConfiguredName(event: number): string {
-    let eventName: string;
+  static getIsConfiguredName(event: number): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.NOT_CONFIGURED: { eventName = 'NOT CONFIGURED'; break; }
-    case InputSource.CONFIGURED: { eventName = 'CONFIGURED'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.NOT_CONFIGURED: { name = 'NOT CONFIGURED'; break; }
+    case InputSource.CONFIGURED: { name = 'CONFIGURED'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 
-  static getVisibilityName(event: number): string {
-    let eventName: string;
+  static getCurrentVisibilityStateName(event: number): string {
+    let name: string;
 
     switch (event) {
-    case undefined: { eventName = 'undefined'; break; }
-    case InputSource.SHOWN: { eventName = 'SHOWN'; break; }
-    case InputSource.HIDDEN: { eventName = 'HIDDEN'; break; }
-    default: { eventName = event.toString(); }
+    case undefined: { name = 'undefined'; break; }
+    case InputSource.SHOWN: { name = 'SHOWN'; break; }
+    case InputSource.HIDDEN: { name = 'HIDDEN'; break; }
+    default: { name = event.toString(); }
     }
 
-    return eventName;
+    return name;
   }
 }

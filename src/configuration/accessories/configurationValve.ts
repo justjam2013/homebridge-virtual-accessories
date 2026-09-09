@@ -1,4 +1,3 @@
-/* eslint-disable brace-style */
 /* eslint-disable curly */
 
 import { Validatable } from '../validatable.js';

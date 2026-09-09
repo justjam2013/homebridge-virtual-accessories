@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { Utils, shutdownSignal } from './utils.js';
 import { VirtualLogger } from './virtualLogger.js';
 

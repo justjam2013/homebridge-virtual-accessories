@@ -47,7 +47,8 @@ export class VirtualLogger {
   info (message: string, debug: boolean = false, parameters: any[] = []): void {
     if (debug) {
       this.platformLogger.debug(message, ...parameters);
-    } else {
+    }
+    else {
       this.platformLogger.info(message, ...parameters);
     }
   }

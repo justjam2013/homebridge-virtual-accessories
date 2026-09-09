@@ -1,8 +1,8 @@
-/* eslint-disable brace-style */
- 
+/* eslint-disable max-len */
+
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -16,29 +16,19 @@ import { Timer } from '../utils/timer.js';
  */
 export class SecuritySystem extends Accessory implements TriggerableAlarm {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'SecuritySystem';
-
-  static readonly STAY_ARM: number = 0;         // Characteristic.SecuritySystemCurrentState.STAY_ARM
-  static readonly AWAY_ARM: number = 1;         // Characteristic.SecuritySystemCurrentState.AWAY_ARM
-  static readonly NIGHT_ARM: number = 2;        // Characteristic.SecuritySystemCurrentState.NIGHT_ARM
-  static readonly DISARMED: number = 3;         // Characteristic.SecuritySystemCurrentState.DISARMED
-  static readonly ALARM_TRIGGERED: number = 4;  // Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED
-
   private readonly stateStorageKey: string = 'SecuritySystemState';
 
   private awayArmingDelayTimer: Timer;
-
-  private states = {
-    SecuritySystemCurrentState: SecuritySystem.DISARMED,
-    SecuritySystemTargetState: SecuritySystem.DISARMED,
-  };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.SecuritySystem);
+
+    let SecuritySystemCurrentState: number = SecuritySystem.DISARMED;
+    let SecuritySystemTargetState: number = SecuritySystem.DISARMED;
 
     // First configure the device based on the accessory details
     switch (this.accessoryConfiguration.securitySystem.defaultState) {
@@ -61,12 +51,12 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
       this.defaultState = SecuritySystem.DISARMED;
     }
 
-    this.states.SecuritySystemCurrentState = this.defaultState;
+    SecuritySystemCurrentState = this.defaultState;
 
     // Timer is not resettable
     const timerIsResettable: boolean = false;
     this.awayArmingDelayTimer = new Timer(
-      this.accessoryConfiguration.accessoryName,
+      this.accessoryName,
       this.log,
       timerIsResettable,
     );
@@ -77,106 +67,86 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
       const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.SecuritySystemCurrentState = cachedState;
+        SecuritySystemCurrentState = cachedState;
       }
     }
 
-    this.states.SecuritySystemTargetState = this.states.SecuritySystemCurrentState;
-
-    this.service = this.accessory.getService(this.platform.Service.SecuritySystem) || this.accessory.addService(this.platform.Service.SecuritySystem);
+    SecuritySystemTargetState = SecuritySystemCurrentState;
 
     this.setSecurityServiceProperties(this.service!);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    // eslint-disable-next-line max-len
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Security System Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.SecuritySystemTargetState, (this.states.SecuritySystemTargetState));
+    this.setSecuritySystemCurrentState(SecuritySystemCurrentState);
+    this.setSecuritySystemTargetState(SecuritySystemTargetState);
 
-    // register handlers
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState)
-      .onGet(this.getSecuritySystemCurrentState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.SecuritySystemCurrentState)
+      .onGet(this.getSecuritySystemCurrentStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.SecuritySystemTargetState)
-      .onSet(this.setSecuritySystemTargetState.bind(this))
-      .onGet(this.getSecuritySystemTargetState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.SecuritySystemTargetState)
+      .onSet(this.setSecuritySystemTargetStateHandler.bind(this))
+      .onGet(this.getSecuritySystemTargetStateHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async getSecuritySystemCurrentState(): Promise<CharacteristicValue> {
-    const securitySystemState = this.states.SecuritySystemCurrentState;
+  // SecuritySystemCurrentState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(securitySystemState)}`);
+  async getSecuritySystemCurrentStateHandler(): Promise<CharacteristicValue> {
+    const SecuritySystemCurrentState: number = this.getSecuritySystemCurrentState();
+    this.log.debug(`[${this.accessoryName}] Getting Current State: ${SecuritySystem.getStateName(SecuritySystemCurrentState)}`);
 
-    return securitySystemState;
+    return SecuritySystemCurrentState;
   }
 
-  async setSecuritySystemTargetState(value: CharacteristicValue) {
-    this.states.SecuritySystemTargetState = value as number;
+  // SecuritySystemTargetState
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)}`);
+  async getSecuritySystemTargetStateHandler(): Promise<CharacteristicValue> {
+    const SecuritySystemTargetState: number = this.getSecuritySystemTargetState();
+    this.log.debug(`[${this.accessoryName}] Getting Target State: ${SecuritySystem.getStateName(SecuritySystemTargetState)}`);
+
+    return SecuritySystemTargetState;
+  }
+
+  async setSecuritySystemTargetStateHandler(value: CharacteristicValue) {
+    let SecuritySystemTargetState: number = value as number;
+    SecuritySystemTargetState = this.updateSecuritySystemTargetState(SecuritySystemTargetState);
+
+    this.log.info(`[${this.accessoryName}] Setting Target State: ${SecuritySystem.getStateName(SecuritySystemTargetState)}`);
 
     // No delay when disarming or switching betweem armed modes
-    const delayTime: number = (this.states.SecuritySystemTargetState === SecuritySystem.AWAY_ARM) ?
+    const delayTime: number = (SecuritySystemTargetState === SecuritySystem.AWAY_ARM) ?
       this.accessoryConfiguration.securitySystem.awayArmingDelay :
       0;
-    // eslint-disable-next-line max-len
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State: ${SecuritySystem.getStateName(this.states.SecuritySystemTargetState)} - Delay timer: ${delayTime}`);
+    this.log.debug(`[${this.accessoryName}] Target State: ${SecuritySystem.getStateName(SecuritySystemTargetState)} - Delay timer: ${delayTime}`);
 
     // Stop timer in case it's running
     this.awayArmingDelayTimer.stop();
 
     this.awayArmingDelayTimer.start(
       () => {
-        this.states.SecuritySystemCurrentState = this.states.SecuritySystemTargetState;
-        this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
+        const SecuritySystemCurrentState: number = SecuritySystemTargetState;
+        this.updateSecuritySystemCurrentState(SecuritySystemCurrentState);
+        this.log.info(`[${this.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(SecuritySystemCurrentState)}`);
 
-        // eslint-disable-next-line max-len
-        this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
-
-        this.storeState();
+        this.saveState();
       },
       delayTime,
     );
   }
 
-  async getSecuritySystemTargetState(): Promise<CharacteristicValue> {
-    const securitySystemState = this.states.SecuritySystemTargetState;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${SecuritySystem.getStateName(securitySystemState)}`);
-
-    return securitySystemState;
-  }
+  // Abstract methods impl
 
   protected getJsonState(): string {
-    const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.SecuritySystemCurrentState,
-    });
+    const jsonState = {
+      [this.stateStorageKey]: this.getSecuritySystemCurrentState(),
+    };
+
+    const json = JSON.stringify(jsonState);
     return json;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return SecuritySystem.ACCESSORY_TYPE_NAME;
-  }
-
-  static getStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case SecuritySystem.STAY_ARM: { stateName = 'STAY_ARM'; break; }
-    case SecuritySystem.AWAY_ARM: { stateName = 'AWAY_ARM'; break; }
-    case SecuritySystem.NIGHT_ARM: { stateName = 'NIGHT_ARM'; break; }
-    case SecuritySystem.DISARMED: { stateName = 'DISARMED'; break; }
-    case SecuritySystem.ALARM_TRIGGERED: { stateName = 'ALARM_TRIGGERED'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
   }
 
   /**
@@ -208,30 +178,30 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
       currentStateValues.delete(SecuritySystemCurrentState.NIGHT_ARM);
       targetStateValues.delete(SecuritySystemTargetState.NIGHT_ARM);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Night Arm is not an available armed mode`);
+      this.log.debug(`[${this.accessoryName}] Night Arm is not an available armed mode`);
     }
 
     if (currentStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.generatePropertyValueList(currentStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Current State values: ${this.generatePropertyValueList(currentStateValues)}`);
 
       service.getCharacteristic(SecuritySystemCurrentState)
         .setProps({
           validValues: Array.from(currentStateValues),
         });
 
-      // eslint-disable-next-line max-len
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemCurrentState).props)}`);
+       
+      this.log.debug(`[${this.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemCurrentState).props)}`);
     }
     if (targetStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.generatePropertyValueList(targetStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Target State values: ${this.generatePropertyValueList(targetStateValues)}`);
 
       service.getCharacteristic(SecuritySystemTargetState)
         .setProps({
           validValues: Array.from(targetStateValues),
         });
 
-      // eslint-disable-next-line max-len
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemTargetState).props)}`);
+       
+      this.log.debug(`[${this.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(SecuritySystemTargetState).props)}`);
     }
   }
 
@@ -249,31 +219,59 @@ export class SecuritySystem extends Accessory implements TriggerableAlarm {
   // Triggerable Alarm interface
 
   triggerAlarm(value: number, accessoryId: string): void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update triggered state to ${SecurityServiceTriggerType.getName(value)}`);
+    this.log.debug(`[${this.accessoryName}] Request update triggered state to ${SecurityServiceTriggerType.getName(value)}`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+      this.log.error(`[${this.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number' || !SecurityServiceTriggerType.isValid(value)) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for a Security System triggered state`);
+      this.log.error(`[${this.accessoryName}] Value ${value} is not valid for a Security System triggered state`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
 
+    let SecuritySystemCurrentState: number = this.getSecuritySystemCurrentState();
     if (value === SecurityServiceTriggerType.TriggerPanic ||
-       (value === SecurityServiceTriggerType.TriggerAlarm && this.states.SecuritySystemCurrentState !== SecuritySystem.DISARMED)
+       (value === SecurityServiceTriggerType.TriggerAlarm && SecuritySystemCurrentState !== SecuritySystem.DISARMED)
     ) {
-      this.states.SecuritySystemCurrentState = SecuritySystem.ALARM_TRIGGERED;
-      this.service!.setCharacteristic(this.platform.Characteristic.SecuritySystemCurrentState, (this.states.SecuritySystemCurrentState));
-
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
+      SecuritySystemCurrentState = SecuritySystem.ALARM_TRIGGERED;
+      this.updateSecuritySystemCurrentState(SecuritySystemCurrentState);
+      this.log.info(`[${this.accessoryName}] Updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current state: ${SecuritySystem.getStateName(this.states.SecuritySystemCurrentState)}`);
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Not updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
+      this.log.debug(`[${this.accessoryName}] Current state: ${SecuritySystem.getStateName(SecuritySystemCurrentState)}`);
+      this.log.debug(`[${this.accessoryName}] Not updating triggered state to ${SecurityServiceTriggerType.getName(value)}`);
     }
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get STAY_ARM(): number         { return CharacteristicType.SecuritySystemCurrentState.STAY_ARM; }    // CharacteristicType.SecuritySystemTargetState.STAY_ARM
+  static get AWAY_ARM(): number         { return CharacteristicType.SecuritySystemCurrentState.AWAY_ARM; }    // CharacteristicType.SecuritySystemTargetState.AWAY_ARM
+  static get NIGHT_ARM(): number        { return CharacteristicType.SecuritySystemCurrentState.NIGHT_ARM; }   // CharacteristicType.SecuritySystemTargetState.NIGHT_ARM
+  static get DISARMED(): number         { return CharacteristicType.SecuritySystemCurrentState.DISARMED; }    // CharacteristicType.SecuritySystemTargetState.DISARMED
+  static get ALARM_TRIGGERED(): number  { return CharacteristicType.SecuritySystemCurrentState.ALARM_TRIGGERED; }
+
+  static getStateName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case SecuritySystem.STAY_ARM: { name = 'STAY_ARM'; break; }
+    case SecuritySystem.AWAY_ARM: { name = 'AWAY_ARM'; break; }
+    case SecuritySystem.NIGHT_ARM: { name = 'NIGHT_ARM'; break; }
+    case SecuritySystem.DISARMED: { name = 'DISARMED'; break; }
+    case SecuritySystem.ALARM_TRIGGERED: { name = 'ALARM_TRIGGERED'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
   }
 }
 

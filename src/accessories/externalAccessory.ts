@@ -1,4 +1,4 @@
-import { PlatformAccessory } from 'homebridge';
+import { PlatformAccessory, Service, WithUUID } from 'homebridge';
 
 import { VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -13,8 +13,9 @@ export abstract class ExternalAccessory extends Accessory {
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
   }
 
   getExternalAccessoryCategory(): number {

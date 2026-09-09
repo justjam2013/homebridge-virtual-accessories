@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { APIEvent } from 'homebridge';
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
 
@@ -20,6 +18,9 @@ import fs from 'fs';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore <-- TODO remove this line, unless that gives an error
 import packageInfo from '../package.json' with { type: 'json' };
+
+export let CharacteristicType: typeof Characteristic;
+export let ServiceType: typeof Service;
 
 /**
  * HomebridgePlatform
@@ -55,6 +56,10 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
 
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+
+    // Set the values for types
+    CharacteristicType = this.Characteristic;
+    ServiceType = this.Service;
 
     // This is for dev purposes only to control the output of this plugin
     this.log = new VirtualLogger(log, VirtualLogLevel.DEBUG);
@@ -170,7 +175,7 @@ export class VirtualAccessoriesPlatform implements DynamicPlatformPlugin {
           if (cachedAccessory.displayName !== accessoryConfiguration.accessoryName) {
             this.log.info(`Updating accessory name from ${cachedAccessory.displayName} to ${accessoryConfiguration.accessoryName}`);
 
-            virtualAccessory.updateConfiguredName();
+            virtualAccessory.updateInformationServiceConfiguredName();
             cachedAccessory.updateDisplayName(accessoryConfiguration.accessoryName);
           }
           // Just update all the cached accessories

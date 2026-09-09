@@ -1,9 +1,8 @@
-/* eslint-disable brace-style */
 /* eslint-disable max-len */
 
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -16,20 +15,6 @@ import { HumidifierType } from '../configuration/schema.js';
  */
 export class HumidifierDehumidifier extends Accessory implements UpdatableMeasurementSensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'HumidifierDehumidifier';
-
-  static readonly CURRENTLY_INACTIVE: number = 0;             // Characteristic.CurrentHumidifierDehumidifierState.INACTIVE
-  static readonly CURRENTLY_IDLE: number = 1;                 // Characteristic.CurrentHumidifierDehumidifierState.IDLE
-  static readonly CURRENTLY_HUMIDIFYING: number = 2;          // Characteristic.CurrentHumidifierDehumidifierState.HUMIDIFYING
-  static readonly CURRENTLY_DEHUMIDIFYING: number = 3;        // Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING
-
-  static readonly AUTOMATIC: number = 0;                      // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER 
-  static readonly HUMIDIFY: number = 1;                       // Characteristic.TargetHumidifierDehumidifierState.HUMIDIFIER
-  static readonly DEHUMIDIFY: number = 2;                     // Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER
-
-  static readonly INACTIVE: number = 0;                       // Characteristic.Active.INACTIVE
-  static readonly ACTIVE: number = 1;                         // Characteristic.Active.ACTIVE
-
   private readonly stateStorageKey: string = 'HumidifierDehumidifierActive';
   private readonly targetStateStorageKey: string = 'HumidifierDehumidifierTargetState';
   private readonly humidifierThresholdStorageKey: string = 'HumidifierThreshold';
@@ -38,12 +23,6 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
   private deviceType: string;
 
   private states = {
-    HumidifierDehumidifierActive: HumidifierDehumidifier.INACTIVE,
-    HumidifierDehumidifierCurrentState: HumidifierDehumidifier.CURRENTLY_INACTIVE,
-    HumidifierDehumidifierTargetState: HumidifierDehumidifier.AUTOMATIC,
-    HumidifierThreshold: 30,
-    DehumidifierThreshold: 60,
-    CurrentRelativeHumidity: 50,          // This value comes from sensor, set to 50% for now
   };
 
   constructor(
@@ -51,24 +30,29 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.HumidifierDehumidifier);
+
+    let Active: number = HumidifierDehumidifier.INACTIVE;
+    const CurrentHumidifierDehumidifierState: number = HumidifierDehumidifier.CURRENTLY_INACTIVE;
+    let TargetHumidifierDehumidifierState: number = HumidifierDehumidifier.AUTOMATIC;
+    let RelativeHumidityHumidifierThreshold: number = 30;
+    let RelativeHumidityDehumidifierThreshold: number = 60;
+    const CurrentRelativeHumidity: number = 50;          // This value comes from sensor, set to 50% for now
 
     // First configure the device based on the accessory details
-    this.states.HumidifierDehumidifierActive = HumidifierDehumidifier.INACTIVE;
-    this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
-    this.states.HumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.humidifierThreshold;
-    this.states.DehumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.dehumidifierThreshold;
+    RelativeHumidityHumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.humidifierThreshold;
+    RelativeHumidityDehumidifierThreshold = this.accessoryConfiguration.humidifierDehumidifier.dehumidifierThreshold;
 
     this.deviceType = this.accessoryConfiguration.humidifierDehumidifier.type;
 
     if (this.deviceType === HumidifierType.Humidifier) {
-      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.HUMIDIFY;
+      TargetHumidifierDehumidifierState = HumidifierDehumidifier.HUMIDIFY;
     }
     else if (this.deviceType === HumidifierType.Dehumidifier) {
-      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.DEHUMIDIFY;
+      TargetHumidifierDehumidifierState = HumidifierDehumidifier.DEHUMIDIFY;
     }
     else {
-      this.states.HumidifierDehumidifierTargetState = HumidifierDehumidifier.AUTOMATIC;
+      TargetHumidifierDehumidifierState = HumidifierDehumidifier.AUTOMATIC;
     }
 
     // If the accessory is stateful retrieve stored state
@@ -78,174 +62,190 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       const cachedTargetState: number = accessoryState[this.targetStateStorageKey] as number;
 
       if (cachedState !== undefined) {
-        this.states.HumidifierDehumidifierActive = cachedState;
+        Active = cachedState;
       }
       if (cachedTargetState !== undefined) {
-        this.states.HumidifierDehumidifierTargetState = cachedTargetState;
+        TargetHumidifierDehumidifierState = cachedTargetState;
       }
       if (this.dehumidifies()) {
         const cachedDehumidifierThreshold: number = accessoryState[this.dehumidifierThresholdStorageKey] as number;
         if (cachedDehumidifierThreshold !== undefined) {
-          this.states.DehumidifierThreshold = cachedDehumidifierThreshold;
+          RelativeHumidityDehumidifierThreshold = cachedDehumidifierThreshold;
         }
       }
       if (this.humidifies()) {
         const cachedHumidifierThreshold: number = accessoryState[this.humidifierThresholdStorageKey] as number;
         if (cachedHumidifierThreshold !== undefined) {
-          this.states.HumidifierThreshold = cachedHumidifierThreshold;
+          RelativeHumidityHumidifierThreshold = cachedHumidifierThreshold;
         }
       }
     }
 
-    this.setDeviceOperationalCondition();
+    this.refreshDeviceOperationalCondition();
 
-    // get the HumidifierDehumidifier service if it exists, otherwise create a new LightBulb service
-    this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier);
-    // These characteristics will be added back as needed
-    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold));
-    this.service.removeCharacteristic(this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold));
-
-    this.setHumidifierDehumidifierServiceProperties(this.service!);
-
-    // set the service name, this is what is displayed as the default name on the Home app
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    this.refreshHumidifierDehumidifierServiceProperties(this.service!);
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Humidifier/Dehumidifier Current State: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState, (this.states.HumidifierDehumidifierTargetState));
+    this.updateActive(Active);
+    this.updateCurrentHumidifierDehumidifierState(CurrentHumidifierDehumidifierState);
+    this.updateTargetHumidifierDehumidifierState(TargetHumidifierDehumidifierState);
+    this.updateCurrentRelativeHumidity(CurrentRelativeHumidity);
+    if (this.dehumidifies()) { this.updateRelativeHumidityDehumidifierThreshold(RelativeHumidityDehumidifierThreshold); }
+    if (this.humidifies()) { this.updateRelativeHumidityHumidifierThreshold(RelativeHumidityHumidifierThreshold); }
 
-    // register handlers
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.Active)
-      .onSet(this.setActive.bind(this))
-      .onGet(this.getActive.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Active)
+      .onSet(this.setActiveHandler.bind(this))
+      .onGet(this.getActiveHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
-      .onGet(this.getCurrentHumidifierDehumidifierState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.CurrentHumidifierDehumidifierState)
+      .onGet(this.getCurrentHumidifierDehumidifierStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
-      .onSet(this.setTargetHumidifierDehumidifierState.bind(this))
-      .onGet(this.getTargetHumidifierDehumidifierState.bind(this));
+    this.service.getCharacteristic(CharacteristicType.TargetHumidifierDehumidifierState)
+      .onSet(this.setTargetHumidifierDehumidifierStateHandler.bind(this))
+      .onGet(this.getTargetHumidifierDehumidifierStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
-      .onGet(this.getCurrentRelativeHumidity.bind(this));
+    this.service.getCharacteristic(CharacteristicType.CurrentRelativeHumidity)
+      .onGet(this.getCurrentRelativeHumidityHandler.bind(this));
 
     if (this.dehumidifies()) {
       // Characteristic was removed when adding the Service
-      this.service.addCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
-        .onSet(this.setRelativeHumidityDehumidifierThreshold.bind(this))
-        .onGet(this.getRelativeHumidityDehumidifierThreshold.bind(this));
+      this.service.getCharacteristic(CharacteristicType.RelativeHumidityDehumidifierThreshold)
+        .onSet(this.setRelativeHumidityDehumidifierThresholdHandler.bind(this))
+        .onGet(this.getRelativeHumidityDehumidifierThresholdHandler.bind(this));
+    }
+    else {
+      this.removeCharacteristic(this.service.getCharacteristic(CharacteristicType.RelativeHumidityDehumidifierThreshold));
     }
 
     if (this.humidifies()) {
       // Characteristic was removed when adding the Service
-      this.service.addCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
-        .onSet(this.setRelativeHumidityHumidifierThreshold.bind(this))
-        .onGet(this.getRelativeHumidityHumidifierThreshold.bind(this));
+      this.service.getCharacteristic(CharacteristicType.RelativeHumidityHumidifierThreshold)
+        .onSet(this.setRelativeHumidityHumidifierThresholdHandler.bind(this))
+        .onGet(this.getRelativeHumidityHumidifierThresholdHandler.bind(this));
+    }
+    else {
+      this.removeCharacteristic(this.service.getCharacteristic(CharacteristicType.RelativeHumidityHumidifierThreshold));
     }
 
     const characteristics: string[] = this.service.characteristics.map(characteristic => characteristic.displayName);
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
+    this.log.debug(`[${this.accessoryName}] Characteristics: ${characteristics.join(', ')}`);
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async setActive(value: CharacteristicValue) {
-    this.states.HumidifierDehumidifierActive = value as number;
+  // Active
 
-    this.setDeviceOperationalCondition();
+  async getActiveHandler(): Promise<CharacteristicValue> {
+    const Active: number = this.getActive();
+    this.log.debug(`[${this.accessoryName}] Getting Active: ${HumidifierDehumidifier.getActiveName(Active)}`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Active: ${HumidifierDehumidifier.getActiveName(this.states.HumidifierDehumidifierActive)}`);
+    return Active;
   }
 
-  async getActive(): Promise<CharacteristicValue> {
-    const humidifierDehumidifierActive = this.states.HumidifierDehumidifierActive;
+  async setActiveHandler(value: CharacteristicValue) {
+    let Active: number = value as number;
+    Active = this.updateActive(Active);
+    this.log.info(`[${this.accessoryName}] Setting Active: ${HumidifierDehumidifier.getActiveName(Active)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Active: ${HumidifierDehumidifier.getActiveName(humidifierDehumidifierActive)}`);
-
-    return humidifierDehumidifierActive;
+    this.refreshDeviceOperationalCondition();
   }
 
-  async getCurrentHumidifierDehumidifierState(): Promise<CharacteristicValue> {
-    const humidifierDehumidifierCurrentState = this.states.HumidifierDehumidifierCurrentState;
+  // CurrentHumidifierDehumidifierState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(humidifierDehumidifierCurrentState)}`);
+  async getCurrentHumidifierDehumidifierStateHandler(): Promise<CharacteristicValue> {
+    const CurrentHumidifierDehumidifierState: number = this.getCurrentHumidifierDehumidifierState();
+    this.log.debug(`[${this.accessoryName}] Getting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(CurrentHumidifierDehumidifierState)}`);
 
-    return humidifierDehumidifierCurrentState;
+    return CurrentHumidifierDehumidifierState;
   }
 
-  async setTargetHumidifierDehumidifierState(value: CharacteristicValue) {
-    this.states.HumidifierDehumidifierTargetState = value as number;
+  // TargetHumidifierDehumidifierState
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(this.states.HumidifierDehumidifierTargetState)}`);
+  async getTargetHumidifierDehumidifierStateHandler(): Promise<CharacteristicValue> {
+    const TargetHumidifierDehumidifierState: number = this.getTargetHumidifierDehumidifierState();
+    this.log.debug(`[${this.accessoryName}] Getting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(TargetHumidifierDehumidifierState)}`);
 
-    this.setDeviceOperationalCondition();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
+    return TargetHumidifierDehumidifierState;
   }
 
-  async getTargetHumidifierDehumidifierState(): Promise<CharacteristicValue> {
-    const humidifierDehumidifierTargetState = this.states.HumidifierDehumidifierTargetState;
+  async setTargetHumidifierDehumidifierStateHandler(value: CharacteristicValue) {
+    let TargetHumidifierDehumidifierState: number = value as number;
+    TargetHumidifierDehumidifierState = this.updateTargetHumidifierDehumidifierState(TargetHumidifierDehumidifierState);
+    this.log.info(`[${this.accessoryName}] Setting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(TargetHumidifierDehumidifierState)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(humidifierDehumidifierTargetState)}`);
+    this.refreshDeviceOperationalCondition();
 
-    return humidifierDehumidifierTargetState;
+    const CurrentHumidifierDehumidifierState: number = this.getCurrentHumidifierDehumidifierState();
+    this.log.info(`[${this.accessoryName}] Setting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(CurrentHumidifierDehumidifierState)}`);
   }
 
-  async getCurrentRelativeHumidity(): Promise<CharacteristicValue> {
-    const currentRelativeHumidity = this.states.CurrentRelativeHumidity;
+  // CurrentRelativeHumidity
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current Relative Humidity: ${currentRelativeHumidity}%`);
+  async getCurrentRelativeHumidityHandler(): Promise<CharacteristicValue> {
+    const CurrentRelativeHumidity: number = this.getCurrentRelativeHumidity();
+    this.log.debug(`[${this.accessoryName}] Getting Current Relative Humidity: ${CurrentRelativeHumidity}%`);
 
-    return currentRelativeHumidity;
+    return CurrentRelativeHumidity;
   }
 
-  async setRelativeHumidityDehumidifierThreshold(value: CharacteristicValue) {
-    this.states.DehumidifierThreshold = value as number;
+  // RelativeHumidityDehumidifierThreshold
 
-    this.setDeviceOperationalCondition();
+  async getRelativeHumidityDehumidifierThresholdHandler(): Promise<CharacteristicValue>  {
+    const RelativeHumidityDehumidifierThreshold = this.getRelativeHumidityDehumidifierThreshold();
+    this.log.debug(`[${this.accessoryName}] Getting Relative Humidity Dehumidifier Threshold: ${RelativeHumidityDehumidifierThreshold}%`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${this.states.DehumidifierThreshold}%`);
+    return RelativeHumidityDehumidifierThreshold;
   }
 
-  async getRelativeHumidityDehumidifierThreshold(): Promise<CharacteristicValue>  {
-    const dehumidifierThreshold = this.states.DehumidifierThreshold;
+  async setRelativeHumidityDehumidifierThresholdHandler(value: CharacteristicValue) {
+    let RelativeHumidityDehumidifierThreshold: number = value as number;
+    RelativeHumidityDehumidifierThreshold = this.updateRelativeHumidityDehumidifierThreshold(RelativeHumidityDehumidifierThreshold);
+    this.log.info(`[${this.accessoryName}] Setting Relative Humidity Dehumidifier Threshold: ${RelativeHumidityDehumidifierThreshold}%`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Dehumidifier Threshold: ${dehumidifierThreshold}%`);
-
-    return dehumidifierThreshold;
+    this.refreshDeviceOperationalCondition();
   }
 
-  async setRelativeHumidityHumidifierThreshold(value: CharacteristicValue) {
-    this.states.HumidifierThreshold = value as number;
+  // RelativeHumidityHumidifierThreshold
 
-    this.setDeviceOperationalCondition();
+  async getRelativeHumidityHumidifierThresholdHandler(): Promise<CharacteristicValue> {
+    const RelativeHumidityHumidifierThreshold: number = this.getRelativeHumidityHumidifierThreshold();
+    this.log.debug(`[${this.accessoryName}] Getting Relative Humidity Humidifier Threshold: ${RelativeHumidityHumidifierThreshold}%`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${this.states.HumidifierThreshold}%`);
+    return RelativeHumidityHumidifierThreshold;
   }
 
-  async getRelativeHumidityHumidifierThreshold(): Promise<CharacteristicValue> {
-    const humidifierThreshold = this.states.HumidifierThreshold;
+  async setRelativeHumidityHumidifierThresholdHandler(value: CharacteristicValue) {
+    let RelativeHumidityHumidifierThreshold: number = value as number;
+    RelativeHumidityHumidifierThreshold = this.updateRelativeHumidityHumidifierThreshold(RelativeHumidityHumidifierThreshold);
+    this.log.info(`[${this.accessoryName}] Setting Relative Humidity Humidifier Threshold: ${RelativeHumidityHumidifierThreshold}%`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Relative Humidity Humidifier Threshold: ${humidifierThreshold}%`);
-
-    return humidifierThreshold;
+    this.refreshDeviceOperationalCondition();
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
-    const json = JSON.stringify({
-      [this.stateStorageKey]: this.states.HumidifierDehumidifierActive,
-      [this.targetStateStorageKey]: this.states.HumidifierDehumidifierTargetState,
-      [this.dehumidifierThresholdStorageKey]: this.states.DehumidifierThreshold,
-      [this.humidifierThresholdStorageKey]: this.states.HumidifierThreshold,
-    });
+    const jsonState = {
+      [this.stateStorageKey]: this.getActive(),
+      [this.targetStateStorageKey]: this.getTargetHumidifierDehumidifierState(),
+    };
+
+    if (this.dehumidifies()) {
+      Object.assign(jsonState, { [this.dehumidifierThresholdStorageKey]: this.getRelativeHumidityDehumidifierThreshold() });
+    }
+    if (this.humidifies()) {
+      Object.assign(jsonState, { [this.humidifierThresholdStorageKey]: this.getRelativeHumidityHumidifierThreshold() });
+    }
+
+    const json = JSON.stringify(jsonState);
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return HumidifierDehumidifier.ACCESSORY_TYPE_NAME;
-  }
+  //
 
   private humidifies(): boolean {
     return [HumidifierType.Auto, HumidifierType.Humidifier].includes(this.deviceType);
@@ -255,87 +255,51 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     return [HumidifierType.Auto, HumidifierType.Dehumidifier].includes(this.deviceType);
   }
 
-  private setDeviceOperationalCondition() {
-    if (this.states.HumidifierDehumidifierActive === HumidifierDehumidifier.INACTIVE) {
-      this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
+  private refreshDeviceOperationalCondition() {
+    const Active: number = this.getActive();
+    const TargetHumidifierDehumidifierState: number = this.getTargetHumidifierDehumidifierState();
+    const CurrentRelativeHumidity: number = this.getCurrentRelativeHumidity();
+    const RelativeHumidityHumidifierThreshold: number = this.getRelativeHumidityHumidifierThreshold();
+    const RelativeHumidityDehumidifierThreshold: number = this.getRelativeHumidityDehumidifierThreshold();
+    let CurrentHumidifierDehumidifierState: number = this.getCurrentHumidifierDehumidifierState();
+
+    if (Active === HumidifierDehumidifier.INACTIVE) {
+      CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_INACTIVE;
     }
-    else {  // (this.states.HumidifierDehumidifierActive === HumidifierDehumidifier.ACTIVE)
-      if (this.states.HumidifierDehumidifierTargetState === HumidifierDehumidifier.HUMIDIFY) {
-        this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
+    else {  // (Active === HumidifierDehumidifier.ACTIVE)
+      if (TargetHumidifierDehumidifierState === HumidifierDehumidifier.HUMIDIFY) {
+        CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
       }
-      else if (this.states.HumidifierDehumidifierTargetState === HumidifierDehumidifier.DEHUMIDIFY) {
-        this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
+      else if (TargetHumidifierDehumidifierState === HumidifierDehumidifier.DEHUMIDIFY) {
+        CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
       }
       else {  // (this.states.HumidifierDehumidifierTargetState === HumidifierDehumidifier.AUTOMATIC)
-        if (this.states.CurrentRelativeHumidity < this.states.HumidifierThreshold) {
+        if (CurrentRelativeHumidity < RelativeHumidityHumidifierThreshold) {
           if (this.humidifies()) {
-            this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
+            CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_HUMIDIFYING;
           }
         }
-        else if (this.states.CurrentRelativeHumidity > this.states.DehumidifierThreshold) {
+        else if (CurrentRelativeHumidity > RelativeHumidityDehumidifierThreshold) {
           if (this.dehumidifies()) {
-            this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
+            CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING;
           }
         }
         else {
-          this.states.HumidifierDehumidifierCurrentState = HumidifierDehumidifier.CURRENTLY_IDLE;
+          CurrentHumidifierDehumidifierState = HumidifierDehumidifier.CURRENTLY_IDLE;
         }
       }
     }
 
-    this.service?.setCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, (this.states.HumidifierDehumidifierCurrentState));
+    CurrentHumidifierDehumidifierState = this.updateCurrentHumidifierDehumidifierState(CurrentHumidifierDehumidifierState);
+    this.log.debug(`[${this.accessoryName}] Humidifier/Dehumidifier current state: ${HumidifierDehumidifier.getCurrentStateName(CurrentHumidifierDehumidifierState)}`);
 
-    this.storeState();
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Humidifier/Dehumidifier current state: ${HumidifierDehumidifier.getCurrentStateName(this.states.HumidifierDehumidifierCurrentState)}`);
-  }
-
-  static getActiveName(status: number): string {
-    let activeName: string;
-
-    switch (status) {
-    case undefined: { activeName = 'undefined'; break; }
-    case HumidifierDehumidifier.INACTIVE: { activeName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.ACTIVE: { activeName = 'ACTIVE'; break; }
-    default: { activeName = status.toString(); }
-    }
-
-    return activeName;
-  }
-
-  static getCurrentStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HumidifierDehumidifier.CURRENTLY_INACTIVE: { stateName = 'INACTIVE'; break; }
-    case HumidifierDehumidifier.CURRENTLY_IDLE: { stateName = 'IDLE'; break; }
-    case HumidifierDehumidifier.CURRENTLY_HUMIDIFYING: { stateName = 'HUMIDIFYING'; break; }
-    case HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING: { stateName = 'DEHUMIDIFYING'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
-  }
-
-  static getTargetStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case HumidifierDehumidifier.AUTOMATIC: { stateName = 'AUTO'; break; }
-    case HumidifierDehumidifier.HUMIDIFY: { stateName = 'HUMIDIFY'; break; }
-    case HumidifierDehumidifier.DEHUMIDIFY: { stateName = 'DEHUMIDIFY'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
+    this.saveState();
   }
 
   /**
    * Ensure all the property values are set, then remove as required
    */
-  private setHumidifierDehumidifierServiceProperties(
+  private refreshHumidifierDehumidifierServiceProperties(
     service: Service,
   ) {
     const CurrentHumidifierDehumidifierState = this.platform.Characteristic.CurrentHumidifierDehumidifierState;
@@ -364,7 +328,7 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       // Remove this only if we want manual operation only
       // targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier`);
+      this.log.debug(`[${this.accessoryName}] Is a Humidifier`);
     }
     else if (this.deviceType === HumidifierType.Dehumidifier) {
       currentStateValues.delete(CurrentHumidifierDehumidifierState.HUMIDIFYING);
@@ -373,31 +337,31 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       // Remove this only if we want manual operation only
       // targetStateValues.delete(TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Dehumidifier`);
+      this.log.debug(`[${this.accessoryName}] Is a Dehumidifier`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Is a Humidifier/Dehumidifier`);
+      this.log.debug(`[${this.accessoryName}] Is a Humidifier/Dehumidifier`);
     }
 
     if (currentStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Current State values: ${this.getCurrentStateLabels(currentStateValues)}`);
 
       service.getCharacteristic(CurrentHumidifierDehumidifierState)
         .setProps({
           validValues: Array.from(currentStateValues),
         });
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHumidifierDehumidifierState).props)}`);
+      this.log.debug(`[${this.accessoryName}] Current State Props: ${JSON.stringify(service.getCharacteristic(CurrentHumidifierDehumidifierState).props)}`);
     }
     if (targetStateValues.size > 0) {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
+      this.log.debug(`[${this.accessoryName}] Setting Target State values: ${this.getTargetStateLabels(targetStateValues)}`);
 
       service.getCharacteristic(TargetHumidifierDehumidifierState)
         .setProps({
           validValues: Array.from(targetStateValues),
         });
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHumidifierDehumidifierState).props)}`);
+      this.log.debug(`[${this.accessoryName}] Target State Props: ${JSON.stringify(service.getCharacteristic(TargetHumidifierDehumidifierState).props)}`);
     }
   }
 
@@ -424,23 +388,86 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
   // Updatable Sensor interface
 
   updateMeasurementSensor(value: number, accessoryId: string):void {
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Request update humidity sensor to ${value}%`);
+    this.log.debug(`[${this.accessoryName}] Request update humidity sensor to ${value}%`);
 
     if (accessoryId !== this.accessoryConfiguration.accessoryID) {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
+      this.log.error(`[${this.accessoryName}] Accessory Id  ${accessoryId} is not valid for this accessory`);
 
       throw new SensorValueUpdateNotAllowed(`Invalid accessory id: ${accessoryId}`);
     }
     else if (typeof value !== 'number') {
-      this.log.error(`[${this.accessoryConfiguration.accessoryName}] Value ${value} is not valid for Humidifier/Dehumidifier sensor`);
+      this.log.error(`[${this.accessoryName}] Value ${value} is not valid for Humidifier/Dehumidifier sensor`);
 
       throw new InvalidSensorValueType(`Invalid sensor value: ${value}`);
     }
     else {
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Updating humidity sensor to ${value}%`);
+      this.log.debug(`[${this.accessoryName}] Updating humidity sensor to ${value}%`);
 
-      this.states.CurrentRelativeHumidity = value;
-      this.setDeviceOperationalCondition();
+      let CurrentRelativeHumidity: number = value;
+      CurrentRelativeHumidity = this.updateCurrentRelativeHumidity(CurrentRelativeHumidity);
+      this.log.info(`[${this.accessoryName}] Setting Current Relative Humidity: ${CurrentRelativeHumidity}%`);
+
+      this.refreshDeviceOperationalCondition();
     }
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get CURRENTLY_INACTIVE(): number       { return CharacteristicType.CurrentHumidifierDehumidifierState.INACTIVE; }
+  static get CURRENTLY_IDLE(): number           { return CharacteristicType.CurrentHumidifierDehumidifierState.IDLE; }
+  static get CURRENTLY_HUMIDIFYING(): number    { return CharacteristicType.CurrentHumidifierDehumidifierState.HUMIDIFYING; }
+  static get CURRENTLY_DEHUMIDIFYING(): number  { return CharacteristicType.CurrentHumidifierDehumidifierState.DEHUMIDIFYING; }
+
+  static get AUTOMATIC(): number                { return CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER_OR_DEHUMIDIFIER; } 
+  static get HUMIDIFY(): number                 { return CharacteristicType.TargetHumidifierDehumidifierState.HUMIDIFIER; }
+  static get DEHUMIDIFY(): number               { return CharacteristicType.TargetHumidifierDehumidifierState.DEHUMIDIFIER; }
+
+  static get INACTIVE(): number                 { return CharacteristicType.Active.INACTIVE; }
+  static get ACTIVE(): number                   { return CharacteristicType.Active.ACTIVE; }
+
+  static getActiveName(status: number): string {
+    let name: string;
+
+    switch (status) {
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.INACTIVE: { name = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.ACTIVE: { name = 'ACTIVE'; break; }
+    default: { name = status.toString(); }
+    }
+
+    return name;
+  }
+
+  static getCurrentStateName(state: number): string { 
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.CURRENTLY_INACTIVE: { name = 'INACTIVE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_IDLE: { name = 'IDLE'; break; }
+    case HumidifierDehumidifier.CURRENTLY_HUMIDIFYING: { name = 'HUMIDIFYING'; break; }
+    case HumidifierDehumidifier.CURRENTLY_DEHUMIDIFYING: { name = 'DEHUMIDIFYING'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
+  }
+
+  static getTargetStateName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case HumidifierDehumidifier.AUTOMATIC: { name = 'AUTO'; break; }
+    case HumidifierDehumidifier.HUMIDIFY: { name = 'HUMIDIFY'; break; }
+    case HumidifierDehumidifier.DEHUMIDIFY: { name = 'DEHUMIDIFY'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
   }
 }

@@ -1,35 +1,25 @@
-import type { PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
-import { OpeningAccessory } from './openingAccessory.js';
+import { PositionAccessory } from './positionAccessory.js';
 
 import { OpenableAccessoryConfiguration } from '../configuration/configurationOpenableAccesory.js';
 
 /**
  * Door - Accessory implementation
  */
-export class Door extends OpeningAccessory {
-
-  static readonly ACCESSORY_TYPE_NAME: string = 'Door';
+export class Door extends PositionAccessory {
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Door);
   }
 
-  protected getOpeningAccessoryConfiguration(): OpenableAccessoryConfiguration {
+  protected getOpenableAccessoryConfiguration(): OpenableAccessoryConfiguration {
     return this.accessoryConfiguration.door;
-  }
-
-  protected getOpeningAccessoryService(): WithUUID<typeof Service> {
-    return this.platform.Service.Door;
-  }
-
-  protected getAccessoryTypeName(): string {
-    return Door.ACCESSORY_TYPE_NAME;
   }
 }

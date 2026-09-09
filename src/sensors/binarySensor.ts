@@ -19,43 +19,36 @@ export abstract class BinarySensor extends Accessory {
   static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
   static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
 
-  static readonly NORMAL: number = 0;
-  static readonly TRIGGERED: number = 1;
-
   protected trigger: Trigger | undefined;
 
-  protected eventDetected: WithUUID<{ new (): Characteristic; }>;
-
-  protected states = {
-    SensorState: BinarySensor.NORMAL,
-  };
+  protected EventDetectedCharacteristic: WithUUID<{ new (): Characteristic; }>;
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
+    serviceType: WithUUID<typeof Service>,
+    eventDetectedCharacteristic: WithUUID<{ new (): Characteristic; }>,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, serviceType);
 
-    this.eventDetected = this.getEventDetectedCharacteristic();
+    this.EventDetectedCharacteristic = eventDetectedCharacteristic;
 
-    const sensorService: WithUUID<typeof Service> = this.getService();
-    this.service = this.accessory.getService(sensorService) || this.accessory.addService(sensorService as unknown as Service);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // First configure the device based on the accessory details
+    const SensorState: number = BinarySensor.NORMAL;
 
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`);
-    this.service.updateCharacteristic(this.eventDetected, (this.states.SensorState));
+    this.log.debug(`[${this.accessoryName}] Setting Sensor State: ${BinarySensor.getStateName(SensorState)}`);
+    this.service.setCharacteristic(this.EventDetectedCharacteristic, (SensorState));
 
-    // register handlers
+    // Last register handlers
 
-    this.service.getCharacteristic(this.eventDetected)
-      .onGet(this.getEventDetected.bind(this));
+    this.service.getCharacteristic(this.EventDetectedCharacteristic)
+      .onGet(this.getEventDetectedHandler.bind(this));
 
     // Create Trigger
     if (this.accessoryConfiguration.sensor !== undefined && this.accessoryConfiguration.sensor.trigger !== undefined) {
-      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryConfiguration.accessoryName + ' Trigger');
+      this.trigger = AccessoryFactory.createTrigger(this, this.accessoryConfiguration.sensor.trigger, this.accessoryName + ' Trigger');
     }
   }
 
@@ -64,38 +57,24 @@ export abstract class BinarySensor extends Accessory {
   }
 
   getSensorState(): number {
-    return this.states.SensorState;
+    return this.getCharacteristicValue(this.EventDetectedCharacteristic) as number;
   }
 
-  protected abstract getService(): WithUUID<typeof Service>;
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  protected abstract getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }>;
+  // EventDetected
 
-  // Handlers
+  async getEventDetectedHandler(): Promise<CharacteristicValue> {
+    const SensorState: number = this.getSensorState();
+    this.log.debug(`[${this.accessoryName}] Getting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`);
 
-  async getEventDetected(): Promise<CharacteristicValue> {
-    const sensorState = this.states.SensorState;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Sensor Current State: ${BinarySensor.getStateName(sensorState)}`);
-
-    return sensorState;
+    return SensorState;
   }
 
   protected getJsonState(): string {
     return JSON.stringify({});
-  }
-
-  static getStateName(state: number): string {
-    let sensorStateName: string;
-
-    switch (state) {
-    case undefined: { sensorStateName = 'undefined'; break; }
-    case BinarySensor.NORMAL: { sensorStateName = BinarySensor.NORMAL_INACTIVE; break; }
-    case BinarySensor.TRIGGERED: { sensorStateName = BinarySensor.TRIGGERED_ACTIVE; break; }
-    default: { sensorStateName = state.toString();}
-    }
-
-    return sensorStateName;
   }
 
   /**
@@ -111,13 +90,33 @@ export abstract class BinarySensor extends Accessory {
     }
 
     // Only update the sensor if the state has changed
-    if (this.states.SensorState !== sensorState) {
-      this.states.SensorState = sensorState;
-
-      this.service!.updateCharacteristic(this.eventDetected, (this.states.SensorState));
-
-      // eslint-disable-next-line max-len
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(this.states.SensorState)}`, isLoggingDisabled);
+    let SensorState: number = this.getSensorState();
+    if (SensorState !== sensorState) {
+      SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
+       
+      this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
     }
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get NORMAL(): number     { return 0; }
+  static get TRIGGERED(): number  { return 1; }
+
+  static getStateName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case BinarySensor.NORMAL: { name = BinarySensor.NORMAL_INACTIVE; break; }
+    case BinarySensor.TRIGGERED: { name = BinarySensor.TRIGGERED_ACTIVE; break; }
+    default: { name = state.toString();}
+    }
+
+    return name;
   }
 }

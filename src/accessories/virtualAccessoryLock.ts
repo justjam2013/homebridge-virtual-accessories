@@ -1,8 +1,6 @@
-/* eslint-disable brace-style */
+import { Units, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import { Units, CharacteristicValue, PlatformAccessory } from 'homebridge';
-
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -14,16 +12,8 @@ import { TLVDeviceCredentialRequest, TLVDeviceCredentialResponse, TLVReaderKeyRe
  */
 export class Lock extends Accessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Lock';
-
-  static readonly UNSECURED: number = 0;  // Characteristic.LockCurrentState.UNSECURED
-  static readonly SECURED: number = 1;    // Characteristic.LockCurrentState.SECURED
-  static readonly JAMMED: number = 2;     // Characteristic.LockCurrentState.JAMMED
-  static readonly UNKNOWN: number = 3;    // Characteristic.LockCurrentState.UNKNOWN
-
-  static readonly SECURED_REMOTELY: number = 6;                 // Characteristic.LockLastKnownAction.SECURED_REMOTELY
-  static readonly UNSECURED_REMOTELY: number = 7;               // Characteristic.LockLastKnownAction.UNSECURED_REMOTELY
-  static readonly SECURED_BY_AUTO_SECURE_TIMEOUT: number = 8;   // Characteristic.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT
+  private lockManagementService: Service;
+  private nfcAccessService!: Service;
 
   private readonly stateStorageKey: string = 'LockState';
   private readonly securityTimeoutStorageKey: string = 'LockAutoSecurityTimeout';
@@ -34,7 +24,6 @@ export class Lock extends Accessory {
   // base64 encoded hex "010110020110"; 16 keys each
   private readonly deviceCredentialPublicKeysCount: number = 16;
   private readonly readerPrivateKeysCount: number = 16;
-  private readonly nfcAccessSupportedConfiguration: string = 'AQEQAgEQ';
 
   private deviceCredentialPublicKeys = new Map<string, string>();   // Issuer Key Identifier - Device Credential Public Key
   private readerPrivateKeys = new Map<string, string>();   // Key Identifier - Reader Private Key
@@ -52,31 +41,28 @@ export class Lock extends Accessory {
 
   private securityTimerId: ReturnType<typeof setTimeout> | undefined;
 
-  private states = {
-    LockCurrentState: Lock.SECURED,
-    LockTargetState: Lock.SECURED,
-    LockManagementAutoSecurityTimeout: 0,
-    LockLastKnownAction: Lock.UNSECURED_REMOTELY,
-  };
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.LockMechanism);
+
+    let LockCurrentState: number = Lock.SECURED;
+    let LockTargetState: number = Lock.SECURED;
+    let LockManagementAutoSecurityTimeout: number = 0;
+    let LockLastKnownAction: number = Lock.UNSECURED_REMOTELY;
+    const NFCAccessSupportedConfiguration: string = 'AQEQAgEQ';
+
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.lock.defaultState === 'unlocked' ? Lock.UNSECURED : Lock.SECURED;
-    const autoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
-    // const walletKeyColor = this.accessoryConfiguration.lock.walletKeyColor || 'default';
     // HomeKey appears to be broken right now, so temporarily leaving NFC out if no HomeKey card color is selected
     const walletKeyColor = (this.accessoryConfiguration.lock.walletKeyColor !== undefined) ? this.accessoryConfiguration.lock.walletKeyColor : undefined;
     this.setupHomeKey = (walletKeyColor === undefined) ? false : true;
 
-    this.states.LockCurrentState = this.defaultState;
-    this.states.LockManagementAutoSecurityTimeout = autoSecurityTimeout;
-    this.states.LockLastKnownAction = Lock.UNSECURED_REMOTELY;      // There is no "unknown" value
+    LockCurrentState = this.defaultState;
+    LockManagementAutoSecurityTimeout = this.accessoryConfiguration.lock.autoSecurityTimeout;
 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
@@ -91,13 +77,13 @@ export class Lock extends Accessory {
       const cachedReaderPrivateKeys = (jsonReaderPrivateKeys !== undefined) ? Utils.jsonToMap(jsonReaderPrivateKeys) : undefined;
 
       if (cachedState !== undefined) {
-        this.states.LockCurrentState = cachedState;
+        LockCurrentState = cachedState;
       }
       if (cachedSecurityTimeout !== undefined) {
-        this.states.LockManagementAutoSecurityTimeout = cachedSecurityTimeout;
+        LockManagementAutoSecurityTimeout = cachedSecurityTimeout;
       }
       if (cachedLastKnownAction !== undefined) {
-        this.states.LockLastKnownAction = cachedLastKnownAction;
+        LockLastKnownAction = cachedLastKnownAction;
       }
       if (cachedDeviceCredentialPublicKeys !== undefined) {
         this.deviceCredentialPublicKeys = cachedDeviceCredentialPublicKeys;
@@ -107,29 +93,24 @@ export class Lock extends Accessory {
       }
     }
 
-    this.states.LockTargetState = this.states.LockCurrentState;
+    LockTargetState = LockCurrentState;
 
     if (this.setupHomeKey) {
-      this.accessoryInformationService!.setCharacteristic(this.platform.Characteristic.HardwareFinish, this.lockHardwareFinish[walletKeyColor as string]);
+      this.accessoryInformationService!.setCharacteristic(CharacteristicType.HardwareFinish, this.lockHardwareFinish[walletKeyColor as string]);
     }
 
-    this.service = this.accessory.getService(this.platform.Service.LockMechanism) || this.accessory.addService(this.platform.Service.LockMechanism);
-
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
-
     // Update the initial state of the accessory
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
-    this.service.updateCharacteristic(this.platform.Characteristic.LockTargetState, (this.states.LockTargetState));
+    this.setLockCurrentState(LockCurrentState);
+    this.setLockTargetState(LockTargetState);
 
-    // register handlers
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.LockCurrentState)
-      .onGet(this.getLockCurrentState.bind(this)); // GET - bind to the 'handleLockCurrentStateGet` method below
+    this.service.getCharacteristic(CharacteristicType.LockCurrentState)
+      .onGet(this.getLockCurrentStateHandler.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.LockTargetState)
-      .onSet(this.setLockTargetState.bind(this)) // SET - bind to the `handleLockTargetStateSet` method below
-      .onGet(this.getLockTargetState.bind(this)); // GET - bind to the `handleLockTargetStateGet` method below
+    this.service.getCharacteristic(CharacteristicType.LockTargetState)
+      .onSet(this.setLockTargetStateHandler.bind(this))
+      .onGet(this.getLockTargetStateHandler.bind(this));
 
     /**
      * Creating multiple services of the same type.
@@ -143,15 +124,21 @@ export class Lock extends Accessory {
      */
 
     // Creating Lock Management service
-    const lockManagementServiceName = `${this.accessoryConfiguration.accessoryName} Management`;
-    const lockManagementService = this.accessory.getService(lockManagementServiceName)
-      || this.accessory.addService(this.platform.Service.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
+    const lockManagementServiceName = `${this.accessoryName} Management`;
+    this.lockManagementService =
+      this.accessory.getService(lockManagementServiceName) ||
+      this.accessory.addService(ServiceType.LockManagement, lockManagementServiceName, this.accessory.UUID + '-LMS');
 
-    lockManagementService.getCharacteristic(this.platform.Characteristic.LockControlPoint)
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout, LockManagementAutoSecurityTimeout);
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockLastKnownAction, LockLastKnownAction);
+
+    // Last register handlers
+
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockControlPoint)
       .onSet(this.setLockControlPoint.bind(this));
-    lockManagementService.getCharacteristic(this.platform.Characteristic.Version)
+    this.lockManagementService.getCharacteristic(CharacteristicType.Version)
       .onGet(this.getVersion.bind(this));
-    lockManagementService.getCharacteristic(this.platform.Characteristic.LockManagementAutoSecurityTimeout)
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout)
       .onSet(this.setLockManagementAutoSecurityTimeout.bind(this))
       .onGet(this.getLockManagementAutoSecurityTimeout.bind(this))
       .setProps({
@@ -160,120 +147,132 @@ export class Lock extends Accessory {
         minStep: 1,
         unit: Units.SECONDS,
       });
-    lockManagementService.getCharacteristic(this.platform.Characteristic.LockLastKnownAction)
+    this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction)
       .onGet(this.getLockLastKnownAction.bind(this));
 
-    if (this.setupHomeKey) {
     // Creating Nfc Access service
-      const nfcAccessServiceName = `${this.accessoryConfiguration.accessoryName} Nfc Access`;
-      const nfcAccessService = this.accessory.getService(nfcAccessServiceName)
-        || this.accessory.addService(this.platform.Service.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
+    if (this.setupHomeKey) {
+      const nfcAccessServiceName = `${this.accessoryName} Nfc Access`;
+      this.nfcAccessService =
+        this.accessory.getService(nfcAccessServiceName) ||
+        this.accessory.addService(ServiceType.NFCAccess, nfcAccessServiceName, this.accessory.UUID + '-NFC');
 
-      nfcAccessService.getCharacteristic(this.platform.Characteristic.ConfigurationState)
+      this.nfcAccessService.setCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration, NFCAccessSupportedConfiguration);
+
+      // Last register handlers
+
+      this.nfcAccessService.getCharacteristic(CharacteristicType.ConfigurationState)
         .onGet(this.getConfigurationState.bind(this));
-      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessControlPoint)
+      this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessControlPoint)
         .onSet(this.setNFCAccessControlPoint.bind(this))
         .onGet(this.getNFCAccessControlPoint.bind(this));
-      nfcAccessService.getCharacteristic(this.platform.Characteristic.NFCAccessSupportedConfiguration)
+      this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration)
         .onGet(this.getNFCAccessSupportedConfiguration.bind(this));
     }
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async getLockCurrentState(): Promise<CharacteristicValue> {
-    const lockState = this.states.LockCurrentState;
+  // LockCurrentState
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Current State: ${Lock.getStateName(lockState)}`);
+  async getLockCurrentStateHandler(): Promise<CharacteristicValue> {
+    const LockCurrentState: number = this.getLockCurrentState();
+    this.log.debug(`[${this.accessoryName}] Getting Current State: ${Lock.getStateName(LockCurrentState)}`);
 
-    return lockState;
+    return LockCurrentState;
   }
 
-  async setLockTargetState(value: CharacteristicValue) {
-    this.states.LockTargetState = value as number;
+  // LockTargetState
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Target State: ${Lock.getStateName(this.states.LockTargetState)}`);
+  async getLockTargetStateHandler(): Promise<CharacteristicValue> {
+    const LockTargetState: number = this.getLockTargetState();
+    this.log.debug(`[${this.accessoryName}] Getting Target State: ${Lock.getStateName(LockTargetState)}`);
 
-    this.states.LockCurrentState = this.states.LockTargetState;
-    this.service!.setCharacteristic(this.platform.Characteristic.LockCurrentState, (this.states.LockCurrentState));
+    return LockTargetState;
+  }
 
-    this.states.LockLastKnownAction = (this.states.LockCurrentState === Lock.SECURED) ?
+  async setLockTargetStateHandler(value: CharacteristicValue) {
+    let LockTargetState: number = value as number;
+    LockTargetState = this.updateLockTargetState(LockTargetState);
+    this.log.info(`[${this.accessoryName}] Setting Target State: ${Lock.getStateName(LockTargetState)}`);
+
+    const LockCurrentState: number = this.updateLockCurrentState(LockTargetState);
+    this.log.info(`[${this.accessoryName}] Setting Current State: ${Lock.getStateName(LockCurrentState)}`);
+
+    let LockLastKnownAction: number = (LockCurrentState === Lock.SECURED) ?
       Lock.SECURED_REMOTELY :
       Lock.UNSECURED_REMOTELY;
+    this.lockManagementService.updateCharacteristic(CharacteristicType.LockLastKnownAction, LockLastKnownAction);
+    LockLastKnownAction = this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number;
+    this.log.info(`[${this.accessoryName}] Setting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
-    this.storeState();
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Current State: ${Lock.getStateName(this.states.LockCurrentState)}`);
+    this.saveState();
 
     // Run auto lock timeout
     this.startAutoSecurityTimeout();
   }
 
-  async getLockTargetState(): Promise<CharacteristicValue> {
-    const lockState = this.states.LockTargetState;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Target State: ${Lock.getStateName(lockState)}`);
-
-    return lockState;
-  }
-
   // Lock Management Service handlers
 
   async setLockControlPoint(value: CharacteristicValue) {
-    const lockControlPoint = value;
-
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Control Point: ${lockControlPoint}`);
+    const LockControlPoint = value;
+    this.log.info(`[${this.accessoryName}] Setting Lock Control Point: ${LockControlPoint}`);
   }
 
   async getVersion(): Promise<CharacteristicValue> {
-    const version = '1.0.0';
+    const Version: string = '1.0.0';
+    this.log.debug(`[${this.accessoryName}] Getting Lock Management Version: ${Version}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Version: ${version}`);
-
-    return version;
-  }
-
-  async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
-    this.states.LockManagementAutoSecurityTimeout = value as number;
-
-    // eslint-disable-next-line max-len
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Lock Management Auto Security Timeout: ${this.states.LockManagementAutoSecurityTimeout}`);
+    return Version;
   }
 
   async getLockManagementAutoSecurityTimeout(): Promise<CharacteristicValue> {
-    const lockManagementAutoSecurityTimeout = this.states.LockManagementAutoSecurityTimeout;
+    const LockAutoSecurityTimeout: number = this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
+    this.log.debug(`[${this.accessoryName}] Getting Lock Management Auto Security Timeout: ${LockAutoSecurityTimeout}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Management Auto Security Timeout: ${lockManagementAutoSecurityTimeout}`);
+    return LockAutoSecurityTimeout;
+  }
 
-    return lockManagementAutoSecurityTimeout;
+  async setLockManagementAutoSecurityTimeout(value: CharacteristicValue) {
+    let LockAutoSecurityTimeout: number = value as number;
+    this.lockManagementService.setCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout, LockAutoSecurityTimeout);
+    LockAutoSecurityTimeout = this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
+    this.log.info(`[${this.accessoryName}] Setting Lock Management Auto Security Timeout: ${LockAutoSecurityTimeout}`);
   }
 
   async getLockLastKnownAction(): Promise<CharacteristicValue> {
-    const lockLastKnownAction = this.states.LockLastKnownAction;
+    const LockLastKnownAction: number = this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number;
+    this.log.debug(`[${this.accessoryName}] Getting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Lock Last Known Action: ${lockLastKnownAction}`);
-
-    return lockLastKnownAction;
+    return LockLastKnownAction;
   }
 
   // NFC Service handlers
 
   async getConfigurationState(): Promise<CharacteristicValue> {
-    const configurationState = 0;   // Successful
+    const ConfigurationState: number = 0;   // Successful
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Configuration State: ${ConfigurationState}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Configuration State: ${configurationState}`);
+    return ConfigurationState;
+  }
 
-    return configurationState;
+  async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
+    const NFCAccessControlPoint: string = '';
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Control Point: ${NFCAccessControlPoint}`);
+
+    return NFCAccessControlPoint;
   }
 
   async setNFCAccessControlPoint(value: CharacteristicValue) {
-    const nfcAccessControlPoint = value as string;
+    const NFCAccessControlPoint: string = value as string;
 
     try {
-      const response: string = this.processAccessControlPointRequest(nfcAccessControlPoint);
+      const response: string = this.processAccessControlPointRequest(NFCAccessControlPoint);
 
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Setting NFC Access Control Point: ${nfcAccessControlPoint}`);
-      this.log.debug(`[${this.accessoryConfiguration.accessoryName}] NFC Access Control Point Response: "${response}"`);
+      this.log.debug(`[${this.accessoryName}] Setting NFC Access Control Point: ${NFCAccessControlPoint}`);
+      this.log.debug(`[${this.accessoryName}] NFC Access Control Point Response: "${response}"`);
 
       return response;
     }
@@ -288,27 +287,20 @@ export class Lock extends Accessory {
     return '';
   }
 
-  async getNFCAccessControlPoint(): Promise<CharacteristicValue> {
-    const nfcAccessControlPoint = '';
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Control Point: ${nfcAccessControlPoint}`);
-
-    return nfcAccessControlPoint;
-  }
-
   async getNFCAccessSupportedConfiguration(): Promise<CharacteristicValue> {
-    const nfcAccessSupportedConfiguration = this.nfcAccessSupportedConfiguration;
+    const NFCAccessSupportedConfiguration: string = this.nfcAccessService.getCharacteristic(CharacteristicType.NFCAccessSupportedConfiguration).value as string;
+    this.log.debug(`[${this.accessoryName}] Getting NFC Access Supported Configuration: ${NFCAccessSupportedConfiguration}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting NFC Access Supported Configuration: ${nfcAccessSupportedConfiguration}`);
-
-    return nfcAccessSupportedConfiguration;
+    return NFCAccessSupportedConfiguration;
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.stateStorageKey]: this.states.LockCurrentState,
-      [this.securityTimeoutStorageKey]: this.states.LockManagementAutoSecurityTimeout,
-      [this.lastKnownActionStorageKey]: this.states.LockLastKnownAction,
+      [this.stateStorageKey]: this.getLockCurrentState(),
+      [this.securityTimeoutStorageKey]: this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number,
+      [this.lastKnownActionStorageKey]: this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number,
     };
 
     if (this.setupHomeKey) {
@@ -317,47 +309,32 @@ export class Lock extends Accessory {
     }
 
     const json = JSON.stringify(jsonState);
-
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Lock.ACCESSORY_TYPE_NAME;
-  }
-
-  static getStateName(state: number): string {
-    let stateName: string;
-
-    switch (state) {
-    case undefined: { stateName = 'undefined'; break; }
-    case Lock.UNSECURED: { stateName = 'UNSECURED'; break; }
-    case Lock.SECURED: { stateName = 'SECURED'; break; }
-    case Lock.JAMMED: { stateName = 'JAMMED'; break; }
-    case Lock.UNKNOWN: { stateName = 'UNKNOWN'; break; }
-    default: { stateName = state.toString(); }
-    }
-
-    return stateName;
-  }
+  //
 
   private startAutoSecurityTimeout(): void {
-    if (this.states.LockTargetState !== this.defaultState && this.states.LockManagementAutoSecurityTimeout > 0) {
-      const securityTimeoutMillis: number = this.states.LockManagementAutoSecurityTimeout * 1000;
+    const LockTargetState: number = this.getLockTargetState();
+    const LockManagementAutoSecurityTimeout: number =
+      this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
+    if (LockTargetState !== this.defaultState && LockManagementAutoSecurityTimeout > 0) {
+      const securityTimeoutMillis: number = LockManagementAutoSecurityTimeout * 1000;
       this.securityTimerId = setTimeout(() => {
         // Reset timer
         clearTimeout(this.securityTimerId);
 
         this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
 
-        this.states.LockLastKnownAction = Lock.SECURED_BY_AUTO_SECURE_TIMEOUT;
+        this.lockManagementService.updateCharacteristic(CharacteristicType.LockLastKnownAction, Lock.SECURED_BY_AUTO_SECURE_TIMEOUT);
       }, securityTimeoutMillis)
         .unref();
  
-      const timeout: string = Utils.secondsToHHmmss(this.states.LockManagementAutoSecurityTimeout);
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Security Timeout in ${timeout}`);
+      const timeout: string = Utils.secondsToHHmmss(LockManagementAutoSecurityTimeout);
+      this.log.info(`[${this.accessoryName}] Security Timeout in ${timeout}`);
     }
     else {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] No Security Timeout defined`);
+      this.log.info(`[${this.accessoryName}] No Security Timeout defined`);
     }
   }
 
@@ -365,14 +342,14 @@ export class Lock extends Accessory {
   private readonly GET_READER_KEY_REQUEST: number =             Utils.concatenate(TLVUtils.OPERATION_GET, TLVUtils.READER_KEY_REQUEST);
   private readonly ADD_DEVICE_CREDENTIAL_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_ADD, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
   private readonly ADD_GET_READER_KEY_REQUEST: number =         Utils.concatenate(TLVUtils.OPERATION_ADD, TLVUtils.READER_KEY_REQUEST);
-  private readonly RFEMOVE_DEVICE_CREDENTIAL_REQUEST: number =  Utils.concatenate(TLVUtils.OPERATION_REMOVE, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
+  private readonly REMOVE_DEVICE_CREDENTIAL_REQUEST: number =   Utils.concatenate(TLVUtils.OPERATION_REMOVE, TLVUtils.DEVICE_CREDENTIAL_REQUEST);
   private readonly REMOVE_GET_READER_KEY_REQUEST: number =      Utils.concatenate(TLVUtils.OPERATION_REMOVE, TLVUtils.READER_KEY_REQUEST);
 
   private processAccessControlPointRequest(base64TlvRequest: string) {
     const hexTlvRequest: string = Utils.base64DecodeToHexString(base64TlvRequest);
     const tlvRequest: TLVRequest = new TLVRequest(hexTlvRequest, this.log);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
+    this.log.debug(`[${this.accessoryName}] hexTlvRequest: "${hexTlvRequest}"`);
 
     let hexTlvResponse: string = '';
 
@@ -381,7 +358,7 @@ export class Lock extends Accessory {
     switch (controlPointRequest) {
     // Not called
     case this.GET_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Device Credential`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: GET Device Credential`);
 
       if (this.deviceCredentialPublicKeys.size > 0) {
         const issuerKeyIdentifier = this.deviceCredentialPublicKeys.keys().next().value;
@@ -395,7 +372,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: GET Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: GET Reader Key`);
 
       if (this.readerPrivateKeys.size > 0) {
         const readerKeyIdentifier = this.readerPrivateKeys.keys().next().value;
@@ -409,7 +386,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.ADD_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Device Credential`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: ADD Device Credential`);
 
       const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
       const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
@@ -434,7 +411,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.ADD_GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: ADD Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: ADD Reader Key`);
 
       const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
       const readerPrivateKey = request.readerPrivateKey!.value as string;
@@ -459,8 +436,8 @@ export class Lock extends Accessory {
       break;
     }
     // Not called
-    case this.RFEMOVE_DEVICE_CREDENTIAL_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Device Credential`);
+    case this.REMOVE_DEVICE_CREDENTIAL_REQUEST: {
+      this.log.info(`[${this.accessoryName}] Access Control Point: REMOVE Device Credential`);
 
       const request: TLVDeviceCredentialRequest = tlvRequest.requestPayload as TLVDeviceCredentialRequest;
       const issuerKeyIdentifier: string = request.issuerKeyIdentifier!.value as string;
@@ -480,7 +457,7 @@ export class Lock extends Accessory {
       break;
     }
     case this.REMOVE_GET_READER_KEY_REQUEST: {
-      this.log.info(`[${this.accessoryConfiguration.accessoryName}] Access Control Point: REMOVE Reader Key`);
+      this.log.info(`[${this.accessoryName}] Access Control Point: REMOVE Reader Key`);
 
       const request: TLVReaderKeyRequest = tlvRequest.requestPayload as TLVReaderKeyRequest;
       const keyIdentifier = request.keyIdentifier!.value as string;
@@ -500,17 +477,61 @@ export class Lock extends Accessory {
     }
     default: {
       if (!TLVUtils.OPERATIONS.includes(tlvRequest.operation.type)) {
-        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
+        this.log.error(`[${this.accessoryName}] Invalid operation: "${tlvRequest.operation.value}"`);
       }
       if (!TLVUtils.REQUESTS.includes(tlvRequest.request.type)) {
-        this.log.error(`[${this.accessoryConfiguration.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
+        this.log.error(`[${this.accessoryName}] Invalid request: "${tlvRequest.request.type}"`);
       }
     }
     }
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
+    this.log.debug(`[${this.accessoryName}] hexTlvResponse: "${hexTlvResponse}"`);
 
     const base64TlvResponse = Utils.hexStringEncodeToBase64(hexTlvResponse);
     return base64TlvResponse;
+  }
+
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get UNSECURED(): number                      { return CharacteristicType.LockCurrentState.UNSECURED; }   // Lock.LockTargetState.UNSECURED
+  static get SECURED(): number                        { return CharacteristicType.LockCurrentState.SECURED; }     // Lock.LockTargetState.SECURED
+  static get JAMMED(): number                         { return CharacteristicType.LockCurrentState.JAMMED; }
+  static get UNKNOWN(): number                        { return CharacteristicType.LockCurrentState.UNKNOWN; }
+
+  static get SECURED_REMOTELY(): number               { return CharacteristicType.LockLastKnownAction.SECURED_REMOTELY; }
+  static get UNSECURED_REMOTELY(): number             { return CharacteristicType.LockLastKnownAction.UNSECURED_REMOTELY; }
+  static get SECURED_BY_AUTO_SECURE_TIMEOUT(): number { return CharacteristicType.LockLastKnownAction.SECURED_BY_AUTO_SECURE_TIMEOUT; }
+
+  static getStateName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Lock.UNSECURED: { name = 'UNSECURED'; break; }
+    case Lock.SECURED: { name = 'SECURED'; break; }
+    case Lock.JAMMED: { name = 'JAMMED'; break; }
+    case Lock.UNKNOWN: { name = 'UNKNOWN'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
+  }
+
+  static getLastKnownActionName(state: number): string {
+    let name: string;
+
+    switch (state) {
+    case undefined: { name = 'undefined'; break; }
+    case Lock.SECURED_REMOTELY: { name = 'SECURED REMOTELY'; break; }
+    case Lock.UNSECURED_REMOTELY: { name = 'UNSECURED REMOTELY'; break; }
+    case Lock.SECURED_BY_AUTO_SECURE_TIMEOUT: { name = 'SECURED BY AUTO SECURE TIMEOUT'; break; }
+    default: { name = state.toString(); }
+    }
+
+    return name;
   }
 }

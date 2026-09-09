@@ -24,7 +24,8 @@ export class ConfigurationUtils {
     const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
     try {
       accessoryConfig = deserialize(json, AccessoryConfiguration);
-    } catch (error) {
+    }
+    catch (error) {
       this.log.error(`[Configuration] Error: ${JSON.stringify(error)}`);
     }
 
@@ -38,10 +39,12 @@ export class ConfigurationUtils {
       const json: string = (typeof config === 'object') ? JSON.stringify(config) : <string>config;
       try {
         sensorServerConfig = deserialize(json, WebhookServerConfiguration);
-      } catch (error) {
+      }
+      catch (error) {
         this.log.error(`[Configuration] SensorServer configuration error: ${JSON.stringify(error)}`);
       }
-    } else {
+    }
+    else {
       this.log.debug('[Configuration] No SensorServer configuration. Skipping');
     }
 

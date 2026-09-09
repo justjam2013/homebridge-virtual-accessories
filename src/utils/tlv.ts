@@ -1,5 +1,3 @@
-/* eslint-disable brace-style */
-
 import { createHash } from 'crypto';
 import { VirtualLogger } from './virtualLogger.js';
 

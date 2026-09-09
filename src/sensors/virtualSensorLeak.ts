@@ -1,6 +1,6 @@
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { BinarySensor } from './binarySensor.js';
 
@@ -9,25 +9,12 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class LeakSensor extends BinarySensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'LeakSensor';
-
-  static readonly LEAK_NOT_DETECTED: number = 0;  // Characteristic.LeakDetected.LEAK_NOT_DETECTED;
-  static readonly LEAK_DETECTED: number = 1;      // Characteristic.LeakDetected.LEAK_DETECTED;
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getService(): WithUUID<typeof Service> {
-    return this.platform.Service.LeakSensor;
-  }
-
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return this.platform.Characteristic.LeakDetected;
+    super(platform, accessory, accessoryConfiguration, ServiceType.LeakSensor, CharacteristicType.LeakDetected);
   }
 
   protected getStateName(state: number): string {
@@ -43,7 +30,12 @@ export class LeakSensor extends BinarySensor {
     return sensorStateName;
   }
 
-  protected getAccessoryTypeName(): string {
-    return LeakSensor.ACCESSORY_TYPE_NAME;
-  }
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get LEAK_NOT_DETECTED(): number { return CharacteristicType.LeakDetected.LEAK_NOT_DETECTED; }
+  static get LEAK_DETECTED(): number     { return CharacteristicType.LeakDetected.LEAK_DETECTED; }
 }

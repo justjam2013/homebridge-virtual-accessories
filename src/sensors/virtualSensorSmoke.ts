@@ -1,6 +1,6 @@
-import type { Characteristic, PlatformAccessory, Service, WithUUID } from 'homebridge';
+import type { PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { BinarySensor } from './binarySensor.js';
 
@@ -9,25 +9,12 @@ import { BinarySensor } from './binarySensor.js';
  */
 export class SmokeSensor extends BinarySensor {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'SmokeSensor';
-
-  static readonly SMOKE_NOT_DETECTED: number = 0;   // Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
-  static readonly SMOKE_DETECTED: number = 1;       // Characteristic.SmokeDetected.SMOKE_DETECTED;
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
-  }
-
-  protected getService(): WithUUID<typeof Service> {
-    return this.platform.Service.SmokeSensor;
-  }
-
-  protected getEventDetectedCharacteristic(): WithUUID<{ new (): Characteristic; }> {
-    return this.platform.Characteristic.SmokeDetected;
+    super(platform, accessory, accessoryConfiguration, ServiceType.SmokeSensor, CharacteristicType.SmokeDetected);
   }
 
   protected getStateName(state: number): string {
@@ -43,7 +30,12 @@ export class SmokeSensor extends BinarySensor {
     return sensorStateName;
   }
 
-  protected getAccessoryTypeName(): string {
-    return SmokeSensor.ACCESSORY_TYPE_NAME;
-  }
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get SMOKE_NOT_DETECTED(): number { return CharacteristicType.SmokeDetected.SMOKE_NOT_DETECTED; }
+  static get SMOKE_DETECTED(): number     { return CharacteristicType.SmokeDetected.SMOKE_DETECTED; }
 }

@@ -1,6 +1,6 @@
 import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
 
-import { VirtualAccessoriesPlatform } from '../platform.js';
+import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
 import { Accessory } from './accessory.js';
 
@@ -9,90 +9,112 @@ import { Accessory } from './accessory.js';
  */
 export class Microphone extends Accessory {
 
-  static readonly ACCESSORY_TYPE_NAME: string = 'Microphone';
-
   private readonly muteStorageKey: string = 'MicrophoneMute';
-
-  private states = {
-    Mute: false,
-    Volume: 100,
-  };
 
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
-    super(platform, accessory, accessoryConfiguration);
+    super(platform, accessory, accessoryConfiguration, ServiceType.Microphone);
+
+    let Mute: boolean = Microphone.UNMUTED;
+    let Volume: number = 100;
 
     // First configure the device based on the accessory details
-    this.states.Volume = this.accessoryConfiguration.microphone.volume;
+    Volume = this.accessoryConfiguration.microphone.volume;
 
     const accessoryState: string = this.loadAccessoryState(this.storagePath);
     if (!this.isEmptyAccessoryState(accessoryState)) {
-      const cachedDoorbellMute = accessoryState[this.muteStorageKey] as boolean;
+      const cachedMute = accessoryState[this.muteStorageKey] as boolean;
 
-      if (cachedDoorbellMute !== undefined) {
-        this.states.Mute = cachedDoorbellMute;
+      if (cachedMute !== undefined) {
+        Mute = cachedMute;
       }
     }
 
-    this.service = this.accessory.getService(this.platform.Service.Microphone) || this.accessory.addService(this.platform.Service.Microphone);
+    // Update the initial state of the accessory
+    this.setMute(Mute);
+    this.setVolume(Volume);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, this.accessoryConfiguration.accessoryName);
+    // Last register handlers
 
-    this.service.getCharacteristic(this.platform.Characteristic.Mute)
-      .onSet(this.setMute.bind(this))
-      .onGet(this.getMute.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.Volume)
-      .onSet(this.setVolume.bind(this))
-      .onGet(this.getVolume.bind(this));
+    this.service.getCharacteristic(CharacteristicType.Mute)
+      .onSet(this.setMuteHandler.bind(this))
+      .onGet(this.getMuteHandler.bind(this));
+
+    this.service.getCharacteristic(CharacteristicType.Volume)
+      .onSet(this.setVolumeHandler.bind(this))
+      .onGet(this.getVolumeHandler.bind(this));
   }
 
-  // Handlers
+  //
+  // ****************************** Handlers ******************************
+  //
 
-  async setMute(value: CharacteristicValue) {
-    this.states.Mute = value as boolean;
+  // Mute
 
-    this.storeState();
+  async getMuteHandler(): Promise<CharacteristicValue> {
+    const Mute: boolean = this.getMute();
+    this.log.debug(`[${this.accessoryName}] Getting Mute: ${Microphone.getMuteName(Mute)}`);
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Mute: ${this.states.Mute}`);
+    return Mute;
   }
 
-  async getMute(): Promise<CharacteristicValue> {
-    const mute: boolean = this.states.Mute;
+  async setMuteHandler(value: CharacteristicValue) {
+    let Mute: boolean = value as boolean;
+    Mute = this.updateMute(Mute);
+    this.log.info(`[${this.accessoryName}] Setting Mute: ${Microphone.getMuteName(Mute)}`);
 
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Mute: ${mute}`);
-
-    return mute;
+    this.saveState();
   }
 
-  async setVolume(value: CharacteristicValue) {
-    this.states.Volume = value as number;
+  // Volume
 
-    this.log.info(`[${this.accessoryConfiguration.accessoryName}] Setting Volume: ${this.states.Volume}`);
+  async getVolumeHandler(): Promise<CharacteristicValue> {
+    const Volume: number = this.getVolume();
+    this.log.debug(`[${this.accessoryName}] Getting Volume: ${Volume}%`);
+
+    return Volume;
   }
 
-  async getVolume(): Promise<CharacteristicValue> {
-    const volume: number = this.states.Volume;
-
-    this.log.debug(`[${this.accessoryConfiguration.accessoryName}] Getting Volume: ${volume}`);
-
-    return volume;
+  async setVolumeHandler(value: CharacteristicValue) {
+    let Volume = value as number;
+    Volume = this.updateVolume(Volume);
+    this.log.info(`[${this.accessoryName}] Setting Volume: ${Volume}%`);
   }
+
+  // Abstract methods impl
 
   protected getJsonState(): string {
     const jsonState = {
-      [this.muteStorageKey]: this.states.Mute,
+      [this.muteStorageKey]: this.getMute(),
     };
 
     const json = JSON.stringify(jsonState);
-
     return json;
   }
 
-  protected getAccessoryTypeName(): string {
-    return Microphone.ACCESSORY_TYPE_NAME;
+  //
+  // ****************************** Characteristics ******************************
+  //
+
+  // Lazy static getters
+
+  static get MUTED(): boolean       { return true; }    // CharacteristicType.Mute
+  static get UNMUTED(): boolean     { return false; }   // CharacteristicType.Mute
+
+  static getMuteName(event: boolean): string {
+    let name: string;
+
+    switch (event) {
+    case undefined: { name = 'undefined'; break; }
+    case Microphone.MUTED: { name = 'MUTED'; break; }
+    case Microphone.UNMUTED: { name = 'UNMUTED'; break; }
+    default: { name = event.toString(); }
+    }
+
+    return name;
   }
 }
