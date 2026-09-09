@@ -179,7 +179,7 @@ export class Television extends ExternalAccessory {
     const jsonState = {
       [this.stateStorageKey]: this.getActive(),
       [this.inputActiveIdStorageKey]: this.getActiveIdentifier(),
-      [this.configuredNameStorageKey]: this.getConfiguredName,
+      [this.configuredNameStorageKey]: this.getConfiguredName(),
     };
 
     const json = JSON.stringify(jsonState);
