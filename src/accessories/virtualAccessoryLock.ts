@@ -204,7 +204,8 @@ export class Lock extends Accessory {
     let LockLastKnownAction: number = (LockCurrentState === Lock.SECURED) ?
       Lock.SECURED_REMOTELY :
       Lock.UNSECURED_REMOTELY;
-    LockLastKnownAction = this.updateCharacteristicValue(CharacteristicType.LockLastKnownAction, LockLastKnownAction) as number;
+    this.lockManagementService.updateCharacteristic(CharacteristicType.LockLastKnownAction, LockLastKnownAction);
+    LockLastKnownAction = this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number;
     this.log.info(`[${this.accessoryName}] Setting Lock Last Known Action: ${Lock.getLastKnownActionName(LockLastKnownAction)}`);
 
     this.saveState();
@@ -298,8 +299,8 @@ export class Lock extends Accessory {
   protected getJsonState(): string {
     const jsonState = {
       [this.stateStorageKey]: this.getLockCurrentState(),
-      [this.securityTimeoutStorageKey]: this.getCharacteristicValue(CharacteristicType.LockManagementAutoSecurityTimeout),
-      [this.lastKnownActionStorageKey]: this.getCharacteristicValue(CharacteristicType.LockLastKnownAction),
+      [this.securityTimeoutStorageKey]: this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number,
+      [this.lastKnownActionStorageKey]: this.lockManagementService.getCharacteristic(CharacteristicType.LockLastKnownAction).value as number,
     };
 
     if (this.setupHomeKey) {
@@ -315,7 +316,8 @@ export class Lock extends Accessory {
 
   private startAutoSecurityTimeout(): void {
     const LockTargetState: number = this.getLockTargetState();
-    const LockManagementAutoSecurityTimeout: number = this.getCharacteristicValue(CharacteristicType.LockManagementAutoSecurityTimeout) as number;
+    const LockManagementAutoSecurityTimeout: number =
+      this.lockManagementService.getCharacteristic(CharacteristicType.LockManagementAutoSecurityTimeout).value as number;
     if (LockTargetState !== this.defaultState && LockManagementAutoSecurityTimeout > 0) {
       const securityTimeoutMillis: number = LockManagementAutoSecurityTimeout * 1000;
       this.securityTimerId = setTimeout(() => {
@@ -324,7 +326,7 @@ export class Lock extends Accessory {
 
         this.service!.setCharacteristic(this.platform.Characteristic.LockTargetState, (this.defaultState));
 
-        this.updateCharacteristicValue(CharacteristicType.LockLastKnownAction, Lock.SECURED_BY_AUTO_SECURE_TIMEOUT);
+        this.lockManagementService.updateCharacteristic(CharacteristicType.LockLastKnownAction, Lock.SECURED_BY_AUTO_SECURE_TIMEOUT);
       }, securityTimeoutMillis)
         .unref();
  
