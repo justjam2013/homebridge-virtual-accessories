@@ -146,6 +146,7 @@
                 { "title": "Security System", "enum": ["securitysystem"] },
                 { "title": "Sensor - Measurement", "enum": ["measurement"] },
                 { "title": "Sensor - Triggered", "enum": ["sensor"] },
+                { "title": "Slats", "enum": ["slats"] },
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Television", "enum": ["television"] },
@@ -159,7 +160,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'slats', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
@@ -739,6 +740,61 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'securitysystem';"
               }
             },
+            "slats": {
+              "title": "Slats",
+              "type": "object",
+              "properties": {
+                "slatType": {
+                  "title": "Slat Type *",
+                  "description": "Orientation of the slats",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Horizontal", "enum": ["horizontal"] },
+                    { "title": "Vertical", "enum": ["vertical"] }
+                  ]
+                },
+                "defaultSwingMode": {
+                  "title": "Default Swing Mode",
+                  "description": "Whether the slats are swinging by default (default: Disabled)",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Disabled", "enum": ["disabled"] },
+                    { "title": "Enabled", "enum": ["enabled"] }
+                  ]
+                },
+                "minTiltAngle": {
+                  "title": "Minimum Tilt Angle",
+                  "description": "Minimum tilt angle in degrees, from -90 to 90 (default: -90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "maxTiltAngle": {
+                  "title": "Maximum Tilt Angle",
+                  "description": "Maximum tilt angle in degrees, from -90 to 90 (default: 90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "defaultTiltAngle": {
+                  "title": "Default Tilt Angle",
+                  "description": "Initial tilt angle in degrees, within the configured min/max range (default: 0)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Tilt transition duration in seconds (default: 3 seconds)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'slats';"
+              }
+            },
             "speaker": {
               "title": "Speaker",
               "type": "object",
@@ -867,7 +923,71 @@
             },
             "windowCovering": {
               "title": "Window Covering",
-              "$ref": "#/$defs/doorAndWindowAccessory",
+              "type": "object",
+              "properties": {
+                "defaultState": {
+                  "title": "Default State *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Closed", "enum": ["closed"] },
+                    { "title": "Open", "enum": ["open"] }
+                  ]
+                },
+                "transitionDuration": {
+                  "title": "Transition Duration",
+                  "description": "Open & close transition duration in seconds (default: 3 seconds)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60
+                },
+                "hasTilt": {
+                  "title": "Has Tilt",
+                  "description": "Enable slat tilt angle control (blinds)",
+                  "type": "boolean"
+                },
+                "tiltType": {
+                  "title": "Tilt Type *",
+                  "description": "Direction of the tilt characteristic",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Horizontal", "enum": ["horizontal"] },
+                    { "title": "Vertical", "enum": ["vertical"] }
+                  ],
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
+                "minTiltAngle": {
+                  "title": "Minimum Tilt Angle",
+                  "description": "Minimum tilt angle in degrees, from -90 to 90 (default: -90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
+                "maxTiltAngle": {
+                  "title": "Maximum Tilt Angle",
+                  "description": "Maximum tilt angle in degrees, from -90 to 90 (default: 90)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                },
+                "defaultTiltAngle": {
+                  "title": "Default Tilt Angle",
+                  "description": "Initial tilt angle in degrees, within the configured min/max range (default: 0)",
+                  "type": "integer",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].windowCovering && model.devices[arrayIndices].windowCovering.hasTilt === true;"
+                  }
+                }
+              },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'windowcovering';"
               }
@@ -1552,6 +1672,21 @@
                 "properties": {
                   "securitySystem": {
                     "required": [ "defaultState" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "slats" }
+                }
+              },
+              "then": {
+                "required": [ "slats" ],
+                "properties": {
+                  "slats": {
+                    "required": [ "slatType" ]
                   }
                 }
               }

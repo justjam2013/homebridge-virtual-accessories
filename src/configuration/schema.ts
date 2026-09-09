@@ -18,6 +18,7 @@ export class AccessoryType {
   static SecuritySystem: string = 'securitysystem';
   static SensorBinary: string = 'sensor';
   static SensorMeasurement: string = 'measurement';
+  static Slats: string = 'slats';
   static Speaker: string = 'speaker';
   static Switch: string = 'switch';
   static Television: string = 'television';
@@ -107,6 +108,39 @@ export class OpenableState {
   static Open: string = 'open';
 
   static States: string[] = [ OpenableState.Closed, OpenableState.Open ];
+}
+
+/**
+ *
+ */
+export class TiltType {
+
+  static Horizontal: string = 'horizontal';
+  static Vertical: string = 'vertical';
+
+  static Types: string[] = [ TiltType.Horizontal, TiltType.Vertical ];
+}
+
+/**
+ *
+ */
+export class SlatType {
+
+  static Horizontal: string = 'horizontal';
+  static Vertical: string = 'vertical';
+
+  static Types: string[] = [ SlatType.Horizontal, SlatType.Vertical ];
+}
+
+/**
+ *
+ */
+export class SwingMode {
+
+  static Disabled: string = 'disabled';
+  static Enabled: string = 'enabled';
+
+  static Modes: string[] = [ SwingMode.Disabled, SwingMode.Enabled ];
 }
 
 /**

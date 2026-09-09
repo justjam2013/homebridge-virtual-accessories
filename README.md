@@ -61,6 +61,7 @@ You do not have to volunteer to translate it, but hopefully will provide feedbac
     - [Lock](#lock)
     - [Microphone](#microphone)
     - [Security System](#security-system)
+    - [Slats](#slats)
     - [Speaker](#speaker)
     - [Television](#television)
     - [Valve](#valve)
@@ -123,11 +124,12 @@ Currently, these are the implemented virtual accessories:
 -   **Lock.** Allows you to create a virtual lock. Generates an Apple Home notification when the accessory's state changes. This will also create a HomeKey card in the Wallet app. This card is non-functional as it requires some piece of hardware to complete the loop. Also see the [note below](#issues-with-homekit) regarding issues with HomeKey.
 -   **Microphone.** Allows you to create a virtual microphone.
 -   **Security System.** Allows you to create a virtual security system. Generates am Apple Home notification when the accessory's state changes. The Security System can be put in a triggered state via a [webhook call](#webhook-service-configuration). A [webhook endpoint](#webhook-service-configuration) is also available for a panic alarm.
+-   **Slats.** Allows you to create virtual slats.
 -   **Speaker.** Allows you to create a virtual speaker.
 -   **Television.** Allows you to create a virtual television.
 -   **Valve.** Allows you to create different types of virtual valves: generic, irrigation, shower head, or water faucet.
 -   **Window.** Allows you to create a virtual window.
--   **Window Covering.** Allows you to create virtual blinds and shades.
+-   **Window Covering.** Allows you to create virtual blinds and shades. Supports tilt angle.
 -   **Switch.** Allows you to create a number of different types of virtual switches.
     - **Plain old switches.** What it says on the label.
     - **Normally on/off switches.** The default state of the switch can be set to "on" or "off". This is also the default state when Homebridge restarts. If you pair it with a timer, the switch will revert back to the default state when the timer expires.
@@ -556,6 +558,31 @@ These are example configurations of the virtual accessories and provided for ref
     "platform": "VirtualAccessoriesForHomebridge"
 ```
 
+### Slats
+
+```json
+{
+    "name": "Virtual Accessories Platform",
+    "devices": [
+        {
+            "accessoryID": "1234567",
+            "accessoryName": "My Slats",
+            "accessoryType": "slats",
+            "accessoryIsStateful": false,
+            "slats": {
+                "slatType": "horizontal",
+                "defaultSwingMode": "disabled",
+                "minTiltAngle": -90,
+                "maxTiltAngle": 90,
+                "defaultTiltAngle": 0,
+                "transitionDuration": 3
+            }
+        }
+    ],
+    "platform": "VirtualAccessoriesForHomebridge"
+}
+```
+
 ### Speaker
 
 ```json
@@ -635,13 +662,21 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryIsStateful": false,
             "windowCovering": {
                 "defaultState": "closed",
-                "transitionDuration": 3
+                "transitionDuration": 3,
+                "hasTilt": true,
+                "tiltType": "horizontal",
+                "minTiltAngle": -90,
+                "maxTiltAngle": 90,
+                "defaultTiltAngle": 0
             }
         }
     ],
     "platform": "VirtualAccessoriesForHomebridge"
 }
 ```
+
+> [!NOTE]
+> Tilt is optional. Omit `hasTilt` (or set it to `false`) for a plain covering with no tilt. When enabled, `tiltType` selects the tilt direction (`horizontal` or `vertical`). `minTiltAngle` and `maxTiltAngle` set the travel range in degrees (defaults -90 and 90); they must be within -90 to 90 and `minTiltAngle` must be less than `maxTiltAngle`. `defaultTiltAngle` sets the initial angle and must fall within that range (default 0). If the accessory is stateful, the tilt angle is restored after a restart.
 
 ### Window
 
