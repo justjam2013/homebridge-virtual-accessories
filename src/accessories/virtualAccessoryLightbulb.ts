@@ -85,7 +85,7 @@ export class Lightbulb extends Accessory {
       }
 
       if (this.type === Lightbulb.AMBIANCE && cachedColorTemperature !== undefined) {
-        ColorTemperature = this.kelvinToMired(cachedColorTemperature);
+        ColorTemperature = cachedColorTemperature;
       }
 
       if (this.type === Lightbulb.COLOR) {
