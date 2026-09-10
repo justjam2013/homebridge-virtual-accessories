@@ -7,6 +7,8 @@ import { MeasurementSensor } from './measurementSensor.js';
 import { InvalidSensorValueType, SensorValueUpdateNotAllowed } from '../errors.js';
 import { TemperatureUnit } from '../configuration/schema.js';
 
+import { readFileSync } from 'fs';
+
 /**
  * TemperatureSensor - Sensor implementation
  */
@@ -14,14 +16,14 @@ export class TemperatureSensor extends MeasurementSensor {
 
   static readonly DEFAULT_TEMPERATURE_CELSIUS: number = 20;
 
-  private platformSettingsURL: string = 'http://localhost:8581/api/auth/settings';
-
   constructor(
     platform: VirtualAccessoriesPlatform,
     accessory: PlatformAccessory,
     accessoryConfiguration: AccessoryConfiguration,
   ) {
     super(platform, accessory, accessoryConfiguration, ServiceType.TemperatureSensor, CharacteristicType.CurrentTemperature);
+
+    this.SensorUnits = this.getPlatformTemperatureUnits();
   }
 
   protected getDefaultValue(): number {
@@ -47,26 +49,23 @@ export class TemperatureSensor extends MeasurementSensor {
     return Math.round(temperatureCelsius * 10) / 10;
   }
 
-  private async getPlatformTemperatureUnits(): Promise<string> {
+  private getPlatformTemperatureUnits(): string {
     let sensorUnits: string = TemperatureUnit.Celsius;
 
     try {
-      const response = await fetch(this.platformSettingsURL);
+      const hbConfig = JSON.parse(readFileSync(this.platform.api.user.configPath(), 'utf8')) as {
+        platforms?: Array<{
+          platform?: string;
+          tempUnits?: string;
+        }>;
+      };
 
-      if (response.ok) {
-        const jsonString: string = await response.text();
-        const hbSettings: SettingsResponse = JSON.parse(jsonString);
+      const uiConfig = hbConfig.platforms?.find((platform) => platform.platform === 'config');
 
-        const temperatureUnits: string | undefined =  (hbSettings.environment.temperatureUnits ?? hbSettings.temperatureUnits ?? 'c').toUpperCase();
-        sensorUnits = (temperatureUnits === 'F') ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
-      }
-      else {
-        this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(response.status)}`);
-      }
+      sensorUnits = uiConfig?.tempUnits?.toLowerCase() === 'f' ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
     }
     catch (error) {
-      this.log.error(`[${this.accessoryName}] Error retrieving temperature units: ${JSON.stringify(error)}`);
-      this.log.error(`[${this.accessoryName}] Defaulting to Celsius (ºC)`);
+      this.log.error(`[${this.accessoryName}] Unable to read temperature units; defaulting to Celsius: ${String(error)}`);
     }
 
     return sensorUnits;
@@ -94,13 +93,4 @@ export class TemperatureSensor extends MeasurementSensor {
       this.service.setCharacteristic(this.MeasurementCharacteristic, (SensorValue));
     }
   }
-}
-
-interface SettingsResponse {
-  environment: EnvironmentResponse;
-  temperatureUnits?: string;
-}
-
-interface EnvironmentResponse {
-  temperatureUnits?: string;
 }
