@@ -30,7 +30,6 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
 
     // First configure the device based on the accessory details
     SensorValue = this.getDefaultValue(); 
-    this.SensorUnits = this.accessoryConfiguration.measurement.units;
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Sensor Current Value: ${SensorValue}`);
