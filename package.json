@@ -4,7 +4,7 @@
   "type": "module",
   "version": "3.15.1",
   "description": "Virtual HomeKit accessories for Homebridge.",
-  "author": "justjam2013",
+  "author": "justjam2023 (Renzo Zanelli - renzo.zanelli6@gmail.com)",
   "license": "MIT",
   "funding": [
     {
