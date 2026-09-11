@@ -487,6 +487,13 @@
                     { "title": "Humidifier and Dehumidifier", "enum": ["auto"] }
                   ]
                 },
+                "hasFan": {
+                  "title": "Has Fan",
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['humidifier', 'dehumidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
                 "humidifierThreshold": {
                   "title": "Humidifying Threshold *",
                   "description": "Humidity level below which the humidifier turns on (0% - 100%)",

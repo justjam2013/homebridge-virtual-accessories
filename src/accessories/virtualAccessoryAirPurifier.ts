@@ -52,7 +52,7 @@ export class AirPurifier extends Accessory {
     this.setTargetAirPurifierState(TargetAirPurifierState);
     this.setRotationSpeed(RotationSpeed);
 
-    this.refreshDeviceOperationalCondition();
+    this.updateAccessoryOperationalCondition();
 
     // Last register handlers
 
@@ -90,7 +90,7 @@ export class AirPurifier extends Accessory {
     Active = this.updateActive(Active);
     this.log.info(`[${this.accessoryName}] Setting Active: ${AirPurifier.getActiveName(Active)}`);
 
-    this.refreshDeviceOperationalCondition();
+    this.updateAccessoryOperationalCondition();
   }
 
   // CurrentAirPurifierState
@@ -116,10 +116,7 @@ export class AirPurifier extends Accessory {
     TargetAirPurifierState = this.updateTargetAirPurifierState(TargetAirPurifierState);
     this.log.info(`[${this.accessoryName}] Setting Target Air Purifier State: ${AirPurifier.getTargetStateName(TargetAirPurifierState)}`);
 
-    this.refreshDeviceOperationalCondition();
-
-    const CurrentAirPurifierState: number = this.getCurrentAirPurifierState();
-    this.log.info(`[${this.accessoryName}] Setting Current Air Purifier State: ${AirPurifier.getCurrentStateName(CurrentAirPurifierState)}`);
+    this.updateAccessoryOperationalCondition();
   }
 
   // RotationSpeed
@@ -136,7 +133,7 @@ export class AirPurifier extends Accessory {
     RotationSpeed = this.updateRotationSpeed(RotationSpeed);
     this.log.info(`[${this.accessoryName}] Setting Rotation Speed: ${RotationSpeed}%`);
 
-    this.saveState();
+    this.updateAccessoryOperationalCondition();
   }
 
   // Abstract methods impl
@@ -152,20 +149,40 @@ export class AirPurifier extends Accessory {
     return json;
   }
 
-  private refreshDeviceOperationalCondition() {
+  private updateAccessoryOperationalCondition() {
     const Active = this.getActive();
     const TargetAirPurifierState: number = this.getTargetAirPurifierState();
+    const RotationSpeed: number = this.getRotationSpeed();
     let CurrentAirPurifierState: number = this.getCurrentAirPurifierState();
 
-    if (Active === AirPurifier.ACTIVE) {
-      CurrentAirPurifierState = AirPurifier.CURRENTLY_PURIFYING_AIR;
+    if (Active === AirPurifier.INACTIVE) {
+      CurrentAirPurifierState = AirPurifier.CURRENTLY_INACTIVE;
     }
-    else {  // (this.status.AirPurifierActive === AirPurifier.INACTIVE)
-      if (TargetAirPurifierState === AirPurifier.AUTO) {
-        CurrentAirPurifierState = AirPurifier.CURRENTLY_IDLE;
+    else {  // (Active === AirPurifier.ACTIVE)
+      if (TargetAirPurifierState === AirPurifier.MANUAL) {
+        if (RotationSpeed === 0) {
+          CurrentAirPurifierState = AirPurifier.CURRENTLY_IDLE;
+        }
+        else {  // (RotationSpeed > 0)
+          CurrentAirPurifierState = AirPurifier.CURRENTLY_PURIFYING_AIR;
+        }
       }
-      else if (TargetAirPurifierState === AirPurifier.MANUAL) {
-        CurrentAirPurifierState = AirPurifier.CURRENTLY_INACTIVE;
+      else if (TargetAirPurifierState === AirPurifier.AUTO) {
+        // If the sensors detect that AirQuality < ThresholdPurifyingAirQuality
+        CurrentAirPurifierState = AirPurifier.CURRENTLY_PURIFYING_AIR;
+
+        // Once the sensors report that AirQuality >= ThresholdPurifyingAirQuality
+        // CurrentAirPurifierState = AirPurifier.CURRENTLY_IDLE;
+
+        // TODO: Add an air quality sensor
+        // Standard Air Quality Thresholds
+        // Air Quality Level      |  PM2.5 Concentration | US EPA AQI Range | Typical Auto Mode Behavior
+        // Good (Green).          | 0 – 12 µg/m³         | 0 – 50           | Idle / Sleep Mode (Fan is either off or running
+        //                                                                    on its lowest, silent setting)
+        // Moderate (Yellow)      | 12.1 – 35 µg/m³.     | 51 – 100         | Low to Medium Speed (The purifier actively
+        //                                                                    kicks on or ramps up to clear light pollution)
+        // Unhealthy (Orange/Red) | > 35.5 µg/m³         | > 100            | High / Turbo Speed (The fan runs at maximum
+        //                                                                    capacity to aggressively filter the air)
       }
     }
 
