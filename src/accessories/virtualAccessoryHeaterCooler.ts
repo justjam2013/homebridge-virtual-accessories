@@ -37,6 +37,17 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   ) {
     super(platform, accessory, accessoryConfiguration, ServiceType.HeaterCooler);
 
+    // Make sure the old Fan service is removed
+    const legacyFanService = this.accessory.getServiceById(
+      ServiceType.Fan,
+      `${this.accessory.UUID}-Fan`,
+    );
+
+    if (legacyFanService) {
+      this.accessory.removeService(legacyFanService);
+    }
+    // ******************************
+
     let Active: number = HeaterCooler.INACTIVE;
     const CurrentHeaterCoolerState: number = HeaterCooler.CURRENTLY_INACTIVE;
     let TargetHeaterCoolerState: number = HeaterCooler.AUTO;
