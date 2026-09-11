@@ -20,6 +20,7 @@ import { SmartSpeaker } from './accessories/virtualAccessorySmartSpeaker.js';
 //import { Speaker } from './accessories/virtualAccessorySpeaker.js';
 import { Switch } from './accessories/virtualAccessorySwitch.js';
 import { Television } from './accessories/virtualAccessoryTelevision.js';
+import { Thermostat } from './accessories/virtualAccessoryThermostat.js';
 import { Valve } from './accessories/virtualAccessoryValve.js';
 import { Window } from './accessories/virtualAccessoryWindow.js';
 import { WindowCovering } from './accessories/virtualAccessoryWindowCovering.js';
@@ -119,6 +120,9 @@ export abstract class AccessoryFactory {
       break;
     case AccessoryType.Television:
       virtualAccessory = new Television(platform, accessory, accessoryConfiguration);
+      break;
+    case AccessoryType.Thermostat:
+      virtualAccessory = new Thermostat(platform, accessory, accessoryConfiguration);
       break;
     case AccessoryType.Valve:
       virtualAccessory = new Valve(platform, accessory, accessoryConfiguration);

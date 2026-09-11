@@ -20,6 +20,7 @@ import { SecuritySystemConfiguration } from './accessories/configurationSecurity
 import { SpeakerConfiguration } from './accessories/configurationSpeaker.js';
 import { SwitchConfiguration } from './accessories/configurationSwitch.js';
 import { TelevisionConfiguration } from './accessories/configurationTelevision.js';
+import { ThermostatConfiguration } from './accessories/configurationThermostat.js';
 import { ValveConfiguration } from './accessories/configurationValve.js';
 import { WindowConfiguration } from './accessories/configurationWindow.js';
 import { WindowCoveringConfiguration } from './accessories/configurationWindowCovering.js';
@@ -60,7 +61,7 @@ export class AccessoryConfiguration {
 
   // Accessories
 
-  // Battery
+  // AirPurifier
   @Type(AirPurifierConfiguration)
     airPurifier!: AirPurifierConfiguration;
 
@@ -123,6 +124,10 @@ export class AccessoryConfiguration {
   // Television
   @Type(TelevisionConfiguration)
     television!: TelevisionConfiguration;
+
+  // Thermostat
+  @Type(ThermostatConfiguration)
+    thermostat!: ThermostatConfiguration;
 
   // Valve
   @Type(ValveConfiguration)
@@ -271,6 +276,8 @@ export class AccessoryConfiguration {
     case AccessoryType.Television:
       this.category = Categories.TELEVISION;
       return this.isErrorless(this.television, this.fieldNames.television!);
+    case AccessoryType.Thermostat:
+      return this.isErrorless(this.thermostat, this.fieldNames.thermostat!);
     case AccessoryType.Valve:
       return this.isErrorless(this.valve, this.fieldNames.valve!);
     case AccessoryType.Window:
