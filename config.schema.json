@@ -827,7 +827,7 @@
                   "minimum": 0,
                   "maximum": 25,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius');"
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius';"
                   }
                 },
                 "coolingThresholdCelsius": {
@@ -837,7 +837,7 @@
                   "minimum": 10,
                   "maximum": 35,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius');"
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius';"
                   }
                 },
                 "heatingThresholdFahrenheit": {
@@ -847,7 +847,7 @@
                   "minimum": 32,
                   "maximum": 77,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit');"
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit';"
                   }
                 },
                 "coolingThresholdFahrenheit": {
@@ -857,12 +857,12 @@
                   "minimum": 50,
                   "maximum": 95,
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit');"
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit';"
                   }
                 }
               },
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].accessoryType === 'heatercooler';"
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'thermostat';"
               },
               "allOf": [
                 {
