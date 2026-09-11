@@ -12,7 +12,7 @@ import { TemperatureUnit } from '../configuration/schema.js';
 
 abstract class StorageKeys {
 
-  static CurrentHeatingCoolingState: string = 'CurrentHeatingCoolingState';
+  static TargetHeatingCoolingState: string = 'TargetHeatingCoolingState';
   static CurrentTemperature: string = 'CurrentTemperature';
   static TargetTemperature: string = 'TargetTemperature';
   static TemperatureDisplayUnits: string = 'TemperatureDisplayUnits';
@@ -32,10 +32,10 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
   ) {
     super(platform, accessory, accessoryConfiguration, ServiceType.Thermostat);
 
-    let CurrentHeatingCoolingState: number = Thermostat.OFF;
-    let TargetHeatingCoolingState: number = Thermostat.OFF;
     // HomeKit units are in celsius
-    let CurrentTemperature: number = 22;                    // This value comes from sensor, set to 22ºC for now - room temperature
+    const CurrentHeatingCoolingState: number = Thermostat.OFF;
+    let TargetHeatingCoolingState: number = Thermostat.OFF;
+    let CurrentTemperature: number = 22;                    // 22ºC - room temperature
     let TargetTemperature: number = 22;
     let TemperatureDisplayUnits: number = Thermostat.CELSIUS;
     let HeatingThresholdTemperature: number = 18;           // 18ºC considered a minimum for health and safety
@@ -49,15 +49,15 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedCurrentHeatingCoolingState: number = accessoryState[StorageKeys.CurrentHeatingCoolingState] as number;
+      const cachedTargetHeatingCoolingState: number = accessoryState[StorageKeys.TargetHeatingCoolingState] as number;
       const cachedCurrentTemperature: number = accessoryState[StorageKeys.CurrentTemperature] as number;
       const cachedTargetTemperature: number = accessoryState[StorageKeys.TargetTemperature] as number;
       const cachedTemperatureDisplayUnits: number = accessoryState[StorageKeys.TemperatureDisplayUnits] as number;
       const cachedCoolingThresholdTemperature: number = accessoryState[StorageKeys.CoolingThresholdTemperature] as number;
       const cachedHeatingThresholdTemperature: number = accessoryState[StorageKeys.HeatingThresholdTemperature] as number;
 
-      if (cachedCurrentHeatingCoolingState !== undefined) {
-        CurrentHeatingCoolingState = cachedCurrentHeatingCoolingState;
+      if (cachedTargetHeatingCoolingState !== undefined) {
+        TargetHeatingCoolingState = cachedTargetHeatingCoolingState;
       }
       if (cachedCurrentTemperature !== undefined) {
         CurrentTemperature = cachedCurrentTemperature;
@@ -76,8 +76,6 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
       }
     }
 
-    TargetHeatingCoolingState = CurrentHeatingCoolingState;
-
     // Update the initial state of the accessory
     this.setCurrentHeatingCoolingState(CurrentHeatingCoolingState);
     this.setTargetHeatingCoolingState(TargetHeatingCoolingState);
@@ -86,6 +84,9 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     this.setTemperatureDisplayUnits(TemperatureDisplayUnits);
     this.setCoolingThresholdTemperature(CoolingThresholdTemperature);
     this.setHeatingThresholdTemperature(HeatingThresholdTemperature);
+
+    // 
+    this.refreshAccessoryOperationalCondition();
 
     // Last register handlers
 
@@ -143,7 +144,7 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     TargetHeatingCoolingState = this.updateTargetHeatingCoolingState(TargetHeatingCoolingState);
     this.log.info(`[${this.accessoryName}] Setting Target Heating Cooling State: ${Thermostat.getHeatingCoolingStateName(TargetHeatingCoolingState)}`);
 
-    this.refreshDeviceOperationalCondition();
+    this.refreshAccessoryOperationalCondition();
   }
 
   // CurrentTemperature
@@ -169,7 +170,7 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     TargetTemperature = this.updateTargetTemperature(TargetTemperature);
     this.log.info(`[${this.accessoryName}] Setting Target Temperature: ${this.displayTemperature(TargetTemperature)}${this.getDegreeUnits()}`);
 
-    this.refreshDeviceOperationalCondition();
+    this.refreshAccessoryOperationalCondition();
   }
 
   // TemperatureDisplayUnits
@@ -203,7 +204,7 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     CoolingThresholdTemperature = this.updateCoolingThresholdTemperature(CoolingThresholdTemperature);
     this.log.info(`[${this.accessoryName}] Setting Cooling Threshold Temperature: ${this.displayTemperature(CoolingThresholdTemperature)}${this.getDegreeUnits()}`);
 
-    this.refreshDeviceOperationalCondition();
+    this.refreshAccessoryOperationalCondition();
   }
 
   // HeatingThresholdTemperature
@@ -220,15 +221,16 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
     HeatingThresholdTemperature = this.updateHeatingThresholdTemperature(HeatingThresholdTemperature);
     this.log.info(`[${this.accessoryName}] Setting Heating Threshold Temperature: ${this.displayTemperature(HeatingThresholdTemperature)}${this.getDegreeUnits()}`);
 
-    this.refreshDeviceOperationalCondition();
+    this.refreshAccessoryOperationalCondition();
   }
 
   // Abstract methods impl
 
   protected getJsonState(): string {
     const jsonState = {
-      [StorageKeys.CurrentHeatingCoolingState]: this.getCurrentHeatingCoolingState(),
+      [StorageKeys.TargetHeatingCoolingState]: this.getTargetHeatingCoolingState(),
       [StorageKeys.CurrentTemperature]: this.getCurrentTemperature(),
+      [StorageKeys.TargetTemperature]: this.getTargetTemperature(),
       [StorageKeys.TemperatureDisplayUnits]: this.getTemperatureDisplayUnits(),
       [StorageKeys.CoolingThresholdTemperature]: this.getCoolingThresholdTemperature(),
       [StorageKeys.HeatingThresholdTemperature]: this.getHeatingThresholdTemperature(),
@@ -240,7 +242,7 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
 
   //
 
-  private refreshDeviceOperationalCondition() {
+  private refreshAccessoryOperationalCondition() {
     const TargetHeatingCoolingState: number = this.getTargetHeatingCoolingState();
     const CurrentTemperature: number = this.getCurrentTemperature();
     const TargetTemperature: number = this.getTargetTemperature();
@@ -329,7 +331,7 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
       CurrentTemperature = this.updateCurrentTemperature(CurrentTemperature);
       this.log.info(`[${this.accessoryName}] Setting Current Temperature: ${this.displayTemperature(CurrentTemperature)}${this.getDegreeUnits()}`);
 
-      this.refreshDeviceOperationalCondition();
+      this.refreshAccessoryOperationalCondition();
     }
   }
 
