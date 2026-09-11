@@ -117,9 +117,6 @@ export class AirPurifier extends Accessory {
     this.log.info(`[${this.accessoryName}] Setting Target Air Purifier State: ${AirPurifier.getTargetStateName(TargetAirPurifierState)}`);
 
     this.updateAccessoryOperationalCondition();
-
-    const CurrentAirPurifierState: number = this.getCurrentAirPurifierState();
-    this.log.info(`[${this.accessoryName}] Setting Current Air Purifier State: ${AirPurifier.getCurrentStateName(CurrentAirPurifierState)}`);
   }
 
   // RotationSpeed
@@ -136,7 +133,7 @@ export class AirPurifier extends Accessory {
     RotationSpeed = this.updateRotationSpeed(RotationSpeed);
     this.log.info(`[${this.accessoryName}] Setting Rotation Speed: ${RotationSpeed}%`);
 
-    this.saveState();
+    this.updateAccessoryOperationalCondition();
   }
 
   // Abstract methods impl

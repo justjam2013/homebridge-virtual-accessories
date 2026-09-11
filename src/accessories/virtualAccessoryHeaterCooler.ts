@@ -217,9 +217,6 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     this.log.info(`[${this.accessoryName}] Setting Target Heater Cooler State: ${HeaterCooler.getTargetStateName(TargetHeaterCoolerState)}`);
 
     this.updateAccessoryOperationalCondition();
-
-    const CurrentHeaterCoolerState: number = this.getCurrentHeaterCoolerState();
-    this.log.info(`[${this.accessoryName}] Setting Current Heater Cooler State: ${HeaterCooler.getCurrentStateName(CurrentHeaterCoolerState)}`);
   }
 
   // CurrentTemperature

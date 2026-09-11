@@ -198,9 +198,6 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
     this.log.info(`[${this.accessoryName}] Setting Target Humidifier Dehumidifier State: ${HumidifierDehumidifier.getTargetStateName(TargetHumidifierDehumidifierState)}`);
 
     this.updateAccessoryOperationalCondition();
-
-    const CurrentHumidifierDehumidifierState: number = this.getCurrentHumidifierDehumidifierState();
-    this.log.info(`[${this.accessoryName}] Setting Current Humidifier Dehumidifier State: ${HumidifierDehumidifier.getCurrentStateName(CurrentHumidifierDehumidifierState)}`);
   }
 
   // CurrentRelativeHumidity
