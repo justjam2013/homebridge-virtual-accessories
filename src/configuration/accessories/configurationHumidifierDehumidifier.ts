@@ -10,6 +10,7 @@ import { Utils } from '../../utils/utils.js';
  */
 export class HumidifierDehumidifierConfiguration implements Validatable {
   type!: string;
+  hasFan: boolean = false;
   humidifierThreshold!: number;
   dehumidifierThreshold!: number;
 
