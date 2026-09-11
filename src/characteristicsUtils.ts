@@ -134,42 +134,6 @@ export class CharacteristicUtils {
     return this.updateCharacteristicValue(CharacteristicType.ConfiguredName, value) as string;
   }
 
-  // CurrentRelativeHumidity
-
-  getCurrentRelativeHumidity(): number {
-    return this.getCharacteristicValue(CharacteristicType.CurrentRelativeHumidity) as number;
-  }
-
-  setCurrentRelativeHumidity(
-    value: number,
-  ): number {
-    return this.setCharacteristicValue(CharacteristicType.CurrentRelativeHumidity, value) as number;
-  }
-
-  updateCurrentRelativeHumidity(
-    value: number,
-  ): number {
-    return this.updateCharacteristicValue(CharacteristicType.CurrentRelativeHumidity, value) as number;
-  }
-
-  // CurrentTemperature
-
-  getCurrentTemperature(): number {
-    return this.getCharacteristicValue(CharacteristicType.CurrentTemperature) as number;
-  }
-
-  setCurrentTemperature(
-    value: number,
-  ): number {
-    return this.setCharacteristicValue(CharacteristicType.CurrentTemperature, value) as number;
-  }
-
-  updateCurrentTemperature(
-    value: number,
-  ): number {
-    return this.updateCharacteristicValue(CharacteristicType.CurrentTemperature, value) as number;
-  }
-
   // CurrentVisibilityState
 
   getCurrentVisibilityState(): number {
@@ -873,6 +837,46 @@ export class CharacteristicUtils {
   // ************************************************************************************************************************
 
   //
+  // ****************************** Heating-Cooling ******************************
+  //
+
+  // CurrentHeatingCoolingState
+
+  getCurrentHeatingCoolingState(): number {
+    return this.getCharacteristicValue(CharacteristicType.CurrentHeatingCoolingState) as number;
+  }
+
+  setCurrentHeatingCoolingState(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.CurrentHeatingCoolingState, value) as number;
+  }
+
+  updateCurrentHeatingCoolingState(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.CurrentHeatingCoolingState, value) as number;
+  }
+
+  // TargetHeatingCoolingState
+
+  getTargetHeatingCoolingState(): number {
+    return this.getCharacteristicValue(CharacteristicType.TargetHeatingCoolingState) as number;
+  }
+
+  setTargetHeatingCoolingState(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.TargetHeatingCoolingState, value) as number;
+  }
+
+  updateTargetHeatingCoolingState(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.TargetHeatingCoolingState, value) as number;
+  }
+
+  //
   // ****************************** Media State ******************************
   //
 
@@ -971,6 +975,46 @@ export class CharacteristicUtils {
   }
 
   //
+  // ****************************** Relative Humidity ******************************
+  //
+
+  // CurrentRelativeHumidity
+
+  getCurrentRelativeHumidity(): number {
+    return this.getCharacteristicValue(CharacteristicType.CurrentRelativeHumidity) as number;
+  }
+
+  setCurrentRelativeHumidity(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.CurrentRelativeHumidity, value) as number;
+  }
+
+  updateCurrentRelativeHumidity(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.CurrentRelativeHumidity, value) as number;
+  }
+
+  // TargetRelativeHumidity
+
+  getTargetRelativeHumidity(): number {
+    return this.getCharacteristicValue(CharacteristicType.TargetRelativeHumidity) as number;
+  }
+
+  setTargetRelativeHumidity(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.TargetRelativeHumidity, value) as number;
+  }
+
+  updateTargetRelativeHumidity(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.TargetRelativeHumidity, value) as number;
+  }
+
+  //
   // ****************************** Rotation ******************************
   //
 
@@ -1008,6 +1052,46 @@ export class CharacteristicUtils {
     value: number,
   ): number {
     return this.updateCharacteristicValue(CharacteristicType.RotationSpeed, value) as number;
+  }
+
+  //
+  // ****************************** Temperature ******************************
+  //
+
+  // CurrentTemperature
+
+  getCurrentTemperature(): number {
+    return this.getCharacteristicValue(CharacteristicType.CurrentTemperature) as number;
+  }
+
+  setCurrentTemperature(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.CurrentTemperature, value) as number;
+  }
+
+  updateCurrentTemperature(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.CurrentTemperature, value) as number;
+  }
+
+  // TargetTemperature
+
+  getTargetTemperature(): number {
+    return this.getCharacteristicValue(CharacteristicType.TargetTemperature) as number;
+  }
+
+  setTargetTemperature(
+    value: number,
+  ): number {
+    return this.setCharacteristicValue(CharacteristicType.TargetTemperature, value) as number;
+  }
+
+  updateTargetTemperature(
+    value: number,
+  ): number {
+    return this.updateCharacteristicValue(CharacteristicType.TargetTemperature, value) as number;
   }
 
   //

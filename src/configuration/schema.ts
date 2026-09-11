@@ -21,6 +21,7 @@ export class AccessoryType {
   static Speaker: string = 'speaker';
   static Switch: string = 'switch';
   static Television: string = 'television';
+  static Thermostat: string = 'thermostat';
   static Valve: string = 'valve';
   static Window: string = 'window';
   static WindowCovering: string = 'windowcovering';

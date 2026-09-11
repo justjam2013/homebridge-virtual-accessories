@@ -149,6 +149,7 @@
                 { "title": "Speaker", "enum": ["speaker"] },
                 { "title": "Switch", "enum": ["switch"] },
                 { "title": "Television", "enum": ["television"] },
+                { "title": "Thermostat", "enum": ["thermostat"] },
                 { "title": "Valve", "enum": ["valve"] },
                 { "title": "Window", "enum": ["window"] },
                 { "title": "Window Covering (Blinds, Shades)", "enum": ["windowcovering"] }
@@ -159,7 +160,7 @@
               "description": "Accessory state survives Homebridge restart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'thermostat', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
@@ -806,6 +807,87 @@
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'television';"
               }
+            },
+            "thermostat": {
+              "title": "Thermostat",
+              "type": "object",
+              "properties": {
+                "temperatureDisplayUnits": {
+                  "title": "Temperature Display Units *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ]
+                },
+                "heatingThresholdCelsius": {
+                  "title": "Heating Threshold ºC *",
+                  "description": "Temperature level below which the thermostat turns on (0ºC - 25ºC)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 25,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius');"
+                  }
+                },
+                "coolingThresholdCelsius": {
+                  "title": "Cooling Threshold ºC *",
+                  "description": "Temperature level above which the thermostat turns on (10ºC - 35ºC)",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 35,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius');"
+                  }
+                },
+                "heatingThresholdFahrenheit": {
+                  "title": "Heating Threshold ºF *",
+                  "description": "Temperature level below which the thermostat turns on (32ºF - 77ºF)",
+                  "type": "integer",
+                  "minimum": 32,
+                  "maximum": 77,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit');"
+                  }
+                },
+                "coolingThresholdFahrenheit": {
+                  "title": "Cooling Threshold ºF *",
+                  "description": "Temperature level above which the thermostat turns on (50ºF - 95ºF)",
+                  "type": "integer",
+                  "minimum": 50,
+                  "maximum": 95,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit');"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'heatercooler';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                  }
+                }
+              ]
             },
             "valve": {
               "title": "Valve",
