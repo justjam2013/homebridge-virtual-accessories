@@ -66,7 +66,7 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
     this.deviceType = this.accessoryConfiguration.heaterCooler.type;
     this.hasFan = this.accessoryConfiguration.heaterCooler.hasFan;
 
-    if (this.deviceType === HeaterType.Heater) {
+    if ([HeaterType.Heater, HeaterType.Sauna].includes(this.deviceType)) {
       TargetHeaterCoolerState = HeaterCooler.HEAT;
     }
     else if (this.deviceType === HeaterType.Cooler) {
