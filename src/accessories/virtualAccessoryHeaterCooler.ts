@@ -324,7 +324,7 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
   //
 
   private heats(): boolean {
-    return [HeaterType.Auto, HeaterType.Heater].includes(this.deviceType);
+    return [HeaterType.Auto, HeaterType.Heater, HeaterType.Sauna].includes(this.deviceType);
   }
 
   private cools(): boolean {
