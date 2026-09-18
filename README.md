@@ -26,7 +26,7 @@
 
 #### Matter Support
 
-Now that Homebridge supports publishing devices as Matter devices, I have been considering adding the ability to create Matter virtual accessories. However, after considering the pros and cons, I have decided that I didn't want to bloat this plugin and that I keep it strictly for exposing HomeKit virtual devices. I am in the process of writing a separate plugin, [Virtual Matter Accessories For Homebridge](https://github.com/justjam2013/homebridge-virtual-matter-accessories), which will expose Matter-only virtual devices.
+Now that Homebridge supports publishing devices as Matter devices, I have been considering adding the ability to create virtual Matter accessories. However, after considering the pros and cons, I have chose not to bloat this plugin or muddy its scope. So I will be keeping it strictly for creating HomeKit-only virtual devices. If you are interested in virtual Matter devices, I am currently in the process of writing a separate plugin, [Virtual Matter Accessories For Homebridge](https://github.com/justjam2013/homebridge-virtual-matter-accessories), whose scope will be to create Matter-only virtual devices.
 
 ## <!-- Thin separator line -->
 
