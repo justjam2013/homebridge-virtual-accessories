@@ -153,7 +153,7 @@ Currently, these are the implemented virtual accessories:
 - **Timer.** To create a timer, create a timed switch.
 
 > [!NOTE]
-> When a timed switch is restored after a restart, if the the time remaining on the timer after correction is 0 seconds (i.e. the timer expired while Homebridge was not running), this would leave the switch in a bad state. So the timer will always be restored to at least 1 second, thus allowing the timer to end, reset the switch to its default state, and the switch flip event to occur in Apple Home for any automations depemding on it. This is a tradeoff wherein a late event is preferred to a lost event.
+> When a timed switch is restored after a restart, if the the time remaining on the timer after correction is 0 seconds (i.e. the timer expired while Homebridge was not running), this would leave the switch in a bad state. So the timer will always be restored to at least 1 second, thus allowing the timer to end, reset the switch to its default state, and the switch flip event to occur in Apple Home for any automations depending on it. This is a tradeoff wherein a late event is preferred to a lost event.
 
 <span align="right">
   <h6>
