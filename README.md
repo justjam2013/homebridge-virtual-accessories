@@ -18,7 +18,7 @@
 
 </span>
 
-### Virtual Accessories For Homebridge is a plugin for Homebridge that provides the ability to create virtual Apple Home accessories.
+### Plugin for Homebridge that provides the ability to create virtual Apple Home accessories.
 
 ## <!-- Thin separator line -->
 
