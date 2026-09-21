@@ -74,12 +74,14 @@ export class PingTrigger extends Trigger {
     }
     this.log.debug(`[${this.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
-    const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;
+    const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;  // minutes to milliseconds
     this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
-    const pingTimeoutMillis = 10 * 1000;
+    const pingTimeoutMillis = 1000;  // 1 second timeout
 
     setInterval(
+      // function, delay
       this.ping, intervalBetweenPingsMillis,
+      // function params
       this,
       triggerConfig,
       protocol,
@@ -105,10 +107,12 @@ export class PingTrigger extends Trigger {
     // protocol = ping.NetworkProtocol.IPv4;
     // Create a helper class for protocol, so the value can be updated
 
+    // With "retries = 3" it pings 3 times before it counts it as a failure 
+
     const options = {
       networkProtocol: protocol,
       packetSize: 16,
-      retries: triggerConfig.failureRetryCount,
+      retries: 3,
       sessionId: Math.floor(Math.random() * 65534) + 1,
       timeout: pingTimeoutMillis,
       ttl: 128,
