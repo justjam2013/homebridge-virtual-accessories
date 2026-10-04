@@ -74,11 +74,11 @@
         }
       }
     },
+    "required": [ "name" ],
     "properties": {
       "name": {
         "title": "Platform Name",
         "type": "string",
-        "required": true,
         "default": "Virtual Accessories Platform",
         "readonly": true
       },
@@ -111,25 +111,23 @@
           "type": "object",
           "expandable": true,
           "expanded": false,
+          "required": [ "accessoryID", "accessoryName", "accessoryType" ],
           "properties": {
             "accessoryID": {
               "title": "Accessory ID",
               "description": "Unique ID for the Accessory (https://www.random.org/). Do not modify once assigned!",
               "type": "string",
-              "required": true,
               "pattern": "^[A-Za-z0-9\\-]{5,}$"
             },
             "accessoryName": {
               "title": "Accessory Name",
               "description": "Accessory name as it will be displayed in HomeKit",
               "type": "string",
-              "required": true,
               "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
               "title": "Accessory Type",
               "type": "string",
-              "required": true,
               "oneOf": [
                 { "title": "Air Purifier", "enum": ["airpurifier"] },
                 { "title": "Battery", "enum": ["battery"] },
