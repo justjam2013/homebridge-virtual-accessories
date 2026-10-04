@@ -74,11 +74,11 @@
         }
       }
     },
+    "required": [ "name" ],
     "properties": {
       "name": {
         "title": "Nombre de la Plataforma",
         "type": "string",
-        "required": true,
         "default": "Virtual Accessories Platform",
         "readonly": true
       },
@@ -111,25 +111,23 @@
           "type": "object",
           "expandable": true,
           "expanded": false,
+          "required": [ "accessoryID", "accessoryName", "accessoryType" ],
           "properties": {
             "accessoryID": {
               "title": "ID del Accesorio",
               "description": "ID único del accesorio (https://www.random.org/). ¡No lo modifique una vez asignado!",
               "type": "string",
-              "required": true,
               "pattern": "^[A-Za-z0-9\\-]{5,}$"
             },
             "accessoryName": {
               "title": "Nombre del Accesorio",
               "description": "Nombre del accesorio tal como se mostrará en HomeKit",
               "type": "string",
-              "required": true,
               "pattern": "^(?=[\\p{L}\\p{N}])[\\p{L}\\p{N}\\s']*(?<=[\\p{L}\\p{N}])$"
             },
             "accessoryType": {
               "title": "Tipo de Accesorio",
               "type": "string",
-              "required": true,
               "oneOf": [
                 { "title": "Purificador de Aire", "enum": ["airpurifier"] },
                 { "title": "Batería", "enum": ["battery"] },
