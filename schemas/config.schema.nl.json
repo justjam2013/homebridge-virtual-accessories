@@ -1000,7 +1000,7 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensortype",
+                  "description": "Type meetsensor",
                   "type": "string",
                   "oneOf": [
                     { "title": "Luchtvochtigheid", "enum": ["humidity"] },
