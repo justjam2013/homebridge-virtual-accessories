@@ -185,7 +185,7 @@
                   "type": "boolean"
                 },
                 "lowLevelThreshold": {
-                  "title": "Battery low threshold (5% - 25%) *",
+                  "title": "Battery Low Threshold (5% - 25%) *",
                   "type": "integer",
                   "minimum": 5,
                   "maximum": 25
@@ -781,7 +781,7 @@
                   "description": "Switch triggers a sensor when its state changes",
                   "type": "boolean"
                 },
-                "muteLogging" : {
+                "muteLogging": {
                   "title": "Mute Logging",
                   "description": "Log information will only be visible when running in debug mode",
                   "type": "boolean"
@@ -1256,7 +1256,7 @@
                   "title": "Start Date-Time",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
@@ -1265,7 +1265,7 @@
                   "title": "End Date-Time ",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
