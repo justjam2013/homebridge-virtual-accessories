@@ -1000,7 +1000,7 @@
               "properties": {
                 "type": {
                   "title": "Type *",
-                  "description": "Sensortype (Meldingen van kritieke sensoren negeren de focusmodus ‘Niet storen’)",
+                  "description": "Sensortype",
                   "type": "string",
                   "oneOf": [
                     { "title": "Luchtvochtigheid", "enum": ["humidity"] },
