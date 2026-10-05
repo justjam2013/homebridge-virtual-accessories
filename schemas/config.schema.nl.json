@@ -2,7 +2,7 @@
   "pluginAlias": "VirtualAccessoriesForHomebridge",
   "pluginType": "platform",
   "singular": true,
-  "footerDisplay": "* = verplicht in te vullen velden",
+  "footerDisplay": "* = required fields",
   "strictValidation": true,
   "schema": {
     "type": "object",
@@ -158,7 +158,7 @@
               "description": "Accessoire status overleeft Homebridge herstart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'thermostat', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
@@ -781,7 +781,7 @@
                   "description": "De schakelaar activeert een sensor wanneer de toestand ervan verandert",
                   "type": "boolean"
                 },
-                "muteLogging" : {
+                "muteLogging": {
                   "title": "Logging uitschakelen",
                   "description": "Loggegevens zijn alleen zichtbaar wanneer men in de debugmodus is",
                   "type": "boolean"
@@ -1256,7 +1256,7 @@
                   "title": "Start Datum-Tijd",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
@@ -1265,7 +1265,7 @@
                   "title": "Eind Datum-Tijd ",
                   "type": "string",
                   "format": "iso-date-time",
-                  "widget":"datetime-local",
+                  "widget": "datetime-local",
                   "x-inputAttributes": {
                     "step": 1
                   }
@@ -1420,7 +1420,7 @@
                 }
               },
               "then": {
-                "required": [ "switch", "deviceType" ],
+                "required": [ "switch" ],
                 "properties": {
                   "switch": {
                     "required": [ "defaultState" ]
