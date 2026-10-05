@@ -317,7 +317,7 @@
                   }
                 },
                 "temperatureDisplayUnits": {
-                  "title": "Unidades de Temperatura *",
+                  "title": "Unidades de Visualización de Temperatura *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -826,7 +826,7 @@
                   ]
                 },
                 "heatingThresholdCelsius": {
-                  "title": "Umbral de Calentamiento ºC *",
+                  "title": "Umbral de Calefacción ºC *",
                   "description": "Nivel de temperatura por debajo del cual se activa el termostato (0ºC - 25ºC)",
                   "type": "integer",
                   "minimum": 0,
@@ -846,7 +846,7 @@
                   }
                 },
                 "heatingThresholdFahrenheit": {
-                  "title": "Umbral de Calentamiento ºF *",
+                  "title": "Umbral de Calefacción ºF *",
                   "description": "Nivel de temperatura por debajo del cual se activa el termostato (32ºF - 77ºF)",
                   "type": "integer",
                   "minimum": 32,

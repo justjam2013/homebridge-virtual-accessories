@@ -818,7 +818,7 @@
               "type": "object",
               "properties": {
                 "temperatureDisplayUnits": {
-                  "title": "Temperatuurweergave-eenheden *",
+                  "title": "Eenheid voor temperatuurweergave *",
                   "type": "string",
                   "oneOf": [
                     { "title": "Celsius (ºC)", "enum": ["celsius"] },
@@ -826,7 +826,7 @@
                   ]
                 },
                 "heatingThresholdCelsius": {
-                  "title": "Verwarmingsdrempel ºC *",
+                  "title": "Verwarming instelling ºC *",
                   "description": "Temperatuurniveau waaronder de thermostaat inschakelt (0ºC - 25ºC)",
                   "type": "integer",
                   "minimum": 0,
@@ -836,7 +836,7 @@
                   }
                 },
                 "coolingThresholdCelsius": {
-                  "title": "Koeldrempel ºC *",
+                  "title": "Koeling instelling ºC *",
                   "description": "Temperatuurniveau waarboven de thermostaat inschakelt (10ºC - 35ºC)",
                   "type": "integer",
                   "minimum": 10,
@@ -846,7 +846,7 @@
                   }
                 },
                 "heatingThresholdFahrenheit": {
-                  "title": "Verwarmingsdrempel ºF *",
+                  "title": "Verwarming instelling ºF *",
                   "description": "Temperatuurniveau waaronder de thermostaat inschakelt (32ºF - 77ºF)",
                   "type": "integer",
                   "minimum": 32,
@@ -856,7 +856,7 @@
                   }
                 },
                 "coolingThresholdFahrenheit": {
-                  "title": "Koeldrempel ºF *",
+                  "title": "Koeling instelling ºF *",
                   "description": "Temperatuurniveau waarboven de thermostaat inschakelt (50ºF - 95ºF)",
                   "type": "integer",
                   "minimum": 50,
@@ -1225,8 +1225,8 @@
                   "maximum": 15
                 },
                 "isDisabled": {
-                  "title": "activering uitschakelen",
-                  "description": "uitschakelen/inschakelen van activering",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1325,8 +1325,8 @@
                   "pattern": "^(?:(?:[A-Za-z_\\-]+\/[A-Za-z_\\-]+(?:\/[A-Za-z_\\-]+)?)|(?:Etc\/[A-Za-z0-9+\\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$"
                 },
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
@@ -1339,8 +1339,8 @@
               "type": "object",
               "properties": {
                 "isDisabled": {
-                  "title": "Disable Trigger",
-                  "description": "Turn off/on trigger",
+                  "title": "Activering uitschakelen",
+                  "description": "Uitschakelen/inschakelen van activering",
                   "type": "boolean"
                 }
               },
