@@ -1000,7 +1000,7 @@
               "properties": {
                 "type": {
                   "title": "Tipo *",
-                  "description": "Tipo de sensor (Las notificaciones de sensores críticos omiten el modo de enfoque 'No Molestar')",
+                  "description": "Tipo de sensor de medición",
                   "type": "string",
                   "oneOf": [
                     { "title": "Humedad", "enum": ["humidity"] },
