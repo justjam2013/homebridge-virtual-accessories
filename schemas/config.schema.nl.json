@@ -140,13 +140,14 @@
                 { "title": "luchtbevochtiger/Luchtontvochtigers", "enum": ["humidifierdehumidifier"] },
                 { "title": "Lamp", "enum": ["lightbulb"] },
                 { "title": "Slot", "enum": ["lock"] },
-                { "title": "microfoon", "enum": ["microphone"] },
+                { "title": "Microfoon", "enum": ["microphone"] },
                 { "title": "Beveiligingssysteem", "enum": ["securitysystem"] },
                 { "title": "Sensor - Meting", "enum": ["measurement"] },
                 { "title": "Sensor - Geactiveerd", "enum": ["sensor"] },
                 { "title": "Luidspreker", "enum": ["speaker"] },
                 { "title": "Schakelaar", "enum": ["switch"] },
                 { "title": "Televisie", "enum": ["television"] },
+                { "title": "Thermostaat", "enum": ["thermostat"] },
                 { "title": "Klep", "enum": ["valve"] },
                 { "title": "Raam", "enum": ["window"] },
                 { "title": "Raam Afsluiting (Rolluiken, jaloeziën)", "enum": ["windowcovering"] }
@@ -484,6 +485,13 @@
                     { "title": "luchtbevochtiger en Luchtontvochtigers (Auto)", "enum": ["auto"] }
                   ]
                 },
+                "hasFan": {
+                  "title": "Heeft Ventilator",
+                  "type": "boolean",
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].humidifierDehumidifier && ['humidifier', 'dehumidifier', 'auto'].includes(model.devices[arrayIndices].humidifierDehumidifier.type);"
+                  }
+                },
                 "humidifierThreshold": {
                   "title": "luchtbevochtiger instelling *",
                   "description": "Luchtvochtigheid waarbij de luchtbevochtiger wordt uitgeschakeld (0% - 100%)",
@@ -805,6 +813,87 @@
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'television';"
               }
             },
+            "thermostat": {
+              "title": "Thermostaat",
+              "type": "object",
+              "properties": {
+                "temperatureDisplayUnits": {
+                  "title": "Temperatuurweergave-eenheden *",
+                  "type": "string",
+                  "oneOf": [
+                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
+                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
+                  ]
+                },
+                "heatingThresholdCelsius": {
+                  "title": "Verwarmingsdrempel ºC *",
+                  "description": "Temperatuurniveau waaronder de thermostaat inschakelt (0ºC - 25ºC)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 25,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius';"
+                  }
+                },
+                "coolingThresholdCelsius": {
+                  "title": "Koeldrempel ºC *",
+                  "description": "Temperatuurniveau waarboven de thermostaat inschakelt (10ºC - 35ºC)",
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 35,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'celsius';"
+                  }
+                },
+                "heatingThresholdFahrenheit": {
+                  "title": "Verwarmingsdrempel ºF *",
+                  "description": "Temperatuurniveau waaronder de thermostaat inschakelt (32ºF - 77ºF)",
+                  "type": "integer",
+                  "minimum": 32,
+                  "maximum": 77,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit';"
+                  }
+                },
+                "coolingThresholdFahrenheit": {
+                  "title": "Koeldrempel ºF *",
+                  "description": "Temperatuurniveau waarboven de thermostaat inschakelt (50ºF - 95ºF)",
+                  "type": "integer",
+                  "minimum": 50,
+                  "maximum": 95,
+                  "condition": {
+                    "functionBody": "return model.devices[arrayIndices].thermostat && model.devices[arrayIndices].thermostat.temperatureDisplayUnits === 'fahrenheit';"
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].accessoryType === 'thermostat';"
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "temperatureDisplayUnits": { "const": "celsius" }
+                    },
+                    "required": [ "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdCelsius", "coolingThresholdCelsius" ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "temperatureDisplayUnits": { "const": "fahrenheit" }
+                    },
+                    "required": [ "temperatureDisplayUnits" ]
+                  },
+                  "then": {
+                    "required": [ "heatingThresholdFahrenheit", "coolingThresholdFahrenheit" ]
+                  }
+                }
+              ]
+            },
             "valve": {
               "title": "Klep",
               "type": "object",
@@ -918,13 +1007,11 @@
                     { "title": "Temperatuur", "enum": ["temperature"] }
                   ]
                 },
-                "temperatureUnits": {
-                  "title": "Eenheid voor temperatuurweergave *",
-                  "type": "string",
-                  "oneOf": [
-                    { "title": "Celsius (ºC)", "enum": ["celsius"] },
-                    { "title": "Fahrenheit (ºF)", "enum": ["fahrenheit"] }
-                  ],
+                "": {
+                  "title": " ",
+                  "description": "Opmerking: Temperatuureenheden worden ingesteld in de Homebridge-gebruikersinterface onder Instellingen - Weergave (standaard: Celsius).",
+                  "type": "object",
+                  "properties": {},
                   "condition": {
                     "functionBody": "return model.devices[arrayIndices].measurement && model.devices[arrayIndices].measurement.type === 'temperature';"
                   }
@@ -932,20 +1019,7 @@
               },
               "condition": {
                 "functionBody": "return model.devices[arrayIndices].accessoryType === 'measurement';"
-              },
-              "allOf": [
-                {
-                  "if": {
-                    "properties": {
-                      "type": { "const": "temperature" }
-                    },
-                    "required": [ "type" ]
-                  },
-                  "then": {
-                    "required": [ "temperatureUnits" ]
-                  }
-                }
-              ]
+              }
             },
             "resetTimer": {
               "title": "Reset Timer",
@@ -1275,7 +1349,7 @@
               }
             },
             "startupTrigger": {
-              "title": "Homebridge Startup Trigger",
+              "title": "Homebridge opstart activering",
               "type": "object",
               "properties": {
                 "isDisabled": {
@@ -1580,6 +1654,21 @@
                 "properties": {
                   "television": {
                     "required": [ "inputs" ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "accessoryType": { "const": "thermostat" }
+                }
+              },
+              "then": {
+                "required": [ "thermostat" ],
+                "properties": {
+                  "thermostat": {
+                    "required": [ "temperatureDisplayUnits" ]
                   }
                 }
               }
