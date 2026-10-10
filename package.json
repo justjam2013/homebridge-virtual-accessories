@@ -103,6 +103,7 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc",
+    "test": "npm run build && node --test test/*.test.js",
     "generate-schemas": "node scripts/generate-schemas.js",
     "generate-template": "node scripts/generate-template.js",
     "lint": "eslint . --max-warnings=0",

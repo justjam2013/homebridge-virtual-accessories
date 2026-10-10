@@ -3,5 +3,5 @@
  */
 export interface UpdatableChargingStatus {
 
-  updateChargingStatus(charging: boolean, charge: number, accessoryId: string): void;
+  updateChargingStatus(charging: boolean | undefined, charge: number | undefined, accessoryId: string): void;
 }
