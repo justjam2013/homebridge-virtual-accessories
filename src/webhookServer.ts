@@ -115,13 +115,13 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const obstruction: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
+      const obstruction: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(obstruction, response))
       {
-        this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction), response);
+        this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction.toString()), response);
       }
     });
 
@@ -133,14 +133,14 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger.toString()) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -152,14 +152,14 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(trigger, response))
       {
         // eslint-disable-next-line max-len
-        this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
+        this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger.toString()) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
       }
     });
 
@@ -171,13 +171,13 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const trigger: string = ((useQueryParams) ? request.query.value : request.body.value).toString();
+      const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.parametersArePresent(request, response) &&
           this.accessoryIdIsValid(accessoryId, response) &&
           this.booleanIsValid(trigger, response))
       {
-        this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger), response);
+        this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger.toString()), response);
       }
     });
 
@@ -190,7 +190,7 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const charging: string = ((useQueryParams) ? request.query.charging : request.body.charging).toString();
+      const charging: string = (useQueryParams) ? request.query.charging : request.body.charging;
       const charge: string = (useQueryParams) ? Number(<string>request.query.charge) : request.body.charge;
 
       if (this.parametersArePresent(request, response) &&
@@ -198,7 +198,7 @@ export class WebhookServer {
           this.booleanIsValid(charging, response) &&
           this.numberIsValid(charge, response))
       {
-        const chargingState: ChargingState = new ChargingState(ToBoolean(charging), Number(charge));
+        const chargingState: ChargingState = new ChargingState(ToBoolean(charging.toString()), Number(charge));
         this.processRequest(routeChargingState, accessoryId, [ 'battery' ], chargingState, response);
       }
     });
@@ -331,7 +331,10 @@ export class WebhookServer {
     value: string,
     response: Response,
   ): boolean {
-    const valueBoolean: boolean = ['true', 'false'].includes(value.toLowerCase());
+    const valueBoolean: boolean = (
+      (value !== undefined) &&
+      ['true', 'false'].includes(value.toString().toLowerCase())
+    );
 
     if (!valueBoolean) {
       const errorMsg: string = `Invalid value: ${value}. Value must be a boolean`;
