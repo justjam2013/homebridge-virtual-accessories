@@ -443,6 +443,14 @@ export class WebhookServer {
     request: Request,
     response: Response,
   ): boolean {
+    const header = request.header(this.UseQueryParamsHeader)?.trim().toLowerCase();
+    if (header !== undefined && header !== 'true' && header !== 'false') {
+      const errorMsg = `Invalid ${this.UseQueryParamsHeader} header. Value must be true or false`;
+      this.log.error(`[${this.serverName}] ${errorMsg}`);
+      response.status(HttpResponse.BadRequest).send(errorMsg);
+      return false;
+    }
+
     const useQueryParams: boolean = this.usingQueryParams(request);
     this.log.debug(`[${this.serverName}] ${this.UseQueryParamsHeader}: ${useQueryParams}`);
 
@@ -475,7 +483,7 @@ export class WebhookServer {
   ): boolean {
     const useQueryParamsHeader: string | undefined = request.header(this.UseQueryParamsHeader);
 
-    return (useQueryParamsHeader === undefined) ? false : ToBoolean(useQueryParamsHeader);
+    return (useQueryParamsHeader === undefined) ? false : ToBoolean(useQueryParamsHeader.trim());
   }
 }
 

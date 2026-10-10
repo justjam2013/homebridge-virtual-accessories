@@ -214,3 +214,52 @@ test('charging updates preserve omitted battery properties', async (t) => {
     }
   }
 });
+
+
+test('Use-Query-Params headers reject invalid values and select the requested parameter source', async (t) => {
+  const webhook = new WebhookServer({ info() {}, error() {}, debug() {} }, 0);
+  const updates = [];
+  webhook.processRequest = (route, id, types, value, response) => {
+    updates.push({ route, id });
+    response.sendStatus(200);
+  };
+  const server = webhook.server.listen(0, '127.0.0.1');
+  t.after(() => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())));
+  await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const routes = ['/humidity', '/temperature', '/obstruction', '/triggeralarm', '/triggerpanic', '/triggersensor', '/chargingstate'];
+  for (const route of routes) {
+    const payload = { id: 'body-id', value: route === '/humidity' || route === '/temperature' ? 50 : true, charge: 50, charging: true };
+    const query = new URLSearchParams({ ...payload, id: 'query-id' });
+    for (const header of ['yes', '1', '', '   ', 'true,false', 'tru e']) {
+      for (const withBody of [true, false]) {
+        await t.test(`${route} rejects header ${JSON.stringify(header)} ${withBody ? 'with' : 'without'} body`, async () => {
+          const before = updates.length;
+          const response = await fetch(`${base}${route}?${query}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Use-Query-Params': header },
+            ...(withBody ? { body: JSON.stringify(payload) } : {}),
+          });
+          assert.equal(response.status, 400);
+          assert.equal(await response.text(), 'Invalid Use-Query-Params header. Value must be true or false');
+          assert.equal(updates.length, before);
+        });
+      }
+    }
+    for (const header of [undefined, 'true', 'TRUE', 'True', 'false', 'FALSE', 'False', ' \tTrUe\t ', ' \tFaLsE\t ']) {
+      for (const name of ['Use-Query-Params', 'use-query-params', 'UsE-QuErY-PaRaMs']) {
+        await t.test(`${route} accepts ${name}: ${JSON.stringify(header)}`, async () => {
+          const before = updates.length;
+          const response = await fetch(`${base}${route}?${query}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...(header === undefined ? {} : { [name]: header }) },
+            body: JSON.stringify(payload),
+          });
+          assert.equal(response.status, 200, await response.text());
+          assert.equal(updates.length, before + 1);
+          assert.deepEqual(updates.at(-1), { route, id: header?.trim().toLowerCase() === 'true' ? 'query-id' : 'body-id' });
+        });
+      }
+    }
+  }
+});
