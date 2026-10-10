@@ -328,16 +328,19 @@ export class WebhookServer {
   }
 
   private booleanIsValid(
-    value: string,
+    value: unknown,
     response: Response,
   ): boolean {
     const valueBoolean: boolean = (
-      (value !== undefined) &&
-      ['true', 'false'].includes(value.toString().toLowerCase())
+      typeof value === 'boolean' ||
+      (typeof value === 'string' && ['true', 'false'].includes(value.toLowerCase()))
     );
 
     if (!valueBoolean) {
-      const errorMsg: string = `Invalid value: ${value}. Value must be a boolean`;
+      // Avoid invoking user-supplied conversion methods when reporting malformed values.
+      const invalidValue: string = value !== null && (typeof value === 'object' || typeof value === 'function')
+        ? typeof value : String(value);
+      const errorMsg: string = `Invalid value: ${invalidValue}. Value must be a boolean`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
