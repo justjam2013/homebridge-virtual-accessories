@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { test } from 'node:test';
 import { WebhookServer } from '../dist/webhookServer.js';
+import { SecurityServiceTriggerType } from '../dist/accessories/virtualAccessorySecuritySystem.js';
 
 // Run after npm run build: node --test test/webhookServer.test.js
 test('boolean webhook validation rejects malformed values and preserves valid booleans', async (t) => {
@@ -32,7 +33,8 @@ test('boolean webhook validation rejects malformed values and preserves valid bo
         assert.equal(updates.length, before);
       });
     }
-    for (const value of [true, false]) {
+    for (const value of [true, false, 'true', 'false', 'TRUE', 'FALSE', 'True', 'False']) {
+      const expected = String(value).toLowerCase() === 'true';
       for (const query of [false, true]) {
         await t.test(`${route} accepts ${query ? 'query' : 'JSON'} ${value}`, async () => {
           const before = updates.length;
@@ -44,10 +46,14 @@ test('boolean webhook validation rejects malformed values and preserves valid bo
           assert.equal(response.status, 200);
           assert.equal(updates.length, before + 1);
           if (route === '/chargingstate') {
-            assert.equal(updates.at(-1).charging, value);
+            assert.equal(updates.at(-1).charging, expected);
           }
           else if (route === '/obstruction' || route === '/triggersensor') {
-            assert.equal(updates.at(-1), value);
+            assert.equal(updates.at(-1), expected);
+          }
+          else {
+            const trigger = route === '/triggeralarm' ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.TriggerPanic;
+            assert.equal(updates.at(-1), expected ? trigger : SecurityServiceTriggerType.None);
           }
         });
       }

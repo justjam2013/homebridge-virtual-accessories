@@ -19,7 +19,7 @@ import express, { Express, Request, Response } from 'express';
 
  
 function ToBoolean(value: string): boolean {
-  switch (value) {
+  switch (value.toLowerCase()) {
   case 'true':
     return true;
   case 'false':
