@@ -112,8 +112,8 @@ export class Battery extends Accessory implements UpdatableChargingStatus {
   // Updatable Charging State interface
 
   updateChargingStatus(
-    charging: boolean,
-    charge: number,
+    charging: boolean | undefined,
+    charge: number | undefined,
     accessoryId: string,
   ): void {
     this.log.debug(`[${this.accessoryName}] Request update charging to ${charging}`);

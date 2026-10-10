@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.16.4",
+  "version": "3.16.5",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2023 (Renzo Zanelli - renzo.zanelli6@gmail.com)",
   "license": "MIT",
@@ -103,6 +103,7 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc",
+    "test": "npm run build && node --test test/*.test.js",
     "generate-schemas": "node scripts/generate-schemas.js",
     "generate-template": "node scripts/generate-template.js",
     "lint": "eslint . --max-warnings=0",
