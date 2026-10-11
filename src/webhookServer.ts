@@ -82,7 +82,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const humidity: unknown = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -103,7 +103,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const temperature: unknown = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -124,7 +124,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const obstruction: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -145,7 +145,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -167,7 +167,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -189,7 +189,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
@@ -211,7 +211,7 @@ export class WebhookServer {
 
       const useQueryParams: boolean = this.usingQueryParams(request);
 
-      const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
+      const accessoryId: unknown = (useQueryParams) ? request.query.id : request.body.id;
       const charging: string = (useQueryParams) ? request.query.charging : request.body.charging;
       const charge: unknown = (useQueryParams) ? request.query.charge : request.body.charge;
 
@@ -302,17 +302,19 @@ export class WebhookServer {
   }
 
   private accessoryIdIsValid(
-    accessoryId: string,
+    accessoryId: unknown,
     response: Response,
-  ): boolean {
+  ): accessoryId is string {
     const patternRegex: RegExp = new RegExp(WebhookServer.accessoryIdPattern);
     const isValidAccessoryId: boolean = (
-      (accessoryId !== undefined) &&
+      typeof accessoryId === 'string' &&
       patternRegex.test(accessoryId)
     );
 
     if (!isValidAccessoryId) {
-      const errorMsg: string = `Invalid accessory id: ${accessoryId}`;
+      // Do not invoke conversion methods on malformed objects or arrays.
+      const invalidId: string = accessoryId !== null && typeof accessoryId === 'object' ? typeof accessoryId : String(accessoryId);
+      const errorMsg: string = `Invalid accessory id: ${invalidId}`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 

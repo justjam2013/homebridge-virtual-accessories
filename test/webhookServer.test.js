@@ -8,6 +8,72 @@ import { WebhookServer } from '../dist/webhookServer.js';
 import { SecurityServiceTriggerType } from '../dist/accessories/virtualAccessorySecuritySystem.js';
 
 // Run with npm test (builds the source before testing).
+test('accessory IDs reject malformed HTTP input without dispatching updates', async (t) => {
+  const webhook = new WebhookServer({ info() {}, error() {}, debug() {} }, 0);
+  const updates = [];
+  webhook.processRequest = (route, id, types, value, response) => {
+    updates.push({ route, id });
+    response.sendStatus(200);
+  };
+  const server = webhook.server.listen(0, '127.0.0.1');
+  t.after(() => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())));
+  await once(server, 'listening');
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const routes = ['/humidity', '/temperature', '/obstruction', '/triggeralarm', '/triggerpanic', '/triggersensor', '/chargingstate'];
+
+  for (const route of routes) {
+    const fields = route === '/chargingstate' ? { charging: false, charge: 0 }
+      : { value: route === '/humidity' || route === '/temperature' ? 0 : false };
+    const invalidIds = [
+      [{ toString: 1 }, 'object'], [{}, 'object'], [[], 'object'], [['a00005'], 'object'],
+      [[{ toString: 1 }], 'object'], [null, 'null'], [12345, '12345'], [false, 'false'],
+      [undefined, 'undefined'], ['', ''], ['abcd', 'abcd'], ['invalid id', 'invalid id'],
+    ];
+    for (const [id, description] of invalidIds) {
+      await t.test(`${route} rejects JSON id ${JSON.stringify(id)}`, async () => {
+        const before = updates.length;
+        const response = await fetch(`${base}${route}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...fields }),
+        });
+        assert.equal(response.status, 400);
+        assert.equal(await response.text(), `Invalid accessory id: ${description}`);
+        assert.equal(updates.length, before);
+      });
+    }
+    for (const mode of ['query', 'form']) {
+      for (const id of ['id[toString]=1', 'id[]=a00005', 'id[0][toString]=1', 'id=a00005&id=b00006']) {
+        await t.test(`${route} rejects ${mode} ${id}`, async () => {
+          const before = updates.length;
+          const encoded = `${id}&${new URLSearchParams(fields)}`;
+          const options = mode === 'query' ? { headers: { 'Use-Query-Params': 'true' } }
+            : { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: encoded };
+          const response = await fetch(`${base}${route}${mode === 'query' ? `?${encoded}` : ''}`, { method: 'POST', ...options });
+          assert.equal(response.status, 400);
+          assert.match(await response.text(), /^Invalid accessory id: (object|undefined)$/);
+          assert.equal(updates.length, before);
+        });
+      }
+    }
+    for (const mode of ['JSON', 'query', 'form']) {
+      for (const id of ['a00005', '12345', 'AbC-09']) {
+        await t.test(`${route} accepts ${mode} string id ${id}`, async () => {
+          const before = updates.length;
+          const payload = { id, ...fields };
+          const encoded = new URLSearchParams(payload).toString();
+          const options = mode === 'query' ? { headers: { 'Use-Query-Params': 'true' } }
+            : mode === 'JSON' ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+              : { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: encoded };
+          const response = await fetch(`${base}${route}${mode === 'query' ? `?${encoded}` : ''}`, { method: 'POST', ...options });
+          assert.equal(response.status, 200, await response.text());
+          assert.equal(updates.length, before + 1);
+          assert.deepEqual(updates.at(-1), { route, id });
+        });
+      }
+    }
+  }
+});
+
 test('boolean webhook validation rejects malformed values and preserves valid booleans', async (t) => {
   const webhook = new WebhookServer({ info() {}, error() {}, debug() {} }, 0);
   const updates = [];
