@@ -83,10 +83,10 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const humidity: string = (useQueryParams) ? request.query.value : request.body.value;
+      const humidity: unknown = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.percentageIsValid(humidity, response))
+          this.percentageIsValid(humidity, response, request))
       {
         this.processRequest(routeHumidity, accessoryId, [ 'humidifierdehumidifier', 'measurement' ], Number(humidity), response);
       }
@@ -104,10 +104,10 @@ export class WebhookServer {
       const useQueryParams: boolean = this.usingQueryParams(request);
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
-      const temperature: string = (useQueryParams) ? request.query.value : request.body.value;
+      const temperature: unknown = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.numberIsValid(temperature, response))
+          this.numberIsValid(temperature, response, request))
       {
         this.processRequest(routeTemperature, accessoryId, [ 'heatercooler', 'measurement' ], Number(temperature), response);
       }
@@ -128,7 +128,7 @@ export class WebhookServer {
       const obstruction: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.booleanIsValid(obstruction, response))
+          this.booleanIsValid(obstruction, response, request))
       {
         this.processRequest(routeObstruction, accessoryId, [ 'garagedoor' ], ToBoolean(obstruction.toString()), response);
       }
@@ -149,7 +149,7 @@ export class WebhookServer {
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.booleanIsValid(trigger, response))
+          this.booleanIsValid(trigger, response, request))
       {
         // eslint-disable-next-line max-len
         this.processRequest(routeTriggerAlarm, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger.toString()) ? SecurityServiceTriggerType.TriggerAlarm : SecurityServiceTriggerType.None), response);
@@ -171,7 +171,7 @@ export class WebhookServer {
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.booleanIsValid(trigger, response))
+          this.booleanIsValid(trigger, response, request))
       {
         // eslint-disable-next-line max-len
         this.processRequest(routeTriggerPanic, accessoryId, [ 'securitysystem' ], (ToBoolean(trigger.toString()) ? SecurityServiceTriggerType.TriggerPanic : SecurityServiceTriggerType.None), response);
@@ -193,7 +193,7 @@ export class WebhookServer {
       const trigger: string = (useQueryParams) ? request.query.value : request.body.value;
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          this.booleanIsValid(trigger, response))
+          this.booleanIsValid(trigger, response, request))
       {
         this.processRequest(routeTriggerSensor, accessoryId, [ 'sensor' ], ToBoolean(trigger.toString()), response);
       }
@@ -213,7 +213,7 @@ export class WebhookServer {
 
       const accessoryId: string = (useQueryParams) ? request.query.id : request.body.id;
       const charging: string = (useQueryParams) ? request.query.charging : request.body.charging;
-      const charge: string = (useQueryParams) ? request.query.charge : request.body.charge;
+      const charge: unknown = (useQueryParams) ? request.query.charge : request.body.charge;
 
       if (charging === undefined && charge === undefined) {
         response.status(HttpResponse.BadRequest).send('At least one of charging or charge must be supplied');
@@ -221,8 +221,8 @@ export class WebhookServer {
       }
 
       if (this.accessoryIdIsValid(accessoryId, response) &&
-          (charging === undefined || this.booleanIsValid(charging, response)) &&
-          (charge === undefined || this.numberIsValid(charge, response)))
+          (charging === undefined || this.booleanIsValid(charging, response, request)) &&
+          (charge === undefined || this.percentageIsValid(charge, response, request)))
       {
         const chargingState: ChargingState = new ChargingState(
           charging === undefined ? undefined : ToBoolean(charging.toString()),
@@ -323,12 +323,18 @@ export class WebhookServer {
   }
 
   private percentageIsValid(
-    value: string,
+    value: unknown,
     response: Response,
+    request: Request,
   ): boolean {
+    if (!this.numberIsValid(value, response, request)) {
+      return false;
+    }
+
     const valuePercent: number = Number(value);
 
-    if (isNaN(valuePercent) || valuePercent < 0 || valuePercent > 100) {
+    if (!Number.isInteger(valuePercent) || valuePercent < 0 || valuePercent > 100 ||
+        (typeof value === 'string' && !/^[+-]?\d+$/.test(value))) {
       const errorMsg: string = `Invalid value: ${value}. Value must be a percentage`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
@@ -340,13 +346,18 @@ export class WebhookServer {
   }
 
   private numberIsValid(
-    value: string,
+    value: unknown,
     response: Response,
+    request: Request,
   ): boolean {
-    const valueNumber: number = Number(value);
+    const isScalar: boolean = this.usingStringValues(request)
+      ? typeof value === 'string' && value === value.trim() && /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(value)
+      : typeof value === 'number';
 
-    if (isNaN(valueNumber)) {
-      const errorMsg: string = `Invalid value: ${value}. Value must be a number`;
+    if (!isScalar || !Number.isFinite(Number(value))) {
+      // Do not invoke conversion methods on malformed objects or arrays.
+      const invalidValue: string = value !== null && typeof value === 'object' ? typeof value : String(value);
+      const errorMsg: string = `Invalid value: ${invalidValue}. Value must be a finite number`;
       this.log.error(`[${this.serverName}] ${errorMsg}`);
       response.status(HttpResponse.BadRequest).send(`${errorMsg}`);
 
@@ -359,10 +370,12 @@ export class WebhookServer {
   private booleanIsValid(
     value: unknown,
     response: Response,
+    request: Request,
   ): boolean {
     const valueBoolean: boolean = (
-      typeof value === 'boolean' ||
-      (typeof value === 'string' && ['true', 'false'].includes(value.toLowerCase()))
+      this.usingStringValues(request)
+        ? typeof value === 'string' && ['true', 'false'].includes(value.toLowerCase())
+        : typeof value === 'boolean'
     );
 
     if (!valueBoolean) {
@@ -476,6 +489,10 @@ export class WebhookServer {
     }
 
     return true;
+  }
+
+  private usingStringValues(request: Request): boolean {
+    return this.usingQueryParams(request) || request.is('application/x-www-form-urlencoded') === 'application/x-www-form-urlencoded';
   }
 
   private usingQueryParams(
