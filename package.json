@@ -102,8 +102,8 @@
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "scripts": {
-    "build": "rimraf ./dist && tsc",
-    "test": "npm run build && node --test test/*.test.js",
+    "build": "rimraf ./dist && tsc && npm test",
+    "test": "node --test test/*.test.js",
     "generate-schemas": "node scripts/generate-schemas.js",
     "generate-template": "node scripts/generate-template.js",
     "lint": "eslint . --max-warnings=0",
