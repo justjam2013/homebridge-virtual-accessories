@@ -4,9 +4,9 @@ import { BinarySensor } from '../binarySensor.js';
 
 import { shutdownSignal } from '../../utils/utils.js';
 
-import dns from 'dns';
+import dns, { LookupOneOptions } from 'dns';
 import net from 'net';
-import ping from '@justjam2013/net-ping';
+import { ping } from '@homebridge/node-icmp-ping';
 
 /**
  *  Private helper classes to pass values by reference
@@ -27,9 +27,9 @@ class Counter {
  */
 export class PingTrigger extends Trigger {
 
-  private NOT_IP: number = 0;
-  private IPv4: number = 4;
-  private IPv6: number = 6;
+  private readonly NOT_IP: number = 0;
+  private readonly IPv4: number = 4;
+  private readonly IPv6: number = 6;
 
   private failureCount = new Counter(0);
 
@@ -51,41 +51,30 @@ export class PingTrigger extends Trigger {
 
   private async setup(triggerConfig: PingTriggerConfiguration) {
 
-    let ipProtocolVersion = net.isIP(triggerConfig.host);
+    let ipProtocolVersion: number = net.isIP(triggerConfig.host);
     if (ipProtocolVersion === this.NOT_IP) {
+      // This might be a hostname, so try to resolve it to an IPv4
+      // might change this later to be either IPv4 or IPv6
       const ip: string | void = await this.getIP(triggerConfig.host);
       if (ip) {
         ipProtocolVersion = net.isIP(ip);
         triggerConfig.host = ip;
       }
+      else {
+        this.log.error(`[${this.accessoryName}] No valid IP found for: ${triggerConfig.host}`);
+        return;
+      }
     }
-
-    let protocol: string;
-    switch(ipProtocolVersion) {
-    case this.IPv4:
-      protocol = ping.NetworkProtocol.IPv4;
-      break;
-    case this.IPv6:
-      protocol = ping.NetworkProtocol.IPv6;
-      break;
-    default:
-      this.log.error(`[${this.accessoryName}] Unkown or invalid IP protocol version: ${ipProtocolVersion}`);
-      return;
-    }
-    this.log.debug(`[${this.accessoryName}] Protocol: ${ping.NetworkProtocol[protocol]}`);
 
     const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;  // minutes to milliseconds
     this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
-    const pingTimeoutMillis = 1000;  // 1 second timeout
 
     setInterval(
-      // function, delay
+      // function, repeat interval
       this.ping, intervalBetweenPingsMillis,
       // function params
       this,
       triggerConfig,
-      protocol,
-      pingTimeoutMillis,
     )
       .unref();
   }
@@ -97,65 +86,76 @@ export class PingTrigger extends Trigger {
   private async ping(
     trigger: PingTrigger,
     triggerConfig: PingTriggerConfiguration,
-    protocol: string,
-    pingTimeoutMillis: number,
   ) {
     if (shutdownSignal.isShuttingDown) {return;}
 
+    const IP: string = triggerConfig.host;
+
     // If protocol === None, do a DNS lookup
-    // const host = await getIP(hostname: string);
+    // const IP = await this.getIP(triggerConfig.host, this.IPv4);
     // protocol = ping.NetworkProtocol.IPv4;
-    // Create a helper class for protocol, so the value can be updated
 
-    // With "retries = 3" it pings 3 times before it counts it as a failure 
+    try {
+      const result: PingResult = await ping(IP);
 
-    const options = {
-      networkProtocol: protocol,
-      packetSize: 16,
-      retries: 3,
-      sessionId: Math.floor(Math.random() * 65534) + 1,
-      timeout: pingTimeoutMillis,
-      ttl: 128,
-    };
-
-    const session = ping.createSession(options);
-
-    session.pingHost(triggerConfig.host, (error, target: string, sent: number, rcvd: number) => {
-      const millis = rcvd - sent;
-      if (error) {
-        // Only log the error when we reach the failure count instead of spamming the logs
-        trigger.log.debug(`[${trigger.accessoryName}] Ping ${target}: ${error.toString()}`);
-
-        if (trigger.failureCount.value < Number.MAX_VALUE) {
-          trigger.failureCount.value++;
-        }
-
-        trigger.log.debug(`[${trigger.accessoryName}] Failure count: ${trigger.failureCount.value}`);
-        if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
-          trigger.log.debug(`[${trigger.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
-
-          // Only log the error when we reach the failure count instead of spamming the logs
-          trigger.log.error(`[${trigger.accessoryName}] Ping ${target}: ${error.toString()}`);
-
-          trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
-        }
-      }
-      else {
-        trigger.log.debug(`[${trigger.accessoryName}] Ping ${target}: Alive (latency: ${millis}ms)`);
+      if (result.success) {
+        trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${result.latency}ms)`);
 
         trigger.failureCount.value = 0;
         trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
       }
+      else {
+        // Only log the error when we reach the failure count instead of spamming the logs
+        trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: ${result.message}`);
 
-      session.close ();
-    });
+        trigger.handlePingFailure(trigger, triggerConfig, IP, result.message);
+      }
+    }
+    catch (error) {
+      trigger.log.debug(`Error attempting to ping ${IP}: ${error}`);
+
+      let message: string;
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      else {
+        message = String(error);
+      }
+      trigger.handlePingFailure(trigger, triggerConfig, IP, message);
+    }
+  }
+
+  private handlePingFailure(
+    trigger: PingTrigger,
+    triggerConfig: PingTriggerConfiguration,
+    IP: string,
+    message: string,
+  ) {
+    if (trigger.failureCount.value < Number.MAX_VALUE) {
+      trigger.failureCount.value++;
+    }
+
+    trigger.log.debug(`[${trigger.accessoryName}] Failure count: ${trigger.failureCount.value}`);
+    if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
+      trigger.log.debug(`[${trigger.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
+
+      // Only log the error when we reach the failure count instead of spamming the logs
+      trigger.log.error(`[${trigger.accessoryName}] Ping ${IP}: ${message}`);
+
+      trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
+    }
   }
 
   private async getIP(hostname: string): Promise<string | void> {
-    const response = await dns.promises.lookup(hostname)
+    const options: LookupOneOptions = {
+      hints: dns.ADDRCONFIG | dns.V4MAPPED,
+      order: 'ipv4first',
+    };
+    const response: string | void = await dns.promises.lookup(hostname, options)
       .then((result: dns.LookupAddress) => {
-        this.sensor.platform.log.info(`[${this.accessoryName}] IP address retrieved for '${hostname}' is '${result.address}'`);
-        return result.address;
+        const address: string = result.address;
+        this.sensor.platform.log.info(`[${this.accessoryName}] IP address retrieved for '${hostname}' is '${address}'`);
+        return address;
       })
       .catch((error: Error) => {
         this.sensor.platform.log.error(`[${this.accessoryName}] Error retrieving IP address for '${hostname}': ${error.message}`);
@@ -163,6 +163,12 @@ export class PingTrigger extends Trigger {
   
     return response;
   }
+}
+
+interface PingResult {
+  success: boolean;
+  latency: number | null;
+  message: string;
 }
 
 export const dynamicTrigger = PingTrigger;
