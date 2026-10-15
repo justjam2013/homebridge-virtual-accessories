@@ -108,7 +108,7 @@ export class PingTrigger extends Trigger {
         // Only log the error when we reach the failure count instead of spamming the logs
         trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: ${result.message}`);
 
-        this.handlePingFailure(trigger, triggerConfig, IP, result.message);
+        trigger.handlePingFailure(trigger, triggerConfig, IP, result.message);
       }
     }
     catch (error) {
@@ -121,7 +121,7 @@ export class PingTrigger extends Trigger {
       else {
         message = String(error);
       }
-      this.handlePingFailure(trigger, triggerConfig, IP, message);
+      trigger.handlePingFailure(trigger, triggerConfig, IP, message);
     }
   }
 
