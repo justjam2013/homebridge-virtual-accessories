@@ -112,7 +112,7 @@ export class PingTrigger extends Trigger {
       }
     }
     catch (error) {
-      trigger.log.error(`Error attempting to ping ${IP}: ${error}`);
+      trigger.log.debug(`Error attempting to ping ${IP}: ${error}`);
 
       let message: string;
       if (error instanceof Error) {
