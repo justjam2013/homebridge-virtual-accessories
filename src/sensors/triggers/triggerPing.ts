@@ -5,6 +5,7 @@ import { BinarySensor } from '../binarySensor.js';
 import { shutdownSignal } from '../../utils/utils.js';
 
 import dns from 'dns';
+import net from 'net';
 import { ping } from '@homebridge/node-icmp-ping';
 
 /**
@@ -26,6 +27,7 @@ class Counter {
  */
 export class PingTrigger extends Trigger {
 
+  private readonly NOT_IP: number = 0;
   private readonly IPv4: number = 4;
   private readonly IPv6: number = 6;
 
@@ -48,6 +50,21 @@ export class PingTrigger extends Trigger {
   }
 
   private async setup(triggerConfig: PingTriggerConfiguration) {
+
+    let ipProtocolVersion: number = net.isIP(triggerConfig.host);
+    if (ipProtocolVersion === this.NOT_IP) {
+      // This might be a hostname, so try to resolve it to an IPv4
+      // might change this later to be either IPv4 or IPv6
+      const ip: string | void = await this.getIP(triggerConfig.host, this.IPv4);
+      if (ip) {
+        ipProtocolVersion = net.isIP(ip);
+        triggerConfig.host = ip;
+      }
+      else {
+        this.log.error(`[${this.accessoryName}] No valid IP found for: ${triggerConfig.host}`);
+        return;
+      }
+    }
 
     const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;  // minutes to milliseconds
     this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
