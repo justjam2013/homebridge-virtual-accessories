@@ -108,23 +108,41 @@ export class PingTrigger extends Trigger {
         // Only log the error when we reach the failure count instead of spamming the logs
         trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: ${result.message}`);
 
-        if (trigger.failureCount.value < Number.MAX_VALUE) {
-          trigger.failureCount.value++;
-        }
-
-        trigger.log.debug(`[${trigger.accessoryName}] Failure count: ${trigger.failureCount.value}`);
-        if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
-          trigger.log.debug(`[${trigger.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
-
-          // Only log the error when we reach the failure count instead of spamming the logs
-          trigger.log.error(`[${trigger.accessoryName}] Ping ${IP}: ${result.message}`);
-
-          trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
-        }
+        this.handlePingFailure(trigger, triggerConfig, IP, result.message);
       }
     }
     catch (error) {
       trigger.log.error(`Error attempting to ping ${IP}: ${error}`);
+
+      let message: string;
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      else {
+        message = String(error);
+      }
+      this.handlePingFailure(trigger, triggerConfig, IP, message);
+    }
+  }
+
+  private handlePingFailure(
+    trigger: PingTrigger,
+    triggerConfig: PingTriggerConfiguration,
+    IP: string,
+    message: string,
+  ) {
+    if (trigger.failureCount.value < Number.MAX_VALUE) {
+      trigger.failureCount.value++;
+    }
+
+    trigger.log.debug(`[${trigger.accessoryName}] Failure count: ${trigger.failureCount.value}`);
+    if (trigger.failureCount.value === triggerConfig.failureRetryCount) {
+      trigger.log.debug(`[${trigger.accessoryName}] Reached failure retry count of ${triggerConfig.failureRetryCount}. Triggering sensor`);
+
+      // Only log the error when we reach the failure count instead of spamming the logs
+      trigger.log.error(`[${trigger.accessoryName}] Ping ${IP}: ${message}`);
+
+      trigger.sensor.triggerSensorState(BinarySensor.TRIGGERED, trigger);
     }
   }
 
