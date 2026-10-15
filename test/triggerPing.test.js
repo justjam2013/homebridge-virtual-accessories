@@ -156,13 +156,8 @@ test('shutdown prevents subsequent scheduled pings and state changes', async (t)
   assert.deepEqual(f.states(), []);
 });
 
-// These assertions describe the desired behavior, not the current catch-and-log bug.
-// TODO tests execute and report failures without making npm test fail. Remove todo
-// when network/route rejections participate in the normal failure-counting path.
 for (const message of ['No route to host', 'Network is unreachable']) {
-  test(`network rejection (${message}) reaches the failure threshold`, {
-    todo: 'PR #947: rejected ping promises are logged but never counted',
-  }, async (t) => {
+  test(`network rejection (${message}) reaches the failure threshold`, async (t) => {
     const f = await fixture(t);
     ping.mock.mockImplementation(async () => { throw new Error(message); });
     await f.tick();
