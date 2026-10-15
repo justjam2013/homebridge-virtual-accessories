@@ -111,9 +111,9 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
+    "@homebridge/node-icmp-ping": "^1.0.1",
     "@js-joda/core": "^6.3.0",
     "@js-joda/timezone": "^3.1.0",
-    "@justjam2013/net-ping": "^2.0.2",
     "@types/express": "^5.0.6",
     "cheerio": "^1.2.0",
     "croner": "^10.0.1",
