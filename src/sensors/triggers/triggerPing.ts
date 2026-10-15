@@ -4,7 +4,7 @@ import { BinarySensor } from '../binarySensor.js';
 
 import { shutdownSignal } from '../../utils/utils.js';
 
-import dns from 'dns';
+import dns, { LookupOneOptions } from 'dns';
 import net from 'net';
 import { ping } from '@homebridge/node-icmp-ping';
 
@@ -55,7 +55,7 @@ export class PingTrigger extends Trigger {
     if (ipProtocolVersion === this.NOT_IP) {
       // This might be a hostname, so try to resolve it to an IPv4
       // might change this later to be either IPv4 or IPv6
-      const ip: string | void = await this.getIP(triggerConfig.host, this.IPv4);
+      const ip: string | void = await this.getIP(triggerConfig.host);
       if (ip) {
         ipProtocolVersion = net.isIP(ip);
         triggerConfig.host = ip;
@@ -128,10 +128,10 @@ export class PingTrigger extends Trigger {
     }
   }
 
-  private async getIP(hostname: string, family: number): Promise<string | void> {
-    const options = {
-      family: family,
+  private async getIP(hostname: string): Promise<string | void> {
+    const options: LookupOneOptions = {
       hints: dns.ADDRCONFIG | dns.V4MAPPED,
+      order: 'ipv4first',
     };
     const response: string | void = await dns.promises.lookup(hostname, options)
       .then((result: dns.LookupAddress) => {
