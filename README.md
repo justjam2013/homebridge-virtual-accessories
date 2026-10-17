@@ -145,7 +145,7 @@ Currently, these are the implemented virtual accessories:
     - **Host Ping trigger.** Actvates the sensor after a configurable number of failed attempts to ping a network host. The sensor resets when ping is successful.
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
-    - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call.
+    - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call. If the sensor is stateful (`"accessoryIsStateful": true`), its state persists across restarts of Homebridge. This is useful for sensors that represent a longer-lived state, such as presence, which would otherwise reset when Homebridge restarts.
 -   **Measurement Sensor.** Allows you you to create a virtual measurement sensor. A measurement sensor returns a continuous value, rather than just open/closed.
     - **Humidity Meter.** Allows you to create a virtual hygrometer that measures relative humidity. The humidity meter can be updated via a [webhook call](#webhook-service-configuration).
     - **Temperature Meter.** Allows you to create a virtual thermometer that measures temperature. The temperature meter can be updated via a [webhook call](#webhook-service-configuration).
@@ -908,6 +908,7 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "1234567",
             "accessoryName": "My Webhook Sensor",
             "accessoryType": "sensor",
+            "accessoryIsStateful": false,
             "sensor": {
                 "type": "contact",
                 "trigger": "webhook"
