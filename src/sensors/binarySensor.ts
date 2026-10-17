@@ -7,6 +7,7 @@ import { Accessory } from '../accessories/accessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from './triggers/trigger.js';
 import { TriggerNotAllowedError, InvalidSensorValue } from '../errors.js';
+import { TriggerType } from '../configuration/schema.js';
 
 /**
  * Sensor - Abstract accessory
@@ -18,6 +19,8 @@ export abstract class BinarySensor extends Accessory {
 
   static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
   static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
+
+  private static readonly stateStorageKey: string = 'SensorState';
 
   protected trigger: Trigger | undefined;
 
@@ -35,7 +38,16 @@ export abstract class BinarySensor extends Accessory {
     this.EventDetectedCharacteristic = eventDetectedCharacteristic;
 
     // First configure the device based on the accessory details
-    const SensorState: number = BinarySensor.NORMAL;
+    let SensorState: number = BinarySensor.NORMAL;
+
+    // If the sensor is stateful, restore the last state it was set to
+    if (this.isStatePersisted()) {
+      const cachedState = BinarySensor.getStoredSensorState(this.loadAccessoryState(this.storagePath));
+      if (cachedState !== undefined) {
+        this.log.debug(`[${this.accessoryName}] Restoring Sensor State: ${BinarySensor.getStateName(cachedState)}`);
+        SensorState = cachedState;
+      }
+    }
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Sensor State: ${BinarySensor.getStateName(SensorState)}`);
@@ -73,8 +85,34 @@ export abstract class BinarySensor extends Accessory {
     return SensorState;
   }
 
+  /**
+   * Only webhook-triggered sensors persist their state: their state is set from outside and
+   * there is nothing that would re-evaluate it after a restart. Sensors with other triggers
+   * (ping, cron, sun events, startup) recompute their state on their own.
+   */
+  protected isStatePersisted(): boolean {
+    return (
+      this.accessoryConfiguration.accessoryIsStateful === true &&
+      this.accessoryConfiguration.sensor !== undefined &&
+      this.accessoryConfiguration.sensor.trigger === TriggerType.Webhook
+    );
+  }
+
+  /**
+   * Read a stored sensor state, ignoring anything that is not a valid state
+   */
+  static getStoredSensorState(json: Record<string, unknown> | undefined): number | undefined {
+    const value = json?.[BinarySensor.stateStorageKey];
+    return (value === BinarySensor.NORMAL || value === BinarySensor.TRIGGERED) ? value : undefined;
+  }
+
   protected getJsonState(): string {
-    return JSON.stringify({});
+    const json: Record<string, unknown> = {};
+    if (this.isStatePersisted()) {
+      json[BinarySensor.stateStorageKey] = this.getSensorState();
+    }
+
+    return JSON.stringify(json);
   }
 
   /**
@@ -95,6 +133,11 @@ export abstract class BinarySensor extends Accessory {
       SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
        
       this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
+
+      // Store sensor state if stateful
+      if (this.isStatePersisted()) {
+        this.saveState();
+      }
     }
   }
 

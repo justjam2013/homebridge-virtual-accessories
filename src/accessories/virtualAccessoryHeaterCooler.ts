@@ -513,6 +513,9 @@ export class HeaterCooler extends Accessory implements UpdatableMeasurementSenso
       this.log.info(`[${this.accessoryName}] Setting Current Temperature: ${this.displayTemperature(CurrentTemperature)}${this.getDegreeUnits()}`);
 
       this.updateAccessoryOperationalCondition();
+
+      // Store the new reading if stateful
+      this.saveState();
     }
   }
 
