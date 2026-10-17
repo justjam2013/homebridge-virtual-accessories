@@ -18,6 +18,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   private static readonly DEFAULT_TIMEOUT_SECS: number = 10;
 
   private readonly stateStorageKey: string = 'GarageDoorState';
+  private readonly obstructionStorageKey: string = 'ObstructionDetected';
 
   private transitionTimer: Timer;
   private transitionDuration: number;
@@ -31,7 +32,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     let GarageDoorCurrentState: number = GarageDoor.CLOSED;
     let GarageDoorTargetState: number = GarageDoor.CLOSED;
-    const ObstructionDetected: boolean = GarageDoor.OBSTRUCTION_NOT_DETECTED;
+    let ObstructionDetected: boolean = GarageDoor.OBSTRUCTION_NOT_DETECTED;
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.garageDoor.defaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
@@ -54,6 +55,12 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
       if (cachedState !== undefined) {
         GarageDoorCurrentState = cachedState;
+      }
+
+      // Obstruction is only ever set by webhook, so nothing would restore it after a restart
+      const cachedObstruction: unknown = accessoryState[this.obstructionStorageKey];
+      if (typeof cachedObstruction === 'boolean') {
+        ObstructionDetected = cachedObstruction;
       }
     }
 
@@ -170,6 +177,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   protected getJsonState(): string {
     const jsonState = {
       [this.stateStorageKey]: this.getCurrentDoorState(),
+      [this.obstructionStorageKey]: this.getObstructionDetected(),
     };
 
     const json = JSON.stringify(jsonState);
@@ -195,6 +203,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     let ObstructionDetected: boolean = value;
     ObstructionDetected = this.updateObstructionDetected(ObstructionDetected);
     this.log.info(`[${this.accessoryName}] Setting Obstruction Detected: ${GarageDoor.getObstructionDetectedName(ObstructionDetected)}`);
+
+    // Store obstruction state if stateful
+    this.saveState();
 
     // If the door is closing, it should reverse back to Open
     let CurrentDoorState: number = this.getCurrentDoorState();

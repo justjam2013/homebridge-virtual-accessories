@@ -91,6 +91,9 @@ export class TemperatureSensor extends MeasurementSensor {
 
       const SensorValue: number = this.toCelsius(value);
       this.service.setCharacteristic(this.MeasurementCharacteristic, (SensorValue));
+
+      // Store sensor value if stateful
+      this.saveState();
     }
   }
 }

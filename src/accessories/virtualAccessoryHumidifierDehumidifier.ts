@@ -445,6 +445,9 @@ export class HumidifierDehumidifier extends Accessory implements UpdatableMeasur
       this.log.info(`[${this.accessoryName}] Setting Current Relative Humidity: ${CurrentRelativeHumidity}%`);
 
       this.updateAccessoryOperationalCondition();
+
+      // Store the new reading if stateful
+      this.saveState();
     }
   }
 

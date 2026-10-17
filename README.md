@@ -120,7 +120,7 @@ Currently, these are the implemented virtual accessories:
 -   **Doorbell.** Allows you to use a button as a doorbell and have it play a chime on HomePods. Due to [issues with HomeKit](#issues-with-homekit), you will need the free [Eve app](https://www.evehome.com/en-us/eve-app) to control its settings.
 -   **Fan.** Allows you to create a virtual fan and set rotation direction and speed.
 -   **Filter Maintenance.** Allows you to create a recurring filter maintenance/replacement schedule, with a lifetime up to 30 days.
--   **Garage Door.** Allows you to create a virtual garage door. Generates an Apple Home notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set or reset via a [webhook call](#webhook-service-configuration). Per UL 325 safety standards, if the obstruction sensor is triggered and the garage door is open it will remain open. If the garage door is closing, it will stop and reverse back to open. It will operate as normal in all other circumstances.
+-   **Garage Door.** Allows you to create a virtual garage door. Generates an Apple Home notification when the accessory's state changes. CarPlay will display the Garage widget on the display when you approach your home. The "obstruction detected" property can be set or reset via a [webhook call](#webhook-service-configuration). If the garage door is stateful, the obstruction detected state also persists across restarts of Homebridge. Per UL 325 safety standards, if the obstruction sensor is triggered and the garage door is open it will remain open. If the garage door is closing, it will stop and reverse back to open. It will operate as normal in all other circumstances.
 -   **Heater/Cooler.** Allows you to create a virtual thermostat/AC accessory. You can select heater only, cooler only, or heater + cooler combo. The heater/cooler temperature sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Humidifier/Dehumidifier.** Allows you to create a virtual humidifier/dehumidifier. You can select humidifier only, dehumidifier only, or humidifier + dehumidifier combo. The humidifier/dehumidifier humidity sensor can be updated via a [webhook call](#webhook-service-configuration). Based on the threshold values, the accessory will switch to the appropriate operating state, according to the supported states.
 -   **Lightbulb.** Allows you to create virtual white, white ambiance, color lightbulbs. In the Home app, this can be used as a dimmer switch.
@@ -146,7 +146,7 @@ Currently, these are the implemented virtual accessories:
     - **Sun Events trigger.** Activates the sensor when the selected event happens: sunrise, sunset, and golden hour (for the photographers among us). The sensor resets after a brief delay.
     - **Switch trigger.** To create a switch triggered sensor, create a virtual switch accessory with a companion sensor. This is just the easier way of implementing a switch triggered sensor. A future version may provide the ability to create this pairing as a sensor with a switch trigger.
     - **Webhook trigger.** Triggers the sensor via a [webhook call](#webhook-service-configuration). To reset the sensor, trigger it via another web call. If the sensor is stateful (`"accessoryIsStateful": true`), its state persists across restarts of Homebridge. This is useful for sensors that represent a longer-lived state, such as presence, which would otherwise reset when Homebridge restarts.
--   **Measurement Sensor.** Allows you you to create a virtual measurement sensor. A measurement sensor returns a continuous value, rather than just open/closed.
+-   **Measurement Sensor.** Allows you you to create a virtual measurement sensor. A measurement sensor returns a continuous value, rather than just open/closed. Its value is set via a [webhook call](#webhook-service-configuration). If the sensor is stateful (`"accessoryIsStateful": true`), its last value persists across restarts of Homebridge.
     - **Humidity Meter.** Allows you to create a virtual hygrometer that measures relative humidity. The humidity meter can be updated via a [webhook call](#webhook-service-configuration).
     - **Temperature Meter.** Allows you to create a virtual thermometer that measures temperature. The temperature meter can be updated via a [webhook call](#webhook-service-configuration).
  
@@ -932,6 +932,7 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "2837933",
             "accessoryName": "Humidity Meter",
             "accessoryType": "measurement",
+            "accessoryIsStateful": false,
             "measurement": {
                 "type": "humidity"
             }
@@ -951,6 +952,7 @@ These are example configurations of the virtual accessories and provided for ref
             "accessoryID": "5756040",
             "accessoryName": "Temperature Meter",
             "accessoryType": "measurement",
+            "accessoryIsStateful": false,
             "measurement": {
                 "type": "temperature",
                 "temperatureUnits": "fahrenheit"

@@ -158,7 +158,7 @@
               "description": "Accessoire status overleeft Homebridge herstart",
               "type": "boolean",
               "condition": {
-                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'thermostat', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType) || (model.devices[arrayIndices].accessoryType === 'sensor' && model.devices[arrayIndices].sensor && model.devices[arrayIndices].sensor.trigger === 'webhook');"
+                "functionBody": "return ['airpurifier', 'door', 'fan', 'garagedoor', 'heatercooler', 'humidifierdehumidifier', 'lightbulb', 'lock', 'securitysystem', 'speaker', 'switch', 'television', 'thermostat', 'valve', 'window', 'windowcovering'].includes(model.devices[arrayIndices].accessoryType);"
               }
             },
             "airPurifier": {
