@@ -1,56 +1,95 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { test } from 'node:test';
+import { setImmediate } from 'node:timers/promises';
+import { hap, persistedAccessory } from './helpers/persistedAccessory.js';
 
-// Initialize the accessory graph through the same entry point as existing tests.
-await import('../dist/accessories/virtualAccessoryBattery.js');
-const { BinarySensor } = await import('../dist/sensors/binarySensor.js');
+const { MotionSensor } = await import('../dist/sensors/virtualSensorMotion.js');
+const { OccupancySensor } = await import('../dist/sensors/virtualSensorOccupancy.js');
 
-// A BinarySensor without HomeKit plumbing: only what triggerSensorState() and getJsonState() use.
-function sensor(t, { accessoryIsStateful = true, trigger = 'webhook', state = BinarySensor.NORMAL } = {}) {
-  const fake = Object.create(BinarySensor.prototype);
-  let current = state;
-  Object.assign(fake, {
-    accessoryName: 'My Webhook Sensor',
-    accessoryConfiguration: { accessoryID: '1234567', accessoryIsStateful, sensor: { type: 'occupancy', trigger } },
-    log: { info() {}, debug() {}, error() {} },
-    EventDetectedCharacteristic: {},
-    getSensorState: () => current,
-    updateCharacteristicValue: (characteristic, value) => (current = value),
-    saveState: t.mock.fn(),
+for (const [SensorClass, characteristic, type] of [
+  [MotionSensor, hap.Characteristic.MotionDetected, 'boolean'],
+  [OccupancySensor, hap.Characteristic.OccupancyDetected, 'number'],
+]) {
+  test(`${SensorClass.name} saves and restores both states through real HomeKit characteristics`, (t) => {
+    const fixture = persistedAccessory(t, SensorClass, { sensor: { trigger: 'webhook' } });
+    let sensor = fixture.create();
+    for (const value of [true, false]) {
+      sensor.getTrigger().triggerSensor(value, fixture.config.accessoryID);
+      assert.equal(typeof sensor.service.getCharacteristic(characteristic).value, type);
+      assert.deepEqual(fixture.readState(), { SensorState: Number(value) });
+      sensor = fixture.create();
+      assert.equal(sensor.getSensorState(), Number(value));
+      assert.equal(sensor.service.getCharacteristic(characteristic).value, type === 'boolean' ? value : Number(value));
+
+      // A repeated webhook must not write again, including for Boolean characteristics.
+      const save = t.mock.method(sensor, 'saveState');
+      sensor.getTrigger().triggerSensor(value, fixture.config.accessoryID);
+      assert.equal(save.mock.callCount(), 0);
+      save.mock.restore();
+    }
   });
-  return fake;
 }
 
-const triggerFor = { sensorConfig: { accessoryID: '1234567' } };
-
-test('stateful webhook sensors save their state when it changes', async (t) => {
-  const s = sensor(t);
-  await s.triggerSensorState(BinarySensor.TRIGGERED, triggerFor);
-  assert.equal(s.saveState.mock.callCount(), 1);
-  assert.equal(s.getJsonState(), JSON.stringify({ SensorState: BinarySensor.TRIGGERED }));
-
-  // No change, no write.
-  await s.triggerSensorState(BinarySensor.TRIGGERED, triggerFor);
-  assert.equal(s.saveState.mock.callCount(), 1);
-
-  await s.triggerSensorState(BinarySensor.NORMAL, triggerFor);
-  assert.equal(s.saveState.mock.callCount(), 2);
-  assert.equal(s.getJsonState(), JSON.stringify({ SensorState: BinarySensor.NORMAL }));
+test('legacy Boolean states restore, while invalid binary states use the default', (t) => {
+  const fixture = persistedAccessory(t, MotionSensor, { sensor: { trigger: 'webhook' } });
+  for (const [stored, expected] of [[true, 1], [false, 0], [1, 1], [0, 0], [2, 0], ['1', 0], [null, 0], [{}, 0]]) {
+    fixture.writeState({ SensorState: stored });
+    assert.equal(fixture.create().getSensorState(), expected, JSON.stringify(stored));
+  }
+  fixture.writeState({});
+  assert.equal(fixture.create().getSensorState(), 0);
 });
 
-test('sensors that are not stateful, or not webhook-triggered, do not persist', async (t) => {
-  for (const options of [{ accessoryIsStateful: false }, { trigger: 'cron' }, { trigger: 'ping' }, { trigger: 'startup' }]) {
-    const s = sensor(t, options);
-    await s.triggerSensorState(BinarySensor.TRIGGERED, triggerFor);
-    assert.equal(s.saveState.mock.callCount(), 0, JSON.stringify(options));
-    assert.equal(s.getJsonState(), '{}');
-  }
+test('non-stateful sensors delete old state and do not save webhook updates', (t) => {
+  const fixture = persistedAccessory(t, MotionSensor, { accessoryIsStateful: false, sensor: { trigger: 'webhook' } });
+  fixture.writeState({ SensorState: 1 });
+  const sensor = fixture.create();
+  assert.equal(sensor.getSensorState(), 0);
+  sensor.getTrigger().triggerSensor(true, fixture.config.accessoryID);
+  assert.equal(existsSync(fixture.storagePath), false);
+  assert.equal(fixture.create().getSensorState(), 0);
 });
 
-test('stored sensor states are read back defensively', () => {
-  assert.equal(BinarySensor.getStoredSensorState({ SensorState: BinarySensor.TRIGGERED }), BinarySensor.TRIGGERED);
-  assert.equal(BinarySensor.getStoredSensorState({ SensorState: BinarySensor.NORMAL }), BinarySensor.NORMAL);
-  for (const json of [undefined, {}, { SensorState: 2 }, { SensorState: '1' }, { SensorState: true }, { SensorState: null }]) {
-    assert.equal(BinarySensor.getStoredSensorState(json), undefined, JSON.stringify(json));
-  }
+for (const trigger of ['cron', 'ping', 'sunevents', undefined, 'missing sensor']) {
+  test(`${trigger ?? 'unconfigured'} sensors neither restore nor overwrite webhook state`, async (t) => {
+    const fixture = persistedAccessory(t, OccupancySensor, {
+      sensor: trigger === 'missing sensor' ? undefined : { trigger },
+      cronTrigger: { isDisabled: true },
+      pingTrigger: { isDisabled: true },
+      sunEventsTrigger: { isDisabled: true },
+    });
+    fixture.writeState({ SensorState: 1 });
+    const sensor = fixture.create();
+    assert.equal(sensor.getSensorState(), 0);
+    const source = sensor.getTrigger() ?? { sensorConfig: fixture.config };
+    await sensor.triggerSensorState(1, source);
+    await sensor.triggerSensorState(0, source);
+    assert.deepEqual(fixture.readState(), { SensorState: 1 });
+  });
+}
+
+test('invalid binary updates leave the persisted state untouched', async (t) => {
+  const fixture = persistedAccessory(t, MotionSensor, { sensor: { trigger: 'webhook' } });
+  const sensor = fixture.create();
+  sensor.getTrigger().triggerSensor(true, fixture.config.accessoryID);
+  await assert.rejects(sensor.triggerSensorState(0, { sensorConfig: { accessoryID: 'other' } }));
+  await assert.rejects(sensor.triggerSensorState(2, sensor.getTrigger()));
+  assert.deepEqual(fixture.readState(), { SensorState: 1 });
+});
+
+
+test('startup sensors recompute their state without restoring or saving it', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const fixture = persistedAccessory(t, MotionSensor, { sensor: { trigger: 'startup' } });
+  fixture.writeState({ SensorState: 1 });
+  const sensor = fixture.create();
+  assert.equal(sensor.getSensorState(), 0);
+  t.mock.timers.tick(3000);
+  await setImmediate();
+  assert.equal(sensor.getSensorState(), 1);
+  t.mock.timers.tick(3000);
+  await setImmediate();
+  assert.equal(sensor.getSensorState(), 0);
+  assert.deepEqual(fixture.readState(), { SensorState: 1 });
 });

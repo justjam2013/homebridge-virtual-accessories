@@ -74,18 +74,13 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
   /**
    * Read a stored sensor value, ignoring anything that is not a finite number
    */
-  static getStoredSensorValue(json: Record<string, unknown> | undefined): number | undefined {
+  private static getStoredSensorValue(json: Record<string, unknown> | undefined): number | undefined {
     const value = json?.[MeasurementSensor.stateStorageKey];
     return (typeof value === 'number' && Number.isFinite(value)) ? value : undefined;
   }
 
   protected getJsonState(): string {
-    const json: Record<string, unknown> = {};
-    if (this.accessoryConfiguration.accessoryIsStateful) {
-      json[MeasurementSensor.stateStorageKey] = this.getSensorValue();
-    }
-
-    return JSON.stringify(json);
+    return JSON.stringify({ [MeasurementSensor.stateStorageKey]: this.getSensorValue() });
   }
 
   // Updatable Sensor interface

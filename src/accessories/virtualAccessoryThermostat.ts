@@ -332,9 +332,6 @@ export class Thermostat extends Accessory implements UpdatableMeasurementSensor 
       this.log.info(`[${this.accessoryName}] Setting Current Temperature: ${this.displayTemperature(CurrentTemperature)}${this.getDegreeUnits()}`);
 
       this.refreshAccessoryOperationalCondition();
-
-      // Store the new reading if stateful
-      this.saveState();
     }
   }
 

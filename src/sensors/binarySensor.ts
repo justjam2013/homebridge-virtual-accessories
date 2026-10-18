@@ -69,7 +69,8 @@ export abstract class BinarySensor extends Accessory {
   }
 
   getSensorState(): number {
-    return this.getCharacteristicValue(this.EventDetectedCharacteristic) as number;
+    // MotionDetected is Boolean; other binary sensor characteristics use numeric states.
+    return Number(this.getCharacteristicValue(this.EventDetectedCharacteristic));
   }
 
   //
@@ -101,18 +102,16 @@ export abstract class BinarySensor extends Accessory {
   /**
    * Read a stored sensor state, ignoring anything that is not a valid state
    */
-  static getStoredSensorState(json: Record<string, unknown> | undefined): number | undefined {
+  private static getStoredSensorState(json: Record<string, unknown> | undefined): number | undefined {
     const value = json?.[BinarySensor.stateStorageKey];
+    if (typeof value === 'boolean') {
+      return value ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
+    }
     return (value === BinarySensor.NORMAL || value === BinarySensor.TRIGGERED) ? value : undefined;
   }
 
   protected getJsonState(): string {
-    const json: Record<string, unknown> = {};
-    if (this.isStatePersisted()) {
-      json[BinarySensor.stateStorageKey] = this.getSensorState();
-    }
-
-    return JSON.stringify(json);
+    return JSON.stringify({ [BinarySensor.stateStorageKey]: this.getSensorState() });
   }
 
   /**
@@ -130,7 +129,8 @@ export abstract class BinarySensor extends Accessory {
     // Only update the sensor if the state has changed
     let SensorState: number = this.getSensorState();
     if (SensorState !== sensorState) {
-      SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
+      this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState);
+      SensorState = this.getSensorState();
        
       this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
 

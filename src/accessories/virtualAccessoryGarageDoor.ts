@@ -18,6 +18,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   private static readonly DEFAULT_TIMEOUT_SECS: number = 10;
 
   private readonly stateStorageKey: string = 'GarageDoorState';
+  private readonly targetStorageKey: string = 'TargetDoorState';
   private readonly obstructionStorageKey: string = 'ObstructionDetected';
 
   private transitionTimer: Timer;
@@ -51,9 +52,12 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState: number = accessoryState[this.stateStorageKey] as number;
+      // Restore the effective destination without resuming movement. Older files only stored current state.
+      const cachedState: unknown = accessoryState[this.targetStorageKey] === undefined
+        ? accessoryState[this.stateStorageKey]
+        : accessoryState[this.targetStorageKey];
 
-      if (cachedState !== undefined) {
+      if (cachedState === GarageDoor.OPEN || cachedState === GarageDoor.CLOSED) {
         GarageDoorCurrentState = cachedState;
       }
 
@@ -76,7 +80,12 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     this.service.getCharacteristic(CharacteristicType.CurrentDoorState)
       .onGet(this.getCurrentDoorStateHandler.bind(this));
 
-    this.service.getCharacteristic(CharacteristicType.TargetDoorState)
+    const targetCharacteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
+    // Return the effective target so HomeKit does not replace a refused close with the requested value.
+    if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
+      targetCharacteristic.setProps({ perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE] });
+    }
+    targetCharacteristic
       .onSet(this.setTargetDoorStateHandler.bind(this))
       .onGet(this.getTargetDoorStateHandler.bind(this));
 
@@ -108,21 +117,24 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
   async setTargetDoorStateHandler(value: CharacteristicValue) {
     let TargetDoorState: number = value as number;
-    TargetDoorState = this.updateTargetDoorState(TargetDoorState);
-    this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getDoorStateName(TargetDoorState)}`);
-
     // Check if door already in position
     let CurrentDoorState: number = this.getCurrentDoorState();
     const ObstructionDetected: boolean = this.getObstructionDetected();
-    if (
+    const closeRefused = TargetDoorState === GarageDoor.CLOSED && ObstructionDetected && CurrentDoorState !== GarageDoor.CLOSED;
+    if (closeRefused) {
+      TargetDoorState = GarageDoor.OPEN;
+    }
+    TargetDoorState = this.updateTargetDoorState(TargetDoorState);
+    this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getDoorStateName(TargetDoorState)}`);
+
+    if (closeRefused) {
+      this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
+    }
+    else if (
       (TargetDoorState === GarageDoor.OPEN && CurrentDoorState === GarageDoor.OPEN) ||
       (TargetDoorState === GarageDoor.CLOSED && CurrentDoorState === GarageDoor.CLOSED)
     ) {
       this.log.info(`[${this.accessoryName}] Current Door State already: ${GarageDoor.getDoorStateName(CurrentDoorState)}`);
-    }
-    // Check if obstruction is detected when trying to close
-    else if (TargetDoorState === GarageDoor.CLOSED && ObstructionDetected === true) {
-      this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
     }
     // Check if door should be Stopped
     else if (
@@ -161,6 +173,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
         this.transitionDuration,
       );
     }
+
+    this.saveState();
+    return TargetDoorState;
   }
 
   // ObstructionDetected
@@ -177,6 +192,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   protected getJsonState(): string {
     const jsonState = {
       [this.stateStorageKey]: this.getCurrentDoorState(),
+      [this.targetStorageKey]: this.getTargetDoorState(),
       [this.obstructionStorageKey]: this.getObstructionDetected(),
     };
 
@@ -204,9 +220,6 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     ObstructionDetected = this.updateObstructionDetected(ObstructionDetected);
     this.log.info(`[${this.accessoryName}] Setting Obstruction Detected: ${GarageDoor.getObstructionDetectedName(ObstructionDetected)}`);
 
-    // Store obstruction state if stateful
-    this.saveState();
-
     // If the door is closing, it should reverse back to Open
     let CurrentDoorState: number = this.getCurrentDoorState();
     let TargetDoorState: number = this.getTargetDoorState();
@@ -233,6 +246,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
         this.transitionDuration,
       );
     }
+
+    this.updateTargetDoorState(TargetDoorState);
+    this.saveState();
   }
 
   //
