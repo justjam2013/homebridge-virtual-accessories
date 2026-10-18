@@ -16,7 +16,8 @@ const C = hap.Characteristic;
 const id = 'AbC-09';
 
 async function fixture(t, AccessoryClass, config) {
-  const accessory = persistedAccessory(t, AccessoryClass, { accessoryID: id, ...config }).create();
+  const persistence = persistedAccessory(t, AccessoryClass, { accessoryID: id, ...config });
+  const accessory = persistence.create();
   const webhook = new WebhookServer({ info() {}, error() {}, debug() {} }, 0);
   webhook.addAccessory(accessory);
   const server = webhook.server.listen(0, '127.0.0.1');
@@ -24,6 +25,7 @@ async function fixture(t, AccessoryClass, config) {
   await once(server, 'listening');
   return {
     accessory,
+    persistence,
     value: characteristic => accessory.service.getCharacteristic(characteristic).value,
     async request(path, options, status = 200) {
       const response = await fetch(`http://127.0.0.1:${server.address().port}${path}`, { method: 'POST', ...options });
@@ -49,6 +51,28 @@ test('HTTP temperature and humidity updates reach HomeKit, including zero and pe
   assert.equal(humidity.value(C.CurrentRelativeHumidity), 100);
   await humidity.request('/humidity', json({ value: 0 }));
   assert.equal(humidity.value(C.CurrentRelativeHumidity), 0);
+});
+
+test('HTTP temperature update is saved and restored to HomeKit after accessory recreation', async (t) => {
+  const f = await fixture(t, TemperatureSensor, { accessoryType: 'measurement' });
+  await f.request('/temperature', json({ value: 23.5 }));
+  assert.equal(f.value(C.CurrentTemperature), 23.5);
+  assert.deepEqual(f.persistence.readState(), { SensorValue: 23.5 });
+  const restored = f.persistence.create();
+  assert.equal(restored.service.getCharacteristic(C.CurrentTemperature).value, 23.5);
+});
+
+test('rejected HTTP humidity update preserves saved state after accessory recreation', async (t) => {
+  const f = await fixture(t, HumiditySensor, { accessoryType: 'measurement' });
+  await f.request('/humidity', json({ value: 61 }));
+  const saved = f.persistence.readState();
+  assert.deepEqual(saved, { SensorValue: 61 });
+  await f.request('/humidity', json({ value: 101 }), 400);
+  assert.equal(f.value(C.CurrentRelativeHumidity), 61);
+  assert.deepEqual(f.persistence.readState(), saved);
+  const restored = f.persistence.create();
+  assert.equal(restored.service.getCharacteristic(C.CurrentRelativeHumidity).value, 61);
+  assert.deepEqual(f.persistence.readState(), saved);
 });
 
 test('webhook registration dispatches sensor activation and reset through its real trigger', async (t) => {
