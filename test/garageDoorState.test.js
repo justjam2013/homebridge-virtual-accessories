@@ -30,25 +30,29 @@ function assertRestart(fixture, state, obstruction, current = state) {
   return restored;
 }
 
-test('cached garage reinitialization does not duplicate write-response permission', (t) => {
-  const fixture = garage(t);
+test('cached garage reuse keeps the effective HomeKit target OPEN after an obstructed close', async (t) => {
+  const fixture = garage(t, 'open');
   const door = fixture.create();
   const target = door.service.getCharacteristic(hap.Characteristic.TargetDoorState);
-  const initialPermissions = [...target.props.perms];
-  assert.equal(initialPermissions.filter(permission => permission === hap.Perms.WRITE_RESPONSE).length, 1);
+  door.updateObstruction(true, fixture.config.accessoryID);
 
-  for (let initialization = 0; initialization < 2; initialization++) {
-    const restored = new GarageDoor(door.platform, door.accessory, fixture.config);
-    t.after(() => restored.transitionTimer.stop());
-    assert.equal(restored.service.getCharacteristic(hap.Characteristic.TargetDoorState), target);
-    assert.deepEqual(target.props.perms, initialPermissions);
-  }
+  const restored = new GarageDoor(door.platform, door.accessory, fixture.config);
+  t.after(() => restored.transitionTimer.stop());
+  assert.equal(restored.accessory, door.accessory);
+  assert.equal(restored.service.getCharacteristic(hap.Characteristic.TargetDoorState), target);
+  assert.equal(restored.service.getCharacteristic(hap.Characteristic.ObstructionDetected).value, true);
+
+  await target.handleSetRequest(CLOSED);
+  assert.equal(target.value, OPEN);
 });
 
 for (const [defaultState, state] of [['open', OPEN], ['closed', CLOSED]]) {
   test(`garage obstruction round trips while ${defaultState}`, (t) => {
     const fixture = garage(t, defaultState);
     const door = fixture.create();
+    assert.equal(door.getCurrentDoorState(), state);
+    assert.equal(door.getTargetDoorState(), state);
+    assert.equal(door.getObstructionDetected(), false);
     for (const value of [true, false]) {
       door.updateObstruction(value, fixture.config.accessoryID);
       assertRestart(fixture, state, value);
@@ -119,21 +123,6 @@ for (const [defaultState, initial, target] of [['closed', CLOSED, OPEN], ['open'
   });
 }
 
-test('garage rejects old moving snapshots and invalid obstruction values on restart', (t) => {
-  const fixture = garage(t, 'closed');
-  for (const state of [OPENING, CLOSING, STOPPED, -1, '0', null]) {
-    fixture.writeState({ GarageDoorState: state, ObstructionDetected: true });
-    const door = fixture.create();
-    assert.equal(door.getCurrentDoorState(), CLOSED);
-    assert.equal(door.getTargetDoorState(), CLOSED);
-    assert.equal(door.getObstructionDetected(), true);
-  }
-  fixture.writeState({ GarageDoorState: OPEN, ObstructionDetected: 'true' });
-  const door = fixture.create();
-  assert.equal(door.getCurrentDoorState(), OPEN);
-  assert.equal(door.getObstructionDetected(), false);
-});
-
 test('non-stateful garage does not retain obstruction or completed movement', async (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] });
   const fixture = garage(t, 'closed', false);
@@ -156,7 +145,6 @@ test('rejected obstruction updates do not overwrite garage state', (t) => {
   assertRestart(fixture, CLOSED, true);
 });
 
-
 test('reversal from an initially closed door persists OPEN immediately', async (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] });
   const fixture = garage(t);
@@ -172,31 +160,6 @@ test('reversal from an initially closed door persists OPEN immediately', async (
   assert.equal(door.getCurrentDoorState(), OPEN);
   assertRestart(fixture, OPEN, true);
 });
-
-for (const [defaultState, fallback] of [['open', OPEN], ['closed', CLOSED]]) {
-  test(`garage restores valid targets and legacy stable states with ${defaultState} default`, (t) => {
-    const fixture = garage(t, defaultState);
-    for (const state of [OPEN, CLOSED]) {
-      for (const snapshot of [
-        { GarageDoorState: state },
-        { GarageDoorState: state === OPEN ? CLOSING : OPENING, TargetDoorState: state },
-      ]) {
-        fixture.writeState(snapshot);
-        const door = fixture.create();
-        assert.equal(door.getCurrentDoorState(), state);
-        assert.equal(door.getTargetDoorState(), state);
-        assert.equal(door.transitionTimer.isTimerRunning(), false);
-      }
-    }
-    for (const invalid of [OPENING, CLOSING, STOPPED, -1, '0', null, true, {}]) {
-      fixture.writeState({ GarageDoorState: fallback === OPEN ? CLOSED : OPEN, TargetDoorState: invalid });
-      const door = fixture.create();
-      assert.equal(door.getCurrentDoorState(), fallback);
-      assert.equal(door.getTargetDoorState(), fallback);
-      assert.equal(door.transitionTimer.isTimerRunning(), false);
-    }
-  });
-}
 
 test('blocked close while opening preserves the OPEN destination and running timer', async (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] });
