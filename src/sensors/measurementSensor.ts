@@ -11,7 +11,7 @@ import { UpdatableMeasurementSensor } from './updatableSensor.js';
  */
 export abstract class MeasurementSensor extends Accessory implements UpdatableMeasurementSensor {
 
-  private static readonly stateStorageKey: string = 'SensorValue';
+  private readonly stateStorageKey: string = 'SensorValue';
 
   protected MeasurementCharacteristic: WithUUID<{ new (): Characteristic; }>;
 
@@ -35,7 +35,9 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
 
     // If the sensor is stateful, restore the last value it was set to
     if (this.accessoryConfiguration.accessoryIsStateful) {
-      const cachedValue = MeasurementSensor.getStoredSensorValue(this.loadAccessoryState(this.storagePath));
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedValue: number = accessoryState[this.stateStorageKey] as number;
+
       if (cachedValue !== undefined) {
         this.log.debug(`[${this.accessoryName}] Restoring Sensor Current Value: ${cachedValue}`);
         SensorValue = cachedValue;
@@ -71,16 +73,8 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
 
   protected abstract getDefaultValue(): number;
 
-  /**
-   * Read a stored sensor value, ignoring anything that is not a finite number
-   */
-  private static getStoredSensorValue(json: Record<string, unknown> | undefined): number | undefined {
-    const value = json?.[MeasurementSensor.stateStorageKey];
-    return (typeof value === 'number' && Number.isFinite(value)) ? value : undefined;
-  }
-
   protected getJsonState(): string {
-    return JSON.stringify({ [MeasurementSensor.stateStorageKey]: this.getSensorValue() });
+    return JSON.stringify({ [this.stateStorageKey]: this.getSensorValue() });
   }
 
   // Updatable Sensor interface

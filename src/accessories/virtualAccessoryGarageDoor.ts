@@ -53,22 +53,29 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       // Restore the effective destination without resuming movement. Older files only stored current state.
-      const cachedState: unknown = accessoryState[this.targetStorageKey] === undefined
-        ? accessoryState[this.stateStorageKey]
-        : accessoryState[this.targetStorageKey];
+      const cachedState: number = (accessoryState[this.targetStorageKey] !== undefined) ? accessoryState[this.targetStorageKey] : accessoryState[this.stateStorageKey];
+      // Obstruction is only ever set by webhook, so nothing would restore it after a restart
+      const cachedObstruction: number = accessoryState[this.obstructionStorageKey];
 
-      if (cachedState === GarageDoor.OPEN || cachedState === GarageDoor.CLOSED) {
+      if (cachedState !== undefined) {
         GarageDoorCurrentState = cachedState;
       }
 
-      // Obstruction is only ever set by webhook, so nothing would restore it after a restart
-      const cachedObstruction: unknown = accessoryState[this.obstructionStorageKey];
       if (typeof cachedObstruction === 'boolean') {
         ObstructionDetected = cachedObstruction;
       }
     }
 
     GarageDoorTargetState = GarageDoorCurrentState;
+
+    // Return the effective target so HomeKit does not replace a refused close with the requested value.
+    const targetCharacteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
+    if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
+      targetCharacteristic
+        .setProps({
+          perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE], 
+        });
+    }
 
     // Update the initial state of the accessory
     this.setCurrentDoorState(GarageDoorCurrentState);
@@ -80,12 +87,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     this.service.getCharacteristic(CharacteristicType.CurrentDoorState)
       .onGet(this.getCurrentDoorStateHandler.bind(this));
 
-    const targetCharacteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
-    // Return the effective target so HomeKit does not replace a refused close with the requested value.
-    if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
-      targetCharacteristic.setProps({ perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE] });
-    }
-    targetCharacteristic
+    this.service.getCharacteristic(CharacteristicType.TargetDoorState)
       .onSet(this.setTargetDoorStateHandler.bind(this))
       .onGet(this.getTargetDoorStateHandler.bind(this));
 
@@ -120,14 +122,19 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     // Check if door already in position
     let CurrentDoorState: number = this.getCurrentDoorState();
     const ObstructionDetected: boolean = this.getObstructionDetected();
-    const closeRefused = TargetDoorState === GarageDoor.CLOSED && ObstructionDetected && CurrentDoorState !== GarageDoor.CLOSED;
-    if (closeRefused) {
+
+    const refuseClosing: boolean =
+      (TargetDoorState === GarageDoor.CLOSED) &&
+      ObstructionDetected &&
+      (CurrentDoorState !== GarageDoor.CLOSED);
+
+    if (refuseClosing) {
       TargetDoorState = GarageDoor.OPEN;
     }
     TargetDoorState = this.updateTargetDoorState(TargetDoorState);
     this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getDoorStateName(TargetDoorState)}`);
 
-    if (closeRefused) {
+    if (refuseClosing) {
       this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
     }
     else if (
