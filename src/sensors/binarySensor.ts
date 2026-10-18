@@ -43,7 +43,7 @@ export abstract class BinarySensor extends Accessory {
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+      const cachedState: number = accessoryState[this.stateStorageKey] as number;
 
       if (cachedState !== undefined) {
         SensorState = (cachedState) ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
@@ -106,7 +106,7 @@ export abstract class BinarySensor extends Accessory {
     // Only update the sensor if the state has changed
     let SensorState: number = this.getSensorState();
     if (SensorState !== sensorState) {
-      SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
+      SensorState = Number(this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState));
       this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
 
       this.saveState();

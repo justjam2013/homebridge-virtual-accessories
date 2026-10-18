@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -55,7 +55,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
       // Restore the effective destination without resuming movement. Older files only stored current state.
       const cachedState: number = (accessoryState[this.targetStorageKey] !== undefined) ? accessoryState[this.targetStorageKey] : accessoryState[this.stateStorageKey];
       // Obstruction is only ever set by webhook, so nothing would restore it after a restart
-      const cachedObstruction: number = accessoryState[this.obstructionStorageKey];
+      const cachedObstruction: boolean = accessoryState[this.obstructionStorageKey];
 
       if (cachedState !== undefined) {
         GarageDoorCurrentState = cachedState;
@@ -69,7 +69,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     GarageDoorTargetState = GarageDoorCurrentState;
 
     // Return the effective target so HomeKit does not replace a refused close with the requested value.
-    const targetCharacteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
+    const targetCharacteristic: Characteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
     if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
       targetCharacteristic
         .setProps({
