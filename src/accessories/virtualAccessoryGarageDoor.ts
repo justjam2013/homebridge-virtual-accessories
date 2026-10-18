@@ -53,11 +53,12 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
       // Restore the effective destination without resuming movement. Older files only stored current state.
-      const cachedState: number = (accessoryState[this.targetStorageKey] !== undefined) ? accessoryState[this.targetStorageKey] : accessoryState[this.stateStorageKey];
+      const cachedState: unknown = (accessoryState[this.targetStorageKey] !== undefined) ? accessoryState[this.targetStorageKey] : accessoryState[this.stateStorageKey];
       // Obstruction is only ever set by webhook, so nothing would restore it after a restart
-      const cachedObstruction: number = accessoryState[this.obstructionStorageKey];
+      const cachedObstruction: unknown = accessoryState[this.obstructionStorageKey];
 
-      if (cachedState !== undefined) {
+      // Only a resting state is valid. A moving or stopped state would leave the door stuck with no transition running
+      if (cachedState === GarageDoor.OPEN || cachedState === GarageDoor.CLOSED) {
         GarageDoorCurrentState = cachedState;
       }
 

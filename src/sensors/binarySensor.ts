@@ -40,13 +40,13 @@ export abstract class BinarySensor extends Accessory {
     // First configure the device based on the accessory details
     let SensorState: number = BinarySensor.NORMAL;
 
-    // If the accessory is stateful retrieve stored state
-    if (this.accessoryConfiguration.accessoryIsStateful) {
+    // If the accessory is stateful retrieve stored state. Only webhook triggers save state, so only they restore it
+    if (this.accessoryConfiguration.accessoryIsStateful && this.isWebhookTriggered()) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState: boolean = accessoryState[this.stateStorageKey] as boolean;
+      const cachedState: unknown = accessoryState[this.stateStorageKey];
 
       if (cachedState !== undefined) {
-        SensorState = (cachedState) ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
+        SensorState = (cachedState === true || cachedState === BinarySensor.TRIGGERED) ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
       }
     }
 
@@ -106,7 +106,7 @@ export abstract class BinarySensor extends Accessory {
     // Only update the sensor if the state has changed
     let SensorState: number = this.getSensorState();
     if (SensorState !== sensorState) {
-      SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
+      SensorState = Number(this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState));
       this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
 
       this.saveState();
@@ -115,9 +115,14 @@ export abstract class BinarySensor extends Accessory {
 
   // Only Webhook triggers can save state
   protected saveState() {
-    if (this.accessoryConfiguration.sensor.trigger === TriggerType.Webhook) {
+    if (this.isWebhookTriggered()) {
       super.saveState();
     }
+  }
+
+  // Other triggers recompute their state themselves, so there is nothing to persist for them
+  private isWebhookTriggered(): boolean {
+    return this.accessoryConfiguration.sensor?.trigger === TriggerType.Webhook;
   }
 
   //

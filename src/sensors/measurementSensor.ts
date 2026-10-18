@@ -36,9 +36,10 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
     // If the sensor is stateful, restore the last value it was set to
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedValue: number = accessoryState[this.stateStorageKey] as number;
+      const cachedValue: unknown = accessoryState[this.stateStorageKey];
 
-      if (cachedValue !== undefined) {
+      // Ignore anything that is not a finite number
+      if (typeof cachedValue === 'number' && Number.isFinite(cachedValue)) {
         this.log.debug(`[${this.accessoryName}] Restoring Sensor Current Value: ${cachedValue}`);
         SensorValue = cachedValue;
       }
