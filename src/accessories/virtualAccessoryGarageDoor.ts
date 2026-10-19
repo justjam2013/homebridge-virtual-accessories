@@ -73,7 +73,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
       targetCharacteristic
         .setProps({
-          perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE], 
+          perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE],
         });
     }
 
