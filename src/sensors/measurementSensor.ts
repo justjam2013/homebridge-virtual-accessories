@@ -11,6 +11,8 @@ import { UpdatableMeasurementSensor } from './updatableSensor.js';
  */
 export abstract class MeasurementSensor extends Accessory implements UpdatableMeasurementSensor {
 
+  private readonly stateStorageKey: string = 'SensorValue';
+
   protected MeasurementCharacteristic: WithUUID<{ new (): Characteristic; }>;
 
   protected SensorUnits: string = '';
@@ -30,6 +32,17 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
 
     // First configure the device based on the accessory details
     SensorValue = this.getDefaultValue(); 
+
+    // If the sensor is stateful, restore the last value it was set to
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedValue: number = accessoryState[this.stateStorageKey] as number;
+
+      if (cachedValue !== undefined) {
+        this.log.debug(`[${this.accessoryName}] Restoring Sensor Current Value: ${cachedValue}`);
+        SensorValue = cachedValue;
+      }
+    }
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Sensor Current Value: ${SensorValue}`);
@@ -61,7 +74,7 @@ export abstract class MeasurementSensor extends Accessory implements UpdatableMe
   protected abstract getDefaultValue(): number;
 
   protected getJsonState(): string {
-    return JSON.stringify({});
+    return JSON.stringify({ [this.stateStorageKey]: this.getSensorValue() });
   }
 
   // Updatable Sensor interface

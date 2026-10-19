@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import type { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import type { Characteristic, CharacteristicValue, PlatformAccessory } from 'homebridge';
 
 import { CharacteristicType, ServiceType, VirtualAccessoriesPlatform } from '../platform.js';
 import { AccessoryConfiguration } from '../configuration/configurationAccessory.js';
@@ -18,6 +18,8 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   private static readonly DEFAULT_TIMEOUT_SECS: number = 10;
 
   private readonly stateStorageKey: string = 'GarageDoorState';
+  private readonly targetStorageKey: string = 'TargetDoorState';
+  private readonly obstructionStorageKey: string = 'ObstructionDetected';
 
   private transitionTimer: Timer;
   private transitionDuration: number;
@@ -31,7 +33,7 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
     let GarageDoorCurrentState: number = GarageDoor.CLOSED;
     let GarageDoorTargetState: number = GarageDoor.CLOSED;
-    const ObstructionDetected: boolean = GarageDoor.OBSTRUCTION_NOT_DETECTED;
+    let ObstructionDetected: boolean = GarageDoor.OBSTRUCTION_NOT_DETECTED;
 
     // First configure the device based on the accessory details
     this.defaultState = this.accessoryConfiguration.garageDoor.defaultState === 'open' ? GarageDoor.OPEN : GarageDoor.CLOSED;
@@ -50,14 +52,30 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
     // If the accessory is stateful retrieve stored state
     if (this.accessoryConfiguration.accessoryIsStateful) {
       const accessoryState = this.loadAccessoryState(this.storagePath);
-      const cachedState: number = accessoryState[this.stateStorageKey] as number;
+      // Restore the effective destination without resuming movement. Older files only stored current state.
+      const cachedState: number = (accessoryState[this.targetStorageKey] !== undefined) ? accessoryState[this.targetStorageKey] : accessoryState[this.stateStorageKey];
+      // Obstruction is only ever set by webhook, so nothing would restore it after a restart
+      const cachedObstruction: boolean = accessoryState[this.obstructionStorageKey];
 
       if (cachedState !== undefined) {
         GarageDoorCurrentState = cachedState;
       }
+
+      if (typeof cachedObstruction === 'boolean') {
+        ObstructionDetected = cachedObstruction;
+      }
     }
 
     GarageDoorTargetState = GarageDoorCurrentState;
+
+    // Return the effective target so HomeKit does not replace a refused close with the requested value.
+    const targetCharacteristic: Characteristic = this.service.getCharacteristic(CharacteristicType.TargetDoorState);
+    if (!targetCharacteristic.props.perms.includes(this.platform.api.hap.Perms.WRITE_RESPONSE)) {
+      targetCharacteristic
+        .setProps({
+          perms: [...targetCharacteristic.props.perms, this.platform.api.hap.Perms.WRITE_RESPONSE],
+        });
+    }
 
     // Update the initial state of the accessory
     this.setCurrentDoorState(GarageDoorCurrentState);
@@ -101,21 +119,29 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
 
   async setTargetDoorStateHandler(value: CharacteristicValue) {
     let TargetDoorState: number = value as number;
-    TargetDoorState = this.updateTargetDoorState(TargetDoorState);
-    this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getDoorStateName(TargetDoorState)}`);
-
     // Check if door already in position
     let CurrentDoorState: number = this.getCurrentDoorState();
     const ObstructionDetected: boolean = this.getObstructionDetected();
-    if (
+
+    const refuseClosing: boolean =
+      (TargetDoorState === GarageDoor.CLOSED) &&
+      ObstructionDetected &&
+      (CurrentDoorState !== GarageDoor.CLOSED);
+
+    if (refuseClosing) {
+      TargetDoorState = GarageDoor.OPEN;
+    }
+    TargetDoorState = this.updateTargetDoorState(TargetDoorState);
+    this.log.info(`[${this.accessoryName}] Setting Target Door State: ${GarageDoor.getDoorStateName(TargetDoorState)}`);
+
+    if (refuseClosing) {
+      this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
+    }
+    else if (
       (TargetDoorState === GarageDoor.OPEN && CurrentDoorState === GarageDoor.OPEN) ||
       (TargetDoorState === GarageDoor.CLOSED && CurrentDoorState === GarageDoor.CLOSED)
     ) {
       this.log.info(`[${this.accessoryName}] Current Door State already: ${GarageDoor.getDoorStateName(CurrentDoorState)}`);
-    }
-    // Check if obstruction is detected when trying to close
-    else if (TargetDoorState === GarageDoor.CLOSED && ObstructionDetected === true) {
-      this.log.error(`[${this.accessoryName}] Obstruction Detected. Refusing to close`);
     }
     // Check if door should be Stopped
     else if (
@@ -154,6 +180,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
         this.transitionDuration,
       );
     }
+
+    this.saveState();
+    return TargetDoorState;
   }
 
   // ObstructionDetected
@@ -170,6 +199,8 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
   protected getJsonState(): string {
     const jsonState = {
       [this.stateStorageKey]: this.getCurrentDoorState(),
+      [this.targetStorageKey]: this.getTargetDoorState(),
+      [this.obstructionStorageKey]: this.getObstructionDetected(),
     };
 
     const json = JSON.stringify(jsonState);
@@ -222,6 +253,9 @@ export class GarageDoor extends Accessory implements UpdatableObstruction {
         this.transitionDuration,
       );
     }
+
+    this.updateTargetDoorState(TargetDoorState);
+    this.saveState();
   }
 
   //

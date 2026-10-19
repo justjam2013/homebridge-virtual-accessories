@@ -7,6 +7,7 @@ import { Accessory } from '../accessories/accessory.js';
 import { AccessoryFactory } from '../accessoryFactory.js';
 import { Trigger } from './triggers/trigger.js';
 import { TriggerNotAllowedError, InvalidSensorValue } from '../errors.js';
+import { TriggerType } from '../configuration/schema.js';
 
 /**
  * Sensor - Abstract accessory
@@ -18,6 +19,8 @@ export abstract class BinarySensor extends Accessory {
 
   static readonly NORMAL_INACTIVE: string = 'NORMAL-INACTIVE';
   static readonly TRIGGERED_ACTIVE: string = 'TRIGGERED-ACTIVE';
+
+  private readonly stateStorageKey: string = 'SensorState';
 
   protected trigger: Trigger | undefined;
 
@@ -35,7 +38,17 @@ export abstract class BinarySensor extends Accessory {
     this.EventDetectedCharacteristic = eventDetectedCharacteristic;
 
     // First configure the device based on the accessory details
-    const SensorState: number = BinarySensor.NORMAL;
+    let SensorState: number = BinarySensor.NORMAL;
+
+    // If the accessory is stateful retrieve stored state
+    if (this.accessoryConfiguration.accessoryIsStateful) {
+      const accessoryState = this.loadAccessoryState(this.storagePath);
+      const cachedState: number = accessoryState[this.stateStorageKey] as number;
+
+      if (cachedState !== undefined) {
+        SensorState = (cachedState) ? BinarySensor.TRIGGERED : BinarySensor.NORMAL;
+      }
+    }
 
     // Update the initial state of the accessory
     this.log.debug(`[${this.accessoryName}] Setting Sensor State: ${BinarySensor.getStateName(SensorState)}`);
@@ -57,7 +70,8 @@ export abstract class BinarySensor extends Accessory {
   }
 
   getSensorState(): number {
-    return this.getCharacteristicValue(this.EventDetectedCharacteristic) as number;
+    // MotionDetected is Boolean; other binary sensor characteristics use numeric states.
+    return Number(this.getCharacteristicValue(this.EventDetectedCharacteristic));
   }
 
   //
@@ -74,7 +88,7 @@ export abstract class BinarySensor extends Accessory {
   }
 
   protected getJsonState(): string {
-    return JSON.stringify({});
+    return JSON.stringify({ [this.stateStorageKey]: this.getSensorState() });
   }
 
   /**
@@ -92,9 +106,17 @@ export abstract class BinarySensor extends Accessory {
     // Only update the sensor if the state has changed
     let SensorState: number = this.getSensorState();
     if (SensorState !== sensorState) {
-      SensorState = this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState) as number;
-       
+      SensorState = Number(this.updateCharacteristicValue(this.EventDetectedCharacteristic, sensorState));
       this.log.info(`[${this.accessoryName}] Setting Sensor Current State: ${BinarySensor.getStateName(SensorState)}`, isLoggingDisabled);
+
+      this.saveState();
+    }
+  }
+
+  // Only Webhook triggers can save state
+  protected saveState() {
+    if (this.accessoryConfiguration.sensor.trigger === TriggerType.Webhook) {
+      super.saveState();
     }
   }
 

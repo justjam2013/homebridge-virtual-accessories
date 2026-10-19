@@ -45,6 +45,9 @@ export class HumiditySensor extends MeasurementSensor {
 
       const SensorValue: number = value;
       this.service.setCharacteristic(this.MeasurementCharacteristic, (SensorValue));
+
+      // Store sensor value if stateful
+      this.saveState();
     }
   }
 }
