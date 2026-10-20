@@ -171,7 +171,7 @@ export class PingTrigger extends Trigger {
         trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
       }
       else {
-        trigger.log.info(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
+        trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
       }
     }
   }
