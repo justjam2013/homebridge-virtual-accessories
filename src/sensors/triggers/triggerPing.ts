@@ -5,6 +5,7 @@ import { BinarySensor } from '../binarySensor.js';
 import { shutdownSignal } from '../../utils/utils.js';
 
 import dns, { LookupOneOptions } from 'dns';
+import ipaddr from 'ipaddr.js';
 import net from 'net';
 import { ping } from '@homebridge/node-icmp-ping';
 
@@ -30,6 +31,9 @@ export class PingTrigger extends Trigger {
   private readonly NOT_IP: number = 0;
   private readonly IPv4: number = 4;
   private readonly IPv6: number = 6;
+
+  private readonly LAN_ms_latency_threshold: number = 30;
+  private readonly NET_ms_latency_threshold: number = 100;
 
   private failureCount = new Counter(0);
 
@@ -69,6 +73,10 @@ export class PingTrigger extends Trigger {
     const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;  // minutes to milliseconds
     this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
 
+    this.log.info(`[${this.accessoryName}] Pinging ${triggerConfig.host}`);
+    // One ping only Vasily
+    await this.ping(this, triggerConfig);
+
     setInterval(
       // function, repeat interval
       this.ping, intervalBetweenPingsMillis,
@@ -99,10 +107,10 @@ export class PingTrigger extends Trigger {
       const result: PingResult = await ping(IP);
 
       if (result.success) {
-        trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${result.latency}ms)`);
-
         trigger.failureCount.value = 0;
         trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+
+        trigger.handleLatency(trigger, IP, result.latency);
       }
       else {
         // Only log the error when we reach the failure count instead of spamming the logs
@@ -146,6 +154,28 @@ export class PingTrigger extends Trigger {
     }
   }
 
+  private handleLatency(
+    trigger: PingTrigger,
+    IP: string,
+    latency: number | null,
+  ) {
+    if (latency === null) {
+      trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: unknown)`);
+    }
+    else {
+      const latencyDisplay = Math.round(latency * 10) / 10;
+      const threshold: number = this.isLocalIP(IP) ? this.LAN_ms_latency_threshold : this.NET_ms_latency_threshold;
+
+      // Ping times over 30ms–60ms within the same LAN are considered high and indicate a configuration or hardware bottleneck.
+      if (latency > threshold) {
+        trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
+      }
+      else {
+        trigger.log.info(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
+      }
+    }
+  }
+
   private async getIP(hostname: string): Promise<string | void> {
     const options: LookupOneOptions = {
       hints: dns.ADDRCONFIG | dns.V4MAPPED,
@@ -162,6 +192,21 @@ export class PingTrigger extends Trigger {
       });
   
     return response;
+  }
+
+  private isLocalIP(IP: string): boolean {
+    if (net.isIPv4(IP)) {
+      const address: ipaddr.IPv4 = ipaddr.parse(IP) as ipaddr.IPv4;
+
+      return ['private', 'linkLocal', 'loopback'].includes(address.range());
+    }
+    else if (net.isIPv6(IP)) {
+      const address: ipaddr.IPv6 = ipaddr.parse(IP) as ipaddr.IPv6;
+
+      return ['uniqueLocal', 'linkLocal', 'loopback'].includes(address.range());
+    }
+
+    return false;
   }
 }
 
