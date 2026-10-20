@@ -106,8 +106,7 @@ export class PingTrigger extends Trigger {
         trigger.failureCount.value = 0;
         trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
 
-        //trigger.handleLatency(trigger, IP, result.latency);
-        trigger.handleLatency(trigger, '192.168.10.10', 35);
+        trigger.handleLatency(trigger, IP, result.latency);
       }
       else {
         // Only log the error when we reach the failure count instead of spamming the logs
@@ -160,17 +159,15 @@ export class PingTrigger extends Trigger {
       trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: unknown)`);
     }
     else {
-      const latencyMs = Math.trunc(latency);
-      const isLocal: boolean = this.isLocalIP(IP);
+      const latencyDisplay = Math.round(latency * 10) / 10;
+      const threshold: number = this.isLocalIP(IP) ? 30 : 50;
 
       // Ping times over 30ms–60ms within the same LAN are considered high and indicate a configuration or hardware bottleneck.
-      if (isLocal && latencyMs > 30 ||
-          !isLocal && latencyMs > 50
-      ) {
-        trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyMs} ms)`);
+      if (latency > threshold) {
+        trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
       }
       else {
-        trigger.log.info(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyMs} ms)`);
+        trigger.log.info(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyDisplay.toFixed(1)} ms)`);
       }
     }
   }
@@ -194,11 +191,15 @@ export class PingTrigger extends Trigger {
   }
 
   // IPv4
-  // 10.0.0.0/8 (from 10.0.0.0 to 10.255.255.255) [ Named as Class A Private Network ]
-  // 172.16.0.0/12 (from 172.16.0.0 to 172.31.255.255) [ Named as Class B Private Network ]
+  // 10.0.0.0/8     (from 10.0.0.0 to 10.255.255.255)     [ Named as Class A Private Network ]
+  // 172.16.0.0/12  (from 172.16.0.0 to 172.31.255.255)   [ Named as Class B Private Network ]
   // 192.168.0.0/16 (from 192.168.0.0 to 192.168.255.255) [ Named as Class C Private Network ]
+  // 169.154.0.0/16 (from 192.168.0.0 to 192.168.255.255) [ Link-local - routers generally don't forward link-local traffic to other networks. ]
+  // 127.0.0.0/8    (from 127.0.0.0 to 127.255.255.255)   [ Loopback addresses ]
   // IPv6
-  // FC00::/7 (from fc00:0000:0000:0000:0000:0000:0000:0000 to fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)
+  // FC00::/7  (from fc00:0000:0000:0000:0000:0000:0000:0000 to fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)
+  // FE80::/10 (from fe80:0000:0000:0000:0000:0000:0000:0000 to febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff) [ Link-local ]
+  // ::1       (0000:0000:0000:0000:0000:0000:0000:0001)                                                 [ Loopback addresse ]
   private isLocalIP(IP: string): boolean {
     if (net.isIPv4(IP)) {
       const parts: string[] = IP.split('.');
@@ -206,15 +207,20 @@ export class PingTrigger extends Trigger {
       const part2: number = parseInt(parts[1], 10);
       if ((part1 === 10 && (part2 >= 0 && part2 <= 255)) ||
           (part1 === 172 && (part2 >= 16 && part2 <= 31)) ||
-          (part1 === 192 && part2 === 168)
+          (part1 === 192 && part2 === 168) ||
+          (part1 === 169 && part2 === 254)
       ) {
         return true;
       }
     }
     else if (net.isIPv6(IP)) {
-      const parts: string[] = IP.split('.');
+      const parts: string[] = IP.split(':');
       const part1: number = parseInt(parts[0], 16);
-      if (part1 >= 0xfc00 && part1 <= 0xfdff) {
+      if (IP === '::1' ||
+          IP === '0:0:0:0:0:0:0:1' ||
+          (part1 >= 0xfc00 && part1 <= 0xfdff) ||
+          (part1 >= 0xfe80 && part1 <= 0xfebf)
+      ) {
         return true;
       }
     }
