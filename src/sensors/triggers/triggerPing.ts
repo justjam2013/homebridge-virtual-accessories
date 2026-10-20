@@ -32,6 +32,9 @@ export class PingTrigger extends Trigger {
   private readonly IPv4: number = 4;
   private readonly IPv6: number = 6;
 
+  private readonly LAN_ms_latency_threshold: number = 30;
+  private readonly NET_ms_latency_threshold: number = 100;
+
   private failureCount = new Counter(0);
 
   constructor(
@@ -161,7 +164,7 @@ export class PingTrigger extends Trigger {
     }
     else {
       const latencyDisplay = Math.round(latency * 10) / 10;
-      const threshold: number = this.isLocalIP(IP) ? 30 : 50;
+      const threshold: number = this.isLocalIP(IP) ? this.LAN_ms_latency_threshold : this.NET_ms_latency_threshold;
 
       // Ping times over 30ms–60ms within the same LAN are considered high and indicate a configuration or hardware bottleneck.
       if (latency > threshold) {
