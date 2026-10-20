@@ -5,6 +5,7 @@ import { BinarySensor } from '../binarySensor.js';
 import { shutdownSignal } from '../../utils/utils.js';
 
 import dns, { LookupOneOptions } from 'dns';
+import ipaddr from 'ipaddr.js';
 import net from 'net';
 import { ping } from '@homebridge/node-icmp-ping';
 
@@ -190,39 +191,16 @@ export class PingTrigger extends Trigger {
     return response;
   }
 
-  // IPv4
-  // 10.0.0.0/8     (from 10.0.0.0 to 10.255.255.255)     [ Named as Class A Private Network ]
-  // 172.16.0.0/12  (from 172.16.0.0 to 172.31.255.255)   [ Named as Class B Private Network ]
-  // 192.168.0.0/16 (from 192.168.0.0 to 192.168.255.255) [ Named as Class C Private Network ]
-  // 169.154.0.0/16 (from 192.168.0.0 to 192.168.255.255) [ Link-local - routers generally don't forward link-local traffic to other networks. ]
-  // 127.0.0.0/8    (from 127.0.0.0 to 127.255.255.255)   [ Loopback addresses ]
-  // IPv6
-  // FC00::/7  (from fc00:0000:0000:0000:0000:0000:0000:0000 to fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)
-  // FE80::/10 (from fe80:0000:0000:0000:0000:0000:0000:0000 to febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff) [ Link-local ]
-  // ::1       (0000:0000:0000:0000:0000:0000:0000:0001)                                                 [ Loopback addresse ]
   private isLocalIP(IP: string): boolean {
     if (net.isIPv4(IP)) {
-      const parts: string[] = IP.split('.');
-      const part1: number = parseInt(parts[0], 10);
-      const part2: number = parseInt(parts[1], 10);
-      if ((part1 === 10 && (part2 >= 0 && part2 <= 255)) ||
-          (part1 === 172 && (part2 >= 16 && part2 <= 31)) ||
-          (part1 === 192 && part2 === 168) ||
-          (part1 === 169 && part2 === 254)
-      ) {
-        return true;
-      }
+      const address: ipaddr.IPv4 = ipaddr.parse(IP) as ipaddr.IPv4;
+
+      return ['private', 'linkLocal', 'loopback'].includes(address.range());
     }
     else if (net.isIPv6(IP)) {
-      const parts: string[] = IP.split(':');
-      const part1: number = parseInt(parts[0], 16);
-      if (IP === '::1' ||
-          IP === '0:0:0:0:0:0:0:1' ||
-          (part1 >= 0xfc00 && part1 <= 0xfdff) ||
-          (part1 >= 0xfe80 && part1 <= 0xfebf)
-      ) {
-        return true;
-      }
+      const address: ipaddr.IPv6 = ipaddr.parse(IP) as ipaddr.IPv6;
+
+      return ['uniqueLocal', 'linkLocal', 'loopback'].includes(address.range());
     }
 
     return false;
