@@ -2,7 +2,7 @@
   "name": "homebridge-virtual-accessories",
   "displayName": "Virtual Accessories for Homebridge",
   "type": "module",
-  "version": "3.17.6",
+  "version": "3.17.7",
   "description": "Virtual HomeKit accessories for Homebridge.",
   "author": "justjam2023 (Renzo Zanelli - renzo.zanelli6@gmail.com)",
   "license": "MIT",
@@ -111,7 +111,7 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
-    "@homebridge/node-icmp-ping": "^1.0.1",
+    "@homebridge/node-icmp-ping": "^1.0.2",
     "@js-joda/core": "^6.3.0",
     "@js-joda/timezone": "^3.1.0",
     "@types/express": "^5.0.6",
