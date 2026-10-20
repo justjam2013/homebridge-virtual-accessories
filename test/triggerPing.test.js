@@ -55,7 +55,9 @@ test('ping failures activate motion at the threshold, stay active, recover and s
   assert.equal(f.motion.value, true);
   await f.tick();
   assert.equal(f.motion.value, true);
-  assert.deepEqual(ping.mock.calls.map(call => call.arguments), Array(4).fill(['192.0.2.1']));
+  const initialPing = 1;
+  const pingCount = 4;
+  assert.deepEqual(ping.mock.calls.map(call => call.arguments), Array(initialPing + pingCount).fill(['192.0.2.1']));
   assert.equal(f.lookup.mock.callCount(), 0);
   ping.mock.mockImplementation(async () => alive);
   await f.tick();
@@ -90,7 +92,9 @@ test('hostname resolution supplies the address used to detect motion', async (t)
   await f.tick();
   await f.tick();
   assert.equal(f.motion.value, true);
-  assert.deepEqual(ping.mock.calls.map(call => call.arguments), Array(3).fill(['2001:db8::10']));
+  const initialPing = 1;
+  const pingCount = 3;
+  assert.deepEqual(ping.mock.calls.map(call => call.arguments), Array(initialPing + pingCount).fill(['2001:db8::10']));
 });
 
 test('DNS failure leaves motion inactive without subsequent network work', async (t) => {

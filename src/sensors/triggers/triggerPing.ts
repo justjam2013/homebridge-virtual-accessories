@@ -69,6 +69,10 @@ export class PingTrigger extends Trigger {
     const intervalBetweenPingsMillis = triggerConfig.interval * 60 * 1000;  // minutes to milliseconds
     this.log.info(`[${this.accessoryName}] Setting interval between pings to ${intervalBetweenPingsMillis/1000/60} minute(s)`);
 
+    this.log.info(`[${this.accessoryName}] Pinging ${triggerConfig.host}`);
+    // One ping only Vasily
+    await this.ping(this, triggerConfig);
+
     setInterval(
       // function, repeat interval
       this.ping, intervalBetweenPingsMillis,
@@ -99,10 +103,11 @@ export class PingTrigger extends Trigger {
       const result: PingResult = await ping(IP);
 
       if (result.success) {
-        trigger.log.debug(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${result.latency}ms)`);
-
         trigger.failureCount.value = 0;
         trigger.sensor.triggerSensorState(BinarySensor.NORMAL, trigger);
+
+        //trigger.handleLatency(trigger, IP, result.latency);
+        trigger.handleLatency(trigger, '192.168.10.10', 35);
       }
       else {
         // Only log the error when we reach the failure count instead of spamming the logs
@@ -146,6 +151,30 @@ export class PingTrigger extends Trigger {
     }
   }
 
+  private handleLatency(
+    trigger: PingTrigger,
+    IP: string,
+    latency: number | null,
+  ) {
+    if (latency === null) {
+      trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: unknown)`);
+    }
+    else {
+      const latencyMs = Math.trunc(latency);
+      const isLocal: boolean = this.isLocalIP(IP);
+
+      // Ping times over 30ms–60ms within the same LAN are considered high and indicate a configuration or hardware bottleneck.
+      if (isLocal && latencyMs > 30 ||
+          !isLocal && latencyMs > 50
+      ) {
+        trigger.log.warn(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyMs} ms)`);
+      }
+      else {
+        trigger.log.info(`[${trigger.accessoryName}] Ping ${IP}: Alive (latency: ${latencyMs} ms)`);
+      }
+    }
+  }
+
   private async getIP(hostname: string): Promise<string | void> {
     const options: LookupOneOptions = {
       hints: dns.ADDRCONFIG | dns.V4MAPPED,
@@ -162,6 +191,35 @@ export class PingTrigger extends Trigger {
       });
   
     return response;
+  }
+
+  // IPv4
+  // 10.0.0.0/8 (from 10.0.0.0 to 10.255.255.255) [ Named as Class A Private Network ]
+  // 172.16.0.0/12 (from 172.16.0.0 to 172.31.255.255) [ Named as Class B Private Network ]
+  // 192.168.0.0/16 (from 192.168.0.0 to 192.168.255.255) [ Named as Class C Private Network ]
+  // IPv6
+  // FC00::/7 (from fc00:0000:0000:0000:0000:0000:0000:0000 to fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)
+  private isLocalIP(IP: string): boolean {
+    if (net.isIPv4(IP)) {
+      const parts: string[] = IP.split('.');
+      const part1: number = parseInt(parts[0], 10);
+      const part2: number = parseInt(parts[1], 10);
+      if ((part1 === 10 && (part2 >= 0 && part2 <= 255)) ||
+          (part1 === 172 && (part2 >= 16 && part2 <= 31)) ||
+          (part1 === 192 && part2 === 168)
+      ) {
+        return true;
+      }
+    }
+    else if (net.isIPv6(IP)) {
+      const parts: string[] = IP.split('.');
+      const part1: number = parseInt(parts[0], 16);
+      if (part1 >= 0xfc00 && part1 <= 0xfdff) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
