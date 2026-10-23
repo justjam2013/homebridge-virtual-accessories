@@ -7,7 +7,6 @@ import { shutdownSignal } from '../../utils/utils.js';
 import dns, { LookupOneOptions } from 'dns';
 import ipaddr from 'ipaddr.js';
 import net from 'net';
-import { ping } from '@homebridge/node-icmp-ping';
 
 /**
  *  Private helper classes to pass values by reference
@@ -36,6 +35,7 @@ export class PingTrigger extends Trigger {
   private readonly NET_ms_latency_threshold: number = 100;
 
   private failureCount = new Counter(0);
+  private pingHost!: typeof import('@homebridge/node-icmp-ping').ping;
 
   constructor(
     sensor: BinarySensor,
@@ -45,15 +45,23 @@ export class PingTrigger extends Trigger {
 
     const triggerConfig: PingTriggerConfiguration = this.sensorConfig.pingTrigger;
 
-    if (triggerConfig.isDisabled) {
-      this.log.info(`[${this.accessoryName}] Ping trigger is disabled`);
-      return;
-    }
-
     this.setup(triggerConfig);
   }
 
   private async setup(triggerConfig: PingTriggerConfiguration) {
+    try {
+      // Load once at initialization, even when this configured trigger is disabled.
+      this.pingHost = (await import('@homebridge/node-icmp-ping')).ping;
+    }
+    catch (error) {
+      this.log.error(`[${this.accessoryName}] Ping trigger unavailable: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+
+    if (triggerConfig.isDisabled) {
+      this.log.info(`[${this.accessoryName}] Ping trigger is disabled`);
+      return;
+    }
 
     let ipProtocolVersion: number = net.isIP(triggerConfig.host);
     if (ipProtocolVersion === this.NOT_IP) {
@@ -104,7 +112,7 @@ export class PingTrigger extends Trigger {
     // protocol = ping.NetworkProtocol.IPv4;
 
     try {
-      const result: PingResult = await ping(IP);
+      const result: PingResult = await trigger.pingHost(IP);
 
       if (result.success) {
         trigger.failureCount.value = 0;
