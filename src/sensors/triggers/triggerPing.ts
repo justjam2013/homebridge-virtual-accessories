@@ -49,12 +49,7 @@ export class PingTrigger extends Trigger {
   }
 
   private async setup(triggerConfig: PingTriggerConfiguration) {
-    try {
-      // Load once at initialization, even when this configured trigger is disabled.
-      this.pingHost = (await import('@homebridge/node-icmp-ping')).ping;
-    }
-    catch (error) {
-      this.log.error(`[${this.accessoryName}] Ping trigger unavailable: ${error instanceof Error ? error.message : String(error)}`);
+    if (!await this.initializePing()) {
       return;
     }
 
@@ -98,6 +93,18 @@ export class PingTrigger extends Trigger {
   /**
    * Private methods
    */
+
+  private async initializePing(): Promise<boolean> {
+    try {
+      // Load once at initialization, even when this configured trigger is disabled.
+      this.pingHost = (await import('@homebridge/node-icmp-ping')).ping;
+      return true;
+    }
+    catch (error) {
+      this.log.error(`[${this.accessoryName}] Ping trigger unavailable: ${error instanceof Error ? error.message : String(error)}`);
+      return false;
+    }
+  }
 
   private async ping(
     trigger: PingTrigger,
