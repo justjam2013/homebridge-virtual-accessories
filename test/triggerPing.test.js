@@ -16,12 +16,14 @@ const timeout = { success: false, latency: null, message: 'Request timed out' };
 
 async function fixture(t, options = {}, lookupResult = { address: '2001:db8::10', family: 6 }) {
   t.mock.timers.enable({ apis: ['setInterval'] });
+  let finishSetup;
+  const setupReady = new Promise(resolve => { finishSetup = resolve; });
   const lookup = t.mock.method(dns.promises, 'lookup', async () => {
-    if (lookupResult instanceof Error) { throw lookupResult; }
+    if (lookupResult instanceof Error) { finishSetup(); throw lookupResult; }
     return lookupResult;
   });
   ping.mock.resetCalls();
-  ping.mock.mockImplementation(async () => alive);
+  ping.mock.mockImplementation(async () => { finishSetup(); return alive; });
   const previousShutdown = shutdownSignal.isShuttingDown;
   shutdownSignal.isShuttingDown = false;
   t.after(() => {
@@ -33,6 +35,10 @@ async function fixture(t, options = {}, lookupResult = { address: '2001:db8::10'
     sensor: { trigger: 'ping' },
     pingTrigger: { host: '192.0.2.1', interval: 2, failureRetryCount: 3, isDisabled: false, ...options },
   }).create();
+  sensor.platform.log.info = message => {
+    if (message.includes('Ping trigger is disabled')) { finishSetup(); }
+  };
+  await setupReady;
   await setImmediate();
   return {
     lookup,
