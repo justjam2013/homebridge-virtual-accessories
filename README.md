@@ -16,23 +16,11 @@
 
 # Virtual Accessories For Homebridge
 
-</span>
-
 ### Plugin for Homebridge that provides the ability to create virtual Apple Home accessories.
 
-## <!-- Thin separator line -->
+For Matter support, check out , [Virtual Matter Accessories For Homebridge](https://github.com/justjam2013/homebridge-virtual-matter-accessories).
 
-#### Matter Support
-
-Now that Homebridge supports publishing devices as Matter devices, I have been considering adding the ability to create virtual Matter accessories. However, after considering the pros and cons, I have chose not to bloat this plugin or muddy its scope. So I will be keeping it strictly for creating HomeKit-only virtual devices. If you are interested in virtual Matter devices, I am currently in the process of writing a separate plugin, [Virtual Matter Accessories For Homebridge](https://github.com/justjam2013/homebridge-virtual-matter-accessories), whose scope will be to create Matter-only virtual devices.
-
-## <!-- Thin separator line -->
-
-#### UI Languages
-
-Currently Virtual Accessories For Homebridge offers Spanish and Dutch translations for the UI. This can be accessed by changing the Language setting in Homebridge UI. The plugin will use this setting. Please vote in this ticket for which language you would like to see the UI translated to: [Looking for people interested in translating the plugin UI into other languages](https://github.com/justjam2013/homebridge-virtual-accessories/issues/703)
-
-You do not have to volunteer to translate it, but hopefully will provide feedback if there are issues with the translations.
+</span>
 
 ## <!-- Thin separator line -->
 
